@@ -1,13 +1,15 @@
 using System;
-using System.Data;
 using System.Drawing;
 using System.Windows.Forms;
-using Pedeai.DB;
+using Pedeai.BLL;
+using Pedeai.Modelo;
 
 namespace Pedeai.Forms
 {
     public class frmCadastroProduto : Form
     {
+        private readonly MercadoriaBLL _bll = new MercadoriaBLL();
+        private readonly GrupoMercadoriaBLL _grpBLL = new GrupoMercadoriaBLL();
         private DataGridView grid = new DataGridView();
         private Panel pnlForm = new Panel();
         private TextBox txtNome = new TextBox();
@@ -119,8 +121,8 @@ namespace Pedeai.Forms
             {
                 cmbCategoria.Items.Clear();
                 cmbCategoria.Items.Add(new CatItem(0, "-- Selecione --"));
-                var dt = DbHelper.ListarCategorias(true);
-                foreach (DataRow r in dt.Rows)
+                var dt = _grpBLL.Listar(true);
+                foreach (System.Data.DataRow r in dt.Rows)
                     cmbCategoria.Items.Add(new CatItem(Convert.ToInt32(r["Codigo"]), r["Nome"]?.ToString() ?? ""));
                 cmbCategoria.SelectedIndex = 0;
             }
@@ -129,7 +131,7 @@ namespace Pedeai.Forms
 
         private void CarregarGrid()
         {
-            try { grid.DataSource = DbHelper.ListarMercadorias(); }
+            try { grid.DataSource = _bll.Listar(); }
             catch (Exception ex) { MessageBox.Show("Erro: " + ex.Message); }
         }
 
@@ -148,26 +150,23 @@ namespace Pedeai.Forms
         {
             if (grid.SelectedRows.Count == 0) return;
             var cod = Convert.ToInt32(grid.SelectedRows[0].Cells["Codigo"].Value);
-            var row = DbHelper.GetProduto(cod);
-            if (row == null) return;
+            var obj = _bll.PesquisaCodigo(cod);
+            if (obj == null) return;
             CarrecarComboCategorias();
             _codigoEditando = cod;
-            txtNome.Text = row["mercMercadoria"]?.ToString() ?? "";
-            txtDescricao.Text = row["mercApresentacao"]?.ToString() ?? "";
-            txtImagem.Text = row["mercImagem_Url"]?.ToString() ?? "";
-            numPreco.Value = row["mercPreco_Venda"] == DBNull.Value ? 0 : Convert.ToDecimal(row["mercPreco_Venda"]);
-            numPromo.Value = row["mercPreco_Promocional"] == DBNull.Value ? 0 : Convert.ToDecimal(row["mercPreco_Promocional"]);
-            numEstoque.Value = row["mercEstoque_Atual"] == DBNull.Value ? 0 : Convert.ToDecimal(row["mercEstoque_Atual"]);
-            numOrdem.Value = row["mercOrdem"] == DBNull.Value ? 0 : Convert.ToDecimal(row["mercOrdem"]);
-            chkControlaEstoque.Checked = row["mercControla_Estoque"]?.ToString() == "1" || row["mercControla_Estoque"]?.ToString() == "True";
-            chkDestaque.Checked = row["mercDestaque"]?.ToString() == "1" || row["mercDestaque"]?.ToString() == "True";
-            chkIfood.Checked = row["mercHabilitar_Ifood"]?.ToString() == "1" || row["mercHabilitar_Ifood"]?.ToString() == "True";
-            var sit = row["Situacao"]?.ToString() ?? "A";
-            cmbSituacao.SelectedItem = sit;
-            // Seleciona categoria no combo
-            var codGrp = row["Codigo_Grupo"] == DBNull.Value ? 0 : Convert.ToInt32(row["Codigo_Grupo"]);
+            txtNome.Text = obj.mercMercadoria ?? "";
+            txtDescricao.Text = obj.mercApresentacao ?? "";
+            txtImagem.Text = obj.mercImagem_Url ?? "";
+            numPreco.Value = obj.mercPreco_Venda;
+            numPromo.Value = obj.mercPreco_Promocional;
+            numEstoque.Value = obj.mercEstoque_Atual;
+            numOrdem.Value = obj.mercOrdem;
+            chkControlaEstoque.Checked = obj.mercControla_Estoque;
+            chkDestaque.Checked = obj.mercDestaque;
+            chkIfood.Checked = obj.mercHabilitar_Ifood;
+            cmbSituacao.SelectedItem = obj.Situacao;
             foreach (CatItem item in cmbCategoria.Items)
-                if (item.Codigo == codGrp) { cmbCategoria.SelectedItem = item; break; }
+                if (item.Codigo == obj.Codigo_Grupo) { cmbCategoria.SelectedItem = item; break; }
             pnlForm.Visible = true; txtNome.Focus();
         }
 
@@ -175,12 +174,24 @@ namespace Pedeai.Forms
         {
             if (string.IsNullOrWhiteSpace(txtNome.Text)) { MessageBox.Show("Informe o nome do produto."); return; }
             var catSel = cmbCategoria.SelectedItem as CatItem;
-            var erro = DbHelper.SalvarProduto(_codigoEditando, catSel?.Codigo ?? 0,
-                txtNome.Text.Trim(), txtDescricao.Text.Trim(), numPreco.Value, numPromo.Value,
-                numEstoque.Value, chkControlaEstoque.Checked, txtImagem.Text.Trim(),
-                chkDestaque.Checked, (int)numOrdem.Value, chkIfood.Checked,
-                cmbSituacao.SelectedItem?.ToString() ?? "A");
-            if (erro != "") { MessageBox.Show("Erro: " + erro); return; }
+            var obj = new Mercadoria
+            {
+                Codigo               = _codigoEditando,
+                Codigo_Grupo         = catSel?.Codigo ?? 0,
+                mercMercadoria       = txtNome.Text.Trim(),
+                mercApresentacao     = txtDescricao.Text.Trim(),
+                mercPreco_Venda      = numPreco.Value,
+                mercPreco_Promocional= numPromo.Value,
+                mercEstoque_Atual    = numEstoque.Value,
+                mercControla_Estoque = chkControlaEstoque.Checked,
+                mercImagem_Url       = txtImagem.Text.Trim(),
+                mercDestaque         = chkDestaque.Checked,
+                mercOrdem            = (int)numOrdem.Value,
+                mercHabilitar_Ifood  = chkIfood.Checked,
+                Situacao             = cmbSituacao.SelectedItem?.ToString() ?? "A",
+            };
+            var erro = _bll.Salvar(obj);
+            if (!string.IsNullOrEmpty(erro)) { MessageBox.Show("Erro: " + erro); return; }
             pnlForm.Visible = false; _codigoEditando = 0; CarregarGrid();
         }
 
@@ -188,7 +199,7 @@ namespace Pedeai.Forms
         {
             if (grid.SelectedRows.Count == 0) return;
             if (MessageBox.Show("Desativar produto?", "Confirmar", MessageBoxButtons.YesNo) != DialogResult.Yes) return;
-            DbHelper.AlternarSituacaoMercadoria(Convert.ToInt32(grid.SelectedRows[0].Cells["Codigo"].Value));
+            _bll.AlternarSituacao(Convert.ToInt32(grid.SelectedRows[0].Cells["Codigo"].Value));
             pnlForm.Visible = false; CarregarGrid();
         }
 

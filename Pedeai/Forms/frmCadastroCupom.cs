@@ -1,13 +1,14 @@
 using System;
-using System.Data;
 using System.Drawing;
 using System.Windows.Forms;
-using Pedeai.DB;
+using Pedeai.BLL;
+using Pedeai.Modelo;
 
 namespace Pedeai.Forms
 {
     public class frmCadastroCupom : Form
     {
+        private readonly CupomBLL _bll = new CupomBLL();
         private DataGridView grid = new DataGridView();
         private Panel pnlForm = new Panel();
         private TextBox txtCodigo, txtDescricao;
@@ -88,7 +89,7 @@ namespace Pedeai.Forms
 
         private void CarregarGrid()
         {
-            try { grid.DataSource = DbHelper.ListarCupons(); }
+            try { grid.DataSource = _bll.Listar(); }
             catch (Exception ex) { MessageBox.Show("Erro: " + ex.Message); }
         }
 
@@ -106,28 +107,37 @@ namespace Pedeai.Forms
         {
             if (grid.SelectedRows.Count == 0) return;
             var cod = Convert.ToInt32(grid.SelectedRows[0].Cells["Codigo"].Value);
-            var row = DbHelper.GetCupom(cod);
-            if (row == null) return;
+            var obj = _bll.PesquisaCodigo(cod);
+            if (obj == null) return;
             _codigoEditando = cod;
-            txtCodigo.Text = row["cupomCodigo"]?.ToString() ?? "";
-            txtDescricao.Text = row["cupomDescricao"]?.ToString() ?? "";
-            cmbTipo.SelectedItem = row["cupomTipo"]?.ToString() ?? "PERCENTUAL";
-            numValor.Value = row["cupomValor"] == DBNull.Value ? 0 : Convert.ToDecimal(row["cupomValor"]);
-            numMinimo.Value = row["cupomPedido_Minimo"] == DBNull.Value ? 0 : Convert.ToDecimal(row["cupomPedido_Minimo"]);
-            numLimite.Value = row["cupomLimite_Usos"] == DBNull.Value ? 0 : Convert.ToDecimal(row["cupomLimite_Usos"]);
-            if (row["cupomValido_Ate"] != DBNull.Value) dtpValido.Value = Convert.ToDateTime(row["cupomValido_Ate"]);
-            cmbSituacao.SelectedItem = row["Situacao"]?.ToString() ?? "A";
+            txtCodigo.Text = obj.cupomCodigo ?? "";
+            txtDescricao.Text = obj.cupomDescricao ?? "";
+            cmbTipo.SelectedItem = obj.cupomTipo ?? "PERCENTUAL";
+            numValor.Value = obj.cupomValor;
+            numMinimo.Value = obj.cupomPedido_Minimo;
+            numLimite.Value = obj.cupomLimite_Usos;
+            dtpValido.Value = obj.cupomValido_Ate > DateTime.MinValue ? obj.cupomValido_Ate : DateTime.Today.AddMonths(1);
+            cmbSituacao.SelectedItem = obj.Situacao ?? "A";
             pnlForm.Visible = true; txtCodigo.Focus();
         }
 
         private void BtnSalvar_Click(object sender, EventArgs e)
         {
             if (string.IsNullOrWhiteSpace(txtCodigo.Text)) { MessageBox.Show("Informe o código do cupom."); return; }
-            var erro = DbHelper.SalvarCupom(_codigoEditando, txtCodigo.Text.Trim().ToUpper(),
-                txtDescricao.Text, cmbTipo.SelectedItem?.ToString() ?? "PERCENTUAL",
-                numValor.Value, numMinimo.Value, (int)numLimite.Value,
-                dtpValido.Value, cmbSituacao.SelectedItem?.ToString() ?? "A");
-            if (erro != "") { MessageBox.Show("Erro: " + erro); return; }
+            var obj = new Cupom
+            {
+                Codigo             = _codigoEditando,
+                cupomCodigo        = txtCodigo.Text.Trim().ToUpper(),
+                cupomDescricao     = txtDescricao.Text,
+                cupomTipo          = cmbTipo.SelectedItem?.ToString() ?? "PERCENTUAL",
+                cupomValor         = numValor.Value,
+                cupomPedido_Minimo = numMinimo.Value,
+                cupomLimite_Usos   = (int)numLimite.Value,
+                cupomValido_Ate    = dtpValido.Value,
+                Situacao           = cmbSituacao.SelectedItem?.ToString() ?? "A",
+            };
+            var erro = _bll.Salvar(obj);
+            if (!string.IsNullOrEmpty(erro)) { MessageBox.Show("Erro: " + erro); return; }
             pnlForm.Visible = false; _codigoEditando = 0; CarregarGrid();
         }
 
@@ -136,9 +146,8 @@ namespace Pedeai.Forms
             if (grid.SelectedRows.Count == 0) return;
             if (_codigoEditando == 0) { MessageBox.Show("Abra o cupom para edição primeiro."); return; }
             if (MessageBox.Show("Desativar cupom?", "Confirmar", MessageBoxButtons.YesNo) != DialogResult.Yes) return;
-            DbHelper.SalvarCupom(_codigoEditando, txtCodigo.Text, txtDescricao.Text,
-                cmbTipo.SelectedItem?.ToString() ?? "PERCENTUAL", numValor.Value,
-                numMinimo.Value, (int)numLimite.Value, dtpValido.Value, "I");
+            var obj = _bll.PesquisaCodigo(_codigoEditando);
+            if (obj != null) { obj.Situacao = "I"; _bll.Salvar(obj); }
             pnlForm.Visible = false; _codigoEditando = 0; CarregarGrid();
         }
     }

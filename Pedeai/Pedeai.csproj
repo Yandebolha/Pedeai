@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
@@ -49,12 +49,49 @@
     <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
+    <!-- Modelo (entidades) -->
+    <Compile Include="Modelo\Cliente.cs" />
+    <Compile Include="Modelo\Cupom.cs" />
+    <Compile Include="Modelo\Fornecedor.cs" />
+    <Compile Include="Modelo\GrupoMercadoria.cs" />
+    <Compile Include="Modelo\ItemPedidoWeb.cs" />
+    <Compile Include="Modelo\Mercadoria.cs" />
+    <Compile Include="Modelo\PedidoWeb.cs" />
+    <!-- DAL -->
+    <Compile Include="DAL\BaseDAL.cs" />
+    <Compile Include="DAL\ClienteDAL.cs" />
+    <Compile Include="DAL\CupomDAL.cs" />
+    <Compile Include="DAL\DashboardDAL.cs" />
+    <Compile Include="DAL\FornecedorDAL.cs" />
+    <Compile Include="DAL\GrupoMercadoriaDAL.cs" />
+    <Compile Include="DAL\MercadoriaDAL.cs" />
+    <Compile Include="DAL\PedidoDAL.cs" />
+    <!-- BLL -->
+    <Compile Include="BLL\ClienteBLL.cs" />
+    <Compile Include="BLL\CupomBLL.cs" />
+    <Compile Include="BLL\DashboardBLL.cs" />
+    <Compile Include="BLL\FornecedorBLL.cs" />
+    <Compile Include="BLL\GrupoMercadoriaBLL.cs" />
+    <Compile Include="BLL\MercadoriaBLL.cs" />
+    <Compile Include="BLL\PedidoBLL.cs" />
+    <!-- DB (mantido por compatibilidade) -->
     <Compile Include="DB\DbHelper.cs" />
-    <Compile Include="Forms\frmCadastroCategoria.cs" />
-    <Compile Include="Forms\frmCadastroProduto.cs" />
-    <Compile Include="Forms\frmCadastroCliente.cs" />
-    <Compile Include="Forms\frmCadastroFornecedor.cs" />
-    <Compile Include="Forms\frmCadastroCupom.cs" />
+    <!-- Forms -->
+    <Compile Include="Forms\frmCadastroCategoria.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\frmCadastroProduto.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\frmCadastroCliente.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\frmCadastroFornecedor.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\frmCadastroCupom.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
     </Compile>

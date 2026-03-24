@@ -1,13 +1,14 @@
 using System;
-using System.Data;
 using System.Drawing;
 using System.Windows.Forms;
-using Pedeai.DB;
+using Pedeai.BLL;
+using Pedeai.Modelo;
 
 namespace Pedeai.Forms
 {
     public class frmCadastroFornecedor : Form
     {
+        private readonly FornecedorBLL _bll = new FornecedorBLL();
         private DataGridView grid = new DataGridView();
         private Panel pnlForm = new Panel();
         private TextBox txtRazao, txtFantasia, txtCnpj, txtIe, txtTelefone, txtEmail, txtContato;
@@ -101,7 +102,7 @@ namespace Pedeai.Forms
 
         private void CarregarGrid()
         {
-            try { grid.DataSource = DbHelper.ListarFornecedores(); }
+            try { grid.DataSource = _bll.Listar(); }
             catch (Exception ex) { MessageBox.Show("Erro: " + ex.Message); }
         }
 
@@ -117,38 +118,51 @@ namespace Pedeai.Forms
         {
             if (grid.SelectedRows.Count == 0) return;
             var cod = Convert.ToInt32(grid.SelectedRows[0].Cells["Codigo"].Value);
-            var row = DbHelper.GetFornecedor(cod);
-            if (row == null) return;
+            var obj = _bll.PesquisaCodigo(cod);
+            if (obj == null) return;
             _codigoEditando = cod;
-            txtRazao.Text = row["fornNome_RazaoSocial"]?.ToString() ?? "";
-            txtFantasia.Text = row["fornApelido_Fantasia"]?.ToString() ?? "";
-            txtCnpj.Text = row["fornCPF_CNPJ_"]?.ToString() ?? "";
-            txtIe.Text = row["fornRG_InscricaoEstadual"]?.ToString() ?? "";
-            txtTelefone.Text = row["fornTelefone"]?.ToString() ?? "";
-            txtEmail.Text = row["fornEmail"]?.ToString() ?? "";
-            txtContato.Text = row["fornContato"]?.ToString() ?? "";
-            txtCep.Text = row["fornCEP"]?.ToString() ?? "";
-            txtEndereco.Text = row["fornEndereco"]?.ToString() ?? "";
-            txtNumero.Text = row["fornNumero"]?.ToString() ?? "";
-            txtBairro.Text = row["fornBairro"]?.ToString() ?? "";
-            txtCidade.Text = row["fornCidade"]?.ToString() ?? "";
-            txtEstado.Text = row["fornEstado"]?.ToString() ?? "";
-            txtObs.Text = row["fornObservacoes"]?.ToString() ?? "";
-            var sit = row["Situacao"]?.ToString() ?? "A";
-            cmbSituacao.SelectedItem = sit;
+            txtRazao.Text    = obj.fornNome_RazaoSocial ?? "";
+            txtFantasia.Text = obj.fornApelido_Fantasia ?? "";
+            txtCnpj.Text     = obj.fornCPF_CNPJ_ ?? "";
+            txtIe.Text       = obj.fornRG_InscricaoEstadual ?? "";
+            txtTelefone.Text = obj.fornTelefone ?? "";
+            txtEmail.Text    = obj.fornEmail ?? "";
+            txtContato.Text  = obj.fornContato ?? "";
+            txtCep.Text      = obj.fornCEP ?? "";
+            txtEndereco.Text = obj.fornEndereco ?? "";
+            txtNumero.Text   = obj.fornNumero ?? "";
+            txtBairro.Text   = obj.fornBairro ?? "";
+            txtCidade.Text   = obj.fornCidade ?? "";
+            txtEstado.Text   = obj.fornEstado ?? "";
+            txtObs.Text      = obj.fornObservacoes ?? "";
+            cmbSituacao.SelectedItem = obj.Situacao ?? "A";
             pnlForm.Visible = true; txtRazao.Focus();
         }
 
         private void BtnSalvar_Click(object sender, EventArgs e)
         {
             if (string.IsNullOrWhiteSpace(txtRazao.Text)) { MessageBox.Show("Informe a Razão Social."); return; }
-            var erro = DbHelper.SalvarFornecedor(_codigoEditando,
-                txtRazao.Text, txtFantasia.Text, txtCnpj.Text, txtIe.Text,
-                txtTelefone.Text, txtEmail.Text, txtContato.Text,
-                txtCep.Text, txtEndereco.Text, txtNumero.Text,
-                txtBairro.Text, txtCidade.Text, txtEstado.Text,
-                txtObs.Text, cmbSituacao.SelectedItem?.ToString() ?? "A");
-            if (erro != "") { MessageBox.Show("Erro: " + erro); return; }
+            var obj = new Fornecedor
+            {
+                Codigo                    = _codigoEditando,
+                fornNome_RazaoSocial      = txtRazao.Text.Trim(),
+                fornApelido_Fantasia      = txtFantasia.Text,
+                fornCPF_CNPJ_             = txtCnpj.Text,
+                fornRG_InscricaoEstadual  = txtIe.Text,
+                fornTelefone              = txtTelefone.Text,
+                fornEmail                 = txtEmail.Text,
+                fornContato               = txtContato.Text,
+                fornCEP                   = txtCep.Text,
+                fornEndereco              = txtEndereco.Text,
+                fornNumero                = txtNumero.Text,
+                fornBairro                = txtBairro.Text,
+                fornCidade                = txtCidade.Text,
+                fornEstado                = txtEstado.Text,
+                fornObservacoes           = txtObs.Text,
+                Situacao                  = cmbSituacao.SelectedItem?.ToString() ?? "A",
+            };
+            var erro = _bll.Salvar(obj);
+            if (!string.IsNullOrEmpty(erro)) { MessageBox.Show("Erro: " + erro); return; }
             pnlForm.Visible = false; _codigoEditando = 0; CarregarGrid();
         }
     }

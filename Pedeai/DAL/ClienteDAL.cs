@@ -1,0 +1,137 @@
+using System;
+using System.Data;
+using MySqlConnector;
+using Pedeai.Modelo;
+
+namespace Pedeai.DAL
+{
+    public class ClienteDAL : BaseDAL
+    {
+        public DataTable Listar(string busca = "")
+        {
+            var dt = new DataTable();
+            using var conn = AbrirConexao();
+            var sql = @"SELECT Codigo,
+                               clieNome_RazaoSocial AS Nome,
+                               clieTelefone         AS Telefone,
+                               clieCelular          AS Celular,
+                               clieEmail            AS Email,
+                               clieCidade           AS Cidade,
+                               clieTotalPedidos     AS TotalPedidos,
+                               clieTotalGasto       AS TotalGasto,
+                               Situacao
+                        FROM cliente WHERE 1=1";
+            if (!string.IsNullOrWhiteSpace(busca))
+                sql += " AND (clieNome_RazaoSocial LIKE @b OR clieTelefone LIKE @b OR clieCelular LIKE @b)";
+            sql += " ORDER BY clieNome_RazaoSocial LIMIT 200";
+
+            using var cmd = new MySqlCommand(sql, conn);
+            if (!string.IsNullOrWhiteSpace(busca)) cmd.Parameters.AddWithValue("@b", $"%{busca}%");
+            new MySqlDataAdapter(cmd).Fill(dt);
+            return dt;
+        }
+
+        public Cliente PesquisaCodigo(int codigo)
+        {
+            using var conn = AbrirConexao();
+            using var cmd = new MySqlCommand(
+                "SELECT * FROM cliente WHERE Codigo = @cod LIMIT 1", conn);
+            cmd.Parameters.AddWithValue("@cod", codigo);
+            using var r = cmd.ExecuteReader();
+            if (!r.Read()) return null;
+            return MapearCliente(r);
+        }
+
+        public string Incluir(Cliente obj)
+        {
+            try
+            {
+                using var conn = AbrirConexao();
+                obj.Codigo    = ProximoCodigo("cliente", conn);
+                obj.auxCodigo = ProximoAuxCodigo("cliente", conn);
+                obj.clieData_Cadastro = DateTime.Now;
+
+                var sql = @"INSERT INTO cliente
+                            (auxCodigo, Codigo, clieNome_RazaoSocial, clieTelefone, clieCelular,
+                             clieEmail, clieCPF_CNPJ_, clieCEP, clieEndereco, clieNumero,
+                             clieComplemento, clieBairro, clieCidade, clieEstado,
+                             clieTotalPedidos, clieTotalGasto, clieData_Cadastro, Situacao, Status_Transmissao, Info)
+                            VALUES(@aux, @cod, @nome, @tel, @cel, @email, @cpf, @cep, @end, @num,
+                                   @comp, @bairro, @cidade, @estado, 0, 0, @dt, @sit, @trans, @info)";
+                using var cmd = new MySqlCommand(sql, conn);
+                BindParams(cmd, obj);
+                cmd.ExecuteNonQuery();
+                return "";
+            }
+            catch (Exception ex) { return ex.Message; }
+        }
+
+        public string Alterar(Cliente obj)
+        {
+            try
+            {
+                using var conn = AbrirConexao();
+                var sql = @"UPDATE cliente SET
+                            clieNome_RazaoSocial=@nome, clieTelefone=@tel, clieCelular=@cel,
+                            clieEmail=@email, clieCPF_CNPJ_=@cpf, clieCEP=@cep,
+                            clieEndereco=@end, clieNumero=@num, clieComplemento=@comp,
+                            clieBairro=@bairro, clieCidade=@cidade, clieEstado=@estado, Situacao=@sit
+                            WHERE Codigo=@cod";
+                using var cmd = new MySqlCommand(sql, conn);
+                BindParams(cmd, obj);
+                cmd.ExecuteNonQuery();
+                return "";
+            }
+            catch (Exception ex) { return ex.Message; }
+        }
+
+        private static void BindParams(MySqlCommand cmd, Cliente obj)
+        {
+            cmd.Parameters.AddWithValue("@aux",    obj.auxCodigo);
+            cmd.Parameters.AddWithValue("@cod",    obj.Codigo);
+            cmd.Parameters.AddWithValue("@nome",   obj.clieNome_RazaoSocial ?? "");
+            cmd.Parameters.AddWithValue("@tel",    obj.clieTelefone ?? "");
+            cmd.Parameters.AddWithValue("@cel",    obj.clieCelular ?? "");
+            cmd.Parameters.AddWithValue("@email",  obj.clieEmail ?? "");
+            cmd.Parameters.AddWithValue("@cpf",    obj.clieCPF_CNPJ_ ?? "");
+            cmd.Parameters.AddWithValue("@cep",    obj.clieCEP ?? "");
+            cmd.Parameters.AddWithValue("@end",    obj.clieEndereco ?? "");
+            cmd.Parameters.AddWithValue("@num",    obj.clieNumero ?? "");
+            cmd.Parameters.AddWithValue("@comp",   obj.clieComplemento ?? "");
+            cmd.Parameters.AddWithValue("@bairro", obj.clieBairro ?? "");
+            cmd.Parameters.AddWithValue("@cidade", obj.clieCidade ?? "");
+            cmd.Parameters.AddWithValue("@estado", obj.clieEstado ?? "");
+            cmd.Parameters.AddWithValue("@sit",    obj.Situacao ?? "A");
+            cmd.Parameters.AddWithValue("@trans",  obj.Status_Transmissao ?? "N");
+            cmd.Parameters.AddWithValue("@info",   obj.Info ?? "");
+            cmd.Parameters.AddWithValue("@dt",     obj.clieData_Cadastro);
+        }
+
+        private static Cliente MapearCliente(MySqlDataReader r)
+        {
+            return new Cliente
+            {
+                Codigo               = Convert.ToInt32(r["Codigo"]),
+                auxCodigo            = r["auxCodigo"] == DBNull.Value ? 0 : Convert.ToInt32(r["auxCodigo"]),
+                clieNome_RazaoSocial = r["clieNome_RazaoSocial"]?.ToString() ?? "",
+                clieTelefone         = r["clieTelefone"]?.ToString() ?? "",
+                clieCelular          = r["clieCelular"]?.ToString() ?? "",
+                clieEmail            = r["clieEmail"]?.ToString() ?? "",
+                clieCPF_CNPJ_        = r["clieCPF_CNPJ_"]?.ToString() ?? "",
+                clieCEP              = r["clieCEP"]?.ToString() ?? "",
+                clieEndereco         = r["clieEndereco"]?.ToString() ?? "",
+                clieNumero           = r["clieNumero"]?.ToString() ?? "",
+                clieComplemento      = r["clieComplemento"]?.ToString() ?? "",
+                clieBairro           = r["clieBairro"]?.ToString() ?? "",
+                clieCidade           = r["clieCidade"]?.ToString() ?? "",
+                clieEstado           = r["clieEstado"]?.ToString() ?? "",
+                clieTotalPedidos     = r["clieTotalPedidos"] == DBNull.Value ? 0 : Convert.ToInt32(r["clieTotalPedidos"]),
+                clieTotalGasto       = r["clieTotalGasto"] == DBNull.Value ? 0 : Convert.ToDecimal(r["clieTotalGasto"]),
+                clieData_Cadastro    = r["clieData_Cadastro"] == DBNull.Value ? DateTime.Now : Convert.ToDateTime(r["clieData_Cadastro"]),
+                Situacao             = r["Situacao"]?.ToString() ?? "A",
+                Status_Transmissao   = r["Status_Transmissao"]?.ToString() ?? "N",
+                Info                 = r["Info"]?.ToString() ?? "",
+            };
+        }
+    }
+}

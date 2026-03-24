@@ -1,13 +1,14 @@
 using System;
-using System.Data;
 using System.Drawing;
 using System.Windows.Forms;
-using Pedeai.DB;
+using Pedeai.BLL;
+using Pedeai.Modelo;
 
 namespace Pedeai.Forms
 {
     public class frmCadastroCliente : Form
     {
+        private readonly ClienteBLL _bll = new ClienteBLL();
         private DataGridView grid = new DataGridView();
         private Panel pnlForm = new Panel();
         private TextBox txtBusca = new TextBox();
@@ -94,7 +95,7 @@ namespace Pedeai.Forms
 
         private void CarregarGrid()
         {
-            try { grid.DataSource = DbHelper.ListarClientes(txtBusca?.Text?.Trim() ?? ""); }
+            try { grid.DataSource = _bll.Listar(txtBusca?.Text?.Trim() ?? ""); }
             catch (Exception ex) { MessageBox.Show("Erro: " + ex.Message); }
         }
 
@@ -111,35 +112,47 @@ namespace Pedeai.Forms
         {
             if (grid.SelectedRows.Count == 0) return;
             var cod = Convert.ToInt32(grid.SelectedRows[0].Cells["Codigo"].Value);
-            var row = DbHelper.GetCliente(cod);
-            if (row == null) return;
+            var obj = _bll.PesquisaCodigo(cod);
+            if (obj == null) return;
             _codigoEditando = cod;
-            txtNome.Text = row["clieNome_RazaoSocial"]?.ToString() ?? "";
-            txtTelefone.Text = row["clieTelefone"]?.ToString() ?? "";
-            txtCelular.Text = row["clieCelular"]?.ToString() ?? "";
-            txtEmail.Text = row["clieEmail"]?.ToString() ?? "";
-            txtCpf.Text = row["clieCPF_CNPJ_"]?.ToString() ?? "";
-            txtCep.Text = row["clieCEP"]?.ToString() ?? "";
-            txtEndereco.Text = row["clieEndereco"]?.ToString() ?? "";
-            txtNumero.Text = row["clieNumero"]?.ToString() ?? "";
-            txtComplemento.Text = row["clieComplemento"]?.ToString() ?? "";
-            txtBairro.Text = row["clieBairro"]?.ToString() ?? "";
-            txtCidade.Text = row["clieCidade"]?.ToString() ?? "";
-            txtEstado.Text = row["clieEstado"]?.ToString() ?? "";
-            var sit = row["Situacao"]?.ToString() ?? "NORMAL";
-            cmbSituacao.SelectedItem = sit;
+            txtNome.Text        = obj.clieNome_RazaoSocial ?? "";
+            txtTelefone.Text    = obj.clieTelefone ?? "";
+            txtCelular.Text     = obj.clieCelular ?? "";
+            txtEmail.Text       = obj.clieEmail ?? "";
+            txtCpf.Text         = obj.clieCPF_CNPJ_ ?? "";
+            txtCep.Text         = obj.clieCEP ?? "";
+            txtEndereco.Text    = obj.clieEndereco ?? "";
+            txtNumero.Text      = obj.clieNumero ?? "";
+            txtComplemento.Text = obj.clieComplemento ?? "";
+            txtBairro.Text      = obj.clieBairro ?? "";
+            txtCidade.Text      = obj.clieCidade ?? "";
+            txtEstado.Text      = obj.clieEstado ?? "";
+            cmbSituacao.SelectedItem = obj.Situacao ?? "NORMAL";
             pnlForm.Visible = true; txtNome.Focus();
         }
 
         private void BtnSalvar_Click(object sender, EventArgs e)
         {
             if (string.IsNullOrWhiteSpace(txtNome.Text)) { MessageBox.Show("Informe o nome."); return; }
-            var erro = DbHelper.SalvarCliente(_codigoEditando, txtNome.Text.Trim(),
-                txtTelefone.Text, txtCelular.Text, txtEmail.Text, txtCpf.Text,
-                txtCep.Text, txtEndereco.Text, txtNumero.Text,
-                txtComplemento.Text, txtBairro.Text, txtCidade.Text, txtEstado.Text,
-                cmbSituacao.SelectedItem?.ToString() ?? "NORMAL");
-            if (erro != "") { MessageBox.Show("Erro: " + erro); return; }
+            var obj = new Cliente
+            {
+                Codigo               = _codigoEditando,
+                clieNome_RazaoSocial = txtNome.Text.Trim(),
+                clieTelefone         = txtTelefone.Text,
+                clieCelular          = txtCelular.Text,
+                clieEmail            = txtEmail.Text,
+                clieCPF_CNPJ_        = txtCpf.Text,
+                clieCEP              = txtCep.Text,
+                clieEndereco         = txtEndereco.Text,
+                clieNumero           = txtNumero.Text,
+                clieComplemento      = txtComplemento.Text,
+                clieBairro           = txtBairro.Text,
+                clieCidade           = txtCidade.Text,
+                clieEstado           = txtEstado.Text,
+                Situacao             = cmbSituacao.SelectedItem?.ToString() ?? "NORMAL",
+            };
+            var erro = _bll.Salvar(obj);
+            if (!string.IsNullOrEmpty(erro)) { MessageBox.Show("Erro: " + erro); return; }
             pnlForm.Visible = false; _codigoEditando = 0; CarregarGrid();
         }
     }
