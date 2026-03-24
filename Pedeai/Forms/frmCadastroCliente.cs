@@ -50,42 +50,81 @@ namespace Pedeai.Forms
             grid.DoubleClick += (_, __) => CarregarParaEditar();
 
             // Formulário
-            pnlForm = new Panel { Dock = DockStyle.Bottom, Height = 220, Padding = new Padding(10), Visible = false };
+            pnlForm = new Panel { Dock = DockStyle.Bottom, Height = 195, Padding = new Padding(10), Visible = false };
             pnlForm.BackColor = Color.FromArgb(245, 245, 250);
             pnlForm.BorderStyle = BorderStyle.FixedSingle;
 
-            int y = 8;
-            txtNome = Campo(pnlForm, "Nome / Razão Social:", 10, y, 250); Campo2(pnlForm, "CPF/CNPJ:", 275, y); txtCpf = new TextBox { Left = 350, Top = y, Width = 130 }; pnlForm.Controls.Add(txtCpf);
-            Campo2(pnlForm, "Situação:", 495, y); cmbSituacao = new ComboBox { Left = 555, Top = y, Width = 55, DropDownStyle = ComboBoxStyle.DropDownList }; cmbSituacao.Items.AddRange(new[] { "NORMAL", "INATIVO" }); cmbSituacao.SelectedIndex = 0; pnlForm.Controls.Add(cmbSituacao);
+            // ── Linha 1: Nome | CPF | Situação ────────────────────────────
+            Lbl(pnlForm, "Nome / Razão Social:", 10, 11);
+            txtNome = Txt(pnlForm, 150, 8, 260);
 
-            y += 32;
-            txtTelefone = Campo(pnlForm, "Telefone:", 10, y, 120); txtCelular = Campo(pnlForm, "Celular:", 145, y, 120); txtEmail = Campo(pnlForm, "Email:", 280, y, 230);
+            Lbl(pnlForm, "CPF / CNPJ:", 422, 11);
+            txtCpf = Txt(pnlForm, 500, 8, 140);
 
-            y += 32;
-            txtCep = Campo(pnlForm, "CEP:", 10, y, 80); txtEndereco = Campo(pnlForm, "Endereço:", 105, y, 200); txtNumero = Campo(pnlForm, "Nº:", 320, y, 60); txtComplemento = Campo(pnlForm, "Compl.:", 395, y, 120);
+            Lbl(pnlForm, "Situação:", 654, 11);
+            cmbSituacao = new ComboBox { Left = 714, Top = 8, Width = 100, DropDownStyle = ComboBoxStyle.DropDownList };
+            cmbSituacao.Items.AddRange(new[] { "NORMAL", "INATIVO" });
+            cmbSituacao.SelectedIndex = 0;
+            pnlForm.Controls.Add(cmbSituacao);
 
-            y += 32;
-            txtBairro = Campo(pnlForm, "Bairro:", 10, y, 160); txtCidade = Campo(pnlForm, "Cidade:", 185, y, 180); txtEstado = Campo(pnlForm, "UF:", 380, y, 40);
+            // ── Linha 2: Telefone | Celular | E-mail ──────────────────────
+            Lbl(pnlForm, "Telefone:", 10, 43);
+            txtTelefone = Txt(pnlForm, 72, 40, 130);
 
-            y += 38;
-            var btnS = Botao("Salvar", Color.FromArgb(33, 150, 243)); btnS.Left = 10; btnS.Top = y; btnS.Click += BtnSalvar_Click; pnlForm.Controls.Add(btnS);
-            var btnC = Botao("Cancelar", Color.FromArgb(158, 158, 158)); btnC.Left = 120; btnC.Top = y; btnC.Click += (_, __) => { pnlForm.Visible = false; _codigoEditando = 0; }; pnlForm.Controls.Add(btnC);
+            Lbl(pnlForm, "Celular:", 214, 43);
+            txtCelular = Txt(pnlForm, 265, 40, 130);
+
+            Lbl(pnlForm, "E-mail:", 407, 43);
+            txtEmail = Txt(pnlForm, 450, 40, 264);
+
+            // ── Linha 3: CEP | Endereço | Nº | Compl. ───────────────────
+            Lbl(pnlForm, "CEP:", 10, 75);
+            txtCep = Txt(pnlForm, 42, 72, 80);
+
+            Lbl(pnlForm, "Endereço:", 134, 75);
+            txtEndereco = Txt(pnlForm, 200, 72, 230);
+
+            Lbl(pnlForm, "Nº:", 442, 75);
+            txtNumero = Txt(pnlForm, 462, 72, 60);
+
+            Lbl(pnlForm, "Compl.:", 534, 75);
+            txtComplemento = Txt(pnlForm, 580, 72, 134);
+
+            // ── Linha 4: Bairro | Cidade | UF ───────────────────────────
+            Lbl(pnlForm, "Bairro:", 10, 107);
+            txtBairro = Txt(pnlForm, 55, 104, 190);
+
+            Lbl(pnlForm, "Cidade:", 257, 107);
+            txtCidade = Txt(pnlForm, 305, 104, 190);
+
+            Lbl(pnlForm, "UF:", 507, 107);
+            txtEstado = Txt(pnlForm, 527, 104, 50);
+
+            // ── Botões ───────────────────────────────────────────────────
+            var btnS = Botao("Salvar", Color.FromArgb(33, 150, 243));
+            btnS.Left = 10; btnS.Top = 140; btnS.Click += BtnSalvar_Click;
+            pnlForm.Controls.Add(btnS);
+
+            var btnC = Botao("Cancelar", Color.FromArgb(158, 158, 158));
+            btnC.Left = 120; btnC.Top = 140;
+            btnC.Click += (_, __) => { pnlForm.Visible = false; _codigoEditando = 0; };
+            pnlForm.Controls.Add(btnC);
 
             Controls.Add(grid);
             Controls.Add(topBar);
             Controls.Add(pnlForm);
         }
 
-        private TextBox Campo(Panel p, string label, int x, int y, int w)
+        private static Label Lbl(Panel p, string text, int x, int y)
         {
-            p.Controls.Add(new Label { Text = label, Left = x, Top = y + 3, AutoSize = true });
-            var t = new TextBox { Left = x + label.Length * 6, Top = y, Width = w };
-            p.Controls.Add(t); return t;
+            var l = new Label { Text = text, Left = x, Top = y, AutoSize = true };
+            p.Controls.Add(l); return l;
         }
 
-        private void Campo2(Panel p, string label, int x, int y)
+        private static TextBox Txt(Panel p, int x, int y, int w)
         {
-            p.Controls.Add(new Label { Text = label, Left = x, Top = y + 3, AutoSize = true });
+            var t = new TextBox { Left = x, Top = y, Width = w };
+            p.Controls.Add(t); return t;
         }
 
         private Button Botao(string texto, Color cor)
