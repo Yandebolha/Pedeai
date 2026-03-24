@@ -233,5 +233,22 @@ namespace Pedeai.Forms
             pnlForm.Visible = false; CarregarGrid();
         }
 
+        private void InitializeComponent()
+        {
+            this.SuspendLayout();
+            // 
+            // frmCadastroProduto
+            // 
+            this.ClientSize = new System.Drawing.Size(284, 261);
+            this.Name = "frmCadastroProduto";
+            this.Load += new System.EventHandler(this.frmCadastroProduto_Load);
+            this.ResumeLayout(false);
+
+        }
+
+        private void frmCadastroProduto_Load(object sender, EventArgs e)
+        {
+
+        }
     }
 }
