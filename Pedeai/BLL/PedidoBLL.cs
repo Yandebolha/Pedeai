@@ -38,6 +38,15 @@ namespace Pedeai.BLL
             catch (Exception ex) { return ex.Message; }
         }
 
+        public string InserirManual(PedidoWeb pedido, System.Collections.Generic.List<ItemPedidoWeb> itens)
+        {
+            if (string.IsNullOrWhiteSpace(pedido.pediNome_Cliente))
+                return "Informe o nome do cliente.";
+            if (itens == null || itens.Count == 0)
+                return "Adicione ao menos um item ao pedido.";
+            return _dal.InserirManual(pedido, itens);
+        }
+
         public static string LabelSituacao(int s)
         {
             switch (s)

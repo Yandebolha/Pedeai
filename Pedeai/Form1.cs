@@ -334,8 +334,30 @@ namespace Pedeai
             btnTodos.FlatAppearance.BorderSize = 0;
             btnTodos.Click += (_, __) => { cmbFiltroPedido.SelectedIndex = 0; CarregarPedidos(); };
 
+            var btnManual = new Button
+            {
+                Text      = "✏ Pedido Manual",
+                Left      = 602,
+                Top       = 8,
+                Width     = 128,
+                Height    = 28,
+                BackColor = Color.FromArgb(142, 68, 173),
+                ForeColor = Color.White,
+                FlatStyle = FlatStyle.Flat,
+                Cursor    = Cursors.Hand
+            };
+            btnManual.FlatAppearance.BorderSize = 0;
+            btnManual.Click += (_, __) =>
+            {
+                using (var frm = new Forms.frmPedidoManual())
+                {
+                    if (frm.ShowDialog(this) == System.Windows.Forms.DialogResult.OK)
+                        CarregarPedidos();
+                }
+            };
+
             pnlFiltros.Controls.AddRange(new System.Windows.Forms.Control[]
-                { lblSit, cmbFiltroPedido, lblDt, dtpFiltroPedido, btnFiltrar, btnTodos });
+                { lblSit, cmbFiltroPedido, lblDt, dtpFiltroPedido, btnFiltrar, btnTodos, btnManual });
 
             // Detalhe header
             lblDetalhe = new Label

@@ -92,6 +92,9 @@
     <Compile Include="Forms\frmCadastroCupom.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="Forms\frmPedidoManual.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
     </Compile>

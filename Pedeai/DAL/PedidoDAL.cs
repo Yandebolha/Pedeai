@@ -72,6 +72,76 @@ namespace Pedeai.DAL
             return dt;
         }
 
+        /// <summary>Insere pedido manual com seus itens em transação única.</summary>
+        public string InserirManual(PedidoWeb pedido, System.Collections.Generic.List<ItemPedidoWeb> itens)
+        {
+            try
+            {
+                using var conn = AbrirConexao();
+                using var trans = conn.BeginTransaction();
+
+                pedido.Codigo    = ProximoCodigo("pedido_web", conn, trans);
+                pedido.auxCodigo = ProximoAuxCodigo("pedido_web", conn, trans);
+                pedido.pediData_Lancamento = DateTime.Now;
+
+                // Gera número sequencial simples: MAN + data + codigo
+                pedido.pediNumero = "MAN" + DateTime.Now.ToString("yyyyMMdd") + pedido.Codigo.ToString("D4");
+
+                var sqlP = @"INSERT INTO pedido_web
+                    (auxCodigo, Codigo, pediNumero, pediNome_Cliente, pediTelefone_Cliente,
+                     pediSituacao, pediTipo_Entrega, pediForma_Pagamento, pediOrigem,
+                     pediSubtotal, pediTaxa_Entrega, pediDesconto, pediValor_Total, pediTroco_Para,
+                     pediEndereco_Entrega, pediObservacoes, pediData_Lancamento, Situacao, Info)
+                    VALUES(@aux,@cod,@num,@nome,@tel,@sit,@tent,@fpag,3,
+                           @sub,@taxa,0,@total,@troco,@end,@obs,@dt,'A','')";
+                using var cmdP = new MySqlCommand(sqlP, conn, trans);
+                cmdP.Parameters.AddWithValue("@aux",   pedido.auxCodigo);
+                cmdP.Parameters.AddWithValue("@cod",   pedido.Codigo);
+                cmdP.Parameters.AddWithValue("@num",   pedido.pediNumero);
+                cmdP.Parameters.AddWithValue("@nome",  pedido.pediNome_Cliente ?? "");
+                cmdP.Parameters.AddWithValue("@tel",   pedido.pediTelefone_Cliente ?? "");
+                cmdP.Parameters.AddWithValue("@sit",   0); // Pendente
+                cmdP.Parameters.AddWithValue("@tent",  pedido.pediTipo_Entrega);
+                cmdP.Parameters.AddWithValue("@fpag",  pedido.pediForma_Pagamento);
+                cmdP.Parameters.AddWithValue("@sub",   pedido.pediValor_Total);
+                cmdP.Parameters.AddWithValue("@taxa",  pedido.pediTaxa_Entrega);
+                cmdP.Parameters.AddWithValue("@total", pedido.pediValor_Total + pedido.pediTaxa_Entrega);
+                cmdP.Parameters.AddWithValue("@troco", pedido.pediTroco_Para ?? (object)DBNull.Value);
+                cmdP.Parameters.AddWithValue("@end",   pedido.pediEndereco_Entrega ?? "");
+                cmdP.Parameters.AddWithValue("@obs",   pedido.pediObservacoes ?? "");
+                cmdP.Parameters.AddWithValue("@dt",    pedido.pediData_Lancamento);
+                cmdP.ExecuteNonQuery();
+
+                // Itens
+                foreach (var item in itens)
+                {
+                    item.Codigo       = ProximoCodigo("itens_pedido_web", conn, trans);
+                    item.auxCodigo    = ProximoAuxCodigo("itens_pedido_web", conn, trans);
+                    item.Codigo_Pedido = pedido.Codigo;
+
+                    var sqlI = @"INSERT INTO itens_pedido_web
+                        (auxCodigo,Codigo,Codigo_Pedido,Codigo_Mercadoria,
+                         itpwNome_Mercadoria,itpwQtde,itpwPreco_Unitario,itpwSubtotal,itpwObservacoes,Situacao)
+                        VALUES(@aux,@cod,@pedido,@merc,@nome,@qtde,@unit,@sub,@obs,'A')";
+                    using var cmdI = new MySqlCommand(sqlI, conn, trans);
+                    cmdI.Parameters.AddWithValue("@aux",    item.auxCodigo);
+                    cmdI.Parameters.AddWithValue("@cod",    item.Codigo);
+                    cmdI.Parameters.AddWithValue("@pedido", item.Codigo_Pedido);
+                    cmdI.Parameters.AddWithValue("@merc",   item.Codigo_Mercadoria);
+                    cmdI.Parameters.AddWithValue("@nome",   item.itpwNome_Mercadoria ?? "");
+                    cmdI.Parameters.AddWithValue("@qtde",   item.itpwQtde);
+                    cmdI.Parameters.AddWithValue("@unit",   item.itpwPreco_Unitario);
+                    cmdI.Parameters.AddWithValue("@sub",    item.itpwSubtotal);
+                    cmdI.Parameters.AddWithValue("@obs",    item.itpwObservacoes ?? "");
+                    cmdI.ExecuteNonQuery();
+                }
+
+                trans.Commit();
+                return "";
+            }
+            catch (Exception ex) { return ex.Message; }
+        }
+
         /// <summary>Atualiza a situação de um pedido.</summary>
         public void AtualizarSituacao(int codigo, int novaSituacao)
         {
@@ -93,12 +163,11 @@ namespace Pedeai.DAL
                 pediNome_Cliente      = r["pediNome_Cliente"]?.ToString() ?? "",
                 pediTelefone_Cliente  = r["pediTelefone_Cliente"]?.ToString() ?? "",
                 pediSituacao          = Convert.ToInt32(r["pediSituacao"]),
-                pediForma_Pagamento   = r["pediForma_Pagamento"]?.ToString() ?? "",
-                pediTipo_Entrega      = r["pediTipo_Entrega"]?.ToString() ?? "",
+                pediForma_Pagamento   = r["pediForma_Pagamento"] == DBNull.Value ? 0 : Convert.ToInt32(r["pediForma_Pagamento"]),
+                pediTipo_Entrega      = r["pediTipo_Entrega"] == DBNull.Value ? 0 : Convert.ToInt32(r["pediTipo_Entrega"]),
                 pediValor_Total       = Convert.ToDecimal(r["pediValor_Total"]),
-                pediOrigem            = r["pediOrigem"]?.ToString() ?? "",
+                pediOrigem            = r["pediOrigem"] == DBNull.Value ? 0 : Convert.ToInt32(r["pediOrigem"]),
                 pediData_Lancamento   = Convert.ToDateTime(r["pediData_Lancamento"]),
-                Status_Transmissao    = r["Status_Transmissao"]?.ToString() ?? "N",
                 Info                  = r["Info"]?.ToString() ?? "",
             };
         }
