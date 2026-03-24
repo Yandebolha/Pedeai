@@ -54,7 +54,7 @@ namespace Pedeai.Forms
             LblC(pnlForm, "Código:", 10, y); txtCodigo = new TextBox { Left = 65, Top = y, Width = 100 }; pnlForm.Controls.Add(txtCodigo);
             LblC(pnlForm, "Descrição:", 175, y); txtDescricao = new TextBox { Left = 245, Top = y, Width = 200 }; pnlForm.Controls.Add(txtDescricao);
             LblC(pnlForm, "Tipo:", 455, y); cmbTipo = new ComboBox { Left = 490, Top = y, Width = 100, DropDownStyle = ComboBoxStyle.DropDownList }; cmbTipo.Items.AddRange(new[] { "PERCENTUAL", "VALOR" }); cmbTipo.SelectedIndex = 0; pnlForm.Controls.Add(cmbTipo);
-            LblC(pnlForm, "Sit.:", 605, y); cmbSituacao = new ComboBox { Left = 637, Top = y, Width = 55, DropDownStyle = ComboBoxStyle.DropDownList }; cmbSituacao.Items.AddRange(new[] { "A", "I" }); cmbSituacao.SelectedIndex = 0; pnlForm.Controls.Add(cmbSituacao);
+            LblC(pnlForm, "Situação:", 605, y); cmbSituacao = new ComboBox { Left = 680, Top = y, Width = 90, DropDownStyle = ComboBoxStyle.DropDownList }; cmbSituacao.Items.AddRange(new[] { "Ativo", "Inativo" }); cmbSituacao.SelectedIndex = 0; pnlForm.Controls.Add(cmbSituacao);
 
             y += 34;
             LblC(pnlForm, "Valor:", 10, y); numValor = Num3(60, y, 80); pnlForm.Controls.Add(numValor);
@@ -117,7 +117,7 @@ namespace Pedeai.Forms
             numMinimo.Value = obj.cupomPedido_Minimo;
             numLimite.Value = obj.cupomLimite_Usos;
             dtpValido.Value = obj.cupomValido_Ate > DateTime.MinValue ? obj.cupomValido_Ate : DateTime.Today.AddMonths(1);
-            cmbSituacao.SelectedItem = obj.Situacao ?? "A";
+            cmbSituacao.SelectedItem = (obj.Situacao == "I") ? "Inativo" : "Ativo";
             pnlForm.Visible = true; txtCodigo.Focus();
         }
 
@@ -134,7 +134,7 @@ namespace Pedeai.Forms
                 cupomPedido_Minimo = numMinimo.Value,
                 cupomLimite_Usos   = (int)numLimite.Value,
                 cupomValido_Ate    = dtpValido.Value,
-                Situacao           = cmbSituacao.SelectedItem?.ToString() ?? "A",
+                Situacao           = cmbSituacao.SelectedItem?.ToString() == "Inativo" ? "I" : "A",
             };
             var erro = _bll.Salvar(obj);
             if (!string.IsNullOrEmpty(erro)) { MessageBox.Show("Erro: " + erro); return; }

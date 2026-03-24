@@ -13,7 +13,7 @@ public static class DbHelper
 {
     public static string ConnectionString =>
         ConfigurationManager.AppSettings["ConnectionString"]
-        ?? "Server=localhost;Database=pedeai;User=root;Password=;Port=3306;CharSet=utf8mb4;";
+        ?? "Server=localhost;Database=pedeai;User=root;Password=;Port=3306;CharSet=utf8mb4;SslMode=None;";
 
     public static MySqlConnection AbrirConexao()
     {
