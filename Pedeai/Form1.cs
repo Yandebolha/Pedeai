@@ -4,9 +4,10 @@ using System.Drawing;
 using System.Timers;
 using System.Windows.Forms;
 using Pedeai.DB;
+using Pedeai.Forms;
 
-namespace Pedeai;
-
+namespace Pedeai
+{
 public partial class Form1 : Form
 {
     // ── Timers ───────────────────────────────────────────────────────────────
@@ -243,7 +244,10 @@ public partial class Form1 : Form
         btnToggleProduto = CriarBotao("Ativar/Desativar", Color.FromArgb(255, 152, 0));
         btnToggleProduto.Width = 140;
         btnToggleProduto.Click += BtnToggleProduto_Click;
-        topBar.Controls.AddRange(new Control[] { btnRefresh, btnToggleProduto });
+        var btnCadastrar = CriarBotao("Cadastrar", Color.FromArgb(0, 150, 136));
+        btnCadastrar.Width = 110;
+        btnCadastrar.Click += (_, _) => { new frmCadastroProduto().ShowDialog(this); CarregarProdutos(); };
+        topBar.Controls.AddRange(new Control[] { btnRefresh, btnToggleProduto, btnCadastrar });
 
         gridProdutos = CriarGrid();
         tabProdutos.Controls.Add(gridProdutos);
@@ -270,7 +274,10 @@ public partial class Form1 : Form
         btnBuscar.Width = 80;
         btnBuscar.Click += (_, _) => CarregarClientes();
         txtBuscaCliente.KeyDown += (_, k) => { if (k.KeyCode == Keys.Enter) CarregarClientes(); };
-        topBar.Controls.AddRange(new Control[] { lblBusca, txtBuscaCliente, btnBuscar });
+        var btnCadastrar = CriarBotao("Cadastrar", Color.FromArgb(0, 150, 136));
+        btnCadastrar.Width = 110;
+        btnCadastrar.Click += (_, _) => { new frmCadastroCliente().ShowDialog(this); CarregarClientes(); };
+        topBar.Controls.AddRange(new Control[] { lblBusca, txtBuscaCliente, btnBuscar, btnCadastrar });
 
         gridClientes = CriarGrid();
         tabClientes.Controls.Add(gridClientes);
@@ -285,7 +292,10 @@ public partial class Form1 : Form
         var btnRefresh = CriarBotao("⟳ Atualizar", Color.FromArgb(63, 81, 181));
         btnRefresh.Width = 100;
         btnRefresh.Click += (_, _) => CarregarFornecedores();
-        topBar.Controls.Add(btnRefresh);
+        var btnCadastrar = CriarBotao("Cadastrar", Color.FromArgb(0, 150, 136));
+        btnCadastrar.Width = 110;
+        btnCadastrar.Click += (_, _) => { new frmCadastroFornecedor().ShowDialog(this); CarregarFornecedores(); };
+        topBar.Controls.AddRange(new Control[] { btnRefresh, btnCadastrar });
 
         gridFornecedores = CriarGrid();
         tabFornecedores.Controls.Add(gridFornecedores);
@@ -300,7 +310,10 @@ public partial class Form1 : Form
         var btnRefresh = CriarBotao("⟳ Atualizar", Color.FromArgb(63, 81, 181));
         btnRefresh.Width = 100;
         btnRefresh.Click += (_, _) => CarregarCupons();
-        topBar.Controls.Add(btnRefresh);
+        var btnCadastrar = CriarBotao("Cadastrar", Color.FromArgb(0, 150, 136));
+        btnCadastrar.Width = 110;
+        btnCadastrar.Click += (_, _) => { new frmCadastroCupom().ShowDialog(this); CarregarCupons(); };
+        topBar.Controls.AddRange(new Control[] { btnRefresh, btnCadastrar });
 
         gridCupons = CriarGrid();
         tabCupons.Controls.Add(gridCupons);
@@ -392,5 +405,6 @@ public partial class Form1 : Form
         _timerPedidos.Stop();
         base.OnFormClosed(e);
     }
+}
 }
 
