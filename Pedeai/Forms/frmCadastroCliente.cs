@@ -9,141 +9,16 @@ using Pedeai.Modelo;
 
 namespace Pedeai.Forms
 {
-    public class frmCadastroCliente : Form
+    public partial class frmCadastroCliente : Form
     {
         private readonly ClienteBLL _bll = new ClienteBLL();
-        private DataGridView grid = new DataGridView();
-        private Panel pnlForm = new Panel();
-        private TextBox txtBusca = new TextBox();
-        private TextBox txtNome, txtEmail, txtCpf;
-        private TextBox txtEndereco, txtNumero, txtComplemento, txtBairro, txtCidade, txtEstado;
-        private MaskedTextBox txtTelefone, txtCelular, txtCep;
-        private ComboBox cmbSituacao = new ComboBox();
         private int _codigoEditando = 0;
         private bool _formatingCpf = false;
 
         public frmCadastroCliente()
         {
-            Text = "Cadastro de Clientes";
-            Size = new Size(950, 620);
-            StartPosition = FormStartPosition.CenterParent;
-            MinimumSize = new Size(860, 540);
-            Font = new Font("Segoe UI", 9);
-            BuildUI();
+            InitializeComponent();
             CarregarGrid();
-        }
-
-        private void BuildUI()
-        {
-            var topBar = new Panel { Dock = DockStyle.Top, Height = 44, Padding = new Padding(8, 6, 8, 0) };
-            topBar.BackColor = Color.FromArgb(40, 40, 80);
-            var lblB = new Label { Text = "Buscar:", ForeColor = Color.White, Left = 8, Top = 12, AutoSize = true };
-            txtBusca = new TextBox { Left = 65, Top = 8, Width = 220 };
-            txtBusca.KeyDown += (_, k) => { if (k.KeyCode == Keys.Enter) CarregarGrid(); };
-            var btnB = Botao("Buscar", Color.FromArgb(63, 81, 181)); btnB.Left = 295; btnB.Top = 8; btnB.Click += (_, __) => CarregarGrid();
-            var btnN = Botao("+ Novo Cliente", Color.FromArgb(0, 150, 136)); btnN.Left = 405; btnN.Top = 8; btnN.Click += (_, __) => ModoNovo();
-            topBar.Controls.AddRange(new Control[] { lblB, txtBusca, btnB, btnN });
-
-            grid.Dock = DockStyle.Fill;
-            grid.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
-            grid.ReadOnly = true; grid.AllowUserToAddRows = false;
-            grid.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-            grid.RowHeadersVisible = false; grid.BackgroundColor = Color.White;
-            grid.Font = new Font("Segoe UI", 9); grid.BorderStyle = BorderStyle.None;
-            grid.ColumnHeadersDefaultCellStyle.BackColor = Color.FromArgb(40, 40, 80);
-            grid.ColumnHeadersDefaultCellStyle.ForeColor = Color.White;
-            grid.DoubleClick += (_, __) => CarregarParaEditar();
-
-            // Formulário
-            pnlForm = new Panel { Dock = DockStyle.Bottom, Height = 195, Padding = new Padding(10), Visible = false };
-            pnlForm.BackColor = Color.FromArgb(245, 245, 250);
-            pnlForm.BorderStyle = BorderStyle.FixedSingle;
-
-            // ── Linha 1: Nome | CPF | Situação ────────────────────────────
-            Lbl(pnlForm, "Nome / Razão Social:", 10, 11);
-            txtNome = Txt(pnlForm, 150, 8, 260);
-
-            Lbl(pnlForm, "CPF / CNPJ:", 422, 11);
-            txtCpf = Txt(pnlForm, 500, 8, 160);
-            txtCpf.KeyPress += (s, e) => { if (!char.IsDigit(e.KeyChar) && !char.IsControl(e.KeyChar)) e.Handled = true; };
-            txtCpf.TextChanged += TxtCpf_TextChanged;
-
-            Lbl(pnlForm, "Situação:", 654, 11);
-            cmbSituacao = new ComboBox { Left = 714, Top = 8, Width = 100, DropDownStyle = ComboBoxStyle.DropDownList };
-            cmbSituacao.Items.AddRange(new[] { "Ativo", "Inativo" });
-            cmbSituacao.SelectedIndex = 0;
-            pnlForm.Controls.Add(cmbSituacao);
-
-            // ── Linha 2: Telefone | Celular | E-mail ──────────────────────
-            Lbl(pnlForm, "Telefone:", 10, 43);
-            txtTelefone = MaskTxt(pnlForm, "(00) 0000-0000", 72, 40, 130);
-
-            Lbl(pnlForm, "Celular:", 214, 43);
-            txtCelular = MaskTxt(pnlForm, "(00) 00000-0000", 265, 40, 140);
-
-            Lbl(pnlForm, "E-mail:", 407, 43);
-            txtEmail = Txt(pnlForm, 450, 40, 264);
-
-            // ── Linha 3: CEP | Endereço | Nº | Compl. ───────────────────
-            Lbl(pnlForm, "CEP:", 10, 75);
-            txtCep = MaskTxt(pnlForm, "00000-000", 42, 72, 95);
-            txtCep.Leave += async (s, e) => await BuscarCep();
-
-            Lbl(pnlForm, "Endereço:", 134, 75);
-            txtEndereco = Txt(pnlForm, 200, 72, 230);
-
-            Lbl(pnlForm, "Nº:", 442, 75);
-            txtNumero = Txt(pnlForm, 462, 72, 60);
-
-            Lbl(pnlForm, "Compl.:", 534, 75);
-            txtComplemento = Txt(pnlForm, 580, 72, 134);
-
-            // ── Linha 4: Bairro | Cidade | UF ───────────────────────────
-            Lbl(pnlForm, "Bairro:", 10, 107);
-            txtBairro = Txt(pnlForm, 55, 104, 190);
-
-            Lbl(pnlForm, "Cidade:", 257, 107);
-            txtCidade = Txt(pnlForm, 305, 104, 190);
-
-            Lbl(pnlForm, "UF:", 507, 107);
-            txtEstado = Txt(pnlForm, 527, 104, 50);
-
-            // ── Botões ───────────────────────────────────────────────────
-            var btnS = Botao("Salvar", Color.FromArgb(33, 150, 243));
-            btnS.Left = 10; btnS.Top = 140; btnS.Click += BtnSalvar_Click;
-            pnlForm.Controls.Add(btnS);
-
-            var btnC = Botao("Cancelar", Color.FromArgb(158, 158, 158));
-            btnC.Left = 120; btnC.Top = 140;
-            btnC.Click += (_, __) => { pnlForm.Visible = false; _codigoEditando = 0; };
-            pnlForm.Controls.Add(btnC);
-
-            Controls.Add(grid);
-            Controls.Add(topBar);
-            Controls.Add(pnlForm);
-        }
-
-        private static Label Lbl(Panel p, string text, int x, int y)
-        {
-            var l = new Label { Text = text, Left = x, Top = y, AutoSize = true };
-            p.Controls.Add(l); return l;
-        }
-
-        private static TextBox Txt(Panel p, int x, int y, int w)
-        {
-            var t = new TextBox { Left = x, Top = y, Width = w };
-            p.Controls.Add(t); return t;
-        }
-
-        private static MaskedTextBox MaskTxt(Panel p, string mask, int x, int y, int w)
-        {
-            var t = new MaskedTextBox { Mask = mask, Left = x, Top = y, Width = w };
-            p.Controls.Add(t); return t;
-        }
-
-        private Button Botao(string texto, Color cor)
-        {
-            return new Button { Text = texto, BackColor = cor, ForeColor = Color.White, FlatStyle = FlatStyle.Flat, Width = 100, Height = 28, Font = new Font("Segoe UI", 9, FontStyle.Bold) };
         }
 
         private void TxtCpf_TextChanged(object sender, EventArgs e)

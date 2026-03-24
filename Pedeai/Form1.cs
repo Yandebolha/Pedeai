@@ -13,29 +13,6 @@ namespace Pedeai
         private readonly PedidoBLL      _pedidoBLL  = new PedidoBLL();
         private readonly DashboardBLL   _dashBLL    = new DashboardBLL();
 
-        // ── Layout ──────────────────────────────────────────────────────────
-        private Panel       pnlSidebar;
-        private Panel       pnlContent;
-        private Panel       pnlTopBar;
-        private Label       lblTitulo;
-
-        // ── Dashboard ────────────────────────────────────────────────────────
-        private Panel       pnlDashboard;
-        private Label       lblPedidosHoje;
-        private Label       lblFaturamento;
-        private Label       lblClientes;
-        private Label       lblPendentes;
-
-        // ── Pedidos ──────────────────────────────────────────────────────────
-        private Panel           pnlPedidos;
-        private DataGridView    gridPedidos;
-        private ComboBox        cmbFiltroPedido;
-        private DateTimePicker  dtpFiltroPedido;
-        private DataGridView    gridItens;
-        private Label           lblDetalhe;
-
-        // ── Timer status ─────────────────────────────────────────────────────
-        private Timer   _timer;
         private int     _paginaAtual = 0; // 0=Dashboard 1=Pedidos
 
         // ── Cores ────────────────────────────────────────────────────────────
@@ -47,115 +24,7 @@ namespace Pedeai
 
         public Form1()
         {
-            Text            = "Pedeai — Painel de Controle";
-            Size            = new Size(1280, 780);
-            MinimumSize     = new Size(1024, 680);
-            StartPosition   = FormStartPosition.CenterScreen;
-            BackColor       = CorFundo;
-            Font            = new Font("Segoe UI", 9);
-            BuildUI();
-            Load += (_, __) => CarregarTudo();
-        }
-
-        // ════════════════════════════════════════════════════════════════════
-        // UI BUILD
-        // ════════════════════════════════════════════════════════════════════
-        private void BuildUI()
-        {
-            // ── Top bar ──────────────────────────────────────────────────────
-            pnlTopBar = new Panel
-            {
-                Dock        = DockStyle.Top,
-                Height      = 52,
-                BackColor   = CorTopBar,
-                Padding     = new Padding(12, 10, 12, 0)
-            };
-
-            lblTitulo = new Label
-            {
-                Text      = "Dashboard",
-                ForeColor = Color.White,
-                Font      = new Font("Segoe UI", 14, FontStyle.Bold),
-                AutoSize  = true,
-                Left      = 16,
-                Top       = 12
-            };
-            pnlTopBar.Controls.Add(lblTitulo);
-
-            var btnAtualizar = new Button
-            {
-                Text      = "⟳  Atualizar",
-                Top       = 10,
-                Width     = 110,
-                Height    = 30,
-                Anchor    = AnchorStyles.Top | AnchorStyles.Right,
-                BackColor = CorBotaoAtivo,
-                ForeColor = Color.White,
-                FlatStyle = FlatStyle.Flat,
-                Font      = new Font("Segoe UI", 9, FontStyle.Bold),
-                Cursor    = Cursors.Hand
-            };
-            btnAtualizar.Location = new Point(pnlTopBar.Width - 122, 10);
-            btnAtualizar.FlatAppearance.BorderSize = 0;
-            btnAtualizar.Click += (_, __) => CarregarTudo();
-            pnlTopBar.Controls.Add(btnAtualizar);
-
-            // ── Sidebar ───────────────────────────────────────────────────────
-            pnlSidebar = new Panel
-            {
-                Dock      = DockStyle.Left,
-                Width     = 210,
-                BackColor = CorSidebar,
-                Padding   = new Padding(0, 8, 0, 0)
-            };
-
-            // Logo
-            var lblLogo = new Label
-            {
-                Text      = "🍕 Pedeai",
-                ForeColor = Color.White,
-                Font      = new Font("Segoe UI", 15, FontStyle.Bold),
-                AutoSize  = false,
-                Width     = 210,
-                Height    = 52,
-                TextAlign = ContentAlignment.MiddleCenter,
-                Top       = 0,
-                Left      = 0
-            };
-            pnlSidebar.Controls.Add(lblLogo);
-
-            var separator = new Panel { Left = 16, Top = 56, Width = 178, Height = 1, BackColor = Color.FromArgb(60, 70, 110) };
-            pnlSidebar.Controls.Add(separator);
-
-            // Nav buttons
-            int navY = 68;
-            pnlSidebar.Controls.Add(BotaoNav("🏠  Dashboard",  navY, () => MostrarDashboard()));       navY += 46;
-            pnlSidebar.Controls.Add(BotaoNav("📋  Pedidos",    navY, () => MostrarPedidos()));          navY += 46;
-            pnlSidebar.Controls.Add(BotaoNav("🛒  Produtos",   navY, () => AbrirForm(new frmCadastroProduto()))); navY += 46;
-            pnlSidebar.Controls.Add(BotaoNav("🗂  Categorias", navY, () => AbrirForm(new frmCadastroCategoria()))); navY += 46;
-            pnlSidebar.Controls.Add(BotaoNav("👤  Clientes",   navY, () => AbrirForm(new frmCadastroCliente()))); navY += 46;
-            pnlSidebar.Controls.Add(BotaoNav("🏭  Fornecedores", navY, () => AbrirForm(new frmCadastroFornecedor()))); navY += 46;
-            pnlSidebar.Controls.Add(BotaoNav("🏷  Cupons",     navY, () => AbrirForm(new frmCadastroCupom())));
-
-            // ── Content ───────────────────────────────────────────────────────
-            pnlContent = new Panel
-            {
-                Dock      = DockStyle.Fill,
-                BackColor = CorFundo,
-                Padding   = new Padding(20)
-            };
-
-            BuildDashboard();
-            BuildPedidos();
-
-            Controls.Add(pnlContent);
-            Controls.Add(pnlSidebar);
-            Controls.Add(pnlTopBar);
-
-            // ── Timer ─────────────────────────────────────────────────────────
-            _timer = new Timer { Interval = 30000 };
-            _timer.Tick += (_, __) => CarregarTudo();
-            _timer.Start();
+            InitializeComponent();
         }
 
         private Button BotaoNav(string texto, int y, Action onClick)

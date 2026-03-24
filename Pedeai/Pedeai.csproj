@@ -80,20 +80,38 @@
     <Compile Include="Forms\frmCadastroCategoria.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="Forms\frmCadastroCategoria.Designer.cs">
+      <DependentUpon>frmCadastroCategoria.cs</DependentUpon>
+    </Compile>
     <Compile Include="Forms\frmCadastroProduto.cs">
       <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\frmCadastroProduto.Designer.cs">
+      <DependentUpon>frmCadastroProduto.cs</DependentUpon>
     </Compile>
     <Compile Include="Forms\frmCadastroCliente.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="Forms\frmCadastroCliente.Designer.cs">
+      <DependentUpon>frmCadastroCliente.cs</DependentUpon>
+    </Compile>
     <Compile Include="Forms\frmCadastroFornecedor.cs">
       <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\frmCadastroFornecedor.Designer.cs">
+      <DependentUpon>frmCadastroFornecedor.cs</DependentUpon>
     </Compile>
     <Compile Include="Forms\frmCadastroCupom.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="Forms\frmCadastroCupom.Designer.cs">
+      <DependentUpon>frmCadastroCupom.cs</DependentUpon>
+    </Compile>
     <Compile Include="Forms\frmPedidoManual.cs">
       <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\frmPedidoManual.Designer.cs">
+      <DependentUpon>frmPedidoManual.cs</DependentUpon>
     </Compile>
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>

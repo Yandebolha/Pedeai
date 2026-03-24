@@ -7,152 +7,18 @@ using Pedeai.Modelo;
 
 namespace Pedeai.Forms
 {
-    public class frmCadastroProduto : Form
+    public partial class frmCadastroProduto : Form
     {
         private readonly MercadoriaBLL      _bll    = new MercadoriaBLL();
         private readonly GrupoMercadoriaBLL _grpBLL = new GrupoMercadoriaBLL();
-
-        private DataGridView grid    = new DataGridView();
-        private Panel        pnlForm = new Panel();
-
-        private ComboBox      cmbCategoria       = new ComboBox();
-        private TextBox       txtNome            = new TextBox();
-        private ComboBox      cmbSituacao        = new ComboBox();
-        private TextBox       txtDescricao       = new TextBox();
-        private Label         lblImagem          = new Label();
-        private string        _caminhoImagem     = "";
-        private NumericUpDown numPreco           = new NumericUpDown();
-        private NumericUpDown numCusto           = new NumericUpDown();
-        private NumericUpDown numPromo           = new NumericUpDown();
-        private NumericUpDown numEstoque         = new NumericUpDown();
-        private CheckBox      chkControlaEstoque = new CheckBox();
-        private CheckBox      chkDestaque        = new CheckBox();
-        private CheckBox      chkIfood           = new CheckBox();
-        private int           _codigoEditando    = 0;
+        private string _caminhoImagem = "";
+        private int    _codigoEditando = 0;
 
         public frmCadastroProduto()
         {
-            Text          = "Cadastro de Produtos";
-            Size          = new Size(920, 620);
-            StartPosition = FormStartPosition.CenterParent;
-            MinimumSize   = new Size(820, 540);
-            Font          = new Font("Segoe UI", 9);
-            BuildUI();
+            InitializeComponent();
             CarregarGrid();
         }
-
-        private void BuildUI()
-        {
-            var topBar = new Panel { Dock = DockStyle.Top, Height = 44, Padding = new Padding(8, 6, 8, 0) };
-            topBar.BackColor = Color.FromArgb(40, 40, 80);
-            var btnNovo = Botao("+ Novo Produto", Color.FromArgb(0, 150, 136));
-            btnNovo.Click += (s, e) => ModoNovo();
-            var btnCat = Botao("Categorias", Color.FromArgb(103, 58, 183));
-            btnCat.Left = 115;
-            btnCat.Click += (s, e) => { new frmCadastroCategoria().ShowDialog(this); CarrecarComboCategorias(); };
-            topBar.Controls.AddRange(new Control[] { btnNovo, btnCat });
-
-            grid.Dock = DockStyle.Fill;
-            grid.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
-            grid.ReadOnly = true; grid.AllowUserToAddRows = false;
-            grid.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-            grid.RowHeadersVisible = false; grid.BackgroundColor = Color.White;
-            grid.Font = new Font("Segoe UI", 9); grid.BorderStyle = BorderStyle.None;
-            grid.ColumnHeadersDefaultCellStyle.BackColor = Color.FromArgb(40, 40, 80);
-            grid.ColumnHeadersDefaultCellStyle.ForeColor = Color.White;
-            grid.DoubleClick += (s, e) => CarregarParaEditar();
-
-            pnlForm = new Panel { Dock = DockStyle.Bottom, Height = 225, Padding = new Padding(10), Visible = false };
-            pnlForm.BackColor = Color.FromArgb(245, 245, 250);
-            pnlForm.BorderStyle = BorderStyle.FixedSingle;
-
-            int y = 8;
-
-            // Linha 1: Categoria | Nome | Situacao
-            Lbl(pnlForm, "Categoria:", 10, y);
-            cmbCategoria = new ComboBox { Left = 80, Top = y, Width = 160, DropDownStyle = ComboBoxStyle.DropDown,
-                AutoCompleteMode = AutoCompleteMode.SuggestAppend, AutoCompleteSource = AutoCompleteSource.ListItems };
-            pnlForm.Controls.Add(cmbCategoria);
-
-            Lbl(pnlForm, "Nome do Produto:", 252, y);
-            txtNome = new TextBox { Left = 365, Top = y, Width = 270 };
-            pnlForm.Controls.Add(txtNome);
-
-            Lbl(pnlForm, "Situacao:", 651, y);
-            cmbSituacao = new ComboBox { Left = 711, Top = y, Width = 90, DropDownStyle = ComboBoxStyle.DropDownList };
-            cmbSituacao.Items.AddRange(new object[] { "Ativo", "Inativo" });
-            cmbSituacao.SelectedIndex = 0;
-            pnlForm.Controls.Add(cmbSituacao);
-
-            y += 34;
-
-            // Linha 2: Descricao | Imagem
-            Lbl(pnlForm, "Descricao:", 10, y);
-            txtDescricao = new TextBox { Left = 80, Top = y, Width = 330 };
-            pnlForm.Controls.Add(txtDescricao);
-
-            var btnImg = new Button { Text = "Imagem", Left = 425, Top = y - 1, Width = 85, Height = 24,
-                BackColor = Color.FromArgb(80, 90, 140), ForeColor = Color.White,
-                FlatStyle = FlatStyle.Flat, Cursor = Cursors.Hand };
-            btnImg.FlatAppearance.BorderSize = 0;
-            btnImg.Click += BtnImagem_Click;
-            pnlForm.Controls.Add(btnImg);
-
-            lblImagem = new Label { Text = "nenhuma imagem selecionada", Left = 520, Top = y + 3,
-                Width = 315, ForeColor = Color.Gray, AutoSize = false };
-            pnlForm.Controls.Add(lblImagem);
-
-            y += 34;
-
-            // Linha 3: Preco | Custo | Promo | Estoque | checkboxes
-            Lbl(pnlForm, "Preco R$:", 10, y);
-            numPreco = Num2(73, y, 85); pnlForm.Controls.Add(numPreco);
-
-            Lbl(pnlForm, "Custo R$:", 166, y);
-            numCusto = Num2(228, y, 85); pnlForm.Controls.Add(numCusto);
-
-            Lbl(pnlForm, "Promo R$:", 320, y);
-            numPromo = Num2(385, y, 85); pnlForm.Controls.Add(numPromo);
-
-            Lbl(pnlForm, "Estoque:", 479, y);
-            numEstoque = Num2(535, y, 75); pnlForm.Controls.Add(numEstoque);
-
-            chkControlaEstoque = new CheckBox { Text = "Controla estoque", Left = 620, Top = y + 2, AutoSize = true };
-            pnlForm.Controls.Add(chkControlaEstoque);
-
-            chkDestaque = new CheckBox { Text = "Destaque", Left = 760, Top = y + 2, AutoSize = true };
-            pnlForm.Controls.Add(chkDestaque);
-
-            y += 36;
-
-            // Linha 4: iFood
-            chkIfood = new CheckBox { Text = "Disponivel no iFood (habilita o produto no cardapio do iFood)",
-                Left = 10, Top = y, AutoSize = true,
-                Font = new Font("Segoe UI", 9, FontStyle.Bold),
-                ForeColor = Color.FromArgb(200, 80, 0) };
-            pnlForm.Controls.Add(chkIfood);
-
-            y += 38;
-
-            // Botoes
-            var btnS = Botao("Salvar",    Color.FromArgb(33, 150, 243)); btnS.Left = 10;  btnS.Top = y; btnS.Click += BtnSalvar_Click; pnlForm.Controls.Add(btnS);
-            var btnC = Botao("Cancelar",  Color.FromArgb(158, 158, 158)); btnC.Left = 120; btnC.Top = y; btnC.Click += (s, e) => { pnlForm.Visible = false; _codigoEditando = 0; }; pnlForm.Controls.Add(btnC);
-            var btnD = Botao("Desativar", Color.FromArgb(244, 67, 54));  btnD.Left = 230; btnD.Top = y; btnD.Click += BtnDesativar_Click; pnlForm.Controls.Add(btnD);
-
-            Controls.Add(grid);
-            Controls.Add(topBar);
-            Controls.Add(pnlForm);
-        }
-
-        private void Lbl(Panel p, string t, int x, int y) =>
-            p.Controls.Add(new Label { Text = t, Left = x, Top = y + 3, AutoSize = true });
-
-        private NumericUpDown Num2(int x, int y, int w) =>
-            new NumericUpDown { Left = x, Top = y, Width = w, DecimalPlaces = 2, Maximum = 999999, Minimum = 0 };
-
-        private Button Botao(string texto, Color cor) =>
-            new Button { Text = texto, BackColor = cor, ForeColor = Color.White, FlatStyle = FlatStyle.Flat,
-                         Width = 100, Height = 28, Font = new Font("Segoe UI", 9, FontStyle.Bold) };
 
         private void BtnImagem_Click(object sender, EventArgs e)
         {
