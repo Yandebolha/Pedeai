@@ -286,15 +286,15 @@ public partial class Form1 : Form
 
     private void BuildProdutosTab()
     {
-        var topBar = new Panel { Dock = DockStyle.Top, Height = 42, Padding = new Padding(4) };
+        var topBar = new FlowLayoutPanel { Dock = DockStyle.Top, Height = 38, Padding = new Padding(4, 4, 4, 0), WrapContents = false, AutoSize = false };
         var btnRefresh = CriarBotao("⟳ Atualizar", Color.FromArgb(63, 81, 181));
-        btnRefresh.Width = 100;
+        btnRefresh.Width = 100; btnRefresh.Height = 28; btnRefresh.Margin = new Padding(0, 0, 4, 0);
         btnRefresh.Click += (_, _) => CarregarProdutos();
         btnToggleProduto = CriarBotao("Ativar/Desativar", Color.FromArgb(255, 152, 0));
-        btnToggleProduto.Width = 140;
+        btnToggleProduto.Width = 130; btnToggleProduto.Height = 28; btnToggleProduto.Margin = new Padding(0, 0, 4, 0);
         btnToggleProduto.Click += BtnToggleProduto_Click;
-        var btnCadastrar = CriarBotao("Cadastrar", Color.FromArgb(0, 150, 136));
-        btnCadastrar.Width = 110;
+        var btnCadastrar = CriarBotao("+ Cadastrar", Color.FromArgb(0, 150, 136));
+        btnCadastrar.Width = 110; btnCadastrar.Height = 28;
         btnCadastrar.Click += (_, _) => { new frmCadastroProduto().ShowDialog(this); CarregarProdutos(); };
         topBar.Controls.AddRange(new Control[] { btnRefresh, btnToggleProduto, btnCadastrar });
 
@@ -316,15 +316,15 @@ public partial class Form1 : Form
 
     private void BuildClientesTab()
     {
-        var topBar = new Panel { Dock = DockStyle.Top, Height = 42, Padding = new Padding(4) };
-        var lblBusca = new Label { Text = "Buscar:", Width = 55, TextAlign = ContentAlignment.MiddleLeft, Dock = DockStyle.Left };
-        txtBuscaCliente = new TextBox { Dock = DockStyle.Left, Width = 250 };
+        var topBar = new FlowLayoutPanel { Dock = DockStyle.Top, Height = 38, Padding = new Padding(4, 4, 4, 0), WrapContents = false, AutoSize = false };
+        var lblBusca = new Label { Text = "Buscar:", Width = 52, Height = 28, TextAlign = ContentAlignment.MiddleLeft, Margin = new Padding(0) };
+        txtBuscaCliente = new TextBox { Width = 220, Height = 24, Margin = new Padding(0, 2, 4, 0) };
         var btnBuscar = CriarBotao("Buscar", Color.FromArgb(63, 81, 181));
-        btnBuscar.Width = 80;
+        btnBuscar.Width = 80; btnBuscar.Height = 28; btnBuscar.Margin = new Padding(0, 0, 4, 0);
         btnBuscar.Click += (_, _) => CarregarClientes();
         txtBuscaCliente.KeyDown += (_, k) => { if (k.KeyCode == Keys.Enter) CarregarClientes(); };
-        var btnCadastrar = CriarBotao("Cadastrar", Color.FromArgb(0, 150, 136));
-        btnCadastrar.Width = 110;
+        var btnCadastrar = CriarBotao("+ Cadastrar", Color.FromArgb(0, 150, 136));
+        btnCadastrar.Width = 110; btnCadastrar.Height = 28;
         btnCadastrar.Click += (_, _) => { new frmCadastroCliente().ShowDialog(this); CarregarClientes(); };
         topBar.Controls.AddRange(new Control[] { lblBusca, txtBuscaCliente, btnBuscar, btnCadastrar });
 
@@ -337,12 +337,12 @@ public partial class Form1 : Form
 
     private void BuildFornecedoresTab()
     {
-        var topBar = new Panel { Dock = DockStyle.Top, Height = 42, Padding = new Padding(4) };
+        var topBar = new FlowLayoutPanel { Dock = DockStyle.Top, Height = 38, Padding = new Padding(4, 4, 4, 0), WrapContents = false, AutoSize = false };
         var btnRefresh = CriarBotao("⟳ Atualizar", Color.FromArgb(63, 81, 181));
-        btnRefresh.Width = 100;
+        btnRefresh.Width = 100; btnRefresh.Height = 28; btnRefresh.Margin = new Padding(0, 0, 4, 0);
         btnRefresh.Click += (_, _) => CarregarFornecedores();
-        var btnCadastrar = CriarBotao("Cadastrar", Color.FromArgb(0, 150, 136));
-        btnCadastrar.Width = 110;
+        var btnCadastrar = CriarBotao("+ Cadastrar", Color.FromArgb(0, 150, 136));
+        btnCadastrar.Width = 110; btnCadastrar.Height = 28;
         btnCadastrar.Click += (_, _) => { new frmCadastroFornecedor().ShowDialog(this); CarregarFornecedores(); };
         topBar.Controls.AddRange(new Control[] { btnRefresh, btnCadastrar });
 
@@ -355,12 +355,12 @@ public partial class Form1 : Form
 
     private void BuildCuponsTab()
     {
-        var topBar = new Panel { Dock = DockStyle.Top, Height = 42, Padding = new Padding(4) };
+        var topBar = new FlowLayoutPanel { Dock = DockStyle.Top, Height = 38, Padding = new Padding(4, 4, 4, 0), WrapContents = false, AutoSize = false };
         var btnRefresh = CriarBotao("⟳ Atualizar", Color.FromArgb(63, 81, 181));
-        btnRefresh.Width = 100;
+        btnRefresh.Width = 100; btnRefresh.Height = 28; btnRefresh.Margin = new Padding(0, 0, 4, 0);
         btnRefresh.Click += (_, _) => CarregarCupons();
-        var btnCadastrar = CriarBotao("Cadastrar", Color.FromArgb(0, 150, 136));
-        btnCadastrar.Width = 110;
+        var btnCadastrar = CriarBotao("+ Cadastrar", Color.FromArgb(0, 150, 136));
+        btnCadastrar.Width = 110; btnCadastrar.Height = 28;
         btnCadastrar.Click += (_, _) => { new frmCadastroCupom().ShowDialog(this); CarregarCupons(); };
         topBar.Controls.AddRange(new Control[] { btnRefresh, btnCadastrar });
 
