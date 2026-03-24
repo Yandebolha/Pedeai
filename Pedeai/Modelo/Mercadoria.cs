@@ -11,6 +11,7 @@ namespace Pedeai.Modelo
         public string mercMercadoria { get; set; }
         public string mercApresentacao { get; set; } = "";
         public decimal mercPreco_Venda { get; set; }
+        public decimal mercPreco_Custo { get; set; }
         public decimal mercPreco_Promocional { get; set; }
         public decimal mercEstoque_Atual { get; set; }
         public bool mercControla_Estoque { get; set; }

@@ -51,10 +51,10 @@ namespace Pedeai.DAL
 
                 var sql = @"INSERT INTO mercadoria
                             (auxCodigo, Codigo, Codigo_Grupo, mercMercadoria, mercApresentacao,
-                             mercPreco_Venda, mercPreco_Promocional, mercEstoque_Atual,
+                             mercPreco_Venda, mercPreco_Custo, mercPreco_Promocional, mercEstoque_Atual,
                              mercControla_Estoque, mercImagem_Url, mercDestaque, mercOrdem,
                              mercHabilitar_Ifood, Situacao, Status_Transmissao, Info, mercData_Cadastro)
-                            VALUES(@aux, @cod, @grp, @nome, @desc, @preco, @promo, @est,
+                            VALUES(@aux, @cod, @grp, @nome, @desc, @preco, @custo, @promo, @est,
                                    @ctrl, @img, @dest, @ordem, @ifood, @sit, @trans, @info, @dt)";
                 using var cmd = new MySqlCommand(sql, conn);
                 BindParams(cmd, obj);
@@ -72,7 +72,7 @@ namespace Pedeai.DAL
                 using var conn = AbrirConexao();
                 var sql = @"UPDATE mercadoria SET
                             Codigo_Grupo=@grp, mercMercadoria=@nome, mercApresentacao=@desc,
-                            mercPreco_Venda=@preco, mercPreco_Promocional=@promo, mercEstoque_Atual=@est,
+                            mercPreco_Venda=@preco, mercPreco_Custo=@custo, mercPreco_Promocional=@promo, mercEstoque_Atual=@est,
                             mercControla_Estoque=@ctrl, mercImagem_Url=@img, mercDestaque=@dest,
                             mercOrdem=@ordem, mercHabilitar_Ifood=@ifood, Situacao=@sit
                             WHERE Codigo=@cod";
@@ -102,6 +102,7 @@ namespace Pedeai.DAL
             cmd.Parameters.AddWithValue("@nome",  obj.mercMercadoria);
             cmd.Parameters.AddWithValue("@desc",  obj.mercApresentacao ?? "");
             cmd.Parameters.AddWithValue("@preco", obj.mercPreco_Venda);
+            cmd.Parameters.AddWithValue("@custo", obj.mercPreco_Custo);
             cmd.Parameters.AddWithValue("@promo", obj.mercPreco_Promocional);
             cmd.Parameters.AddWithValue("@est",   obj.mercEstoque_Atual);
             cmd.Parameters.AddWithValue("@ctrl",  obj.mercControla_Estoque ? 1 : 0);
@@ -125,6 +126,7 @@ namespace Pedeai.DAL
                 mercMercadoria       = r["mercMercadoria"]?.ToString() ?? "",
                 mercApresentacao     = r["mercApresentacao"]?.ToString() ?? "",
                 mercPreco_Venda      = r["mercPreco_Venda"] == DBNull.Value ? 0 : Convert.ToDecimal(r["mercPreco_Venda"]),
+                mercPreco_Custo      = r["mercPreco_Custo"] == DBNull.Value ? 0 : Convert.ToDecimal(r["mercPreco_Custo"]),
                 mercPreco_Promocional= r["mercPreco_Promocional"] == DBNull.Value ? 0 : Convert.ToDecimal(r["mercPreco_Promocional"]),
                 mercEstoque_Atual    = r["mercEstoque_Atual"] == DBNull.Value ? 0 : Convert.ToDecimal(r["mercEstoque_Atual"]),
                 mercControla_Estoque = r["mercControla_Estoque"]?.ToString() == "1" || r["mercControla_Estoque"]?.ToString() == "True",
