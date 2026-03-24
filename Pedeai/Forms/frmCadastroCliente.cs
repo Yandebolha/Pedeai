@@ -1,6 +1,9 @@
 using System;
 using System.Drawing;
+using System.Net.Http;
+using System.Threading.Tasks;
 using System.Windows.Forms;
+using Newtonsoft.Json.Linq;
 using Pedeai.BLL;
 using Pedeai.Modelo;
 
@@ -12,8 +15,9 @@ namespace Pedeai.Forms
         private DataGridView grid = new DataGridView();
         private Panel pnlForm = new Panel();
         private TextBox txtBusca = new TextBox();
-        private TextBox txtNome, txtTelefone, txtCelular, txtEmail, txtCpf;
-        private TextBox txtCep, txtEndereco, txtNumero, txtComplemento, txtBairro, txtCidade, txtEstado;
+        private TextBox txtNome, txtEmail, txtCpf;
+        private TextBox txtEndereco, txtNumero, txtComplemento, txtBairro, txtCidade, txtEstado;
+        private MaskedTextBox txtTelefone, txtCelular, txtCep;
         private ComboBox cmbSituacao = new ComboBox();
         private int _codigoEditando = 0;
 
@@ -69,17 +73,18 @@ namespace Pedeai.Forms
 
             // ── Linha 2: Telefone | Celular | E-mail ──────────────────────
             Lbl(pnlForm, "Telefone:", 10, 43);
-            txtTelefone = Txt(pnlForm, 72, 40, 130);
+            txtTelefone = MaskTxt(pnlForm, "(00) 0000-0000", 72, 40, 130);
 
             Lbl(pnlForm, "Celular:", 214, 43);
-            txtCelular = Txt(pnlForm, 265, 40, 130);
+            txtCelular = MaskTxt(pnlForm, "(00) 00000-0000", 265, 40, 140);
 
             Lbl(pnlForm, "E-mail:", 407, 43);
             txtEmail = Txt(pnlForm, 450, 40, 264);
 
             // ── Linha 3: CEP | Endereço | Nº | Compl. ───────────────────
             Lbl(pnlForm, "CEP:", 10, 75);
-            txtCep = Txt(pnlForm, 42, 72, 80);
+            txtCep = MaskTxt(pnlForm, "00000-000", 42, 72, 95);
+            txtCep.Leave += async (s, e) => await BuscarCep();
 
             Lbl(pnlForm, "Endereço:", 134, 75);
             txtEndereco = Txt(pnlForm, 200, 72, 230);
@@ -127,9 +132,38 @@ namespace Pedeai.Forms
             p.Controls.Add(t); return t;
         }
 
+        private static MaskedTextBox MaskTxt(Panel p, string mask, int x, int y, int w)
+        {
+            var t = new MaskedTextBox { Mask = mask, Left = x, Top = y, Width = w };
+            p.Controls.Add(t); return t;
+        }
+
         private Button Botao(string texto, Color cor)
         {
             return new Button { Text = texto, BackColor = cor, ForeColor = Color.White, FlatStyle = FlatStyle.Flat, Width = 100, Height = 28, Font = new Font("Segoe UI", 9, FontStyle.Bold) };
+        }
+
+        private async Task BuscarCep()
+        {
+            var cep = new string(System.Array.FindAll(txtCep.Text.ToCharArray(), char.IsDigit));
+            if (cep.Length != 8) return;
+            try
+            {
+                using (var http = new HttpClient { Timeout = TimeSpan.FromSeconds(6) })
+                {
+                    var json = await http.GetStringAsync("https://viacep.com.br/ws/" + cep + "/json/");
+                    var obj = JObject.Parse(json);
+                    if (obj["erro"] == null)
+                    {
+                        txtEndereco.Text = obj["logradouro"]?.ToString() ?? "";
+                        txtBairro.Text   = obj["bairro"]?.ToString()     ?? "";
+                        txtCidade.Text   = obj["localidade"]?.ToString() ?? "";
+                        txtEstado.Text   = obj["uf"]?.ToString()         ?? "";
+                        txtNumero.Focus();
+                    }
+                }
+            }
+            catch { }
         }
 
         private void CarregarGrid()
@@ -141,8 +175,11 @@ namespace Pedeai.Forms
         private void ModoNovo()
         {
             _codigoEditando = 0;
-            foreach (var c in pnlForm.Controls)
+            foreach (Control c in pnlForm.Controls)
+            {
                 if (c is TextBox tb) tb.Clear();
+                else if (c is MaskedTextBox mtb) mtb.Clear();
+            }
             cmbSituacao.SelectedIndex = 0;
             pnlForm.Visible = true; txtNome.Focus();
         }
