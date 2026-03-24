@@ -55,15 +55,21 @@ public partial class Form1 : Form
 
         Load += (_, __) =>
         {
-            // Ajusta splitter após form ter tamanho real
-            foreach (var ctrl in tabPedidos.Controls)
-                if (ctrl is SplitContainer sc)
-                    sc.SplitterDistance = Math.Max(400, sc.Width - 380);
-
             CarregarTudo();
             _timerPedidos.Elapsed += (s, e) => InvokeOnUI(CarregarPedidos);
             _timerPedidos.AutoReset = true;
             _timerPedidos.Start();
+        };
+
+        Shown += (_, __) =>
+        {
+            try
+            {
+                foreach (Control ctrl in tabPedidos.Controls)
+                    if (ctrl is SplitContainer sc)
+                        sc.SplitterDistance = (int)(sc.Width * 0.65);
+            }
+            catch { }
         };
     }
 
@@ -158,16 +164,12 @@ public partial class Form1 : Form
 
     private void BuildPedidosTab()
     {
-        // ── Layout principal: esquerda (lista) | direita (detalhe) ────────────
         var split = new SplitContainer
         {
             Dock = DockStyle.Fill,
-            Orientation = Orientation.Vertical,
-            Panel1MinSize = 400,
-            Panel2MinSize = 320,
-            FixedPanel = FixedPanel.Panel2
+            Orientation = Orientation.Vertical
         };
-        // Define SplitterDistance após o form estar visível (via Load event no Form1)
+
         // ── Panel esquerdo ─────────────────────────────────────────────────────
         var topBar = new FlowLayoutPanel
         {
