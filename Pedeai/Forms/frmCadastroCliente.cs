@@ -67,7 +67,7 @@ namespace Pedeai.Forms
 
             Lbl(pnlForm, "Situação:", 654, 11);
             cmbSituacao = new ComboBox { Left = 714, Top = 8, Width = 100, DropDownStyle = ComboBoxStyle.DropDownList };
-            cmbSituacao.Items.AddRange(new[] { "NORMAL", "INATIVO" });
+            cmbSituacao.Items.AddRange(new[] { "Ativo", "Inativo" });
             cmbSituacao.SelectedIndex = 0;
             pnlForm.Controls.Add(cmbSituacao);
 
@@ -203,7 +203,7 @@ namespace Pedeai.Forms
             txtBairro.Text      = obj.clieBairro ?? "";
             txtCidade.Text      = obj.clieCidade ?? "";
             txtEstado.Text      = obj.clieEstado ?? "";
-            cmbSituacao.SelectedItem = obj.Situacao ?? "NORMAL";
+            cmbSituacao.SelectedIndex = (obj.Situacao == "I") ? 1 : 0;
             pnlForm.Visible = true; txtNome.Focus();
         }
 
@@ -225,7 +225,7 @@ namespace Pedeai.Forms
                 clieBairro           = txtBairro.Text,
                 clieCidade           = txtCidade.Text,
                 clieEstado           = txtEstado.Text,
-                Situacao             = cmbSituacao.SelectedItem?.ToString() ?? "NORMAL",
+                Situacao             = cmbSituacao.SelectedIndex == 1 ? "I" : "A",
             };
             var erro = _bll.Salvar(obj);
             if (!string.IsNullOrEmpty(erro)) { MessageBox.Show("Erro: " + erro); return; }
