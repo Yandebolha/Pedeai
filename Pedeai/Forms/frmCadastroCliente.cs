@@ -20,6 +20,7 @@ namespace Pedeai.Forms
         private MaskedTextBox txtTelefone, txtCelular, txtCep;
         private ComboBox cmbSituacao = new ComboBox();
         private int _codigoEditando = 0;
+        private bool _formatingCpf = false;
 
         public frmCadastroCliente()
         {
@@ -63,7 +64,9 @@ namespace Pedeai.Forms
             txtNome = Txt(pnlForm, 150, 8, 260);
 
             Lbl(pnlForm, "CPF / CNPJ:", 422, 11);
-            txtCpf = Txt(pnlForm, 500, 8, 140);
+            txtCpf = Txt(pnlForm, 500, 8, 160);
+            txtCpf.KeyPress += (s, e) => { if (!char.IsDigit(e.KeyChar) && !char.IsControl(e.KeyChar)) e.Handled = true; };
+            txtCpf.TextChanged += TxtCpf_TextChanged;
 
             Lbl(pnlForm, "Situação:", 654, 11);
             cmbSituacao = new ComboBox { Left = 714, Top = 8, Width = 100, DropDownStyle = ComboBoxStyle.DropDownList };
@@ -141,6 +144,30 @@ namespace Pedeai.Forms
         private Button Botao(string texto, Color cor)
         {
             return new Button { Text = texto, BackColor = cor, ForeColor = Color.White, FlatStyle = FlatStyle.Flat, Width = 100, Height = 28, Font = new Font("Segoe UI", 9, FontStyle.Bold) };
+        }
+
+        private void TxtCpf_TextChanged(object sender, EventArgs e)
+        {
+            if (_formatingCpf) return;
+            _formatingCpf = true;
+            var digits = new string(System.Array.FindAll(txtCpf.Text.ToCharArray(), char.IsDigit));
+            if (digits.Length > 14) digits = digits.Substring(0, 14);
+            string fmt = FormatCpfCnpj(digits);
+            int caret = txtCpf.SelectionStart;
+            int diff   = fmt.Length - txtCpf.Text.Length;
+            txtCpf.Text = fmt;
+            txtCpf.SelectionStart = Math.Min(Math.Max(caret + diff, 0), fmt.Length);
+            _formatingCpf = false;
+        }
+
+        private static string FormatCpfCnpj(string d)
+        {
+            if (d.Length <=  3) return d;
+            if (d.Length <=  6) return $"{d.Substring(0,3)}.{d.Substring(3)}";
+            if (d.Length <=  9) return $"{d.Substring(0,3)}.{d.Substring(3,3)}.{d.Substring(6)}";
+            if (d.Length <= 11) return $"{d.Substring(0,3)}.{d.Substring(3,3)}.{d.Substring(6,3)}-{d.Substring(9)}";
+            if (d.Length <= 12) return $"{d.Substring(0,2)}.{d.Substring(2,3)}.{d.Substring(5,3)}/{d.Substring(8)}";
+            return $"{d.Substring(0,2)}.{d.Substring(2,3)}.{d.Substring(5,3)}/{d.Substring(8,4)}-{d.Substring(12)}";
         }
 
         private async Task BuscarCep()
