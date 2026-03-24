@@ -46,8 +46,8 @@ public partial class Form1 : Form
     {
         InitializeComponent();
         Text = "Pedeai — Sistema Local";
-        Size = new Size(1280, 800);
-        MinimumSize = new Size(900, 600);
+        Size = new Size(1100, 700);
+        MinimumSize = new Size(1000, 640);
         StartPosition = FormStartPosition.CenterScreen;
         Icon = SystemIcons.Application;
 
@@ -170,82 +170,80 @@ public partial class Form1 : Form
             Orientation = Orientation.Vertical
         };
 
-        // ── Panel esquerdo ─────────────────────────────────────────────────────
-        var topBar = new FlowLayoutPanel
-        {
-            Dock = DockStyle.Top,
-            Height = 42,
-            Padding = new Padding(4, 6, 4, 0),
-            WrapContents = false,
-            AutoSize = false
-        };
-
-        var lblFiltro = new Label
-        {
-            Text = "Status:", Width = 50, Height = 26,
-            TextAlign = ContentAlignment.MiddleLeft
-        };
-        cmbStatusPedido = new ComboBox { Width = 160, Height = 26, DropDownStyle = ComboBoxStyle.DropDownList };
+        // ── Panel esquerdo: filtro + grid de pedidos ───────────────────────────
+        var topBar = new Panel { Dock = DockStyle.Top, Height = 38, Padding = new Padding(6, 5, 4, 0) };
+        var lblFiltro = new Label { Text = "Status:", Left = 0, Top = 5, Width = 52, Height = 22, TextAlign = ContentAlignment.MiddleLeft };
+        cmbStatusPedido = new ComboBox { Left = 54, Top = 3, Width = 155, Height = 24, DropDownStyle = ComboBoxStyle.DropDownList };
         cmbStatusPedido.Items.AddRange(new[] { "Todos", "Pendente", "Confirmado", "Em Preparo", "Pronto", "Saiu p/ Entrega", "Entregue", "Cancelado" });
         cmbStatusPedido.SelectedIndex = 0;
         var btnRefresh = CriarBotao("⟳ Atualizar", Color.FromArgb(63, 81, 181));
-        btnRefresh.Width = 100; btnRefresh.Height = 28;
+        btnRefresh.SetBounds(216, 2, 100, 26);
         btnRefresh.Click += (_, __) => CarregarPedidos();
         topBar.Controls.AddRange(new Control[] { lblFiltro, cmbStatusPedido, btnRefresh });
 
         gridPedidos = CriarGrid();
         gridPedidos.SelectionChanged += GridPedidos_SelectionChanged;
-
         split.Panel1.Controls.Add(gridPedidos);
         split.Panel1.Controls.Add(topBar);
 
-        // ── Panel direito ─────────────────────────────────────────────────────
-        // Ordem de adição ao painel: Bottom primeiro, depois Fill, depois Top
-        // (WinForms processa Dock de baixo para cima quando múltiplos DockBottom)
-
-        // Botões de status — parte INFERIOR
-        var pBotoes = new FlowLayoutPanel
+        // ── Panel direito: usa TableLayoutPanel para 3 linhas fixas ───────────
+        // Row0=info (auto), Row1=itens (fill), Row2=botões (auto)
+        var tbl = new TableLayoutPanel
         {
-            Dock = DockStyle.Bottom,
-            Height = 40,
-            Padding = new Padding(4, 4, 4, 0),
-            WrapContents = false
+            Dock = DockStyle.Fill,
+            RowCount = 3,
+            ColumnCount = 1
         };
-        btnConfirmar = CriarBotao("Confirmar",   Color.FromArgb(33, 150, 243));
-        btnEmPreparo = CriarBotao("Em Preparo",  Color.FromArgb(255, 152, 0));
-        btnPronto    = CriarBotao("Pronto",       Color.FromArgb(76, 175, 80));
-        btnEntregue  = CriarBotao("Entregue",     Color.FromArgb(0, 150, 136));
-        btnCancelar  = CriarBotao("Cancelar",     Color.FromArgb(244, 67, 54));
-        foreach (var b in new[] { btnConfirmar, btnEmPreparo, btnPronto, btnEntregue, btnCancelar })
-        {
-            b.Width = 90; b.Height = 30;
-            b.Click += BtnStatus_Click;
-            pBotoes.Controls.Add(b);
-        }
+        tbl.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
+        tbl.RowStyles.Add(new RowStyle(SizeType.Absolute, 68));   // info
+        tbl.RowStyles.Add(new RowStyle(SizeType.Percent, 100));    // itens
+        tbl.RowStyles.Add(new RowStyle(SizeType.Absolute, 38));   // botões
 
-        // Grid de itens do pedido — parte CENTRAL (acima dos botões)
-        gridItens = CriarGrid();
-        gridItens.Dock = DockStyle.Bottom;
-        gridItens.Height = 180;
-
-        // Info do pedido — parte SUPERIOR
+        // Linha 0 — info do pedido
         lblPedidoInfo = new Label
         {
-            Dock = DockStyle.Top,
-            Height = 75,
+            Dock = DockStyle.Fill,
             Font = new Font("Segoe UI", 9),
             AutoSize = false,
-            Padding = new Padding(6),
+            Padding = new Padding(6, 4, 6, 4),
             BackColor = Color.FromArgb(240, 240, 255),
             BorderStyle = BorderStyle.FixedSingle,
             Text = "Selecione um pedido na lista ao lado."
         };
+        tbl.Controls.Add(lblPedidoInfo, 0, 0);
 
-        // Adicionar na ordem correta (Bottom vai empilhando de baixo para cima)
-        split.Panel2.Controls.Add(gridItens);   // vai acima de pBotoes
-        split.Panel2.Controls.Add(pBotoes);     // fica na base
-        split.Panel2.Controls.Add(lblPedidoInfo); // fica no topo
+        // Linha 1 — grid de itens
+        gridItens = CriarGrid();
+        gridItens.Dock = DockStyle.Fill;
+        tbl.Controls.Add(gridItens, 0, 1);
 
+        // Linha 2 — botões de status em TableLayout para distribuir igualmente
+        var pBotoes = new TableLayoutPanel
+        {
+            Dock = DockStyle.Fill,
+            ColumnCount = 5,
+            RowCount = 1
+        };
+        for (int i = 0; i < 5; i++)
+            pBotoes.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 20));
+        pBotoes.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
+
+        btnConfirmar = CriarBotao("Confirmar",  Color.FromArgb(33, 150, 243));
+        btnEmPreparo = CriarBotao("Em Preparo", Color.FromArgb(255, 152, 0));
+        btnPronto    = CriarBotao("Pronto",      Color.FromArgb(76, 175, 80));
+        btnEntregue  = CriarBotao("Entregue",    Color.FromArgb(0, 150, 136));
+        btnCancelar  = CriarBotao("Cancelar",    Color.FromArgb(244, 67, 54));
+        int col = 0;
+        foreach (var b in new[] { btnConfirmar, btnEmPreparo, btnPronto, btnEntregue, btnCancelar })
+        {
+            b.Dock = DockStyle.Fill;
+            b.Margin = new Padding(2, 4, 2, 4);
+            b.Click += BtnStatus_Click;
+            pBotoes.Controls.Add(b, col++, 0);
+        }
+        tbl.Controls.Add(pBotoes, 0, 2);
+
+        split.Panel2.Controls.Add(tbl);
         tabPedidos.Controls.Add(split);
     }
 
