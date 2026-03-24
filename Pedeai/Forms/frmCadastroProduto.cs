@@ -9,13 +9,11 @@ namespace Pedeai.Forms
 {
     public class frmCadastroProduto : Form
     {
-        private readonly MercadoriaBLL      _bll    = new MercadoriaBLL();
-        private readonly GrupoMercadoriaBLL _grpBLL = new GrupoMercadoriaBLL();
+        private readonly MercadoriaBLL _bll = new MercadoriaBLL();
 
         private DataGridView grid    = new DataGridView();
         private Panel        pnlForm = new Panel();
 
-        private ComboBox      cmbCategoria       = new ComboBox();
         private TextBox       txtNome            = new TextBox();
         private ComboBox      cmbSituacao        = new ComboBox();
         private TextBox       txtDescricao       = new TextBox();
@@ -47,10 +45,7 @@ namespace Pedeai.Forms
             topBar.BackColor = Color.FromArgb(40, 40, 80);
             var btnNovo = Botao("+ Novo Produto", Color.FromArgb(0, 150, 136));
             btnNovo.Click += (s, e) => ModoNovo();
-            var btnCat = Botao("Categorias", Color.FromArgb(103, 58, 183));
-            btnCat.Left = 115;
-            btnCat.Click += (s, e) => { new frmCadastroCategoria().ShowDialog(this); CarrecarComboCategorias(); };
-            topBar.Controls.AddRange(new Control[] { btnNovo, btnCat });
+            topBar.Controls.Add(btnNovo);
 
             grid.Dock = DockStyle.Fill;
             grid.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
@@ -68,18 +63,13 @@ namespace Pedeai.Forms
 
             int y = 8;
 
-            // Linha 1: Categoria | Nome | Situacao
-            Lbl(pnlForm, "Categoria:", 10, y);
-            cmbCategoria = new ComboBox { Left = 80, Top = y, Width = 170, DropDownStyle = ComboBoxStyle.DropDown,
-                AutoCompleteMode = AutoCompleteMode.SuggestAppend, AutoCompleteSource = AutoCompleteSource.ListItems };
-            pnlForm.Controls.Add(cmbCategoria);
-
-            Lbl(pnlForm, "Nome do Produto:", 262, y);
-            txtNome = new TextBox { Left = 375, Top = y, Width = 290 };
+            // Linha 1: Nome | Situacao
+            Lbl(pnlForm, "Nome do Produto:", 10, y);
+            txtNome = new TextBox { Left = 125, Top = y, Width = 400 };
             pnlForm.Controls.Add(txtNome);
 
-            Lbl(pnlForm, "Situacao:", 682, y);
-            cmbSituacao = new ComboBox { Left = 742, Top = y, Width = 90, DropDownStyle = ComboBoxStyle.DropDownList };
+            Lbl(pnlForm, "Situacao:", 544, y);
+            cmbSituacao = new ComboBox { Left = 604, Top = y, Width = 90, DropDownStyle = ComboBoxStyle.DropDownList };
             cmbSituacao.Items.AddRange(new object[] { "Ativo", "Inativo" });
             cmbSituacao.SelectedIndex = 0;
             pnlForm.Controls.Add(cmbSituacao);
@@ -169,18 +159,6 @@ namespace Pedeai.Forms
             }
         }
 
-        private void CarrecarComboCategorias()
-        {
-            try
-            {
-                cmbCategoria.Items.Clear();
-                var dt = _grpBLL.Listar(true);
-                foreach (System.Data.DataRow r in dt.Rows)
-                    cmbCategoria.Items.Add(new CatItem(Convert.ToInt32(r["Codigo"]), r["Nome"]?.ToString() ?? ""));
-            }
-            catch { }
-        }
-
         private void CarregarGrid()
         {
             try { grid.DataSource = _bll.Listar(); }
@@ -189,9 +167,7 @@ namespace Pedeai.Forms
 
         private void ModoNovo()
         {
-            CarrecarComboCategorias();
             _codigoEditando = 0;
-            cmbCategoria.Text = "";
             txtNome.Clear(); txtDescricao.Clear();
             _caminhoImagem = ""; lblImagem.Text = "nenhuma imagem selecionada"; lblImagem.ForeColor = Color.Gray;
             numPreco.Value = 0; numCusto.Value = 0; numPromo.Value = 0; numEstoque.Value = 0;
@@ -206,7 +182,6 @@ namespace Pedeai.Forms
             var cod = Convert.ToInt32(grid.SelectedRows[0].Cells["Codigo"].Value);
             var obj = _bll.PesquisaCodigo(cod);
             if (obj == null) return;
-            CarrecarComboCategorias();
             _codigoEditando   = cod;
             txtNome.Text      = obj.mercMercadoria ?? "";
             txtDescricao.Text = obj.mercApresentacao ?? "";
@@ -221,9 +196,6 @@ namespace Pedeai.Forms
             chkDestaque.Checked        = obj.mercDestaque;
             chkIfood.Checked           = obj.mercHabilitar_Ifood;
             cmbSituacao.SelectedItem   = obj.Situacao == "I" ? "Inativo" : "Ativo";
-            cmbCategoria.Text = "";
-            foreach (CatItem item in cmbCategoria.Items)
-                if (item.Codigo == obj.Codigo_Grupo) { cmbCategoria.SelectedItem = item; break; }
             pnlForm.Visible = true; txtNome.Focus();
         }
 
@@ -231,20 +203,10 @@ namespace Pedeai.Forms
         {
             if (string.IsNullOrWhiteSpace(txtNome.Text)) { MessageBox.Show("Informe o nome do produto."); return; }
 
-            int codigoGrupo = 0;
-            if (cmbCategoria.SelectedItem is CatItem selItem)
-                codigoGrupo = selItem.Codigo;
-            else
-                foreach (CatItem item in cmbCategoria.Items)
-                    if (item.Nome.Equals(cmbCategoria.Text.Trim(), StringComparison.OrdinalIgnoreCase))
-                    { codigoGrupo = item.Codigo; break; }
-
-            if (codigoGrupo == 0) { MessageBox.Show("Selecione ou digite uma categoria valida."); return; }
-
             var obj = new Mercadoria
             {
                 Codigo                = _codigoEditando,
-                Codigo_Grupo          = codigoGrupo,
+                Codigo_Grupo          = 0,
                 mercMercadoria        = txtNome.Text.Trim(),
                 mercApresentacao      = txtDescricao.Text.Trim(),
                 mercPreco_Venda       = numPreco.Value,
@@ -271,11 +233,5 @@ namespace Pedeai.Forms
             pnlForm.Visible = false; CarregarGrid();
         }
 
-        private class CatItem
-        {
-            public int Codigo; public string Nome;
-            public CatItem(int c, string n) { Codigo = c; Nome = n; }
-            public override string ToString() => Nome;
-        }
     }
 }
