@@ -52,11 +52,19 @@ public partial class Form1 : Form
         Icon = SystemIcons.Application;
 
         BuildUI();
-        CarregarTudo();
 
-        _timerPedidos.Elapsed += (_, _) => InvokeOnUI(CarregarPedidos);
-        _timerPedidos.AutoReset = true;
-        _timerPedidos.Start();
+        Load += (_, __) =>
+        {
+            // Ajusta splitter após form ter tamanho real
+            foreach (var ctrl in tabPedidos.Controls)
+                if (ctrl is SplitContainer sc)
+                    sc.SplitterDistance = Math.Max(400, sc.Width - 380);
+
+            CarregarTudo();
+            _timerPedidos.Elapsed += (s, e) => InvokeOnUI(CarregarPedidos);
+            _timerPedidos.AutoReset = true;
+            _timerPedidos.Start();
+        };
     }
 
     // Helper to marshal calls to UI thread
@@ -150,17 +158,37 @@ public partial class Form1 : Form
 
     private void BuildPedidosTab()
     {
-        var split = new SplitContainer { Dock = DockStyle.Fill, Orientation = Orientation.Vertical, SplitterDistance = 700 };
+        // ── Layout principal: esquerda (lista) | direita (detalhe) ────────────
+        var split = new SplitContainer
+        {
+            Dock = DockStyle.Fill,
+            Orientation = Orientation.Vertical,
+            Panel1MinSize = 400,
+            Panel2MinSize = 320,
+            FixedPanel = FixedPanel.Panel2
+        };
+        // Define SplitterDistance após o form estar visível (via Load event no Form1)
+        // ── Panel esquerdo ─────────────────────────────────────────────────────
+        var topBar = new FlowLayoutPanel
+        {
+            Dock = DockStyle.Top,
+            Height = 42,
+            Padding = new Padding(4, 6, 4, 0),
+            WrapContents = false,
+            AutoSize = false
+        };
 
-        // Painel esquerdo — lista de pedidos
-        var topBar = new Panel { Dock = DockStyle.Top, Height = 42, Padding = new Padding(4) };
-        var lblFiltro = new Label { Text = "Status:", Width = 55, TextAlign = ContentAlignment.MiddleLeft, Dock = DockStyle.Left };
-        cmbStatusPedido = new ComboBox { Dock = DockStyle.Left, Width = 160 };
+        var lblFiltro = new Label
+        {
+            Text = "Status:", Width = 50, Height = 26,
+            TextAlign = ContentAlignment.MiddleLeft
+        };
+        cmbStatusPedido = new ComboBox { Width = 160, Height = 26, DropDownStyle = ComboBoxStyle.DropDownList };
         cmbStatusPedido.Items.AddRange(new[] { "Todos", "Pendente", "Confirmado", "Em Preparo", "Pronto", "Saiu p/ Entrega", "Entregue", "Cancelado" });
         cmbStatusPedido.SelectedIndex = 0;
         var btnRefresh = CriarBotao("⟳ Atualizar", Color.FromArgb(63, 81, 181));
-        btnRefresh.Width = 100;
-        btnRefresh.Click += (_, _) => CarregarPedidos();
+        btnRefresh.Width = 100; btnRefresh.Height = 28;
+        btnRefresh.Click += (_, __) => CarregarPedidos();
         topBar.Controls.AddRange(new Control[] { lblFiltro, cmbStatusPedido, btnRefresh });
 
         gridPedidos = CriarGrid();
@@ -169,31 +197,52 @@ public partial class Form1 : Form
         split.Panel1.Controls.Add(gridPedidos);
         split.Panel1.Controls.Add(topBar);
 
-        // Painel direito — detalhes do pedido
-        var pDetail = new Panel { Dock = DockStyle.Fill, Padding = new Padding(8) };
-        lblPedidoInfo = new Label { Dock = DockStyle.Top, Height = 80, Font = new Font("Segoe UI", 9), AutoSize = false };
+        // ── Panel direito ─────────────────────────────────────────────────────
+        // Ordem de adição ao painel: Bottom primeiro, depois Fill, depois Top
+        // (WinForms processa Dock de baixo para cima quando múltiplos DockBottom)
 
-        gridItens = CriarGrid();
-        gridItens.Height = 200;
-        gridItens.Dock = DockStyle.Bottom;
-
-        var pBotoes = new FlowLayoutPanel { Dock = DockStyle.Bottom, Height = 42, Padding = new Padding(2) };
-        btnConfirmar = CriarBotao("Confirmar", Color.FromArgb(33, 150, 243));
-        btnEmPreparo = CriarBotao("Em Preparo", Color.FromArgb(255, 152, 0));
-        btnPronto = CriarBotao("Pronto", Color.FromArgb(76, 175, 80));
-        btnEntregue = CriarBotao("Entregue", Color.FromArgb(0, 150, 136));
-        btnCancelar = CriarBotao("Cancelar", Color.FromArgb(244, 67, 54));
+        // Botões de status — parte INFERIOR
+        var pBotoes = new FlowLayoutPanel
+        {
+            Dock = DockStyle.Bottom,
+            Height = 40,
+            Padding = new Padding(4, 4, 4, 0),
+            WrapContents = false
+        };
+        btnConfirmar = CriarBotao("Confirmar",   Color.FromArgb(33, 150, 243));
+        btnEmPreparo = CriarBotao("Em Preparo",  Color.FromArgb(255, 152, 0));
+        btnPronto    = CriarBotao("Pronto",       Color.FromArgb(76, 175, 80));
+        btnEntregue  = CriarBotao("Entregue",     Color.FromArgb(0, 150, 136));
+        btnCancelar  = CriarBotao("Cancelar",     Color.FromArgb(244, 67, 54));
         foreach (var b in new[] { btnConfirmar, btnEmPreparo, btnPronto, btnEntregue, btnCancelar })
         {
-            b.Width = 95;
+            b.Width = 90; b.Height = 30;
             b.Click += BtnStatus_Click;
             pBotoes.Controls.Add(b);
         }
 
-        pDetail.Controls.Add(gridItens);
-        pDetail.Controls.Add(pBotoes);
-        pDetail.Controls.Add(lblPedidoInfo);
-        split.Panel2.Controls.Add(pDetail);
+        // Grid de itens do pedido — parte CENTRAL (acima dos botões)
+        gridItens = CriarGrid();
+        gridItens.Dock = DockStyle.Bottom;
+        gridItens.Height = 180;
+
+        // Info do pedido — parte SUPERIOR
+        lblPedidoInfo = new Label
+        {
+            Dock = DockStyle.Top,
+            Height = 75,
+            Font = new Font("Segoe UI", 9),
+            AutoSize = false,
+            Padding = new Padding(6),
+            BackColor = Color.FromArgb(240, 240, 255),
+            BorderStyle = BorderStyle.FixedSingle,
+            Text = "Selecione um pedido na lista ao lado."
+        };
+
+        // Adicionar na ordem correta (Bottom vai empilhando de baixo para cima)
+        split.Panel2.Controls.Add(gridItens);   // vai acima de pBotoes
+        split.Panel2.Controls.Add(pBotoes);     // fica na base
+        split.Panel2.Controls.Add(lblPedidoInfo); // fica no topo
 
         tabPedidos.Controls.Add(split);
     }
@@ -397,8 +446,13 @@ public partial class Form1 : Form
         _ => s.ToString()
     };
 
-    private void StatusBarMensagem(string msg) =>
-        BeginInvoke(new Action(() => Text = $"Pedeai — {msg}"));
+    private void StatusBarMensagem(string msg)
+    {
+        if (IsHandleCreated && !IsDisposed)
+            BeginInvoke(new Action(() => Text = $"Pedeai — {msg}"));
+        else
+            Text = $"Pedeai — {msg}";
+    }
 
     protected override void OnFormClosed(FormClosedEventArgs e)
     {
