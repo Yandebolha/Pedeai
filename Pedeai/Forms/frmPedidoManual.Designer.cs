@@ -135,34 +135,25 @@ namespace Pedeai.Forms
             numUnitario.Left = 507; numUnitario.Top = 10; numUnitario.Width = 90;
             numUnitario.DecimalPlaces = 2; numUnitario.Maximum = 9999;
 
-            var lblObsItem = new Label { Text = "Obs:", Left = 609, Top = 14, AutoSize = true };
-            txtObsItem.Left = 634; txtObsItem.Top = 10; txtObsItem.Width = 120;
-
             var btnAdd = new Button
             {
-                Text = "➕ Adicionar", Top = 8, Width = 120, Height = 28,
+                Text = "➕ Adicionar", Top = 8, Width = 130, Height = 28,
                 BackColor = Color.FromArgb(39, 174, 96), ForeColor = Color.White,
                 FlatStyle = FlatStyle.Flat, Font = new Font("Segoe UI", 9F, FontStyle.Bold),
                 Cursor = Cursors.Hand,
                 Anchor = AnchorStyles.Top | AnchorStyles.Right
             };
-            btnAdd.Left = pnlItem.Width - btnAdd.Width - 8;
             btnAdd.FlatAppearance.BorderSize = 0;
             btnAdd.Click += BtnAdicionarItem_Click;
 
-            txtObsItem.Top = 10; txtObsItem.Width = 120;
-            txtObsItem.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            // posicionado na frente do btnAdd
             pnlItem.SizeChanged += (_, __) =>
             {
-                btnAdd.Left    = pnlItem.Width - btnAdd.Width - 8;
-                txtObsItem.Left = btnAdd.Left - txtObsItem.Width - 34;
-                lblObsItem.Left = txtObsItem.Left - lblObsItem.Width - 4;
+                btnAdd.Left = pnlItem.Width - btnAdd.Width - 8;
             };
+            btnAdd.Left = 860;
 
             pnlItem.Controls.AddRange(new Control[]
-                { lblProd, cmbProduto, lblQtde, numQtde, lblUnit, numUnitario,
-                  lblObsItem, txtObsItem, btnAdd });
+                { lblProd, cmbProduto, lblQtde, numQtde, lblUnit, numUnitario, btnAdd });
 
             // ── Grid de itens ─────────────────────────────────────────────────
             gridItens.Dock = DockStyle.Fill;
@@ -176,11 +167,19 @@ namespace Pedeai.Forms
             gridItens.ColumnHeadersDefaultCellStyle.BackColor = Color.FromArgb(40, 40, 80);
             gridItens.ColumnHeadersDefaultCellStyle.ForeColor = Color.White;
             gridItens.ColumnHeadersDefaultCellStyle.Font      = new Font("Segoe UI", 9F, FontStyle.Bold);
-            gridItens.Columns.Add(new DataGridViewTextBoxColumn { Name = "Nome",     HeaderText = "Produto",      FillWeight = 38 });
+            gridItens.Columns.Add(new DataGridViewTextBoxColumn { Name = "Nome",     HeaderText = "Produto",      FillWeight = 40 });
             gridItens.Columns.Add(new DataGridViewTextBoxColumn { Name = "Qtde",     HeaderText = "Qtde",         FillWeight = 8  });
             gridItens.Columns.Add(new DataGridViewTextBoxColumn { Name = "Unitario", HeaderText = "Unit. R$",     FillWeight = 14 });
             gridItens.Columns.Add(new DataGridViewTextBoxColumn { Name = "Subtotal", HeaderText = "Subtotal R$",  FillWeight = 14 });
-            gridItens.Columns.Add(new DataGridViewTextBoxColumn { Name = "Obs",      HeaderText = "Observação",   FillWeight = 26 });
+            var colDel = new DataGridViewButtonColumn
+            {
+                Name = "Remover", HeaderText = "", Text = "🗑 Remover",
+                UseColumnTextForButtonValue = true,
+                FillWeight = 12, MinimumWidth = 80,
+                FlatStyle = FlatStyle.Flat
+            };
+            gridItens.Columns.Add(colDel);
+            gridItens.CellClick += GridItens_CellClick;
 
             // ── Rodapé ────────────────────────────────────────────────────────
             var pnlRodape = new Panel
@@ -189,16 +188,7 @@ namespace Pedeai.Forms
                 BackColor = Color.FromArgb(240, 242, 248)
             };
 
-            var btnRem = new Button
-            {
-                Text = "🗑 Remover item", Left = 10, Top = 11, Width = 140, Height = 30,
-                BackColor = Color.FromArgb(192, 57, 43), ForeColor = Color.White,
-                FlatStyle = FlatStyle.Flat, Font = new Font("Segoe UI", 9F, FontStyle.Bold),
-                Cursor = Cursors.Hand,
-                Anchor = AnchorStyles.Bottom | AnchorStyles.Left
-            };
-            btnRem.FlatAppearance.BorderSize = 0;
-            btnRem.Click += BtnRemoverItem_Click;
+            // btnRem removido — exclusão agora é feita pela coluna do grid
 
             var btnSal = new Button
             {
@@ -244,7 +234,7 @@ namespace Pedeai.Forms
             pnlRodape.SizeChanged   += (_, __) => RepositionarRodape();
             pnlRodape.HandleCreated += (_, __) => RepositionarRodape();
 
-            pnlRodape.Controls.AddRange(new Control[] { btnRem, lblTotal, btnSal, btnCanc });
+            pnlRodape.Controls.AddRange(new Control[] { lblTotal, btnSal, btnCanc });
 
             // ── Montagem do formulário ────────────────────────────────────────
             Controls.Add(gridItens);
