@@ -71,7 +71,8 @@ namespace Pedeai
             int navY = 68;
             pnlSidebar.Controls.Add(BotaoNav("🏠  Dashboard",   navY, MostrarDashboard));     navY += 46;
             pnlSidebar.Controls.Add(BotaoNav("📋  Pedidos",     navY, MostrarPedidos));        navY += 46;
-            pnlSidebar.Controls.Add(BotaoNav("🛒  Produtos",    navY, () => AbrirForm(new frmCadastroProduto()))); navY += 46;
+            pnlSidebar.Controls.Add(BotaoNav("�  Financeiro",  navY, MostrarFinanceiro));     navY += 46;
+            pnlSidebar.Controls.Add(BotaoNav("�🛒  Produtos",    navY, () => AbrirForm(new frmCadastroProduto()))); navY += 46;
             pnlSidebar.Controls.Add(BotaoNav("🗂  Categorias",  navY, () => AbrirForm(new frmCadastroCategoria()))); navY += 46;
             pnlSidebar.Controls.Add(BotaoNav("👤  Clientes",    navY, () => AbrirForm(new frmCadastroCliente()))); navY += 46;
             pnlSidebar.Controls.Add(BotaoNav("🏭  Fornecedores",navY, () => AbrirForm(new frmCadastroFornecedor()))); navY += 46;
@@ -107,6 +108,7 @@ namespace Pedeai
         private Panel      pnlContent;
         private Panel      pnlDashboard;
         private Panel      pnlPedidos;
+        private Panel      pnlFinanceiro;
         private Label      lblTitulo;
         private Label      lblPedidosHoje;
         private Label      lblFaturamento;
@@ -114,9 +116,13 @@ namespace Pedeai
         private Label      lblPendentes;
         private DataGridView gridPedidos;
         private DataGridView gridItens;
+        private DataGridView gridFinanceiro;
         private Label      lblDetalhe;
         private ComboBox   cmbFiltroPedido;
         private DateTimePicker dtpFiltroPedido;
+        private DateTimePicker dtpFinDe;
+        private DateTimePicker dtpFinAte;
+        private Label      lblFinResumo;
         private Timer      _timer;
     }
 }

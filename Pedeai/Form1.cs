@@ -4,18 +4,19 @@ using System.Drawing;
 using System.Windows.Forms;
 using Pedeai.BLL;
 using Pedeai.Forms;
+using Pedeai.Modelo;
 
 namespace Pedeai
 {
     public partial class Form1 : Form
     {
-        // ── BLL ─────────────────────────────────────────────────────────────
+        // -- BLL -------------------------------------------------------------
         private readonly PedidoBLL      _pedidoBLL  = new PedidoBLL();
         private readonly DashboardBLL   _dashBLL    = new DashboardBLL();
 
         private int     _paginaAtual = 0; // 0=Dashboard 1=Pedidos
 
-        // ── Cores ────────────────────────────────────────────────────────────
+        // -- Cores ------------------------------------------------------------
         private static readonly Color CorSidebar    = Color.FromArgb(28, 37, 65);
         private static readonly Color CorTopBar     = Color.FromArgb(36, 48, 82);
         private static readonly Color CorBotaoAtivo = Color.FromArgb(52, 152, 219);
@@ -29,6 +30,7 @@ namespace Pedeai
             {
                 BuildDashboard();
                 BuildPedidos();
+                BuildFinanceiro();
             }
         }
 
@@ -56,9 +58,9 @@ namespace Pedeai
             return btn;
         }
 
-        // ════════════════════════════════════════════════════════════════════
+        // --------------------------------------------------------------------
         // DASHBOARD
-        // ════════════════════════════════════════════════════════════════════
+        // --------------------------------------------------------------------
         private void BuildDashboard()
         {
             pnlDashboard = new Panel { Dock = DockStyle.Fill, BackColor = Color.Transparent };
@@ -78,10 +80,10 @@ namespace Pedeai
             lblClientes     = CriarCard(pnlCards, "Total Clientes",   "0",       Color.FromArgb(142, 68, 173));
             lblPendentes    = CriarCard(pnlCards, "Pedidos Pendentes","0",       Color.FromArgb(211, 84, 0));
 
-            // Tabela de últimos pedidos
+            // Tabela de �ltimos pedidos
             var lblUltimos = new Label
             {
-                Text      = "Últimos Pedidos",
+                Text      = "�ltimos Pedidos",
                 ForeColor = Color.White,
                 Font      = new Font("Segoe UI", 11, FontStyle.Bold),
                 AutoSize  = true,
@@ -142,9 +144,9 @@ namespace Pedeai
             return lblVal;
         }
 
-        // ════════════════════════════════════════════════════════════════════
+        // --------------------------------------------------------------------
         // PEDIDOS
-        // ════════════════════════════════════════════════════════════════════
+        // --------------------------------------------------------------------
         private void BuildPedidos()
         {
             pnlPedidos = new Panel { Dock = DockStyle.Fill, BackColor = Color.Transparent, Visible = false };
@@ -157,7 +159,7 @@ namespace Pedeai
                 BackColor = Color.Transparent
             };
 
-            var lblSit = new Label { Text = "Situação:", ForeColor = Color.White, Left = 0, Top = 14, AutoSize = true };
+            var lblSit = new Label { Text = "Situa��o:", ForeColor = Color.White, Left = 0, Top = 14, AutoSize = true };
             cmbFiltroPedido = new ComboBox
             {
                 Left          = 68,
@@ -165,7 +167,7 @@ namespace Pedeai
                 Width         = 160,
                 DropDownStyle = ComboBoxStyle.DropDownList
             };
-            cmbFiltroPedido.Items.AddRange(new object[] { "Todos", "0", "1", "2", "3", "4", "5", "6" });
+            cmbFiltroPedido.Items.AddRange(new object[] { "Todos", "Em Preparo", "Finalizados", "Cancelados" });
             cmbFiltroPedido.SelectedIndex = 0;
 
             var lblDt = new Label { Text = "Data:", ForeColor = Color.White, Left = 244, Top = 14, AutoSize = true };
@@ -210,7 +212,7 @@ namespace Pedeai
 
             var btnManual = new Button
             {
-                Text      = "✏ Pedido Manual",
+                Text      = "? Pedido Manual",
                 Left      = 602,
                 Top       = 8,
                 Width     = 128,
@@ -247,7 +249,7 @@ namespace Pedeai
             gridItens = CriarGrid();
             gridItens.Dock = DockStyle.Fill;
 
-            // Ações
+            // A��es
             var pnlAcoes = new FlowLayoutPanel
             {
                 Dock          = DockStyle.Bottom,
@@ -258,12 +260,12 @@ namespace Pedeai
             };
             var acoes = new[]
             {
-                ("✓ Confirmar",    1, Color.FromArgb(39, 174, 96)),
-                ("⏳ Em Preparo",  2, Color.FromArgb(243, 156, 18)),
-                ("✅ Pronto",      3, Color.FromArgb(22, 160, 133)),
-                ("🚴 Saiu",        4, Color.FromArgb(52, 152, 219)),
-                ("📦 Entregue",    5, Color.FromArgb(41, 128, 185)),
-                ("✕ Cancelar",     6, Color.FromArgb(192, 57, 43)),
+                ("? Confirmar",    1, Color.FromArgb(39, 174, 96)),
+                ("? Em Preparo",  2, Color.FromArgb(243, 156, 18)),
+                ("? Pronto",      3, Color.FromArgb(22, 160, 133)),
+                ("?? Saiu",        4, Color.FromArgb(52, 152, 219)),
+                ("?? Entregue",    5, Color.FromArgb(41, 128, 185)),
+                ("? Cancelar",     6, Color.FromArgb(192, 57, 43)),
             };
             foreach (var (txt, sit, cor) in acoes)
             {
@@ -337,24 +339,26 @@ namespace Pedeai
             return g;
         }
 
-        // ════════════════════════════════════════════════════════════════════
-        // NAVEGAÇÃO
-        // ════════════════════════════════════════════════════════════════════
+        // --------------------------------------------------------------------
+        // NAVEGA��O
+        // --------------------------------------------------------------------
         private void MostrarDashboard()
         {
-            pnlDashboard.Visible = true;
-            pnlPedidos.Visible   = false;
-            lblTitulo.Text       = "Dashboard";
-            _paginaAtual         = 0;
+            pnlDashboard.Visible  = true;
+            pnlPedidos.Visible    = false;
+            if (pnlFinanceiro != null) pnlFinanceiro.Visible = false;
+            lblTitulo.Text        = "Dashboard";
+            _paginaAtual          = 0;
             CarregarDashboard();
         }
 
         private void MostrarPedidos()
         {
-            pnlDashboard.Visible = false;
-            pnlPedidos.Visible   = true;
-            lblTitulo.Text       = "Pedidos";
-            _paginaAtual         = 1;
+            pnlDashboard.Visible  = false;
+            pnlPedidos.Visible    = true;
+            if (pnlFinanceiro != null) pnlFinanceiro.Visible = false;
+            lblTitulo.Text        = "Pedidos";
+            _paginaAtual          = 1;
             CarregarPedidos();
         }
 
@@ -363,9 +367,9 @@ namespace Pedeai
             f.ShowDialog(this);
         }
 
-        // ════════════════════════════════════════════════════════════════════
+        // --------------------------------------------------------------------
         // CARGA DE DADOS
-        // ════════════════════════════════════════════════════════════════════
+        // --------------------------------------------------------------------
         private void CarregarTudo()
         {
             CarregarDashboard();
@@ -382,7 +386,7 @@ namespace Pedeai
                 lblClientes.Text    = cli.ToString();
                 lblPendentes.Text   = pend.ToString();
 
-                // Últimos pedidos no topo da dashboard (reusa gridPedidos se visível)
+                // �ltimos pedidos no topo da dashboard (reusa gridPedidos se vis�vel)
                 if (_paginaAtual == 0)
                     gridPedidos.DataSource = _pedidoBLL.Listar();
             }
@@ -398,9 +402,16 @@ namespace Pedeai
         {
             try
             {
-                string sit  = cmbFiltroPedido?.SelectedIndex > 0 ? cmbFiltroPedido.SelectedItem?.ToString() : null;
+                string filtro = null;
+                if (cmbFiltroPedido?.SelectedIndex > 0)
+                {
+                    var sel = cmbFiltroPedido.SelectedItem?.ToString() ?? "";
+                    if      (sel == "Em Preparo")  filtro = "emPreparo";
+                    else if (sel == "Finalizados") filtro = "finalizados";
+                    else if (sel == "Cancelados")  filtro = "cancelados";
+                }
                 DateTime? dt = dtpFiltroPedido?.Value.Date;
-                gridPedidos.DataSource = _pedidoBLL.Listar(sit, dt);
+                gridPedidos.DataSource = _pedidoBLL.Listar(filtro, dt);
                 gridItens.DataSource   = null;
             }
             catch (Exception ex) { MessageBox.Show("Erro ao carregar pedidos: " + ex.Message); }
@@ -415,18 +426,162 @@ namespace Pedeai
                 gridItens.DataSource = _pedidoBLL.ListarItens(cod);
                 var pedido = _pedidoBLL.PesquisaCodigo(cod);
                 if (pedido != null)
-                    lblDetalhe.Text = $"Itens — Pedido #{pedido.pediNumero}  |  {PedidoBLL.LabelSituacao(pedido.pediSituacao)}  |  Total: {pedido.pediValor_Total:C}";
+                    lblDetalhe.Text = $"Itens � Pedido #{pedido.pediNumero}  |  {PedidoBLL.LabelSituacao(pedido.pediSituacao)}  |  Total: {pedido.pediValor_Total:C}";
             }
             catch { }
         }
 
         private void AtualizarSituacaoPedido(int novaSit)
         {
-            if (gridPedidos.SelectedRows.Count == 0) { MessageBox.Show("Selecione um pedido."); return; }
-            var cod  = Convert.ToInt32(gridPedidos.SelectedRows[0].Cells["Codigo"].Value);
+            if (gridPedidos.SelectedRows.Count == 0) { MessageBox.Show("Selecione um pedido na lista."); return; }
+            var cod = Convert.ToInt32(gridPedidos.SelectedRows[0].Cells["Codigo"].Value);
+
+            // Cancelar: pede confirma��o
+            if (novaSit == 6)
+            {
+                if (MessageBox.Show("Cancelar este pedido?", "Confirma��o",
+                        MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes) return;
+                var eC = _pedidoBLL.AtualizarSituacao(cod, 6);
+                if (!string.IsNullOrEmpty(eC)) MessageBox.Show("Erro: " + eC);
+                else CarregarPedidos();
+                return;
+            }
+
+            // Pronto (3) e Entregue (5): verifica se � finaliza��o e pede dados de pagamento
+            if (novaSit == 3 || novaSit == 5)
+            {
+                var pedido   = _pedidoBLL.PesquisaCodigo(cod);
+                bool retirada = pedido?.pediTipo_Entrega == 0;
+                bool finaliza = (novaSit == 3 && retirada) || (novaSit == 5 && !retirada);
+
+                if (finaliza && pedido != null)
+                {
+                    if (MostrarDialogPagamento(pedido, out decimal vPago, out string trans))
+                    {
+                        var eF = _pedidoBLL.FinalizarPedido(cod, novaSit, vPago, trans);
+                        if (!string.IsNullOrEmpty(eF)) MessageBox.Show("Erro: " + eF);
+                        else CarregarPedidos();
+                    }
+                    return;
+                }
+            }
+
             var erro = _pedidoBLL.AtualizarSituacao(cod, novaSit);
             if (!string.IsNullOrEmpty(erro)) { MessageBox.Show("Erro: " + erro); return; }
             CarregarPedidos();
+        }
+
+        private bool MostrarDialogPagamento(PedidoWeb pedido, out decimal valorPago, out string transacao)
+        {
+            valorPago = pedido.pediValor_Total;
+            transacao  = "";
+            bool needsTrans = pedido.pediForma_Pagamento > 0; // Cart�o ou Pix
+
+            using var frm = new Form();
+            frm.Text             = "Finalizar Pedido � Pagamento";
+            frm.StartPosition    = FormStartPosition.CenterParent;
+            frm.FormBorderStyle  = FormBorderStyle.FixedDialog;
+            frm.MaximizeBox      = frm.MinimizeBox = false;
+            frm.BackColor        = Color.FromArgb(36, 48, 82);
+            frm.ForeColor        = Color.White;
+            frm.Font             = new Font("Segoe UI", 9F);
+            frm.ClientSize       = new Size(390, needsTrans ? 158 : 110);
+
+            var lblV = new Label { Text = "Valor pago (R$):", Left = 12, Top = 18, AutoSize = true, ForeColor = Color.White };
+            var numV = new NumericUpDown { Left = 150, Top = 14, Width = 130, DecimalPlaces = 2, Maximum = 99999M, Value = pedido.pediValor_Total };
+
+            string lblTrans = pedido.pediForma_Pagamento == 2 ? "C�digo Pix:" : "C�d. Transa��o:";
+            var lblT = new Label { Text = lblTrans, Left = 12, Top = 56, AutoSize = true, ForeColor = Color.White, Visible = needsTrans };
+            var txtT = new TextBox { Left = 150, Top = 52, Width = 220, Visible = needsTrans };
+
+            int btnTop = needsTrans ? 108 : 64;
+            var btnOk  = new Button { Text = "? Confirmar", Left = 100, Top = btnTop, Width = 130, Height = 28, DialogResult = DialogResult.OK,  BackColor = Color.FromArgb(39, 174, 96),   ForeColor = Color.White, FlatStyle = FlatStyle.Flat };
+            var btnCan = new Button { Text = "Cancelar",     Left = 242, Top = btnTop, Width = 90,  Height = 28, DialogResult = DialogResult.Cancel, BackColor = Color.FromArgb(108,117,125), ForeColor = Color.White, FlatStyle = FlatStyle.Flat };
+            btnOk.FlatAppearance.BorderSize = btnCan.FlatAppearance.BorderSize = 0;
+
+            frm.Controls.AddRange(new Control[] { lblV, numV, lblT, txtT, btnOk, btnCan });
+            frm.AcceptButton = btnOk; frm.CancelButton = btnCan;
+
+            if (frm.ShowDialog(this) == DialogResult.OK)
+            {
+                valorPago = numV.Value;
+                transacao  = txtT.Text.Trim();
+                return true;
+            }
+            return false;
+        }
+
+        // --------------------------------------------------------------------
+        // FINANCEIRO
+        // --------------------------------------------------------------------
+        private void MostrarFinanceiro()
+        {
+            pnlDashboard.Visible  = false;
+            pnlPedidos.Visible    = false;
+            pnlFinanceiro.Visible = true;
+            lblTitulo.Text        = "Financeiro";
+            _paginaAtual          = 2;
+            CarregarFinanceiro();
+        }
+
+        private void BuildFinanceiro()
+        {
+            pnlFinanceiro = new Panel { Dock = DockStyle.Fill, BackColor = Color.Transparent, Visible = false };
+
+            // Barra de filtro
+            var pnlFil = new Panel { Dock = DockStyle.Top, Height = 48, BackColor = Color.Transparent };
+            var lblDe  = new Label { Text = "De:",  ForeColor = Color.White, Left = 0,   Top = 14, AutoSize = true };
+            dtpFinDe   = new DateTimePicker { Left = 32,  Top = 10, Width = 120, Format = DateTimePickerFormat.Short, Value = DateTime.Today.AddDays(-30) };
+            var lblAte = new Label { Text = "At�:", ForeColor = Color.White, Left = 164, Top = 14, AutoSize = true };
+            dtpFinAte  = new DateTimePicker { Left = 198, Top = 10, Width = 120, Format = DateTimePickerFormat.Short, Value = DateTime.Today };
+            var btnFil = new Button { Text = "Filtrar", Left = 332, Top = 8, Width = 80, Height = 28, BackColor = CorBotaoAtivo, ForeColor = Color.White, FlatStyle = FlatStyle.Flat, Cursor = Cursors.Hand };
+            btnFil.FlatAppearance.BorderSize = 0;
+            btnFil.Click += (_, __) => CarregarFinanceiro();
+            pnlFil.Controls.AddRange(new Control[] { lblDe, dtpFinDe, lblAte, dtpFinAte, btnFil });
+
+            // Rodap� resumo
+            lblFinResumo = new Label
+            {
+                Dock      = DockStyle.Bottom,
+                Height    = 52,
+                ForeColor = Color.White,
+                Font      = new Font("Segoe UI", 10F),
+                BackColor = Color.FromArgb(28, 37, 65),
+                Padding   = new Padding(10, 14, 0, 0),
+                Text      = "Selecione um per�odo e clique em Filtrar."
+            };
+
+            // Grid
+            gridFinanceiro = CriarGrid();
+            gridFinanceiro.Dock = DockStyle.Fill;
+
+            pnlFinanceiro.Controls.Add(gridFinanceiro);
+            pnlFinanceiro.Controls.Add(lblFinResumo);
+            pnlFinanceiro.Controls.Add(pnlFil);
+            pnlContent.Controls.Add(pnlFinanceiro);
+        }
+
+        private void CarregarFinanceiro()
+        {
+            try
+            {
+                var dt = _pedidoBLL.GetFinanceiro(dtpFinDe.Value.Date, dtpFinAte.Value.Date);
+                gridFinanceiro.DataSource = dt;
+
+                decimal totalPedidos = 0, totalBruto = 0, dinheiro = 0, cartao = 0, pix = 0;
+                foreach (DataRow r in dt.Rows)
+                {
+                    totalPedidos += r["Pedidos"]    == DBNull.Value ? 0 : Convert.ToDecimal(r["Pedidos"]);
+                    totalBruto   += r["TotalBruto"] == DBNull.Value ? 0 : Convert.ToDecimal(r["TotalBruto"]);
+                    dinheiro     += r["Dinheiro"]   == DBNull.Value ? 0 : Convert.ToDecimal(r["Dinheiro"]);
+                    cartao       += r["Cartao"]     == DBNull.Value ? 0 : Convert.ToDecimal(r["Cartao"]);
+                    pix          += r["Pix"]        == DBNull.Value ? 0 : Convert.ToDecimal(r["Pix"]);
+                }
+                lblFinResumo.Text =
+                    $"Pedidos: {totalPedidos:N0}    �    Total Bruto: {totalBruto:C}" +
+                    $"    �    Dinheiro: {dinheiro:C}    �    Cart�o: {cartao:C}    �    Pix: {pix:C}";
+            }
+            catch (Exception ex) { MessageBox.Show("Erro ao carregar financeiro: " + ex.Message); }
         }
     }
 }

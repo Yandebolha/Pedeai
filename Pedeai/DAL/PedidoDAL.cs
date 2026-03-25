@@ -11,30 +11,50 @@ namespace Pedeai.DAL
         /// Lista pedidos com filtros opcionais de situação e data.
         /// Retorna DataTable pronto para binding no DataGridView.
         /// </summary>
-        public DataTable Listar(string situacao = null, DateTime? data = null)
+        public DataTable Listar(string filtro = null, DateTime? data = null)
         {
             var dt = new DataTable();
             using var conn = AbrirConexao();
 
             var sql = @"SELECT p.Codigo,
-                               p.pediNumero            AS Numero,
-                               p.pediNome_Cliente      AS Cliente,
-                               p.pediTelefone_Cliente  AS Telefone,
-                               p.pediSituacao          AS Status,
-                               p.pediForma_Pagamento   AS Pagamento,
-                               p.pediTipo_Entrega      AS Entrega,
-                               p.pediValor_Total       AS Total,
-                               p.pediOrigem            AS Origem,
-                               p.pediData_Lancamento   AS DataHora
+                               p.pediNumero                AS Numero,
+                               p.pediNome_Cliente          AS Cliente,
+                               p.pediTelefone_Cliente      AS Telefone,
+                               CASE p.pediSituacao
+                                   WHEN 0 THEN 'Pendente'
+                                   WHEN 1 THEN 'Confirmado'
+                                   WHEN 2 THEN 'Em Preparo'
+                                   WHEN 3 THEN 'Pronto'
+                                   WHEN 4 THEN 'Saiu p/ Entrega'
+                                   WHEN 5 THEN 'Entregue'
+                                   WHEN 6 THEN 'Cancelado'
+                                   ELSE CAST(p.pediSituacao AS CHAR)
+                               END                          AS Status,
+                               CASE p.pediForma_Pagamento
+                                   WHEN 0 THEN 'Dinheiro'
+                                   WHEN 1 THEN 'Cartão'
+                                   WHEN 2 THEN 'Pix'
+                                   ELSE CAST(p.pediForma_Pagamento AS CHAR)
+                               END                          AS Pagamento,
+                               CASE p.pediTipo_Entrega
+                                   WHEN 0 THEN 'Retirada'
+                                   WHEN 1 THEN 'Entrega'
+                                   ELSE CAST(p.pediTipo_Entrega AS CHAR)
+                               END                          AS Entrega,
+                               p.pediValor_Total           AS Total,
+                               p.pediOrigem                AS Origem,
+                               p.pediData_Lancamento       AS DataHora
                         FROM pedido_web p
                         WHERE 1=1";
 
-            if (!string.IsNullOrEmpty(situacao)) sql += " AND p.pediSituacao = @sit";
+            if      (filtro == "emPreparo")  sql += " AND p.pediSituacao = 2";
+            else if (filtro == "finalizados") sql += " AND p.pediSituacao IN (3,4,5)";
+            else if (filtro == "cancelados")  sql += " AND p.pediSituacao = 6";
+
             if (data.HasValue) sql += " AND DATE(p.pediData_Lancamento) = @data";
             sql += " ORDER BY p.pediData_Lancamento DESC LIMIT 200";
 
             using var cmd = new MySqlCommand(sql, conn);
-            if (!string.IsNullOrEmpty(situacao)) cmd.Parameters.AddWithValue("@sit", situacao);
             if (data.HasValue) cmd.Parameters.AddWithValue("@data", data.Value.Date);
 
             new MySqlDataAdapter(cmd).Fill(dt);
@@ -84,8 +104,16 @@ namespace Pedeai.DAL
                 pedido.auxCodigo = ProximoAuxCodigo("pedido_web", conn, trans);
                 pedido.pediData_Lancamento = DateTime.Now;
 
-                // Gera número sequencial simples: MAN + data + codigo
-                pedido.pediNumero = "MAN" + DateTime.Now.ToString("yyyyMMdd") + pedido.Codigo.ToString("D4");
+                // Número sequencial diário: ex. 001, 002… reinicia a cada dia
+                int seqDia;
+                using (var cmdSeq = new MySqlCommand(
+                    "SELECT COALESCE(MAX(CAST(SUBSTR(pediNumero,9) AS UNSIGNED)),0)+1 " +
+                    "FROM pedido_web WHERE DATE(pediData_Lancamento)=CURDATE()", conn, trans))
+                {
+                    var r2 = cmdSeq.ExecuteScalar();
+                    seqDia = r2 == null || r2 == DBNull.Value ? 1 : Convert.ToInt32(r2);
+                }
+                pedido.pediNumero = DateTime.Now.ToString("yyyyMMdd") + seqDia.ToString("D3");
 
                 var sqlP = @"INSERT INTO pedido_web
                     (auxCodigo, Codigo, pediNumero, pediNome_Cliente, pediTelefone_Cliente,
@@ -151,6 +179,51 @@ namespace Pedeai.DAL
             cmd.Parameters.AddWithValue("@sit", novaSituacao);
             cmd.Parameters.AddWithValue("@cod", codigo);
             cmd.ExecuteNonQuery();
+        }
+
+        /// <summary>Finaliza pedido gravando valor pago e código de transação.</summary>
+        public void FinalizarPedido(int codigo, int novaSituacao, decimal valorPago, string transacao)
+        {
+            using var conn = AbrirConexao();
+            var sql = @"UPDATE pedido_web
+                        SET pediSituacao          = @sit,
+                            pediValor_Pago        = @pago,
+                            pediCodigo_Transacao  = @trans,
+                            pediData_Atualizacao  = NOW()
+                        WHERE Codigo = @cod";
+            using var cmd = new MySqlCommand(sql, conn);
+            cmd.Parameters.AddWithValue("@sit",   novaSituacao);
+            cmd.Parameters.AddWithValue("@pago",  valorPago);
+            cmd.Parameters.AddWithValue("@trans", transacao ?? "");
+            cmd.Parameters.AddWithValue("@cod",   codigo);
+            cmd.ExecuteNonQuery();
+        }
+
+        /// <summary>Retorna resumo financeiro de um período.</summary>
+        public DataTable GetFinanceiro(DateTime de, DateTime ate)
+        {
+            var dt = new DataTable();
+            using var conn = AbrirConexao();
+            var sql = @"SELECT
+                DATE(pediData_Lancamento)       AS Dia,
+                COUNT(*)                         AS Pedidos,
+                SUM(pediSubtotal)                AS Subtotal,
+                SUM(pediTaxa_Entrega)            AS TaxaEntrega,
+                SUM(pediDesconto)                AS Descontos,
+                SUM(pediValor_Total)             AS TotalBruto,
+                SUM(CASE WHEN pediForma_Pagamento=0 THEN pediValor_Total ELSE 0 END) AS Dinheiro,
+                SUM(CASE WHEN pediForma_Pagamento=1 THEN pediValor_Total ELSE 0 END) AS Cartao,
+                SUM(CASE WHEN pediForma_Pagamento=2 THEN pediValor_Total ELSE 0 END) AS Pix
+              FROM pedido_web
+              WHERE DATE(pediData_Lancamento) BETWEEN @de AND @ate
+                AND pediSituacao NOT IN (6)
+              GROUP BY DATE(pediData_Lancamento)
+              ORDER BY Dia DESC";
+            using var cmd = new MySqlCommand(sql, conn);
+            cmd.Parameters.AddWithValue("@de",  de.Date);
+            cmd.Parameters.AddWithValue("@ate", ate.Date);
+            new MySqlDataAdapter(cmd).Fill(dt);
+            return dt;
         }
 
         private static PedidoWeb MapearPedido(MySqlDataReader r)

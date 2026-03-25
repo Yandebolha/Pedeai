@@ -13,8 +13,8 @@ namespace Pedeai.BLL
     {
         private readonly PedidoDAL _dal = new PedidoDAL();
 
-        public DataTable Listar(string situacao = null, DateTime? data = null)
-            => _dal.Listar(situacao, data);
+        public DataTable Listar(string filtro = null, DateTime? data = null)
+            => _dal.Listar(filtro, data);
 
         public PedidoWeb PesquisaCodigo(int codigo)
             => _dal.PesquisaCodigo(codigo);
@@ -37,6 +37,16 @@ namespace Pedeai.BLL
             }
             catch (Exception ex) { return ex.Message; }
         }
+
+        public string FinalizarPedido(int codigo, int novaSituacao, decimal valorPago, string transacao)
+        {
+            if (codigo <= 0) return "Código de pedido inválido.";
+            try { _dal.FinalizarPedido(codigo, novaSituacao, valorPago, transacao); return ""; }
+            catch (Exception ex) { return ex.Message; }
+        }
+
+        public System.Data.DataTable GetFinanceiro(DateTime de, DateTime ate)
+            => _dal.GetFinanceiro(de, ate);
 
         public string InserirManual(PedidoWeb pedido, System.Collections.Generic.List<ItemPedidoWeb> itens)
         {

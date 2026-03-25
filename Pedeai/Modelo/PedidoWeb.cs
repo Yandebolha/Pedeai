@@ -22,6 +22,8 @@ namespace Pedeai.Modelo
         public decimal? pediTroco_Para { get; set; }
         public string pediEndereco_Entrega { get; set; } = "";
         public string pediObservacoes { get; set; } = "";
+        public decimal? pediValor_Pago { get; set; }
+        public string pediCodigo_Transacao { get; set; } = "";
         public DateTime pediData_Lancamento { get; set; }
         public DateTime? pediData_Atualizacao { get; set; }
 
