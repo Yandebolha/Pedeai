@@ -13,11 +13,29 @@ namespace Pedeai.Forms
         private readonly MercadoriaBLL _mercBLL   = new MercadoriaBLL();
         private readonly List<ItemPedidoWeb> _itens = new List<ItemPedidoWeb>();
         private static readonly Color CorHeader = Color.FromArgb(40, 40, 80);
+        private int _codigoCliente = 0;
 
         public frmPedidoManual()
         {
             InitializeComponent();
             if (!DesignMode) CarregarProdutos();
+        }
+
+        // ── Seleção de cliente ────────────────────────────────────────────────
+        private void BtnSelecionarCliente_Click(object sender, EventArgs e)
+        {
+            using var frm = new frmSelecionarCliente();
+            if (frm.ShowDialog(this) == DialogResult.OK && frm.ClienteSelecionado != null)
+            {
+                var c = frm.ClienteSelecionado;
+                _codigoCliente        = c.Codigo;
+                txtNome.Text          = c.clieNome_RazaoSocial ?? "";
+                txtTelefone.Text      = !string.IsNullOrWhiteSpace(c.clieCelular)
+                                        ? c.clieCelular
+                                        : c.clieTelefone ?? "";
+                if (!string.IsNullOrWhiteSpace(c.clieEndereco))
+                    txtEndereco.Text  = $"{c.clieEndereco}, {c.clieNumero}".Trim(',', ' ');
+            }
         }
 
         // ── Visibilidade dinâmica ─────────────────────────────────────────────
@@ -110,6 +128,7 @@ namespace Pedeai.Forms
 
             var pedido = new PedidoWeb
             {
+                Codigo_Cliente       = _codigoCliente,
                 pediNome_Cliente     = txtNome.Text.Trim(),
                 pediTelefone_Cliente = txtTelefone.Text.Trim(),
                 pediTipo_Entrega     = cmbEntrega.SelectedIndex,   // 0=Retirada 1=Entrega

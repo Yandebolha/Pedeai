@@ -45,6 +45,8 @@ namespace Pedeai.Forms
             return $"{d.Substring(0,2)}.{d.Substring(2,3)}.{d.Substring(5,3)}/{d.Substring(8,4)}-{d.Substring(12)}";
         }
 
+        private async void TxtCep_Leave(object sender, EventArgs e) => await BuscarCep();
+
         private async Task BuscarCep()
         {
             var cep = new string(System.Array.FindAll(txtCep.Text.ToCharArray(), char.IsDigit));

@@ -1,8 +1,5 @@
 using System.Drawing;
-using System.Net.Http;
-using System.Threading.Tasks;
 using System.Windows.Forms;
-using Newtonsoft.Json.Linq;
 
 namespace Pedeai.Forms
 {
@@ -103,7 +100,7 @@ namespace Pedeai.Forms
             // Linha 3: CEP | Endereço | Nº | Compl.
             var lblCep  = new Label { Text = "CEP:",     Left = 10,  Top = 75, AutoSize = true };
             txtCep.Mask = "00000-000"; txtCep.Left = 42; txtCep.Top = 72; txtCep.Width = 95;
-            txtCep.Leave += async (s, e) => await BuscarCep();
+            txtCep.Leave += TxtCep_Leave;
 
             var lblEnd  = new Label { Text = "Endereço:", Left = 148, Top = 75, AutoSize = true };
             txtEndereco.Left = 210; txtEndereco.Top = 72; txtEndereco.Width = 230;

@@ -1,161 +1,41 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{141A7E56-E6DC-4A63-A015-9C6F59DDE83A}</ProjectGuid>
     <OutputType>WinExe</OutputType>
-    <RootNamespace>Pedeai</RootNamespace>
-    <AssemblyName>Pedeai</AssemblyName>
-    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
-    <Deterministic>true</Deterministic>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <UseWindowsForms>true</UseWindowsForms>
     <LangVersion>latest</LangVersion>
-    <SuppressTfmSupportBuildWarnings>true</SuppressTfmSupportBuildWarnings>
+    <Nullable>disable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <AssemblyName>Pedeai</AssemblyName>
+    <RootNamespace>Pedeai</RootNamespace>
+    <Deterministic>true</Deterministic>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <ApplicationHighDpiMode>SystemAware</ApplicationHighDpiMode>
+    <SupportedOSPlatformVersion>6.1</SupportedOSPlatformVersion>
+    <NoWarn>$(NoWarn);CA1416</NoWarn>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
+
   <ItemGroup>
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System" />
-    <Reference Include="System.Configuration" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="System.Deployment" />
-    <Reference Include="System.Drawing" />
-    <Reference Include="System.Net.Http" />
-    <Reference Include="System.Windows.Forms" />
-    <Reference Include="System.Xml" />
-    <Reference Include="System.Xml.Linq" />
+    <PackageReference Include="MySqlConnector" Version="2.3.7" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
   </ItemGroup>
+
   <ItemGroup>
-    <!-- Modelo (entidades) -->
-    <Compile Include="Modelo\Cliente.cs" />
-    <Compile Include="Modelo\Cupom.cs" />
-    <Compile Include="Modelo\Fornecedor.cs" />
-    <Compile Include="Modelo\GrupoMercadoria.cs" />
-    <Compile Include="Modelo\ItemPedidoWeb.cs" />
-    <Compile Include="Modelo\Mercadoria.cs" />
-    <Compile Include="Modelo\PedidoWeb.cs" />
-    <!-- DAL -->
-    <Compile Include="DAL\BaseDAL.cs" />
-    <Compile Include="DAL\ClienteDAL.cs" />
-    <Compile Include="DAL\CupomDAL.cs" />
-    <Compile Include="DAL\DashboardDAL.cs" />
-    <Compile Include="DAL\FornecedorDAL.cs" />
-    <Compile Include="DAL\GrupoMercadoriaDAL.cs" />
-    <Compile Include="DAL\MercadoriaDAL.cs" />
-    <Compile Include="DAL\PedidoDAL.cs" />
-    <!-- BLL -->
-    <Compile Include="BLL\ClienteBLL.cs" />
-    <Compile Include="BLL\CupomBLL.cs" />
-    <Compile Include="BLL\DashboardBLL.cs" />
-    <Compile Include="BLL\FornecedorBLL.cs" />
-    <Compile Include="BLL\GrupoMercadoriaBLL.cs" />
-    <Compile Include="BLL\MercadoriaBLL.cs" />
-    <Compile Include="BLL\PedidoBLL.cs" />
-    <!-- DB (mantido por compatibilidade) -->
-    <Compile Include="DB\DbHelper.cs" />
-    <!-- Forms -->
-    <Compile Include="Forms\frmCadastroCategoria.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Forms\frmCadastroCategoria.Designer.cs">
-      <DependentUpon>frmCadastroCategoria.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Forms\frmCadastroProduto.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Forms\frmCadastroProduto.Designer.cs">
-      <DependentUpon>frmCadastroProduto.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Forms\frmCadastroCliente.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Forms\frmCadastroCliente.Designer.cs">
-      <DependentUpon>frmCadastroCliente.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Forms\frmCadastroFornecedor.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Forms\frmCadastroFornecedor.Designer.cs">
-      <DependentUpon>frmCadastroFornecedor.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Forms\frmCadastroCupom.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Forms\frmCadastroCupom.Designer.cs">
-      <DependentUpon>frmCadastroCupom.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Forms\frmPedidoManual.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Forms\frmPedidoManual.Designer.cs">
-      <DependentUpon>frmPedidoManual.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Form1.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Form1.Designer.cs">
-      <DependentUpon>Form1.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Program.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Properties\Resources.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Resources.resx</DependentUpon>
-      <DesignTime>True</DesignTime>
-    </Compile>
-    <Compile Include="Properties\Settings.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Settings.settings</DependentUpon>
-      <DesignTime>True</DesignTime>
-    </Compile>
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Forms\frmCadastroProduto.resx">
-      <DependentUpon>frmCadastroProduto.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Properties\Resources.resx">
+    <EmbeddedResource Update="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
-      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Forms\frmCadastroProduto.resx">
+      <DependentUpon>frmCadastroProduto.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
+
   <ItemGroup>
-    <None Include="App.config" />
-    <None Include="Properties\Settings.settings">
+    <None Update="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
   </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="MySqlConnector">
-      <Version>2.3.7</Version>
-    </PackageReference>
-    <PackageReference Include="Newtonsoft.Json">
-      <Version>13.0.3</Version>
-    </PackageReference>
-  </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+
 </Project>

@@ -15,7 +15,8 @@ namespace Pedeai.Forms
 
         private void InitializeComponent()
         {
-            txtNome      = new TextBox();
+            txtNome            = new TextBox();
+            btnSelecionarCliente = new Button();
             txtTelefone  = new TextBox();
             cmbEntrega   = new ComboBox();
             txtEndereco  = new TextBox();
@@ -52,10 +53,18 @@ namespace Pedeai.Forms
 
             // Linha 1: Cliente | Telefone
             pnlDados.Controls.Add(new Label { Text = "Cliente:",  Left = 0, Top = 10, AutoSize = true });
-            txtNome.Left = 60; txtNome.Top = 6; txtNome.Width = 300;
+            txtNome.Left = 60; txtNome.Top = 6; txtNome.Width = 215;
 
-            pnlDados.Controls.Add(new Label { Text = "Telefone:", Left = 374, Top = 10, AutoSize = true });
-            txtTelefone.Left = 440; txtTelefone.Top = 6; txtTelefone.Width = 150;
+            btnSelecionarCliente.Text = "🔍 Selecionar";
+            btnSelecionarCliente.Left = 280; btnSelecionarCliente.Top = 4; btnSelecionarCliente.Width = 110; btnSelecionarCliente.Height = 24;
+            btnSelecionarCliente.BackColor = Color.FromArgb(63, 81, 181); btnSelecionarCliente.ForeColor = Color.White;
+            btnSelecionarCliente.FlatStyle = FlatStyle.Flat; btnSelecionarCliente.Font = new Font("Segoe UI", 8F);
+            btnSelecionarCliente.FlatAppearance.BorderSize = 0;
+            btnSelecionarCliente.Cursor = Cursors.Hand;
+            btnSelecionarCliente.Click += BtnSelecionarCliente_Click;
+
+            pnlDados.Controls.Add(new Label { Text = "Telefone:", Left = 400, Top = 10, AutoSize = true });
+            txtTelefone.Left = 466; txtTelefone.Top = 6; txtTelefone.Width = 150;
 
             // Linha 2: Entrega | Endereço
             pnlDados.Controls.Add(new Label { Text = "Entrega:", Left = 0, Top = 42, AutoSize = true });
@@ -91,7 +100,7 @@ namespace Pedeai.Forms
 
             pnlDados.Controls.AddRange(new Control[]
             {
-                txtNome, txtTelefone,
+                txtNome, btnSelecionarCliente, txtTelefone,
                 cmbEntrega, lblEndereco, txtEndereco,
                 cmbPagamento, lblTroco, numTroco, numTaxa,
                 txtObs
@@ -205,6 +214,7 @@ namespace Pedeai.Forms
         }
 
         private TextBox       txtNome;
+        private Button        btnSelecionarCliente;
         private TextBox       txtTelefone;
         private ComboBox      cmbEntrega;
         private TextBox       txtEndereco;
