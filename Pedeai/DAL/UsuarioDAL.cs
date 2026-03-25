@@ -85,6 +85,17 @@ namespace Pedeai.DAL
         // Mantido para compatibilidade
         public string BuscarNomePorLogin(string login) => BuscarNomePorLoginOuNome(login);
 
+        // Busca nome pelo código numérico (ex.: digitar "1" encontra "Administrador")
+        public string BuscarNomePorCodigo(int codigo)
+        {
+            using var conn = AbrirConexao();
+            using var cmd = new MySqlCommand(
+                "SELECT usuNome FROM usuario WHERE Codigo=@cod AND Situacao='A' LIMIT 1", conn);
+            cmd.Parameters.AddWithValue("@cod", codigo);
+            var r = cmd.ExecuteScalar();
+            return r == null || r == DBNull.Value ? "" : r.ToString();
+        }
+
         // ── Listagem ─────────────────────────────────────────────────────────
         public List<Usuario> Listar()
         {

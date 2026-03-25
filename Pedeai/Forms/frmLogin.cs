@@ -36,29 +36,48 @@ namespace Pedeai.Forms
             Close();
         }
 
-        private void TxtLogin_Leave(object sender, EventArgs e)
+        // Resolve o texto digitado: se for número, busca por código;
+        // senão busca por login/nome. Substitui o campo pelo nome encontrado
+        // e devolve true para indicar que o foco deve ir para a senha.
+        private bool ResolverLogin()
         {
-            if (string.IsNullOrWhiteSpace(txtLogin.Text))
-            {
-                lblNomeUsuario.Text = "";
-                return;
-            }
+            lblMensagem.Text = "";
+            var texto = txtLogin.Text.Trim();
+            if (string.IsNullOrEmpty(texto)) { lblNomeUsuario.Text = ""; return false; }
+
             try
             {
-                var nome = _bll.BuscarNomePorLogin(txtLogin.Text.Trim());
+                string nome = "";
+
+                // Tentativa 1: código numérico
+                if (int.TryParse(texto, out int cod) && cod > 0)
+                    nome = _bll.BuscarNomePorCodigo(cod);
+
+                // Tentativa 2: login ou nome
+                if (string.IsNullOrEmpty(nome))
+                    nome = _bll.BuscarNomePorLogin(texto);
+
                 if (!string.IsNullOrEmpty(nome))
                 {
-                    lblNomeUsuario.ForeColor = System.Drawing.Color.FromArgb(39, 174, 96);
-                    lblNomeUsuario.Text = "\u2713 " + nome;
+                    // Substitui o conteúdo do campo pelo nome real
+                    txtLogin.Text = nome;
+                    txtLogin.SelectionStart = nome.Length;
+
+                    lblNomeUsuario.ForeColor = Color.FromArgb(39, 174, 96);
+                    lblNomeUsuario.Text = "\u2713 Usuário identificado";
+                    return true;
                 }
                 else
                 {
-                    lblNomeUsuario.ForeColor = System.Drawing.Color.FromArgb(231, 76, 60);
-                    lblNomeUsuario.Text = "Usu\u00e1rio n\u00e3o encontrado";
+                    lblNomeUsuario.ForeColor = Color.FromArgb(231, 76, 60);
+                    lblNomeUsuario.Text = "Usuário não encontrado";
+                    return false;
                 }
             }
-            catch { lblNomeUsuario.Text = ""; }
+            catch { lblNomeUsuario.Text = ""; return false; }
         }
+
+        private void TxtLogin_Leave(object sender, EventArgs e) => ResolverLogin();
 
         private void TxtSenha_KeyDown(object sender, KeyEventArgs e)
         {
@@ -67,7 +86,13 @@ namespace Pedeai.Forms
 
         private void TxtLogin_KeyDown(object sender, KeyEventArgs e)
         {
-            if (e.KeyCode == Keys.Enter) txtSenha.Focus();
+            if (e.KeyCode == Keys.Enter)
+            {
+                if (ResolverLogin())
+                    txtSenha.Focus();
+                e.Handled = true;
+                e.SuppressKeyPress = true;
+            }
         }
     }
 }

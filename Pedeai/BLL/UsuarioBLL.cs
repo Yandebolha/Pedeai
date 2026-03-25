@@ -15,6 +15,9 @@ namespace Pedeai.BLL
         public string BuscarNomePorLogin(string login)
             => _dal.BuscarNomePorLoginOuNome(login);
 
+        public string BuscarNomePorCodigo(int codigo)
+            => _dal.BuscarNomePorCodigo(codigo);
+
         public List<Usuario> Listar()
             => _dal.Listar();
 
