@@ -72,28 +72,24 @@ namespace Pedeai.DB
                     "VARCHAR(100) NULL DEFAULT NULL AFTER pediCodigo_Transacao");
 
                 // ── 5. Dado inicial: empresa ──────────────────────────────────
+                //     INSERT IGNORE: silencioso se já existir Codigo=1
                 Exec(conn, @"
-                    INSERT INTO empresa (Codigo, empNome)
-                    SELECT 1, 'Minha Empresa'
-                    FROM DUAL
-                    WHERE NOT EXISTS (SELECT 1 FROM empresa WHERE Codigo=1)");
+                    INSERT IGNORE INTO empresa
+                        (Codigo, empNome, empNome_Fantasia, empCNPJ,
+                         empTelefone, empEmail, empEndereco, Info)
+                    VALUES (1, 'Minha Empresa', '', '', '', '', '', '')");
 
                 // ── 6. Dado inicial: admin (hash SHA-256 de '$up0rte') ────────
-                //     Insere se não existir; se existir com senha em texto puro, corrige.
+                //     ON DUPLICATE KEY: atualiza hash/nivel se o admin já existir
                 string hashAdmin = HashSenha("$up0rte");
                 Exec(conn, $@"
                     INSERT INTO usuario
-                        (auxCodigo, Codigo, usuNome, usuLogin, usuSenha, usuNivel, Situacao)
-                    SELECT 1, 1, 'Administrador', 'admin', '{hashAdmin}', 9, 'A'
-                    FROM DUAL
-                    WHERE NOT EXISTS (SELECT 1 FROM usuario WHERE usuLogin='admin')");
-
-                // Corrige senha do admin caso esteja em texto puro ou hash antigo
-                Exec(conn, $@"
-                    UPDATE usuario
-                    SET usuSenha = '{hashAdmin}'
-                    WHERE usuLogin = 'admin'
-                      AND usuSenha <> '{hashAdmin}'");
+                        (auxCodigo, usuNome, usuLogin, usuSenha, usuNivel, Situacao)
+                    VALUES (1, 'Administrador', 'admin', '{hashAdmin}', 9, 'A')
+                    ON DUPLICATE KEY UPDATE
+                        usuSenha = '{hashAdmin}',
+                        usuNivel = 9,
+                        Situacao = 'A'");
 
                 return true;
             }
