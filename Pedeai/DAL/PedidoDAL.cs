@@ -119,9 +119,9 @@ namespace Pedeai.DAL
                     (auxCodigo, Codigo, pediNumero, pediNome_Cliente, pediTelefone_Cliente,
                      pediSituacao, pediTipo_Entrega, pediForma_Pagamento, pediOrigem,
                      pediSubtotal, pediTaxa_Entrega, pediDesconto, pediValor_Total, pediTroco_Para,
-                     pediEndereco_Entrega, pediObservacoes, pediData_Lancamento, Situacao, Info)
+                     pediEndereco_Entrega, pediObservacoes, pediData_Lancamento, Situacao, Info, Codigo_Cliente)
                     VALUES(@aux,@cod,@num,@nome,@tel,@sit,@tent,@fpag,3,
-                           @sub,@taxa,0,@total,@troco,@end,@obs,@dt,'A','')";
+                           @sub,@taxa,0,@total,@troco,@end,@obs,@dt,'A','',@cliCod)";
                 using var cmdP = new MySqlCommand(sqlP, conn, trans);
                 cmdP.Parameters.AddWithValue("@aux",   pedido.auxCodigo);
                 cmdP.Parameters.AddWithValue("@cod",   pedido.Codigo);
@@ -138,6 +138,7 @@ namespace Pedeai.DAL
                 cmdP.Parameters.AddWithValue("@end",   pedido.pediEndereco_Entrega ?? "");
                 cmdP.Parameters.AddWithValue("@obs",   pedido.pediObservacoes ?? "");
                 cmdP.Parameters.AddWithValue("@dt",    pedido.pediData_Lancamento);
+                cmdP.Parameters.AddWithValue("@cliCod", pedido.Codigo_Cliente > 0 ? (object)pedido.Codigo_Cliente : DBNull.Value);
                 cmdP.ExecuteNonQuery();
 
                 // Itens
@@ -223,10 +224,10 @@ namespace Pedeai.DAL
                 SUM(CASE WHEN p.pediForma_Pagamento=1 THEN p.pediValor_Total ELSE 0 END) AS Cartao,
                 SUM(CASE WHEN p.pediForma_Pagamento=2 THEN p.pediValor_Total ELSE 0 END) AS Pix,
                 COALESCE((
-                    SELECT SUM(i.itemQtd * COALESCE(m.merCusto, 0))
+                    SELECT SUM(i.itpwQtde * COALESCE(m.mercPreco_Custo, 0))
                     FROM itens_pedido_web i
-                    LEFT JOIN mercadoria m ON m.Codigo = i.itemMercadoria_Codigo
-                    WHERE i.itemPedido_Codigo = p.Codigo
+                    LEFT JOIN mercadoria m ON m.Codigo = i.Codigo_Mercadoria
+                    WHERE i.Codigo_Pedido = p.Codigo
                 ), 0) AS CustoMercadorias
               FROM pedido_web p
               WHERE DATE(p.pediData_Lancamento) BETWEEN @de AND @ate

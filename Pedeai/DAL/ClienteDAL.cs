@@ -11,19 +11,23 @@ namespace Pedeai.DAL
         {
             var dt = new DataTable();
             using var conn = AbrirConexao();
-            var sql = @"SELECT Codigo,
-                               clieNome_RazaoSocial AS Nome,
-                               clieTelefone         AS Telefone,
-                               clieCelular          AS Celular,
-                               clieEmail            AS Email,
-                               clieCidade           AS Cidade,
-                               clieTotalPedidos     AS TotalPedidos,
-                               clieTotalGasto       AS TotalGasto,
-                               Situacao
-                        FROM cliente WHERE 1=1";
+            var sql = @"SELECT c.Codigo,
+                               c.clieNome_RazaoSocial AS Nome,
+                               c.clieTelefone         AS Telefone,
+                               c.clieCelular          AS Celular,
+                               c.clieEmail            AS Email,
+                               c.clieCidade           AS Cidade,
+                               COALESCE((SELECT COUNT(*) FROM pedido_web pw
+                                         WHERE pw.Codigo_Cliente = c.Codigo
+                                           AND pw.pediSituacao <> 6), 0) AS TotalPedidos,
+                               COALESCE((SELECT SUM(pw.pediValor_Total) FROM pedido_web pw
+                                         WHERE pw.Codigo_Cliente = c.Codigo
+                                           AND pw.pediSituacao <> 6), 0) AS TotalGasto,
+                               c.Situacao
+                        FROM cliente c WHERE 1=1";
             if (!string.IsNullOrWhiteSpace(busca))
-                sql += " AND (clieNome_RazaoSocial LIKE @b OR clieTelefone LIKE @b OR clieCelular LIKE @b)";
-            sql += " ORDER BY clieNome_RazaoSocial LIMIT 200";
+                sql += " AND (c.clieNome_RazaoSocial LIKE @b OR c.clieTelefone LIKE @b OR c.clieCelular LIKE @b)";
+            sql += " ORDER BY c.clieNome_RazaoSocial LIMIT 200";
 
             using var cmd = new MySqlCommand(sql, conn);
             if (!string.IsNullOrWhiteSpace(busca)) cmd.Parameters.AddWithValue("@b", $"%{busca}%");

@@ -76,6 +76,8 @@ namespace Pedeai.DB
                     "VARCHAR(100) NULL DEFAULT NULL");
                 AddColumnIfNotExists(conn, db, "pedido_web", "pediData_Atualizacao",
                     "DATETIME NULL DEFAULT NULL");
+                AddColumnIfNotExists(conn, db, "pedido_web", "Codigo_Cliente",
+                    "INT NULL DEFAULT NULL");
 
                 // ── 4b. Colunas em grupo_mercadoria ─────────────────────────────
                 AddColumnIfNotExists(conn, db, "grupo_mercadoria", "grmeData_Cadastro",
