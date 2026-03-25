@@ -12,7 +12,7 @@ namespace Pedeai.Forms
 
         public frmCadastroGasto()
         {
-            BuildUI();
+            InitializeComponent();
             dtpData.Value = DateTime.Today;
         }
 

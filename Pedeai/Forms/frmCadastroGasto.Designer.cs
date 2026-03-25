@@ -13,7 +13,7 @@ namespace Pedeai.Forms
             base.Dispose(disposing);
         }
 
-        private void BuildUI()
+        private void InitializeComponent()
         {
             this.Text            = "Lancar Gasto de Material";
             this.StartPosition   = FormStartPosition.CenterParent;

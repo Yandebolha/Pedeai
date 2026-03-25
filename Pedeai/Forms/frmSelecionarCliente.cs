@@ -16,7 +16,7 @@ namespace Pedeai.Forms
 
         public frmSelecionarCliente()
         {
-            BuildUI();
+            InitializeComponent();
             if (!DesignMode) CarregarGrid();
         }
 

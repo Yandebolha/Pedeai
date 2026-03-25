@@ -18,7 +18,7 @@ namespace Pedeai.Forms
 
         public frmPedidoManual()
         {
-            BuildUI();
+            InitializeComponent();
             if (!DesignMode) CarregarProdutos();
         }
 

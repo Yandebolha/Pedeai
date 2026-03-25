@@ -13,7 +13,7 @@ namespace Pedeai.Forms
             base.Dispose(disposing);
         }
 
-        private void BuildUI()
+        private void InitializeComponent()
         {
             this.Text            = "Autorizacao Necessaria";
             this.StartPosition   = FormStartPosition.CenterParent;

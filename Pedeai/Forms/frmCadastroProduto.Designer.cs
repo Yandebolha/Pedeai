@@ -13,7 +13,7 @@ namespace Pedeai.Forms
             base.Dispose(disposing);
         }
 
-        private void BuildUI()
+        private void InitializeComponent()
         {
             grid               = new DataGridView();
             pnlForm            = new Panel();

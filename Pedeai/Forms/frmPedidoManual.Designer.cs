@@ -13,7 +13,7 @@ namespace Pedeai.Forms
             base.Dispose(disposing);
         }
 
-        private void BuildUI()
+        private void InitializeComponent()
         {
             txtNome              = new TextBox();
             btnSelecionarCliente = new Button();
