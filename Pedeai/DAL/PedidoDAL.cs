@@ -211,21 +211,27 @@ namespace Pedeai.DAL
             var dt = new DataTable();
             using var conn = AbrirConexao();
             var sql = @"SELECT
-                DATE(pediData_Lancamento)         AS Dia,
-                COUNT(*)                           AS Pedidos,
-                SUM(pediSubtotal)                  AS Subtotal,
-                SUM(pediTaxa_Entrega)              AS TaxaEntrega,
-                SUM(pediDesconto)                  AS Descontos,
-                SUM(pediValor_Total)               AS TotalBruto,
-                SUM(CASE WHEN pediTipo_Entrega=1 THEN pediValor_Total ELSE 0 END) AS ValorEntrega,
-                SUM(CASE WHEN pediTipo_Entrega=0 THEN pediValor_Total ELSE 0 END) AS ValorRetirada,
-                SUM(CASE WHEN pediForma_Pagamento=0 THEN pediValor_Total ELSE 0 END) AS Dinheiro,
-                SUM(CASE WHEN pediForma_Pagamento=1 THEN pediValor_Total ELSE 0 END) AS Cartao,
-                SUM(CASE WHEN pediForma_Pagamento=2 THEN pediValor_Total ELSE 0 END) AS Pix
-              FROM pedido_web
-              WHERE DATE(pediData_Lancamento) BETWEEN @de AND @ate
-                AND pediSituacao NOT IN (6)
-              GROUP BY DATE(pediData_Lancamento)
+                DATE(p.pediData_Lancamento)         AS Dia,
+                COUNT(*)                            AS Pedidos,
+                SUM(p.pediSubtotal)                 AS Subtotal,
+                SUM(p.pediTaxa_Entrega)             AS TaxaEntrega,
+                SUM(p.pediDesconto)                 AS Descontos,
+                SUM(p.pediValor_Total)              AS TotalBruto,
+                SUM(CASE WHEN p.pediTipo_Entrega=1 THEN p.pediValor_Total ELSE 0 END) AS ValorEntrega,
+                SUM(CASE WHEN p.pediTipo_Entrega=0 THEN p.pediValor_Total ELSE 0 END) AS ValorRetirada,
+                SUM(CASE WHEN p.pediForma_Pagamento=0 THEN p.pediValor_Total ELSE 0 END) AS Dinheiro,
+                SUM(CASE WHEN p.pediForma_Pagamento=1 THEN p.pediValor_Total ELSE 0 END) AS Cartao,
+                SUM(CASE WHEN p.pediForma_Pagamento=2 THEN p.pediValor_Total ELSE 0 END) AS Pix,
+                COALESCE((
+                    SELECT SUM(i.itemQtd * COALESCE(m.merCusto, 0))
+                    FROM itens_pedido_web i
+                    LEFT JOIN mercadoria m ON m.Codigo = i.itemMercadoria_Codigo
+                    WHERE i.itemPedido_Codigo = p.Codigo
+                ), 0) AS CustoMercadorias
+              FROM pedido_web p
+              WHERE DATE(p.pediData_Lancamento) BETWEEN @de AND @ate
+                AND p.pediSituacao NOT IN (6)
+              GROUP BY DATE(p.pediData_Lancamento)
               ORDER BY Dia DESC";
             using var cmd = new MySqlCommand(sql, conn);
             cmd.Parameters.AddWithValue("@de",  de.Date);

@@ -213,7 +213,7 @@ namespace Pedeai
 
             var btnManual = new Button
             {
-                Text      = "? Pedido Manual",
+                Text      = "\u270F Pedido Manual",
                 Left      = 602,
                 Top       = 8,
                 Width     = 128,
@@ -699,42 +699,48 @@ namespace Pedeai
 
                 // ── Totais acumulados ──
                 decimal pedidos = 0, totalBruto = 0, taxaEnt = 0,
-                        entrega = 0, retirada = 0,
-                        dinheiro = 0, cartao = 0, pix = 0;
+                        dinheiro = 0, cartao = 0, pix = 0,
+                        custoMerc = 0;
                 foreach (DataRow r in dt.Rows)
                 {
                     decimal V(string col) => r[col] == DBNull.Value ? 0 : Convert.ToDecimal(r[col]);
-                    pedidos      += V("Pedidos");
-                    totalBruto   += V("TotalBruto");
-                    taxaEnt      += V("TaxaEntrega");
-                    entrega      += V("ValorEntrega");
-                    retirada     += V("ValorRetirada");
-                    dinheiro     += V("Dinheiro");
-                    cartao       += V("Cartao");
-                    pix          += V("Pix");
+                    pedidos    += V("Pedidos");
+                    totalBruto += V("TotalBruto");
+                    taxaEnt    += V("TaxaEntrega");
+                    dinheiro   += V("Dinheiro");
+                    cartao     += V("Cartao");
+                    pix        += V("Pix");
+                    custoMerc  += V("CustoMercadorias");
                 }
 
-                // ── Grid de gastos ──
+                // ── Gastos de material ──
                 _gridGastos.DataSource = _gastosBLL.Listar(de, ate);
-                decimal gastos = _gastosBLL.TotalPeriodo(de, ate);
-                decimal lucro  = totalBruto - gastos;
+                decimal gastosMaterial = _gastosBLL.TotalPeriodo(de, ate);
+
+                // ── Cálculos derivados ──
+                decimal fatLiquido = totalBruto - taxaEnt;    // receita dos produtos sem frete
+                decimal despesas   = custoMerc + gastosMaterial; // custo total (mercadorias + material)
+                decimal lucro      = totalBruto - despesas;
 
                 // ── Rebuild cards ──
                 _pnlFinCards.Controls.Clear();
-                CriarCardFin("Total Pedidos",    pedidos.ToString("N0"),   Color.FromArgb(41,128,185));
-                CriarCardFin("Faturamento Bruto",totalBruto.ToString("C"), Color.FromArgb(39,174,96));
-                CriarCardFin("Taxa de Entrega",  taxaEnt.ToString("C"),    Color.FromArgb(22,160,133));
-                CriarCardFin("Entrega",          entrega.ToString("C"),    Color.FromArgb(52,152,219));
-                CriarCardFin("Retirada",         retirada.ToString("C"),   Color.FromArgb(93,109,126));
-                CriarCardFin("Dinheiro",         dinheiro.ToString("C"),   Color.FromArgb(39,174,96));
-                CriarCardFin("Cartao",           cartao.ToString("C"),     Color.FromArgb(142,68,173));
-                CriarCardFin("Pix",              pix.ToString("C"),        Color.FromArgb(52,152,219));
-                CriarCardFin("Gastos Material",  gastos.ToString("C"),     Color.FromArgb(192,57,43));
-                CriarCardFin("Lucro Liquido",    lucro.ToString("C"),      lucro >= 0 ? Color.FromArgb(39,174,96) : Color.FromArgb(192,57,43));
+                CriarCardFin("Total Pedidos",      pedidos.ToString("N0"),       Color.FromArgb(41, 128, 185));
+                CriarCardFin("Faturamento Bruto",  totalBruto.ToString("C"),     Color.FromArgb(39, 174, 96));
+                CriarCardFin("Taxa de Entrega",    taxaEnt.ToString("C"),        Color.FromArgb(22, 160, 133));
+                CriarCardFin("Fat. Líquido",       fatLiquido.ToString("C"),     Color.FromArgb(52, 152, 219));
+                CriarCardFin("Custo Mercadorias",  custoMerc.ToString("C"),      Color.FromArgb(211, 84, 0));
+                CriarCardFin("Gastos Material",    gastosMaterial.ToString("C"), Color.FromArgb(192, 57, 43));
+                CriarCardFin("Despesas Totais",    despesas.ToString("C"),       Color.FromArgb(169, 50, 38));
+                CriarCardFin("Dinheiro",           dinheiro.ToString("C"),       Color.FromArgb(39, 174, 96));
+                CriarCardFin("Cartão",             cartao.ToString("C"),         Color.FromArgb(142, 68, 173));
+                CriarCardFin("Pix",                pix.ToString("C"),            Color.FromArgb(52, 152, 219));
+                CriarCardFin("Lucro Líquido",      lucro.ToString("C"),
+                    lucro >= 0 ? Color.FromArgb(39, 174, 96) : Color.FromArgb(192, 57, 43));
 
                 lblFinResumo.Text =
-                    $"Periodo: {de:dd/MM/yyyy} a {ate:dd/MM/yyyy}  |  " +
-                    $"Bruto: {totalBruto:C}  |  Gastos: {gastos:C}  |  Lucro Liquido: {lucro:C}";
+                    $"Período: {de:dd/MM/yyyy} a {ate:dd/MM/yyyy}  |  " +
+                    $"Fat. Bruto: {totalBruto:C}  |  Custo Merc: {custoMerc:C}  |  " +
+                    $"Gastos: {gastosMaterial:C}  |  Despesas: {despesas:C}  |  Lucro: {lucro:C}";
             }
             catch (Exception ex) { MessageBox.Show("Erro ao carregar financeiro: " + ex.Message); }
         }

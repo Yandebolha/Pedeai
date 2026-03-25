@@ -67,11 +67,17 @@ namespace Pedeai.DB
                         Info             VARCHAR(255)   NOT NULL DEFAULT ''
                     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
 
-                // ── 4. Coluna pediCancelado_Por em pedido_web ─────────────────
+                // ── 4. Colunas em pedido_web ─────────────────────────────────────────
                 AddColumnIfNotExists(conn, db, "pedido_web", "pediCancelado_Por",
-                    "VARCHAR(100) NULL DEFAULT NULL AFTER pediCodigo_Transacao");
+                    "VARCHAR(100) NULL DEFAULT NULL");
+                AddColumnIfNotExists(conn, db, "pedido_web", "pediValor_Pago",
+                    "DECIMAL(10,2) NULL DEFAULT NULL");
+                AddColumnIfNotExists(conn, db, "pedido_web", "pediCodigo_Transacao",
+                    "VARCHAR(100) NULL DEFAULT NULL");
+                AddColumnIfNotExists(conn, db, "pedido_web", "pediData_Atualizacao",
+                    "DATETIME NULL DEFAULT NULL");
 
-                // ── 4b. Coluna grmeData_Cadastro em grupo_mercadoria ────────────
+                // ── 4b. Colunas em grupo_mercadoria ─────────────────────────────
                 AddColumnIfNotExists(conn, db, "grupo_mercadoria", "grmeData_Cadastro",
                     "DATETIME NULL DEFAULT NULL");
 
