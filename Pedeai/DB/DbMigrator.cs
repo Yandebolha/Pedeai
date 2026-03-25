@@ -71,6 +71,10 @@ namespace Pedeai.DB
                 AddColumnIfNotExists(conn, db, "pedido_web", "pediCancelado_Por",
                     "VARCHAR(100) NULL DEFAULT NULL AFTER pediCodigo_Transacao");
 
+                // ── 4b. Coluna grmeData_Cadastro em grupo_mercadoria ────────────
+                AddColumnIfNotExists(conn, db, "grupo_mercadoria", "grmeData_Cadastro",
+                    "DATETIME NULL DEFAULT NULL");
+
                 // ── 5. Dado inicial: empresa ──────────────────────────────────
                 //     INSERT IGNORE: silencioso se já existir Codigo=1
                 Exec(conn, @"

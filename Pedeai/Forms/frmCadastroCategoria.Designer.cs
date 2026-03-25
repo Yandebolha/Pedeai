@@ -18,7 +18,6 @@ namespace Pedeai.Forms
             grid       = new DataGridView();
             pnlForm    = new Panel();
             txtNome    = new TextBox();
-            numOrdem   = new NumericUpDown();
             cmbSituacao = new ComboBox();
 
             // ── Top bar ─────────────────────────────────────────────────
@@ -54,37 +53,34 @@ namespace Pedeai.Forms
             pnlForm.BorderStyle = BorderStyle.FixedSingle;
             pnlForm.Visible = false;
 
-            var lblNome  = new Label { Text = "Nome:",     AutoSize = true, Left = 10,  Top = 14 };
-            txtNome.Left = 70;  txtNome.Top = 10; txtNome.Width = 280;
+            var lblNome  = new Label { Text = "Nome:", ForeColor = Color.FromArgb(180, 190, 220), AutoSize = true, Left = 20,  Top = 18 };
+            txtNome.Left = 70;  txtNome.Top = 14; txtNome.Width = 320;
+            txtNome.BackColor = Color.FromArgb(20, 28, 55); txtNome.ForeColor = Color.White; txtNome.BorderStyle = BorderStyle.FixedSingle;
 
-            var lblOrdem = new Label { Text = "Ordem:",    AutoSize = true, Left = 370, Top = 14 };
-            numOrdem.Left = 430; numOrdem.Top = 10; numOrdem.Width = 60;
-            numOrdem.Minimum = 0; numOrdem.Maximum = 999;
-
-            var lblSit   = new Label { Text = "Situação:", AutoSize = true, Left = 510, Top = 14 };
-            cmbSituacao.Left = 575; cmbSituacao.Top = 10; cmbSituacao.Width = 80;
+            var lblSit   = new Label { Text = "Situação:", ForeColor = Color.FromArgb(180, 190, 220), AutoSize = true, Left = 402, Top = 18 };
+            cmbSituacao.Left = 465; cmbSituacao.Top = 14; cmbSituacao.Width = 80;
             cmbSituacao.DropDownStyle = ComboBoxStyle.DropDownList;
             cmbSituacao.Items.AddRange(new object[] { "A", "I" });
             cmbSituacao.SelectedIndex = 0;
 
-            var btnS = new Button { Text = "Salvar",    Left = 10,  Top = 50, Width = 100, Height = 28,
+            var btnS = new Button { Text = "Salvar",    Left = 120, Top = 52, Width = 110, Height = 30,
                 BackColor = Color.FromArgb(52, 152, 219),  ForeColor = Color.White, FlatStyle = FlatStyle.Flat,
                 Font = new Font("Segoe UI", 9F, FontStyle.Bold) };
             btnS.FlatAppearance.BorderSize = 0; btnS.Click += BtnSalvar_Click;
 
-            var btnC = new Button { Text = "Cancelar",  Left = 120, Top = 50, Width = 100, Height = 28,
+            var btnC = new Button { Text = "Cancelar",  Left = 240, Top = 52, Width = 110, Height = 30,
                 BackColor = Color.FromArgb(80, 95, 130), ForeColor = Color.White, FlatStyle = FlatStyle.Flat,
                 Font = new Font("Segoe UI", 9F, FontStyle.Bold) };
             btnC.FlatAppearance.BorderSize = 0;
             btnC.Click += (_, __) => { pnlForm.Visible = false; _codigoEditando = 0; };
 
-            var btnD = new Button { Text = "Desativar", Left = 230, Top = 50, Width = 100, Height = 28,
+            var btnD = new Button { Text = "Desativar", Left = 360, Top = 52, Width = 110, Height = 30,
                 BackColor = Color.FromArgb(192, 57, 43),   ForeColor = Color.White, FlatStyle = FlatStyle.Flat,
                 Font = new Font("Segoe UI", 9F, FontStyle.Bold) };
             btnD.FlatAppearance.BorderSize = 0; btnD.Click += BtnDesativar_Click;
 
             pnlForm.Controls.AddRange(new Control[]
-                { lblNome, txtNome, lblOrdem, numOrdem, lblSit, cmbSituacao, btnS, btnC, btnD });
+                { lblNome, txtNome, lblSit, cmbSituacao, btnS, btnC, btnD });
 
             Controls.Add(grid); Controls.Add(topBar); Controls.Add(pnlForm);
 
@@ -103,7 +99,6 @@ namespace Pedeai.Forms
         private DataGridView grid;
         private Panel        pnlForm;
         private TextBox      txtNome;
-        private NumericUpDown numOrdem;
         private ComboBox     cmbSituacao;
     }
 }

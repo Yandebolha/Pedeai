@@ -72,8 +72,49 @@ namespace Pedeai.Forms
 
         private void CarregarGrid()
         {
-            try { grid.DataSource = _bll.Listar(txtBusca?.Text?.Trim() ?? ""); }
+            try
+            {
+                grid.DataSource = _bll.Listar(txtBusca?.Text?.Trim() ?? "");
+                FormatarGrid();
+            }
             catch (Exception ex) { MessageBox.Show("Erro: " + ex.Message); }
+        }
+
+        private void FormatarGrid()
+        {
+            if (grid.Columns.Count == 0) return;
+            grid.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.None;
+
+            void Col(string name, string header, int width, DataGridViewContentAlignment align = DataGridViewContentAlignment.MiddleLeft)
+            {
+                if (!grid.Columns.Contains(name)) return;
+                grid.Columns[name].HeaderText = header;
+                grid.Columns[name].Width      = width;
+                grid.Columns[name].DefaultCellStyle.Alignment = align;
+            }
+
+            Col("Codigo",       "Cód.",         50,  DataGridViewContentAlignment.MiddleCenter);
+            Col("Nome",         "Nome / Razão Social", 200);
+            Col("Telefone",     "Telefone",      110,  DataGridViewContentAlignment.MiddleCenter);
+            Col("Celular",      "Celular",        125,  DataGridViewContentAlignment.MiddleCenter);
+            Col("Email",        "E-mail",         180);
+            Col("Cidade",       "Cidade",         120);
+            Col("TotalPedidos", "Pedidos",         70,  DataGridViewContentAlignment.MiddleCenter);
+            Col("TotalGasto",   "Total Gasto",     90,  DataGridViewContentAlignment.MiddleRight);
+            Col("Situacao",     "Sit.",             45,  DataGridViewContentAlignment.MiddleCenter);
+
+            // Colore a célula Situacao: verde = A, vermelho = I
+            foreach (DataGridViewRow row in grid.Rows)
+            {
+                if (row.IsNewRow) continue;
+                var sit = row.Cells["Situacao"].Value?.ToString();
+                row.Cells["Situacao"].Style.ForeColor     = sit == "A" ? System.Drawing.Color.FromArgb(39, 200, 100) : System.Drawing.Color.FromArgb(231, 76, 60);
+                row.Cells["Situacao"].Style.Font          = new Font(grid.Font, FontStyle.Bold);
+
+                // Formata TotalGasto com R$
+                if (grid.Columns.Contains("TotalGasto") && row.Cells["TotalGasto"].Value is decimal d)
+                    row.Cells["TotalGasto"].Value = d.ToString("N2");
+            }
         }
 
         private void ModoNovo()
@@ -113,7 +154,23 @@ namespace Pedeai.Forms
 
         private void BtnSalvar_Click(object sender, EventArgs e)
         {
-            if (string.IsNullOrWhiteSpace(txtNome.Text)) { MessageBox.Show("Informe o nome."); return; }
+            // Validações obrigatórias
+            if (string.IsNullOrWhiteSpace(txtNome.Text))
+                { MessageBox.Show("Informe o nome / razão social.", "Campo obrigatório", MessageBoxButtons.OK, MessageBoxIcon.Warning); txtNome.Focus(); return; }
+
+            var celDigs = new string(System.Array.FindAll(txtCelular.Text.ToCharArray(), char.IsDigit));
+            if (celDigs.Length < 10)
+                { MessageBox.Show("Informe o celular completo.", "Campo obrigatório", MessageBoxButtons.OK, MessageBoxIcon.Warning); txtCelular.Focus(); return; }
+
+            var cepDigs = new string(System.Array.FindAll(txtCep.Text.ToCharArray(), char.IsDigit));
+            if (cepDigs.Length < 8)
+                { MessageBox.Show("Informe o CEP completo (8 dígitos).", "Campo obrigatório", MessageBoxButtons.OK, MessageBoxIcon.Warning); txtCep.Focus(); return; }
+
+            if (string.IsNullOrWhiteSpace(txtNumero.Text))
+                { MessageBox.Show("Informe o número do endereço.", "Campo obrigatório", MessageBoxButtons.OK, MessageBoxIcon.Warning); txtNumero.Focus(); return; }
+
+            if (string.IsNullOrWhiteSpace(txtComplemento.Text))
+                { MessageBox.Show("Informe o complemento.", "Campo obrigatório", MessageBoxButtons.OK, MessageBoxIcon.Warning); txtComplemento.Focus(); return; }
             var obj = new Cliente
             {
                 Codigo               = _codigoEditando,

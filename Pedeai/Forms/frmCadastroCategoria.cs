@@ -25,7 +25,7 @@ namespace Pedeai.Forms
 
         private void ModoNovo()
         {
-            _codigoEditando = 0; txtNome.Clear(); numOrdem.Value = 0; cmbSituacao.SelectedIndex = 0;
+            _codigoEditando = 0; txtNome.Clear(); cmbSituacao.SelectedIndex = 0;
             pnlForm.Visible = true; txtNome.Focus();
         }
 
@@ -37,7 +37,6 @@ namespace Pedeai.Forms
             if (obj == null) return;
             _codigoEditando = cod;
             txtNome.Text = obj.grmeDescricao_ ?? "";
-            numOrdem.Value = obj.grmeOrdem;
             cmbSituacao.SelectedItem = obj.Situacao;
             pnlForm.Visible = true; txtNome.Focus();
         }
@@ -46,10 +45,10 @@ namespace Pedeai.Forms
         {
             var obj = new GrupoMercadoria
             {
-                Codigo       = _codigoEditando,
+                Codigo         = _codigoEditando,
                 grmeDescricao_ = txtNome.Text.Trim(),
-                grmeOrdem    = (int)numOrdem.Value,
-                Situacao     = cmbSituacao.SelectedItem?.ToString() ?? "A",
+                grmeOrdem      = 0,
+                Situacao       = cmbSituacao.SelectedItem?.ToString() ?? "A",
             };
             var erro = _bll.Salvar(obj);
             if (!string.IsNullOrEmpty(erro)) { MessageBox.Show("Erro: " + erro); return; }
