@@ -18,27 +18,38 @@ namespace Pedeai.DAL
         }
 
         // ── Autenticação ─────────────────────────────────────────────────────
-        public Usuario Autenticar(string login, string senha)
+        // loginOuNome: aceita usuLogin, usuNome ou código-como-string
+        public Usuario Autenticar(string loginOuNome, string senha)
         {
             var hash = HashSenha(senha);
             using var conn = AbrirConexao();
 
-            // 1) Tenta login com hash (fluxo normal)
+            // 1) Tenta por usuLogin com hash (fluxo normal)
             using (var cmd = new MySqlCommand(
                 "SELECT * FROM usuario WHERE usuLogin=@l AND usuSenha=@s AND Situacao='A' LIMIT 1", conn))
             {
-                cmd.Parameters.AddWithValue("@l", login);
+                cmd.Parameters.AddWithValue("@l", loginOuNome);
                 cmd.Parameters.AddWithValue("@s", hash);
                 using var r = cmd.ExecuteReader();
                 if (r.Read()) return Mapear(r);
             }
 
-            // 2) Fallback: senha armazenada como texto puro (migração automática → grava hash)
+            // 2) Tenta por usuNome com hash (campo exibe nome após resolver código)
+            using (var cmd = new MySqlCommand(
+                "SELECT * FROM usuario WHERE usuNome=@n AND usuSenha=@s AND Situacao='A' LIMIT 1", conn))
+            {
+                cmd.Parameters.AddWithValue("@n", loginOuNome);
+                cmd.Parameters.AddWithValue("@s", hash);
+                using var r = cmd.ExecuteReader();
+                if (r.Read()) return Mapear(r);
+            }
+
+            // 3) Fallback: senha em texto puro — migração automática → grava hash
             Usuario user = null;
             using (var cmd2 = new MySqlCommand(
-                "SELECT * FROM usuario WHERE usuLogin=@l AND usuSenha=@raw AND Situacao='A' LIMIT 1", conn))
+                "SELECT * FROM usuario WHERE (usuLogin=@l OR usuNome=@l) AND usuSenha=@raw AND Situacao='A' LIMIT 1", conn))
             {
-                cmd2.Parameters.AddWithValue("@l",   login);
+                cmd2.Parameters.AddWithValue("@l",   loginOuNome);
                 cmd2.Parameters.AddWithValue("@raw", senha);
                 using var r2 = cmd2.ExecuteReader();
                 if (!r2.Read()) return null;
