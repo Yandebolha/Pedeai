@@ -83,6 +83,10 @@ namespace Pedeai.DB
                 AddColumnIfNotExists(conn, db, "grupo_mercadoria", "grmeData_Cadastro",
                     "DATETIME NULL DEFAULT NULL");
 
+                // ── 4c. Colunas em mercadoria ────────────────────────────────
+                AddColumnIfNotExists(conn, db, "mercadoria", "mercHabilitar_Site",
+                    "TINYINT(1) NOT NULL DEFAULT 0");
+
                 // ── 5. Dado inicial: empresa ──────────────────────────────────
                 //     INSERT IGNORE: silencioso se já existir Codigo=1
                 Exec(conn, @"
