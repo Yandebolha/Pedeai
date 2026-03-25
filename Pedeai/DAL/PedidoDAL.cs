@@ -164,6 +164,28 @@ namespace Pedeai.DAL
                     cmdI.Parameters.AddWithValue("@obs",    item.itpwObservacoes ?? "");
                     cmdI.ExecuteNonQuery();
 
+                    // Verificar estoque disponível antes da baixa
+                    var sqlChkEst = @"SELECT mercMercadoria, mercEstoque_Atual, mercControla_Estoque
+                                      FROM mercadoria WHERE Codigo = @merc LIMIT 1";
+                    using var cmdChk = new MySqlCommand(sqlChkEst, conn, trans);
+                    cmdChk.Parameters.AddWithValue("@merc", item.Codigo_Mercadoria);
+                    using (var rdr = cmdChk.ExecuteReader())
+                    {
+                        if (rdr.Read() && Convert.ToInt32(rdr["mercControla_Estoque"]) == 1)
+                        {
+                            var nomeProd   = rdr["mercMercadoria"]?.ToString() ?? item.itpwNome_Mercadoria;
+                            var estDisp    = rdr["mercEstoque_Atual"] == DBNull.Value
+                                                ? 0m
+                                                : Convert.ToDecimal(rdr["mercEstoque_Atual"]);
+                            if (item.itpwQtde > estDisp)
+                            {
+                                trans.Rollback();
+                                return $"Estoque insuficiente para \"{nomeProd}\": " +
+                                       $"disponível {estDisp:0.##}, solicitado {item.itpwQtde:0.##}.";
+                            }
+                        }
+                    }
+
                     // Baixa de estoque (apenas quando o produto controla estoque)
                     var sqlEst = @"UPDATE mercadoria
                                    SET mercEstoque_Atual = mercEstoque_Atual - @qtde
