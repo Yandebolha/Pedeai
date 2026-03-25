@@ -103,9 +103,9 @@ namespace Pedeai.DAL
                 cmdP.Parameters.AddWithValue("@sit",   0); // Pendente
                 cmdP.Parameters.AddWithValue("@tent",  pedido.pediTipo_Entrega);
                 cmdP.Parameters.AddWithValue("@fpag",  pedido.pediForma_Pagamento);
-                cmdP.Parameters.AddWithValue("@sub",   pedido.pediValor_Total);
+                cmdP.Parameters.AddWithValue("@sub",   pedido.pediSubtotal);
                 cmdP.Parameters.AddWithValue("@taxa",  pedido.pediTaxa_Entrega);
-                cmdP.Parameters.AddWithValue("@total", pedido.pediValor_Total + pedido.pediTaxa_Entrega);
+                cmdP.Parameters.AddWithValue("@total", pedido.pediValor_Total);
                 cmdP.Parameters.AddWithValue("@troco", pedido.pediTroco_Para ?? (object)DBNull.Value);
                 cmdP.Parameters.AddWithValue("@end",   pedido.pediEndereco_Entrega ?? "");
                 cmdP.Parameters.AddWithValue("@obs",   pedido.pediObservacoes ?? "");
