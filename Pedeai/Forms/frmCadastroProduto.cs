@@ -134,7 +134,7 @@ namespace Pedeai.Forms
 
             var lblEst  = new Label { Text = "Estoque:",   Left = 474, Top = 79, AutoSize = true };
             numEstoque.Left = 530; numEstoque.Top = 76; numEstoque.Width = 75;
-            numEstoque.DecimalPlaces = 2; numEstoque.Maximum = 999999;
+            numEstoque.DecimalPlaces = 2; numEstoque.Minimum = -999999; numEstoque.Maximum = 999999;
 
             chkControlaEstoque.Text = "Controla estoque"; chkControlaEstoque.Left = 615; chkControlaEstoque.Top = 78; chkControlaEstoque.AutoSize = true;
             chkDestaque.Text        = "Destaque";          chkDestaque.Left        = 755; chkDestaque.Top        = 78; chkDestaque.AutoSize        = true;
