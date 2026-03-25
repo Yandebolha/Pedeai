@@ -25,6 +25,11 @@ namespace Pedeai
         public Form1()
         {
             InitializeComponent();
+            if (!DesignMode)
+            {
+                BuildDashboard();
+                BuildPedidos();
+            }
         }
 
         private Button BotaoNav(string texto, int y, Action onClick)

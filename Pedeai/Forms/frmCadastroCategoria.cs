@@ -14,7 +14,7 @@ namespace Pedeai.Forms
         public frmCadastroCategoria()
         {
             InitializeComponent();
-            Carregar();
+            if (!DesignMode) Carregar();
         }
 
         private void Carregar()

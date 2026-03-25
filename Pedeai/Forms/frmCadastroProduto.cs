@@ -17,7 +17,7 @@ namespace Pedeai.Forms
         public frmCadastroProduto()
         {
             InitializeComponent();
-            CarregarGrid();
+            if (!DesignMode) CarregarGrid();
         }
 
         private void BtnImagem_Click(object sender, EventArgs e)

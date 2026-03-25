@@ -82,9 +82,6 @@ namespace Pedeai
             pnlContent.BackColor = Color.FromArgb(15, 22, 45);
             pnlContent.Padding = new Padding(20);
 
-            BuildDashboard();
-            BuildPedidos();
-
             Controls.Add(pnlContent);
             Controls.Add(pnlSidebar);
             Controls.Add(pnlTopBar);

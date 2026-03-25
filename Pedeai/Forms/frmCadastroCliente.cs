@@ -18,7 +18,7 @@ namespace Pedeai.Forms
         public frmCadastroCliente()
         {
             InitializeComponent();
-            CarregarGrid();
+            if (!DesignMode) CarregarGrid();
         }
 
         private void TxtCpf_TextChanged(object sender, EventArgs e)

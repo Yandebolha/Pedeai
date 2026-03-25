@@ -17,7 +17,7 @@ namespace Pedeai.Forms
         public frmPedidoManual()
         {
             InitializeComponent();
-            CarregarProdutos();
+            if (!DesignMode) CarregarProdutos();
         }
 
         // ── Visibilidade dinâmica ─────────────────────────────────────────────
