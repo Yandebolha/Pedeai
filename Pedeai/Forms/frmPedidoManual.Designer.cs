@@ -68,6 +68,7 @@ namespace Pedeai.Forms
 
             var lblTelLabel = new Label { Text = "Telefone:", Left = 426, Top = 11, AutoSize = true };
             txtTelefone.Left = 490; txtTelefone.Top = 7; txtTelefone.Width = 170;
+            txtTelefone.Anchor = AnchorStyles.Top | AnchorStyles.Left;
 
             // Linha 2 — Tipo de Entrega | Endereço
             var lblEntrega = new Label { Text = "Entrega:", Left = 10, Top = 44, AutoSize = true };
@@ -78,7 +79,8 @@ namespace Pedeai.Forms
             cmbEntrega.SelectedIndexChanged += (_, __) => AtualizarVisibilidade();
 
             lblEndereco.Text = "Endereço:"; lblEndereco.Left = 200; lblEndereco.Top = 44; lblEndereco.AutoSize = true;
-            txtEndereco.Left = 262; txtEndereco.Top = 40; txtEndereco.Width = 490;
+            txtEndereco.Left = 262; txtEndereco.Top = 40; txtEndereco.Width = 450;
+            txtEndereco.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
 
             // Linha 3 — Pagamento | Troco | Taxa
             var lblPag = new Label { Text = "Pagamento:", Left = 10, Top = 77, AutoSize = true };
@@ -99,7 +101,8 @@ namespace Pedeai.Forms
 
             // Linha 4 — Observações do pedido
             var lblObs = new Label { Text = "Obs.:", Left = 10, Top = 110, AutoSize = true };
-            txtObs.Left = 52; txtObs.Top = 107; txtObs.Width = 700;
+            txtObs.Left = 52; txtObs.Top = 107; txtObs.Width = 600;
+            txtObs.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
 
             pnlDados.Controls.AddRange(new Control[]
             {
@@ -133,17 +136,29 @@ namespace Pedeai.Forms
             numUnitario.DecimalPlaces = 2; numUnitario.Maximum = 9999;
 
             var lblObsItem = new Label { Text = "Obs:", Left = 609, Top = 14, AutoSize = true };
-            txtObsItem.Left = 634; txtObsItem.Top = 10; txtObsItem.Width = 130;
+            txtObsItem.Left = 634; txtObsItem.Top = 10; txtObsItem.Width = 120;
 
             var btnAdd = new Button
             {
-                Text = "➕ Adicionar", Left = 778, Top = 8, Width = 115, Height = 28,
+                Text = "➕ Adicionar", Top = 8, Width = 120, Height = 28,
                 BackColor = Color.FromArgb(39, 174, 96), ForeColor = Color.White,
                 FlatStyle = FlatStyle.Flat, Font = new Font("Segoe UI", 9F, FontStyle.Bold),
-                Cursor = Cursors.Hand
+                Cursor = Cursors.Hand,
+                Anchor = AnchorStyles.Top | AnchorStyles.Right
             };
+            btnAdd.Left = pnlItem.Width - btnAdd.Width - 8;
             btnAdd.FlatAppearance.BorderSize = 0;
             btnAdd.Click += BtnAdicionarItem_Click;
+
+            txtObsItem.Top = 10; txtObsItem.Width = 120;
+            txtObsItem.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            // posicionado na frente do btnAdd
+            pnlItem.SizeChanged += (_, __) =>
+            {
+                btnAdd.Left    = pnlItem.Width - btnAdd.Width - 8;
+                txtObsItem.Left = btnAdd.Left - txtObsItem.Width - 34;
+                lblObsItem.Left = txtObsItem.Left - lblObsItem.Width - 4;
+            };
 
             pnlItem.Controls.AddRange(new Control[]
                 { lblProd, cmbProduto, lblQtde, numQtde, lblUnit, numUnitario,
@@ -179,36 +194,53 @@ namespace Pedeai.Forms
                 Text = "🗑 Remover item", Left = 10, Top = 11, Width = 140, Height = 30,
                 BackColor = Color.FromArgb(192, 57, 43), ForeColor = Color.White,
                 FlatStyle = FlatStyle.Flat, Font = new Font("Segoe UI", 9F, FontStyle.Bold),
-                Cursor = Cursors.Hand
+                Cursor = Cursors.Hand,
+                Anchor = AnchorStyles.Bottom | AnchorStyles.Left
             };
             btnRem.FlatAppearance.BorderSize = 0;
             btnRem.Click += BtnRemoverItem_Click;
 
             lblTotal.Text      = "Total: R$ 0,00";
-            lblTotal.Left      = 400; lblTotal.Top = 14;
+            lblTotal.Top       = 16;
             lblTotal.Font      = new Font("Segoe UI", 13F, FontStyle.Bold);
             lblTotal.ForeColor = Color.FromArgb(25, 111, 61);
             lblTotal.AutoSize  = true;
+            lblTotal.Anchor    = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            lblTotal.TextAlign = ContentAlignment.MiddleCenter;
+
+            var btnCanc = new Button
+            {
+                Text = "✖ Cancelar", Top = 11, Width = 110, Height = 30,
+                BackColor = Color.FromArgb(108, 117, 125), ForeColor = Color.White,
+                FlatStyle = FlatStyle.Flat, Font = new Font("Segoe UI", 9F, FontStyle.Bold),
+                Cursor = Cursors.Hand,
+                Anchor = AnchorStyles.Bottom | AnchorStyles.Right
+            };
+            btnCanc.FlatAppearance.BorderSize = 0;
+            btnCanc.Click += (_, __) => Close();
 
             var btnSal = new Button
             {
-                Text = "✔ Salvar Pedido", Left = 705, Top = 11, Width = 150, Height = 30,
+                Text = "✔ Salvar Pedido", Top = 11, Width = 150, Height = 30,
                 BackColor = Color.FromArgb(33, 150, 243), ForeColor = Color.White,
                 FlatStyle = FlatStyle.Flat, Font = new Font("Segoe UI", 9F, FontStyle.Bold),
-                Cursor = Cursors.Hand
+                Cursor = Cursors.Hand,
+                Anchor = AnchorStyles.Bottom | AnchorStyles.Right
             };
             btnSal.FlatAppearance.BorderSize = 0;
             btnSal.Click += BtnSalvar_Click;
 
-            var btnCanc = new Button
+            // Posiciona botões direitos e reposiciona ao redimensionar
+            pnlRodape.SizeChanged += (_, __) =>
             {
-                Text = "✖ Cancelar", Left = 865, Top = 11, Width = 110, Height = 30,
-                BackColor = Color.FromArgb(108, 117, 125), ForeColor = Color.White,
-                FlatStyle = FlatStyle.Flat, Font = new Font("Segoe UI", 9F, FontStyle.Bold),
-                Cursor = Cursors.Hand
+                btnCanc.Left = pnlRodape.Width - btnCanc.Width - 10;
+                btnSal.Left  = btnCanc.Left - btnSal.Width - 8;
+                lblTotal.Left  = 160;
+                lblTotal.Width = btnSal.Left - 160 - 8;
             };
-            btnCanc.FlatAppearance.BorderSize = 0;
-            btnCanc.Click += (_, __) => Close();
+            // Posicionamento inicial
+            btnCanc.Left = 860; btnSal.Left = 700;
+            lblTotal.Left = 160; lblTotal.Width = 530;
 
             pnlRodape.Controls.AddRange(new Control[] { btnRem, lblTotal, btnSal, btnCanc });
 
