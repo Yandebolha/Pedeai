@@ -163,6 +163,15 @@ namespace Pedeai.DAL
                     cmdI.Parameters.AddWithValue("@sub",    item.itpwSubtotal);
                     cmdI.Parameters.AddWithValue("@obs",    item.itpwObservacoes ?? "");
                     cmdI.ExecuteNonQuery();
+
+                    // Baixa de estoque (apenas quando o produto controla estoque)
+                    var sqlEst = @"UPDATE mercadoria
+                                   SET mercEstoque_Atual = mercEstoque_Atual - @qtde
+                                   WHERE Codigo = @merc AND mercControla_Estoque = 1";
+                    using var cmdEst = new MySqlCommand(sqlEst, conn, trans);
+                    cmdEst.Parameters.AddWithValue("@qtde", item.itpwQtde);
+                    cmdEst.Parameters.AddWithValue("@merc", item.Codigo_Mercadoria);
+                    cmdEst.ExecuteNonQuery();
                 }
 
                 trans.Commit();
