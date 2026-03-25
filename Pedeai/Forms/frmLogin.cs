@@ -11,7 +11,7 @@ namespace Pedeai.Forms
 
         public frmLogin()
         {
-            InitializeComponent();
+            BuildUI();
         }
 
         private void BtnEntrar_Click(object sender, EventArgs e)

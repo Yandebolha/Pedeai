@@ -13,7 +13,7 @@ namespace Pedeai.Forms
             base.Dispose(disposing);
         }
 
-        private void InitializeComponent()
+        private void BuildUI()
         {
             // ── Form ─────────────────────────────────────────────────────────
             this.Text            = "Empresa e Usuarios";

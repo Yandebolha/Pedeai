@@ -13,7 +13,7 @@ namespace Pedeai.Forms
 
         public frmCadastroCupom()
         {
-            InitializeComponent();
+            BuildUI();
             if (!DesignMode) CarregarGrid();
         }
 

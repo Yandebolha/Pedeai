@@ -15,7 +15,7 @@ namespace Pedeai.Forms
 
         public frmEmpresa()
         {
-            InitializeComponent();
+            BuildUI();
             CarregarEmpresa();
             CarregarUsuarios();
         }

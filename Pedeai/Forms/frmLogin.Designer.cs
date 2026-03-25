@@ -13,7 +13,7 @@ namespace Pedeai.Forms
             base.Dispose(disposing);
         }
 
-        private void InitializeComponent()
+        private void BuildUI()
         {
             // ── Cores da paleta principal ────────────────────────────────────
             var clrBg      = Color.FromArgb(15,  22,  45);   // fundo geral

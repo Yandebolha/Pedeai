@@ -14,7 +14,7 @@ namespace Pedeai.Forms
             base.Dispose(disposing);
         }
 
-        private void InitializeComponent()
+        private void BuildUI()
         {
             grid        = new DataGridView();
             pnlForm     = new Panel();
@@ -103,28 +103,39 @@ namespace Pedeai.Forms
             dtpValido.Format = DateTimePickerFormat.Short;
 
             // Botões
-            var btnS = new Button { Text = "Salvar",    Left = 10,  Top = 84, Width = 100, Height = 28,
+            var pnlBtns = new Panel { Dock = DockStyle.Bottom, Height = 48,
+                BackColor = Color.FromArgb(28, 37, 65) };
+            var btnS = new Button { Text = "Salvar",    Top = 10, Width = 110, Height = 28,
                 BackColor = Color.FromArgb(52, 152, 219),  ForeColor = Color.White, FlatStyle = FlatStyle.Flat,
                 Font = new Font("Segoe UI", 9F, FontStyle.Bold) };
             btnS.FlatAppearance.BorderSize = 0; btnS.Click += BtnSalvar_Click;
 
-            var btnC = new Button { Text = "Cancelar",  Left = 120, Top = 84, Width = 100, Height = 28,
+            var btnC = new Button { Text = "Cancelar",  Top = 10, Width = 110, Height = 28,
                 BackColor = Color.FromArgb(80, 95, 130), ForeColor = Color.White, FlatStyle = FlatStyle.Flat,
                 Font = new Font("Segoe UI", 9F, FontStyle.Bold) };
             btnC.FlatAppearance.BorderSize = 0;
             btnC.Click += (_, __) => { pnlForm.Visible = false; _codigoEditando = 0; };
 
-            var btnD = new Button { Text = "Desativar", Left = 230, Top = 84, Width = 100, Height = 28,
+            var btnD = new Button { Text = "Desativar", Top = 10, Width = 110, Height = 28,
                 BackColor = Color.FromArgb(192, 57, 43),   ForeColor = Color.White, FlatStyle = FlatStyle.Flat,
                 Font = new Font("Segoe UI", 9F, FontStyle.Bold) };
             btnD.FlatAppearance.BorderSize = 0; btnD.Click += BtnDesativar_Click;
 
+            void CentrarBotoes()
+            {
+                int x = (pnlBtns.Width - 110 * 3 - 10 * 2) / 2;
+                if (x < 10) x = 10;
+                btnS.Left = x; btnC.Left = x + 120; btnD.Left = x + 240;
+            }
+            pnlBtns.SizeChanged += (_, __) => CentrarBotoes();
+            pnlBtns.Controls.AddRange(new Control[] { btnS, btnC, btnD });
+
             pnlForm.Controls.AddRange(new Control[]
             {
                 lblCod, txtCodigo, lblDesc, txtDescricao, lblTipo, cmbTipo, lblSit, cmbSituacao,
-                lblVal, numValor, lblMin, numMinimo, lblLim, numLimite, lblVal2, dtpValido,
-                btnS, btnC, btnD
+                lblVal, numValor, lblMin, numMinimo, lblLim, numLimite, lblVal2, dtpValido
             });
+            pnlForm.Controls.Add(pnlBtns);
 
             Controls.Add(grid); Controls.Add(topBar); Controls.Add(pnlForm);
 
