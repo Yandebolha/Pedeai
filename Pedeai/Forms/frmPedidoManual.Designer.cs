@@ -200,13 +200,16 @@ namespace Pedeai.Forms
             btnRem.FlatAppearance.BorderSize = 0;
             btnRem.Click += BtnRemoverItem_Click;
 
-            lblTotal.Text      = "Total: R$ 0,00";
-            lblTotal.Top       = 16;
-            lblTotal.Font      = new Font("Segoe UI", 13F, FontStyle.Bold);
-            lblTotal.ForeColor = Color.FromArgb(25, 111, 61);
-            lblTotal.AutoSize  = true;
-            lblTotal.Anchor    = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            lblTotal.TextAlign = ContentAlignment.MiddleCenter;
+            var btnSal = new Button
+            {
+                Text = "✔ Salvar Pedido", Top = 11, Width = 150, Height = 30,
+                BackColor = Color.FromArgb(33, 150, 243), ForeColor = Color.White,
+                FlatStyle = FlatStyle.Flat, Font = new Font("Segoe UI", 9F, FontStyle.Bold),
+                Cursor = Cursors.Hand,
+                Anchor = AnchorStyles.Bottom | AnchorStyles.None
+            };
+            btnSal.FlatAppearance.BorderSize = 0;
+            btnSal.Click += BtnSalvar_Click;
 
             var btnCanc = new Button
             {
@@ -214,33 +217,32 @@ namespace Pedeai.Forms
                 BackColor = Color.FromArgb(108, 117, 125), ForeColor = Color.White,
                 FlatStyle = FlatStyle.Flat, Font = new Font("Segoe UI", 9F, FontStyle.Bold),
                 Cursor = Cursors.Hand,
-                Anchor = AnchorStyles.Bottom | AnchorStyles.Right
+                Anchor = AnchorStyles.Bottom | AnchorStyles.None
             };
             btnCanc.FlatAppearance.BorderSize = 0;
             btnCanc.Click += (_, __) => Close();
 
-            var btnSal = new Button
-            {
-                Text = "✔ Salvar Pedido", Top = 11, Width = 150, Height = 30,
-                BackColor = Color.FromArgb(33, 150, 243), ForeColor = Color.White,
-                FlatStyle = FlatStyle.Flat, Font = new Font("Segoe UI", 9F, FontStyle.Bold),
-                Cursor = Cursors.Hand,
-                Anchor = AnchorStyles.Bottom | AnchorStyles.Right
-            };
-            btnSal.FlatAppearance.BorderSize = 0;
-            btnSal.Click += BtnSalvar_Click;
+            lblTotal.Text      = "Total: R$ 0,00";
+            lblTotal.Top       = 16;
+            lblTotal.Font      = new Font("Segoe UI", 13F, FontStyle.Bold);
+            lblTotal.ForeColor = Color.FromArgb(25, 111, 61);
+            lblTotal.AutoSize  = true;
+            lblTotal.Anchor    = AnchorStyles.Bottom | AnchorStyles.None;
 
-            // Posiciona botões direitos e reposiciona ao redimensionar
-            pnlRodape.SizeChanged += (_, __) =>
+            // Centraliza Salvar + Cancelar; Total fica ancorado na direita
+            void RepositionarRodape()
             {
-                btnCanc.Left = pnlRodape.Width - btnCanc.Width - 10;
-                btnSal.Left  = btnCanc.Left - btnSal.Width - 8;
-                lblTotal.Left  = 160;
-                lblTotal.Width = btnSal.Left - 160 - 8;
-            };
-            // Posicionamento inicial
-            btnCanc.Left = 860; btnSal.Left = 700;
-            lblTotal.Left = 160; lblTotal.Width = 530;
+                int margem = 10;
+                // Total na direita
+                lblTotal.Left = pnlRodape.Width - lblTotal.PreferredWidth - margem;
+                // Salvar + Cancelar centralizados
+                int pairW    = btnSal.Width + 8 + btnCanc.Width;
+                int pairX    = (pnlRodape.Width - pairW) / 2;
+                btnSal.Left  = pairX;
+                btnCanc.Left = pairX + btnSal.Width + 8;
+            }
+            pnlRodape.SizeChanged   += (_, __) => RepositionarRodape();
+            pnlRodape.HandleCreated += (_, __) => RepositionarRodape();
 
             pnlRodape.Controls.AddRange(new Control[] { btnRem, lblTotal, btnSal, btnCanc });
 
