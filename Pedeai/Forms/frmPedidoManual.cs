@@ -86,27 +86,25 @@ namespace Pedeai.Forms
                 itpwQtde            = (int)numQtde.Value,
                 itpwPreco_Unitario  = numUnitario.Value,
                 itpwSubtotal        = numUnitario.Value * numQtde.Value,
-                itpwObservacoes     = txtObsItem.Text.Trim(),
             };
             _itens.Add(item);
 
             gridItens.Rows.Add(item.itpwNome_Mercadoria, item.itpwQtde,
                 item.itpwPreco_Unitario.ToString("N2"),
-                item.itpwSubtotal.ToString("N2"),
-                item.itpwObservacoes);
+                item.itpwSubtotal.ToString("N2"));
 
             // Reset
             cmbProduto.SelectedIndex = -1; cmbProduto.Text = "";
-            numQtde.Value = 1; numUnitario.Value = 0; txtObsItem.Clear();
+            numQtde.Value = 1; numUnitario.Value = 0;
             AtualizarTotal();
         }
 
-        private void BtnRemoverItem_Click(object sender, EventArgs e)
+        private void GridItens_CellClick(object sender, DataGridViewCellEventArgs e)
         {
-            if (gridItens.SelectedRows.Count == 0) return;
-            int idx = gridItens.SelectedRows[0].Index;
-            _itens.RemoveAt(idx);
-            gridItens.Rows.RemoveAt(idx);
+            if (e.RowIndex < 0) return;
+            if (gridItens.Columns[e.ColumnIndex].Name != "Remover") return;
+            _itens.RemoveAt(e.RowIndex);
+            gridItens.Rows.RemoveAt(e.RowIndex);
             AtualizarTotal();
         }
 

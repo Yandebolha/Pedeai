@@ -29,7 +29,6 @@ namespace Pedeai.Forms
             cmbProduto           = new ComboBox();
             numQtde              = new NumericUpDown();
             numUnitario          = new NumericUpDown();
-            txtObsItem           = new TextBox();
             gridItens            = new DataGridView();
             lblTotal             = new Label();
 
@@ -268,7 +267,6 @@ namespace Pedeai.Forms
         private ComboBox      cmbProduto;
         private NumericUpDown numQtde;
         private NumericUpDown numUnitario;
-        private TextBox       txtObsItem;
         private DataGridView  gridItens;
         private Label         lblTotal;
     }
