@@ -36,6 +36,21 @@ namespace Pedeai.Forms
             Close();
         }
 
+        private void TxtLogin_Leave(object sender, EventArgs e)
+        {
+            if (string.IsNullOrWhiteSpace(txtLogin.Text))
+            {
+                lblNomeUsuario.Text = "";
+                return;
+            }
+            try
+            {
+                var nome = _bll.BuscarNomePorLogin(txtLogin.Text.Trim());
+                lblNomeUsuario.Text = string.IsNullOrEmpty(nome) ? "" : nome;
+            }
+            catch { lblNomeUsuario.Text = ""; }
+        }
+
         private void TxtSenha_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.KeyCode == Keys.Enter) BtnEntrar_Click(null, null);

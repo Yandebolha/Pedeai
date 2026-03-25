@@ -23,7 +23,7 @@ namespace Pedeai.Forms
             this.BackColor       = Color.FromArgb(15, 22, 45);
             this.ForeColor       = Color.White;
             this.Font            = new Font("Segoe UI", 10F);
-            this.ClientSize      = new Size(360, 300);
+            this.ClientSize      = new Size(360, 320);
 
             // Logo / titulo
             var lblTitle = new Label
@@ -64,12 +64,24 @@ namespace Pedeai.Forms
                 Font          = new Font("Segoe UI", 10F)
             };
             txtLogin.KeyDown += TxtLogin_KeyDown;
+            txtLogin.Leave  += TxtLogin_Leave;
+
+            // Nome do usuario (exibido ao sair do campo login)
+            lblNomeUsuario = new Label
+            {
+                Text      = "",
+                ForeColor = Color.FromArgb(52, 200, 120),
+                Font      = new Font("Segoe UI", 9F, FontStyle.Italic),
+                AutoSize  = false,
+                TextAlign = ContentAlignment.MiddleLeft,
+                Bounds    = new System.Drawing.Rectangle(60, 176, 240, 18)
+            };
 
             // Senha
-            var lblSenha = new Label { Text = "Senha:", ForeColor = Color.FromArgb(180, 190, 220), Bounds = new System.Drawing.Rectangle(60, 182, 60, 22) };
+            var lblSenha = new Label { Text = "Senha:", ForeColor = Color.FromArgb(180, 190, 220), Bounds = new System.Drawing.Rectangle(60, 196, 60, 22) };
             txtSenha = new TextBox
             {
-                Bounds        = new System.Drawing.Rectangle(60, 204, 240, 28),
+                Bounds        = new System.Drawing.Rectangle(60, 218, 240, 28),
                 BackColor     = Color.FromArgb(28, 37, 65),
                 ForeColor     = Color.White,
                 BorderStyle   = BorderStyle.FixedSingle,
@@ -86,14 +98,14 @@ namespace Pedeai.Forms
                 AutoSize  = false,
                 TextAlign = ContentAlignment.MiddleCenter,
                 Font      = new Font("Segoe UI", 9F),
-                Bounds    = new System.Drawing.Rectangle(60, 238, 240, 20)
+                Bounds    = new System.Drawing.Rectangle(60, 252, 240, 20)
             };
 
             // Botao Entrar
             var btnEntrar = new Button
             {
                 Text      = "Entrar",
-                Bounds    = new System.Drawing.Rectangle(60, 262, 240, 30),
+                Bounds    = new System.Drawing.Rectangle(60, 278, 240, 30),
                 BackColor = Color.FromArgb(52, 152, 219),
                 ForeColor = Color.White,
                 FlatStyle = FlatStyle.Flat,
@@ -105,11 +117,12 @@ namespace Pedeai.Forms
             this.AcceptButton = btnEntrar;
 
             this.Controls.AddRange(new System.Windows.Forms.Control[]
-                { lblTitle, lblSub, sep, lblLogin, txtLogin, lblSenha, txtSenha, lblMensagem, btnEntrar });
+                { lblTitle, lblSub, sep, lblLogin, txtLogin, lblNomeUsuario, lblSenha, txtSenha, lblMensagem, btnEntrar });
         }
 
         internal TextBox txtLogin;
         internal TextBox txtSenha;
         internal Label   lblMensagem;
+        internal Label   lblNomeUsuario;
     }
 }

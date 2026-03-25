@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Windows.Forms;
+using Pedeai.DB;
 using Pedeai.Forms;
 
 namespace Pedeai
@@ -11,6 +12,9 @@ namespace Pedeai
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
+
+            // Cria tabelas, colunas e dados iniciais automaticamente
+            if (!DbMigrator.Executar()) return;
 
             // Exibe tela de login; cancela aplicacao se o usuario fechar sem logar
             using (var login = new frmLogin())

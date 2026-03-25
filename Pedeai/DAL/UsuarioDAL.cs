@@ -22,13 +22,51 @@ namespace Pedeai.DAL
         {
             var hash = HashSenha(senha);
             using var conn = AbrirConexao();
+
+            // 1) Tenta login com hash (fluxo normal)
+            using (var cmd = new MySqlCommand(
+                "SELECT * FROM usuario WHERE usuLogin=@l AND usuSenha=@s AND Situacao='A' LIMIT 1", conn))
+            {
+                cmd.Parameters.AddWithValue("@l", login);
+                cmd.Parameters.AddWithValue("@s", hash);
+                using var r = cmd.ExecuteReader();
+                if (r.Read()) return Mapear(r);
+            }
+
+            // 2) Fallback: senha armazenada como texto puro (migração automática → grava hash)
+            Usuario user = null;
+            using (var cmd2 = new MySqlCommand(
+                "SELECT * FROM usuario WHERE usuLogin=@l AND usuSenha=@raw AND Situacao='A' LIMIT 1", conn))
+            {
+                cmd2.Parameters.AddWithValue("@l",   login);
+                cmd2.Parameters.AddWithValue("@raw", senha);
+                using var r2 = cmd2.ExecuteReader();
+                if (!r2.Read()) return null;
+                user = Mapear(r2);
+            }
+
+            // Atualiza para hash seguro automaticamente
+            using (var upd = new MySqlCommand(
+                "UPDATE usuario SET usuSenha=@hash WHERE Codigo=@cod", conn))
+            {
+                upd.Parameters.AddWithValue("@hash", hash);
+                upd.Parameters.AddWithValue("@cod",  user.Codigo);
+                upd.ExecuteNonQuery();
+            }
+
+            return user;
+        }
+
+        // ── Busca nome pelo login (para exibir na tela) ──────────────────────
+        public string BuscarNomePorLogin(string login)
+        {
+            if (string.IsNullOrWhiteSpace(login)) return "";
+            using var conn = AbrirConexao();
             using var cmd = new MySqlCommand(
-                "SELECT * FROM usuario WHERE usuLogin=@l AND usuSenha=@s AND Situacao='A' LIMIT 1", conn);
-            cmd.Parameters.AddWithValue("@l", login);
-            cmd.Parameters.AddWithValue("@s", hash);
-            using var r = cmd.ExecuteReader();
-            if (!r.Read()) return null;
-            return Mapear(r);
+                "SELECT usuNome FROM usuario WHERE usuLogin=@l AND Situacao='A' LIMIT 1", conn);
+            cmd.Parameters.AddWithValue("@l", login.Trim());
+            var r = cmd.ExecuteScalar();
+            return r == null || r == DBNull.Value ? "" : r.ToString();
         }
 
         // ── Listagem ─────────────────────────────────────────────────────────
