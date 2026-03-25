@@ -17,6 +17,7 @@ namespace Pedeai.Forms
         public frmCadastroProduto()
         {
             InitializeComponent();
+            BuildUI();
             if (!DesignMode) CarregarGrid();
         }
 

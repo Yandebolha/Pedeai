@@ -15,6 +15,21 @@ namespace Pedeai.Forms
 
         private void InitializeComponent()
         {
+            this.SuspendLayout();
+            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.ClientSize = new System.Drawing.Size(684, 481);
+            this.MinimumSize = new System.Drawing.Size(600, 450);
+            this.BackColor = System.Drawing.Color.FromArgb(15, 22, 45);
+            this.ForeColor = System.Drawing.Color.White;
+            this.Font = new System.Drawing.Font("Segoe UI", 9F);
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
+            this.Text = "Categorias de Produtos";
+            this.ResumeLayout(false);
+        }
+
+        private void BuildUI()
+        {
             grid       = new DataGridView();
             pnlForm    = new Panel();
             txtNome    = new TextBox();
@@ -95,17 +110,6 @@ namespace Pedeai.Forms
             pnlForm.Controls.Add(pnlBtns);
 
             Controls.Add(grid); Controls.Add(topBar); Controls.Add(pnlForm);
-
-            // ── Propriedades do Form ──────────────────────────────────────
-            AutoScaleDimensions = new SizeF(6F, 13F);
-            AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(684, 481);
-            Font = new Font("Segoe UI", 9F);
-            MinimumSize = new Size(600, 450);
-            BackColor = Color.FromArgb(15, 22, 45);
-            ForeColor = Color.White;
-            StartPosition = FormStartPosition.CenterParent;
-            Text = "Categorias de Produtos";
         }
 
         private DataGridView grid;

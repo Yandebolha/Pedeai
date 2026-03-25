@@ -15,6 +15,21 @@ namespace Pedeai.Forms
 
         private void InitializeComponent()
         {
+            this.SuspendLayout();
+            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.ClientSize = new System.Drawing.Size(934, 581);
+            this.MinimumSize = new System.Drawing.Size(860, 540);
+            this.BackColor = System.Drawing.Color.FromArgb(15, 22, 45);
+            this.ForeColor = System.Drawing.Color.White;
+            this.Font = new System.Drawing.Font("Segoe UI", 9F);
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
+            this.Text = "Cadastro de Clientes";
+            this.ResumeLayout(false);
+        }
+
+        private void BuildUI()
+        {
             grid        = new DataGridView();
             pnlForm     = new Panel();
             txtBusca    = new TextBox();
@@ -76,7 +91,6 @@ namespace Pedeai.Forms
             pnlForm.BorderStyle = BorderStyle.FixedSingle;
             pnlForm.Visible = false;
 
-            // Linha 1: Nome | CPF | Situação
             var lblNome = new Label { Text = "Nome / Razão Social:", Left = 10, Top = 11, AutoSize = true };
             txtNome.Left = 150; txtNome.Top = 8; txtNome.Width = 260;
 
@@ -91,7 +105,6 @@ namespace Pedeai.Forms
             cmbSituacao.Items.AddRange(new object[] { "Ativo", "Inativo" });
             cmbSituacao.SelectedIndex = 0;
 
-            // Linha 2: Telefone | Celular | E-mail
             var lblTel  = new Label { Text = "Telefone:", Left = 10, Top = 43, AutoSize = true };
             txtTelefone.Mask = "(00) 0000-0000"; txtTelefone.Left = 72; txtTelefone.Top = 40; txtTelefone.Width = 130;
 
@@ -101,7 +114,6 @@ namespace Pedeai.Forms
             var lblEmail = new Label { Text = "E-mail:", Left = 416, Top = 43, AutoSize = true };
             txtEmail.Left = 455; txtEmail.Top = 40; txtEmail.Width = 264;
 
-            // Linha 3: CEP | Endereço | Nº | Compl.
             var lblCep  = new Label { Text = "CEP:",     Left = 10,  Top = 75, AutoSize = true };
             txtCep.Mask = "00000-000"; txtCep.Left = 42; txtCep.Top = 72; txtCep.Width = 95;
             txtCep.Leave += TxtCep_Leave;
@@ -115,7 +127,6 @@ namespace Pedeai.Forms
             var lblComp = new Label { Text = "Compl.:",  Left = 540, Top = 75, AutoSize = true };
             txtComplemento.Left = 582; txtComplemento.Top = 72; txtComplemento.Width = 134;
 
-            // Linha 4: Bairro | Cidade | UF
             var lblBai  = new Label { Text = "Bairro:",  Left = 10,  Top = 107, AutoSize = true };
             txtBairro.Left = 55; txtBairro.Top = 104; txtBairro.Width = 190;
 
@@ -125,7 +136,6 @@ namespace Pedeai.Forms
             var lblUF   = new Label { Text = "UF:",      Left = 507, Top = 107, AutoSize = true };
             txtEstado.Left = 522; txtEstado.Top = 104; txtEstado.Width = 50;
 
-            // Botões
             var pnlBtns = new Panel { Dock = DockStyle.Bottom, Height = 48,
                 BackColor = Color.FromArgb(28, 37, 65) };
             var btnS = new Button { Text = "Salvar",    Top = 10, Width = 110, Height = 28,
@@ -158,16 +168,6 @@ namespace Pedeai.Forms
             pnlForm.Controls.Add(pnlBtns);
 
             Controls.Add(grid); Controls.Add(topBar); Controls.Add(pnlForm);
-
-            AutoScaleDimensions = new SizeF(6F, 13F);
-            AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(934, 581);
-            Font = new Font("Segoe UI", 9F);
-            MinimumSize = new Size(860, 540);
-            BackColor = Color.FromArgb(15, 22, 45);
-            ForeColor = Color.White;
-            StartPosition = FormStartPosition.CenterParent;
-            Text = "Cadastro de Clientes";
         }
 
         private DataGridView   grid;
