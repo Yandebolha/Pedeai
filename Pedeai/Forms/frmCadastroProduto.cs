@@ -49,15 +49,23 @@ namespace Pedeai.Forms
             };
             btnNovo.FlatAppearance.BorderSize = 0; btnNovo.Click += (_, __) => ModoNovo();
 
+            var btnEditar = new Button
+            {
+                Text = "✏ Editar", Left = 133, Top = 8, Width = 95, Height = 28,
+                BackColor = Color.FromArgb(230, 126, 34), ForeColor = Color.White,
+                FlatStyle = FlatStyle.Flat, Font = new Font("Segoe UI", 9F, FontStyle.Bold)
+            };
+            btnEditar.FlatAppearance.BorderSize = 0; btnEditar.Click += (_, __) => CarregarParaEditar();
+
             var btnCat = new Button
             {
-                Text = "Categorias", Left = 133, Top = 8, Width = 100, Height = 28,
+                Text = "Categorias", Left = 238, Top = 8, Width = 100, Height = 28,
                 BackColor = Color.FromArgb(52, 152, 219), ForeColor = Color.White,
                 FlatStyle = FlatStyle.Flat, Font = new Font("Segoe UI", 9F, FontStyle.Bold)
             };
             btnCat.FlatAppearance.BorderSize = 0;
             btnCat.Click += (_, __) => { new frmCadastroCategoria().ShowDialog(this); CarrecarComboCategorias(); };
-            topBar.Controls.AddRange(new Control[] { btnNovo, btnCat });
+            topBar.Controls.AddRange(new Control[] { btnNovo, btnEditar, btnCat });
 
             // ── Grid ──────────────────────────────────────────────────────
             grid.Dock = DockStyle.Fill;
@@ -71,7 +79,7 @@ namespace Pedeai.Forms
             grid.Font = new Font("Segoe UI", 9F); grid.BorderStyle = BorderStyle.None;
             grid.ColumnHeadersDefaultCellStyle.BackColor = Color.FromArgb(36, 48, 82);
             grid.ColumnHeadersDefaultCellStyle.ForeColor = Color.White;
-            grid.DoubleClick += (_, __) => CarregarParaEditar();
+            grid.CellDoubleClick += (_, __) => CarregarParaEditar();
 
             // ── Painel formulário ──────────────────────────────────────────
             pnlForm.Dock = DockStyle.Bottom; pnlForm.Height = 225;
@@ -207,7 +215,11 @@ namespace Pedeai.Forms
 
         private void CarregarGrid()
         {
-            try { grid.DataSource = _bll.Listar(); }
+            try
+            {
+                grid.DataSource = _bll.Listar();
+                if (grid.Columns.Contains("Codigo")) grid.Columns["Codigo"].Visible = false;
+            }
             catch (Exception ex) { MessageBox.Show("Erro: " + ex.Message); }
         }
 
