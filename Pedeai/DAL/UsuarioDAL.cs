@@ -58,16 +58,32 @@ namespace Pedeai.DAL
         }
 
         // ── Busca nome pelo login (para exibir na tela) ──────────────────────
-        public string BuscarNomePorLogin(string login)
+        // Aceita login exato OU nome parcial (≥ 2 chars) — retorna nome completo
+        public string BuscarNomePorLoginOuNome(string texto)
         {
-            if (string.IsNullOrWhiteSpace(login)) return "";
+            if (string.IsNullOrWhiteSpace(texto) || texto.Trim().Length < 2) return "";
+            var q = texto.Trim();
             using var conn = AbrirConexao();
-            using var cmd = new MySqlCommand(
-                "SELECT usuNome FROM usuario WHERE usuLogin=@l AND Situacao='A' LIMIT 1", conn);
-            cmd.Parameters.AddWithValue("@l", login.Trim());
-            var r = cmd.ExecuteScalar();
-            return r == null || r == DBNull.Value ? "" : r.ToString();
+            // Primeiro tenta login exato
+            using (var cmd = new MySqlCommand(
+                "SELECT usuNome FROM usuario WHERE usuLogin=@l AND Situacao='A' LIMIT 1", conn))
+            {
+                cmd.Parameters.AddWithValue("@l", q);
+                var r = cmd.ExecuteScalar();
+                if (r != null && r != DBNull.Value) return r.ToString();
+            }
+            // Depois tenta nome (exato ou contém)
+            using (var cmd2 = new MySqlCommand(
+                "SELECT usuNome FROM usuario WHERE usuNome LIKE @n AND Situacao='A' LIMIT 1", conn))
+            {
+                cmd2.Parameters.AddWithValue("@n", "%" + q + "%");
+                var r2 = cmd2.ExecuteScalar();
+                return r2 == null || r2 == DBNull.Value ? "" : r2.ToString();
+            }
         }
+
+        // Mantido para compatibilidade
+        public string BuscarNomePorLogin(string login) => BuscarNomePorLoginOuNome(login);
 
         // ── Listagem ─────────────────────────────────────────────────────────
         public List<Usuario> Listar()

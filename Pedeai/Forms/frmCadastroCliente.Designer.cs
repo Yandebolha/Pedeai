@@ -34,22 +34,23 @@ namespace Pedeai.Forms
 
             // ── Top bar ──────────────────────────────────────────────────
             var topBar = new Panel { Dock = DockStyle.Top, Height = 44,
-                BackColor = Color.FromArgb(40, 40, 80) };
+                BackColor = Color.FromArgb(36, 48, 82) };
             var lblB = new Label { Text = "Buscar:", ForeColor = Color.White,
                 Left = 8, Top = 12, AutoSize = true };
             txtBusca.Left = 65; txtBusca.Top = 8; txtBusca.Width = 220;
+            txtBusca.BackColor = Color.FromArgb(28, 37, 65); txtBusca.ForeColor = Color.White;
             txtBusca.KeyDown += (_, k) => { if (k.KeyCode == Keys.Enter) CarregarGrid(); };
             var btnB = new Button
             {
                 Text = "Buscar", Left = 295, Top = 8, Width = 100, Height = 28,
-                BackColor = Color.FromArgb(63, 81, 181), ForeColor = Color.White,
+                BackColor = Color.FromArgb(52, 152, 219), ForeColor = Color.White,
                 FlatStyle = FlatStyle.Flat, Font = new Font("Segoe UI", 9F, FontStyle.Bold)
             };
             btnB.FlatAppearance.BorderSize = 0; btnB.Click += (_, __) => CarregarGrid();
             var btnN = new Button
             {
                 Text = "+ Novo Cliente", Left = 405, Top = 8, Width = 120, Height = 28,
-                BackColor = Color.FromArgb(0, 150, 136), ForeColor = Color.White,
+                BackColor = Color.FromArgb(39, 174, 96), ForeColor = Color.White,
                 FlatStyle = FlatStyle.Flat, Font = new Font("Segoe UI", 9F, FontStyle.Bold)
             };
             btnN.FlatAppearance.BorderSize = 0; btnN.Click += (_, __) => ModoNovo();
@@ -60,15 +61,18 @@ namespace Pedeai.Forms
             grid.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
             grid.ReadOnly = true; grid.AllowUserToAddRows = false;
             grid.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-            grid.RowHeadersVisible = false; grid.BackgroundColor = Color.White;
+            grid.RowHeadersVisible = false; grid.BackgroundColor = Color.FromArgb(20, 28, 55);
+            grid.DefaultCellStyle.BackColor = Color.FromArgb(20, 28, 55);
+            grid.DefaultCellStyle.ForeColor = Color.White;
+            grid.GridColor = Color.FromArgb(40, 55, 90);
             grid.Font = new Font("Segoe UI", 9F); grid.BorderStyle = BorderStyle.None;
-            grid.ColumnHeadersDefaultCellStyle.BackColor = Color.FromArgb(40, 40, 80);
+            grid.ColumnHeadersDefaultCellStyle.BackColor = Color.FromArgb(36, 48, 82);
             grid.ColumnHeadersDefaultCellStyle.ForeColor = Color.White;
             grid.DoubleClick += (_, __) => CarregarParaEditar();
 
             // ── Painel formulário ──────────────────────────────────────────
             pnlForm.Dock = DockStyle.Bottom; pnlForm.Height = 195;
-            pnlForm.BackColor = Color.FromArgb(245, 245, 250);
+            pnlForm.BackColor = Color.FromArgb(28, 37, 65);
             pnlForm.BorderStyle = BorderStyle.FixedSingle;
             pnlForm.Visible = false;
 
@@ -123,12 +127,12 @@ namespace Pedeai.Forms
 
             // Botões
             var btnS = new Button { Text = "Salvar",    Left = 10,  Top = 140, Width = 100, Height = 28,
-                BackColor = Color.FromArgb(33, 150, 243),  ForeColor = Color.White, FlatStyle = FlatStyle.Flat,
+                BackColor = Color.FromArgb(52, 152, 219),  ForeColor = Color.White, FlatStyle = FlatStyle.Flat,
                 Font = new Font("Segoe UI", 9F, FontStyle.Bold) };
             btnS.FlatAppearance.BorderSize = 0; btnS.Click += BtnSalvar_Click;
 
             var btnC = new Button { Text = "Cancelar",  Left = 120, Top = 140, Width = 100, Height = 28,
-                BackColor = Color.FromArgb(158, 158, 158), ForeColor = Color.White, FlatStyle = FlatStyle.Flat,
+                BackColor = Color.FromArgb(80, 95, 130), ForeColor = Color.White, FlatStyle = FlatStyle.Flat,
                 Font = new Font("Segoe UI", 9F, FontStyle.Bold) };
             btnC.FlatAppearance.BorderSize = 0;
             btnC.Click += (_, __) => { pnlForm.Visible = false; _codigoEditando = 0; };
@@ -149,6 +153,8 @@ namespace Pedeai.Forms
             ClientSize = new Size(934, 581);
             Font = new Font("Segoe UI", 9F);
             MinimumSize = new Size(860, 540);
+            BackColor = Color.FromArgb(15, 22, 45);
+            ForeColor = Color.White;
             StartPosition = FormStartPosition.CenterParent;
             Text = "Cadastro de Clientes";
         }

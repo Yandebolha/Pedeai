@@ -46,7 +46,16 @@ namespace Pedeai.Forms
             try
             {
                 var nome = _bll.BuscarNomePorLogin(txtLogin.Text.Trim());
-                lblNomeUsuario.Text = string.IsNullOrEmpty(nome) ? "" : nome;
+                if (!string.IsNullOrEmpty(nome))
+                {
+                    lblNomeUsuario.ForeColor = System.Drawing.Color.FromArgb(39, 174, 96);
+                    lblNomeUsuario.Text = "\u2713 " + nome;
+                }
+                else
+                {
+                    lblNomeUsuario.ForeColor = System.Drawing.Color.FromArgb(231, 76, 60);
+                    lblNomeUsuario.Text = "Usu\u00e1rio n\u00e3o encontrado";
+                }
             }
             catch { lblNomeUsuario.Text = ""; }
         }

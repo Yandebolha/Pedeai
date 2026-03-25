@@ -13,7 +13,7 @@ namespace Pedeai.BLL
             => _dal.Autenticar(login, senha);
 
         public string BuscarNomePorLogin(string login)
-            => _dal.BuscarNomePorLogin(login);
+            => _dal.BuscarNomePorLoginOuNome(login);
 
         public List<Usuario> Listar()
             => _dal.Listar();
