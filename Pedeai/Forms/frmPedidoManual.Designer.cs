@@ -93,7 +93,7 @@ namespace Pedeai.Forms
             numTroco.Left = 305; numTroco.Top = 73; numTroco.Width = 95;
             numTroco.DecimalPlaces = 2; numTroco.Maximum = 9999;
 
-            var lblTaxa = new Label { Text = "Taxa entrega R$:", Left = 412, Top = 77, AutoSize = true };
+            lblTaxa = new Label { Text = "Taxa entrega R$:", Left = 412, Top = 77, AutoSize = true };
             numTaxa.Left = 522; numTaxa.Top = 73; numTaxa.Width = 95;
             numTaxa.DecimalPlaces = 2; numTaxa.Maximum = 999;
             numTaxa.ValueChanged += (_, __) => AtualizarTotal();
@@ -263,6 +263,7 @@ namespace Pedeai.Forms
         private NumericUpDown numTroco;
         private Label         lblTroco;
         private NumericUpDown numTaxa;
+        private Label         lblTaxa;
         private TextBox       txtObs;
         private ComboBox      cmbProduto;
         private NumericUpDown numQtde;

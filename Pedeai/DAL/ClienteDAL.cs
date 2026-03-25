@@ -133,5 +133,17 @@ namespace Pedeai.DAL
                 Info                 = r["Info"]?.ToString() ?? "",
             };
         }
+
+        public void IncrementarTotais(int codigoCliente, decimal valorPedido)
+        {
+            if (codigoCliente <= 0) return;
+            using var conn = AbrirConexao();
+            using var cmd = new MySqlCommand(
+                "UPDATE cliente SET clieTotalPedidos = clieTotalPedidos + 1, " +
+                "clieTotalGasto = clieTotalGasto + @val WHERE Codigo = @cod", conn);
+            cmd.Parameters.AddWithValue("@val", valorPedido);
+            cmd.Parameters.AddWithValue("@cod", codigoCliente);
+            cmd.ExecuteNonQuery();
+        }
     }
 }

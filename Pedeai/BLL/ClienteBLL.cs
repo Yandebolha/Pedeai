@@ -19,5 +19,8 @@ namespace Pedeai.BLL
 
             return obj.Codigo == 0 ? _dal.Incluir(obj) : _dal.Alterar(obj);
         }
+
+        public void IncrementarTotais(int codigoCliente, decimal valorPedido)
+            => _dal.IncrementarTotais(codigoCliente, valorPedido);
     }
 }

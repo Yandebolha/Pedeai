@@ -9,8 +9,9 @@ namespace Pedeai.Forms
 {
     public partial class frmPedidoManual : Form
     {
-        private readonly PedidoBLL     _pedidoBLL = new PedidoBLL();
-        private readonly MercadoriaBLL _mercBLL   = new MercadoriaBLL();
+        private readonly PedidoBLL     _pedidoBLL  = new PedidoBLL();
+        private readonly MercadoriaBLL _mercBLL    = new MercadoriaBLL();
+        private readonly ClienteBLL    _clienteBLL = new ClienteBLL();
         private readonly List<ItemPedidoWeb> _itens = new List<ItemPedidoWeb>();
         private static readonly Color CorHeader = Color.FromArgb(40, 40, 80);
         private int _codigoCliente = 0;
@@ -45,7 +46,7 @@ namespace Pedeai.Forms
             bool dinheiro = cmbPagamento.SelectedIndex == 0;
             lblEndereco.Visible = txtEndereco.Visible = entrega;
             lblTroco.Visible    = numTroco.Visible    = dinheiro;
-            numTaxa.Visible = entrega;
+            lblTaxa.Visible     = numTaxa.Visible     = entrega;
             // Zera taxa quando não é entrega para não impactar no total
             if (!entrega) numTaxa.Value = 0;
             AtualizarTotal();
@@ -151,6 +152,9 @@ namespace Pedeai.Forms
 
             var erro = _pedidoBLL.InserirManual(pedido, _itens);
             if (!string.IsNullOrEmpty(erro)) { MessageBox.Show("Erro ao salvar: " + erro); return; }
+
+            if (_codigoCliente > 0)
+                _clienteBLL.IncrementarTotais(_codigoCliente, total);
 
             MessageBox.Show($"Pedido {pedido.pediNumero} criado com sucesso!", "Sucesso",
                 MessageBoxButtons.OK, MessageBoxIcon.Information);
