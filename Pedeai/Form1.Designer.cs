@@ -69,14 +69,15 @@ namespace Pedeai
             pnlSidebar.Controls.Add(new Panel { Left = 16, Top = 56, Width = 178, Height = 1, BackColor = Color.FromArgb(60, 70, 110) });
 
             int navY = 68;
-            pnlSidebar.Controls.Add(BotaoNav("🏠  Dashboard",   navY, MostrarDashboard));     navY += 46;
-            pnlSidebar.Controls.Add(BotaoNav("📋  Pedidos",     navY, MostrarPedidos));        navY += 46;
-            pnlSidebar.Controls.Add(BotaoNav("💰  Financeiro",  navY, MostrarFinanceiro));     navY += 46;
-            pnlSidebar.Controls.Add(BotaoNav("🛒  Produtos",    navY, () => AbrirForm(new frmCadastroProduto()))); navY += 46;
-            pnlSidebar.Controls.Add(BotaoNav("🗂  Categorias",  navY, () => AbrirForm(new frmCadastroCategoria()))); navY += 46;
-            pnlSidebar.Controls.Add(BotaoNav("👤  Clientes",    navY, () => AbrirForm(new frmCadastroCliente()))); navY += 46;
-            pnlSidebar.Controls.Add(BotaoNav("🏭  Fornecedores",navY, () => AbrirForm(new frmCadastroFornecedor()))); navY += 46;
-            pnlSidebar.Controls.Add(BotaoNav("🏷  Cupons",      navY, () => AbrirForm(new frmCadastroCupom())));
+            pnlSidebar.Controls.Add(BotaoNav("\U0001F3E0  Dashboard",   navY, MostrarDashboard));     navY += 46;
+            pnlSidebar.Controls.Add(BotaoNav("\U0001F4CB  Pedidos",     navY, MostrarPedidos));        navY += 46;
+            pnlSidebar.Controls.Add(BotaoNav("\U0001F4B0  Financeiro",  navY, MostrarFinanceiro));     navY += 46;
+            pnlSidebar.Controls.Add(BotaoNav("\U0001F6D2  Produtos",    navY, () => AbrirForm(new frmCadastroProduto()))); navY += 46;
+            pnlSidebar.Controls.Add(BotaoNav("\U0001F5C2  Categorias",  navY, () => AbrirForm(new frmCadastroCategoria()))); navY += 46;
+            pnlSidebar.Controls.Add(BotaoNav("\U0001F464  Clientes",    navY, () => AbrirForm(new frmCadastroCliente()))); navY += 46;
+            pnlSidebar.Controls.Add(BotaoNav("\U0001F3ED  Fornecedores",navY, () => AbrirForm(new frmCadastroFornecedor()))); navY += 46;
+            pnlSidebar.Controls.Add(BotaoNav("\U0001F3F7  Cupons",      navY, () => AbrirForm(new frmCadastroCupom()))); navY += 46;
+            pnlSidebar.Controls.Add(BotaoNav("\U0001F3E2  Empresa",     navY, MostrarEmpresa));
 
             // ── Content ───────────────────────────────────────────────────
             pnlContent.Dock = DockStyle.Fill;

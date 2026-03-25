@@ -170,13 +170,19 @@ namespace Pedeai.DAL
             catch (Exception ex) { return ex.Message; }
         }
 
-        /// <summary>Atualiza a situação de um pedido.</summary>
-        public void AtualizarSituacao(int codigo, int novaSituacao)
+        /// <summary>Atualiza a situacao de um pedido. Para cancelamento (sit=6), informe canceladoPor.</summary>
+        public void AtualizarSituacao(int codigo, int novaSituacao, string canceladoPor = null)
         {
             using var conn = AbrirConexao();
-            var sql = "UPDATE pedido_web SET pediSituacao = @sit, pediData_Atualizacao = NOW() WHERE Codigo = @cod";
+            string sql;
+            if (novaSituacao == 6 && canceladoPor != null)
+                sql = "UPDATE pedido_web SET pediSituacao=@sit, pediCancelado_Por=@cpor, pediData_Atualizacao=NOW() WHERE Codigo=@cod";
+            else
+                sql = "UPDATE pedido_web SET pediSituacao=@sit, pediData_Atualizacao=NOW() WHERE Codigo=@cod";
             using var cmd = new MySqlCommand(sql, conn);
             cmd.Parameters.AddWithValue("@sit", novaSituacao);
+            if (novaSituacao == 6 && canceladoPor != null)
+                cmd.Parameters.AddWithValue("@cpor", canceladoPor);
             cmd.Parameters.AddWithValue("@cod", codigo);
             cmd.ExecuteNonQuery();
         }
@@ -199,18 +205,20 @@ namespace Pedeai.DAL
             cmd.ExecuteNonQuery();
         }
 
-        /// <summary>Retorna resumo financeiro de um período.</summary>
+        /// <summary>Retorna resumo financeiro de um periodo.</summary>
         public DataTable GetFinanceiro(DateTime de, DateTime ate)
         {
             var dt = new DataTable();
             using var conn = AbrirConexao();
             var sql = @"SELECT
-                DATE(pediData_Lancamento)       AS Dia,
-                COUNT(*)                         AS Pedidos,
-                SUM(pediSubtotal)                AS Subtotal,
-                SUM(pediTaxa_Entrega)            AS TaxaEntrega,
-                SUM(pediDesconto)                AS Descontos,
-                SUM(pediValor_Total)             AS TotalBruto,
+                DATE(pediData_Lancamento)         AS Dia,
+                COUNT(*)                           AS Pedidos,
+                SUM(pediSubtotal)                  AS Subtotal,
+                SUM(pediTaxa_Entrega)              AS TaxaEntrega,
+                SUM(pediDesconto)                  AS Descontos,
+                SUM(pediValor_Total)               AS TotalBruto,
+                SUM(CASE WHEN pediTipo_Entrega=1 THEN pediValor_Total ELSE 0 END) AS ValorEntrega,
+                SUM(CASE WHEN pediTipo_Entrega=0 THEN pediValor_Total ELSE 0 END) AS ValorRetirada,
                 SUM(CASE WHEN pediForma_Pagamento=0 THEN pediValor_Total ELSE 0 END) AS Dinheiro,
                 SUM(CASE WHEN pediForma_Pagamento=1 THEN pediValor_Total ELSE 0 END) AS Cartao,
                 SUM(CASE WHEN pediForma_Pagamento=2 THEN pediValor_Total ELSE 0 END) AS Pix
@@ -241,6 +249,7 @@ namespace Pedeai.DAL
                 pediValor_Total       = Convert.ToDecimal(r["pediValor_Total"]),
                 pediOrigem            = r["pediOrigem"] == DBNull.Value ? 0 : Convert.ToInt32(r["pediOrigem"]),
                 pediData_Lancamento   = Convert.ToDateTime(r["pediData_Lancamento"]),
+                pediCancelado_Por     = r["pediCancelado_Por"] == DBNull.Value ? null : r["pediCancelado_Por"]?.ToString(),
                 Info                  = r["Info"]?.ToString() ?? "",
             };
         }
