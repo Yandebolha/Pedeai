@@ -911,8 +911,8 @@ namespace Pedeai
                 Height        = 210,
                 Orientation   = Orientation.Vertical,
                 BackColor     = Color.FromArgb(22, 30, 55),
-                Panel1MinSize = 200,
-                Panel2MinSize = 200,
+                Panel1MinSize = 50,
+                Panel2MinSize = 50,
             };
 
             // Panel1 – Gastos de Material / Insumos
