@@ -11,8 +11,10 @@ namespace Pedeai.Forms
     {
         private readonly MercadoriaBLL      _bll    = new MercadoriaBLL();
         private readonly GrupoMercadoriaBLL _grpBLL = new GrupoMercadoriaBLL();
-        private string _caminhoImagem = "";
-        private int    _codigoEditando = 0;
+        private string    _caminhoImagem = "";
+        private int       _codigoEditando = 0;
+        private System.Data.DataTable _dtProdutos;
+        private TextBox   _txtFiltro;
 
         public frmCadastroProduto()
         {
@@ -37,6 +39,7 @@ namespace Pedeai.Forms
             chkControlaEstoque = new CheckBox();
             chkDestaque        = new CheckBox();
             chkIfood           = new CheckBox();
+            chkSite            = new CheckBox();
 
             // ── Top bar ───────────────────────────────────────────────────
             var topBar = new Panel { Dock = DockStyle.Top, Height = 44,
@@ -66,6 +69,23 @@ namespace Pedeai.Forms
             btnCat.FlatAppearance.BorderSize = 0;
             btnCat.Click += (_, __) => { new frmCadastroCategoria().ShowDialog(this); CarrecarComboCategorias(); };
             topBar.Controls.AddRange(new Control[] { btnNovo, btnEditar, btnCat });
+
+            // ── Barra de pesquisa ─────────────────────────────────────────
+            var pnlSearch = new Panel { Dock = DockStyle.Top, Height = 38, BackColor = Color.FromArgb(22, 30, 55) };
+            _txtFiltro = new TextBox
+            {
+                Left = 8, Top = 7, Width = 260, Font = new Font("Segoe UI", 9.5F),
+                PlaceholderText = "Pesquisar por nome ou categoria..."
+            };
+            var btnPesq = new Button
+            {
+                Text = "Pesquisar", Left = 276, Top = 6, Width = 90, Height = 26,
+                BackColor = Color.FromArgb(52, 152, 219), ForeColor = Color.White, FlatStyle = FlatStyle.Flat, Cursor = Cursors.Hand
+            };
+            btnPesq.FlatAppearance.BorderSize = 0;
+            btnPesq.Click += (_, __) => FiltrarGrid(_txtFiltro.Text);
+            _txtFiltro.KeyDown += (s, ev) => { if (ev.KeyCode == Keys.Enter) FiltrarGrid(_txtFiltro.Text); };
+            pnlSearch.Controls.AddRange(new Control[] { _txtFiltro, btnPesq });
 
             // ── Grid ──────────────────────────────────────────────────────
             grid.Dock = DockStyle.Fill;
@@ -137,11 +157,12 @@ namespace Pedeai.Forms
             numEstoque.DecimalPlaces = 2; numEstoque.Minimum = -999999; numEstoque.Maximum = 999999;
 
             chkControlaEstoque.Text = "Controla estoque"; chkControlaEstoque.Left = 615; chkControlaEstoque.Top = 78; chkControlaEstoque.AutoSize = true;
-            chkDestaque.Text        = "Destaque";          chkDestaque.Left        = 755; chkDestaque.Top        = 78; chkDestaque.AutoSize        = true;
 
-            // Linha 4: iFood
-            chkIfood.Text      = "Disponível no iFood (habilita o produto no cardápio do iFood)";
-            chkIfood.Left      = 10; chkIfood.Top = 114; chkIfood.AutoSize = true;
+            // Linha 4: Publicações
+            var lblPub = new Label { Text = "Publicações:", Left = 10, Top = 119, AutoSize = true, ForeColor = Color.FromArgb(180, 190, 220) };
+            chkSite.Text     = "No site";   chkSite.Left     = 90;  chkSite.Top     = 116; chkSite.AutoSize = true;
+            chkDestaque.Text = "Destaque";  chkDestaque.Left = 180; chkDestaque.Top = 116; chkDestaque.AutoSize = true;
+            chkIfood.Text    = "iFood";     chkIfood.Left    = 268; chkIfood.Top    = 116; chkIfood.AutoSize = true;
             chkIfood.Font      = new Font("Segoe UI", 9F, FontStyle.Bold);
             chkIfood.ForeColor = Color.FromArgb(200, 80, 0);
 
@@ -178,12 +199,12 @@ namespace Pedeai.Forms
                 lblCat, cmbCategoria, lblNom, txtNome, lblSit, cmbSituacao,
                 lblDesc, txtDescricao, btnImg, lblImagem,
                 lblPrc, numPreco, lblCst, numCusto, lblPrm, numPromo, lblEst, numEstoque,
-                chkControlaEstoque, chkDestaque,
+                chkControlaEstoque, lblPub, chkSite, chkDestaque,
                 chkIfood
             });
             pnlForm.Controls.Add(pnlBtns);
 
-            Controls.Add(grid); Controls.Add(topBar); Controls.Add(pnlForm);
+            Controls.Add(grid); Controls.Add(pnlSearch); Controls.Add(topBar); Controls.Add(pnlForm);
         }
 
         private void BtnImagem_Click(object sender, EventArgs e)
@@ -217,10 +238,40 @@ namespace Pedeai.Forms
         {
             try
             {
-                grid.DataSource = _bll.Listar();
-                if (grid.Columns.Contains("Codigo")) grid.Columns["Codigo"].Visible = false;
+                _dtProdutos = _bll.Listar();
+                FiltrarGrid(_txtFiltro?.Text ?? "");
             }
             catch (Exception ex) { MessageBox.Show("Erro: " + ex.Message); }
+        }
+
+        private void FiltrarGrid(string filtro)
+        {
+            if (_dtProdutos == null) return;
+            var dv = new System.Data.DataView(_dtProdutos);
+            if (!string.IsNullOrWhiteSpace(filtro))
+            {
+                var f = filtro.Replace("'", "''");
+                dv.RowFilter = $"Nome LIKE '%{f}%' OR Categoria LIKE '%{f}%'";
+            }
+            grid.DataSource = dv;
+            ConfigurarColunasProdutos();
+        }
+
+        private void ConfigurarColunasProdutos()
+        {
+            if (grid.Columns.Count == 0) return;
+            foreach (DataGridViewColumn col in grid.Columns)
+                col.Visible = false;
+            var show = new[] { "Nome", "Categoria", "Preco", "Promocional", "Estoque" };
+            foreach (var name in show)
+                if (grid.Columns.Contains(name)) grid.Columns[name].Visible = true;
+            var caps = new System.Collections.Generic.Dictionary<string, string>
+            {
+                ["Preco"]      = "Preço",
+                ["Promocional"] = "Preço Promo.",
+            };
+            foreach (var kv in caps)
+                if (grid.Columns.Contains(kv.Key)) grid.Columns[kv.Key].HeaderText = kv.Value;
         }
 
         private void ModoNovo()
@@ -231,7 +282,7 @@ namespace Pedeai.Forms
             txtNome.Clear(); txtDescricao.Clear();
             _caminhoImagem = ""; lblImagem.Text = "nenhuma imagem selecionada"; lblImagem.ForeColor = Color.Gray;
             numPreco.Value = 0; numCusto.Value = 0; numPromo.Value = 0; numEstoque.Value = 0;
-            chkControlaEstoque.Checked = false; chkDestaque.Checked = false; chkIfood.Checked = false;
+            chkControlaEstoque.Checked = false; chkDestaque.Checked = false; chkIfood.Checked = false; chkSite.Checked = false;
             cmbSituacao.SelectedIndex = 0;
             pnlForm.Visible = true; txtNome.Focus();
         }
@@ -256,6 +307,7 @@ namespace Pedeai.Forms
             chkControlaEstoque.Checked = obj.mercControla_Estoque;
             chkDestaque.Checked        = obj.mercDestaque;
             chkIfood.Checked           = obj.mercHabilitar_Ifood;
+            chkSite.Checked            = obj.mercHabilitar_Site;
             cmbSituacao.SelectedItem   = obj.Situacao == "I" ? "Inativo" : "Ativo";
             cmbCategoria.Text = "";
             foreach (CatItem item in cmbCategoria.Items)
@@ -291,6 +343,7 @@ namespace Pedeai.Forms
                 mercDestaque          = chkDestaque.Checked,
                 mercOrdem             = 0,
                 mercHabilitar_Ifood   = chkIfood.Checked,
+                mercHabilitar_Site    = chkSite.Checked,
                 Situacao              = cmbSituacao.SelectedItem?.ToString() == "Inativo" ? "I" : "A",
             };
             var erro = _bll.Salvar(obj);

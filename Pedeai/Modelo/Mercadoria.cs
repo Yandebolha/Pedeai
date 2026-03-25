@@ -19,6 +19,7 @@ namespace Pedeai.Modelo
         public bool mercDestaque { get; set; }
         public int mercOrdem { get; set; }
         public bool mercHabilitar_Ifood { get; set; }
+        public bool mercHabilitar_Site   { get; set; }
         public DateTime mercData_Cadastro { get; set; }
 
         public string Situacao { get; set; } = "A";

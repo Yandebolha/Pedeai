@@ -13,7 +13,8 @@ namespace Pedeai
         // -- BLL -------------------------------------------------------------
         private readonly PedidoBLL        _pedidoBLL   = new PedidoBLL();
         private readonly DashboardBLL     _dashBLL     = new DashboardBLL();
-        private readonly GastoMaterialBLL _gastosBLL   = new GastoMaterialBLL();
+        private readonly GastoMaterialBLL     _gastosBLL       = new GastoMaterialBLL();
+        private readonly NecessidadeEmpresaBLL  _necessidadesBLL = new NecessidadeEmpresaBLL();
 
         private int  _paginaAtual = 0; // 0=Dashboard 1=Pedidos 2=Financeiro
 
@@ -861,6 +862,7 @@ namespace Pedeai
         // Campos de UI do painel financeiro
         private FlowLayoutPanel _pnlFinCards;
         private DataGridView    _gridGastos;
+        private DataGridView    _gridNecessidades;
 
         private void MostrarFinanceiro()
         {
@@ -902,21 +904,29 @@ namespace Pedeai
             gridFinanceiro = CriarGrid();
             gridFinanceiro.Dock = DockStyle.Fill;
 
-            // ── Rodape gastos ──
-            var pnlGastos = new Panel { Dock = DockStyle.Bottom, Height = 220, BackColor = Color.FromArgb(22, 30, 55) };
+            // ── Rodapé: SplitContainer Gastos | Necessidades ──
+            var splitBottom = new SplitContainer
+            {
+                Dock          = DockStyle.Bottom,
+                Height        = 210,
+                Orientation   = Orientation.Vertical,
+                BackColor     = Color.FromArgb(22, 30, 55),
+                Panel1MinSize = 200,
+                Panel2MinSize = 200,
+            };
 
+            // Panel1 – Gastos de Material / Insumos
             var lblGTitle = new Label
             {
                 Text      = "Gastos de Material / Insumos",
                 ForeColor = Color.FromArgb(243, 156, 18),
                 Font      = new Font("Segoe UI", 10F, FontStyle.Bold),
-                Dock      = DockStyle.Top, Height = 32, Padding = new Padding(0, 8, 0, 0)
+                Dock      = DockStyle.Top, Height = 32, Padding = new Padding(4, 8, 0, 0)
             };
-
             var pnlGBtn = new Panel { Dock = DockStyle.Top, Height = 36, BackColor = Color.Transparent };
             var btnAddGasto = new Button
             {
-                Text = "+ Lancar Gasto", Left = 0, Top = 4, Width = 140, Height = 28,
+                Text = "+ Lancar Gasto", Left = 4, Top = 4, Width = 140, Height = 28,
                 BackColor = Color.FromArgb(52, 73, 94), ForeColor = Color.White,
                 FlatStyle = FlatStyle.Flat, Cursor = Cursors.Hand
             };
@@ -928,7 +938,7 @@ namespace Pedeai
             };
             var btnDelGasto = new Button
             {
-                Text = "\u2715 Excluir", Left = 148, Top = 4, Width = 100, Height = 28,
+                Text = "\u2715 Excluir", Left = 152, Top = 4, Width = 100, Height = 28,
                 BackColor = Color.FromArgb(192, 57, 43), ForeColor = Color.White,
                 FlatStyle = FlatStyle.Flat, Cursor = Cursors.Hand
             };
@@ -938,15 +948,56 @@ namespace Pedeai
                 if (_gridGastos.SelectedRows.Count == 0) return;
                 var cod = Convert.ToInt32(_gridGastos.SelectedRows[0].Cells["Codigo"].Value);
                 if (MessageBox.Show("Excluir este gasto?", "Confirmar", MessageBoxButtons.YesNo) == DialogResult.Yes)
-                {
-                    _gastosBLL.Excluir(cod);
-                    CarregarFinanceiro();
-                }
+                { _gastosBLL.Excluir(cod); CarregarFinanceiro(); }
             };
             pnlGBtn.Controls.AddRange(new Control[] { btnAddGasto, btnDelGasto });
-
             _gridGastos = CriarGrid();
             _gridGastos.Dock = DockStyle.Fill;
+            splitBottom.Panel1.Controls.Add(_gridGastos);
+            splitBottom.Panel1.Controls.Add(pnlGBtn);
+            splitBottom.Panel1.Controls.Add(lblGTitle);
+
+            // Panel2 – Necessidades da Empresa
+            var lblNTitle = new Label
+            {
+                Text      = "Necessidades da Empresa",
+                ForeColor = Color.FromArgb(243, 156, 18),
+                Font      = new Font("Segoe UI", 10F, FontStyle.Bold),
+                Dock      = DockStyle.Top, Height = 32, Padding = new Padding(4, 8, 0, 0)
+            };
+            var pnlNBtn = new Panel { Dock = DockStyle.Top, Height = 36, BackColor = Color.Transparent };
+            var btnAddNecess = new Button
+            {
+                Text = "+ Lancar", Left = 4, Top = 4, Width = 110, Height = 28,
+                BackColor = Color.FromArgb(52, 73, 94), ForeColor = Color.White,
+                FlatStyle = FlatStyle.Flat, Cursor = Cursors.Hand
+            };
+            btnAddNecess.FlatAppearance.BorderSize = 0;
+            btnAddNecess.Click += (_, __) =>
+            {
+                using var frm = new Forms.frmCadastroNecessidade();
+                if (frm.ShowDialog(this) == DialogResult.OK) CarregarFinanceiro();
+            };
+            var btnDelNecess = new Button
+            {
+                Text = "\u2715 Excluir", Left = 122, Top = 4, Width = 100, Height = 28,
+                BackColor = Color.FromArgb(192, 57, 43), ForeColor = Color.White,
+                FlatStyle = FlatStyle.Flat, Cursor = Cursors.Hand
+            };
+            btnDelNecess.FlatAppearance.BorderSize = 0;
+            btnDelNecess.Click += (_, __) =>
+            {
+                if (_gridNecessidades.SelectedRows.Count == 0) return;
+                var cod = Convert.ToInt32(_gridNecessidades.SelectedRows[0].Cells["Codigo"].Value);
+                if (MessageBox.Show("Excluir esta necessidade?", "Confirmar", MessageBoxButtons.YesNo) == DialogResult.Yes)
+                { _necessidadesBLL.Excluir(cod); CarregarFinanceiro(); }
+            };
+            pnlNBtn.Controls.AddRange(new Control[] { btnAddNecess, btnDelNecess });
+            _gridNecessidades = CriarGrid();
+            _gridNecessidades.Dock = DockStyle.Fill;
+            splitBottom.Panel2.Controls.Add(_gridNecessidades);
+            splitBottom.Panel2.Controls.Add(pnlNBtn);
+            splitBottom.Panel2.Controls.Add(lblNTitle);
 
             lblFinResumo = new Label
             {
@@ -959,14 +1010,10 @@ namespace Pedeai
                 Text      = ""
             };
 
-            pnlGastos.Controls.Add(_gridGastos);
-            pnlGastos.Controls.Add(pnlGBtn);
-            pnlGastos.Controls.Add(lblGTitle);
-
             pnlFinanceiro.Controls.Add(gridFinanceiro);
             pnlFinanceiro.Controls.Add(_pnlFinCards);
             pnlFinanceiro.Controls.Add(pnlFil);
-            pnlFinanceiro.Controls.Add(pnlGastos);
+            pnlFinanceiro.Controls.Add(splitBottom);
             pnlFinanceiro.Controls.Add(lblFinResumo);
             pnlContent.Controls.Add(pnlFinanceiro);
         }
@@ -1004,53 +1051,65 @@ namespace Pedeai
                 // ── Grid de receitas ──
                 var dt = _pedidoBLL.GetFinanceiro(de, ate);
                 gridFinanceiro.DataSource = dt;
+                ConfigurarColunasFinanceiro();
 
-                // ── Totais acumulados ──
-                decimal pedidos = 0, totalBruto = 0, taxaEnt = 0,
-                        dinheiro = 0, cartao = 0, pix = 0,
-                        custoMerc = 0;
+                // ── Totais ──
+                decimal pedidos = 0, taxaEnt = 0, totalBruto = 0, custoMerc = 0;
                 foreach (DataRow r in dt.Rows)
                 {
                     decimal V(string col) => r[col] == DBNull.Value ? 0 : Convert.ToDecimal(r[col]);
                     pedidos    += V("Pedidos");
-                    totalBruto += V("TotalBruto");
                     taxaEnt    += V("TaxaEntrega");
-                    dinheiro   += V("Dinheiro");
-                    cartao     += V("Cartao");
-                    pix        += V("Pix");
+                    totalBruto += V("TotalBruto");
                     custoMerc  += V("CustoMercadorias");
                 }
+                decimal fatLiquido = totalBruto - custoMerc;
 
-                // ── Gastos de material ──
+                // ── 4 cards ──
+                _pnlFinCards.Controls.Clear();
+                CriarCardFin("Total de Pedidos",    pedidos.ToString("N0"),   Color.FromArgb(41, 128, 185));
+                CriarCardFin("Taxa de Entrega",     taxaEnt.ToString("C"),    Color.FromArgb(22, 160, 133));
+                CriarCardFin("Faturamento Bruto",   totalBruto.ToString("C"), Color.FromArgb(39, 174, 96));
+                CriarCardFin("Faturamento Líquido", fatLiquido.ToString("C"),
+                    fatLiquido >= 0 ? Color.FromArgb(52, 152, 219) : Color.FromArgb(192, 57, 43));
+
+                // ── Gastos material ──
                 _gridGastos.DataSource = _gastosBLL.Listar(de, ate);
                 decimal gastosMaterial = _gastosBLL.TotalPeriodo(de, ate);
 
-                // ── Cálculos derivados ──
-                decimal fatLiquido = totalBruto - taxaEnt;    // receita dos produtos sem frete
-                decimal despesas   = custoMerc + gastosMaterial; // custo total (mercadorias + material)
-                decimal lucro      = totalBruto - despesas;
-
-                // ── Rebuild cards ──
-                _pnlFinCards.Controls.Clear();
-                CriarCardFin("Total Pedidos",      pedidos.ToString("N0"),       Color.FromArgb(41, 128, 185));
-                CriarCardFin("Faturamento Bruto",  totalBruto.ToString("C"),     Color.FromArgb(39, 174, 96));
-                CriarCardFin("Taxa de Entrega",    taxaEnt.ToString("C"),        Color.FromArgb(22, 160, 133));
-                CriarCardFin("Fat. Líquido",       fatLiquido.ToString("C"),     Color.FromArgb(52, 152, 219));
-                CriarCardFin("Custo Mercadorias",  custoMerc.ToString("C"),      Color.FromArgb(211, 84, 0));
-                CriarCardFin("Gastos Material",    gastosMaterial.ToString("C"), Color.FromArgb(192, 57, 43));
-                CriarCardFin("Despesas Totais",    despesas.ToString("C"),       Color.FromArgb(169, 50, 38));
-                CriarCardFin("Dinheiro",           dinheiro.ToString("C"),       Color.FromArgb(39, 174, 96));
-                CriarCardFin("Cartão",             cartao.ToString("C"),         Color.FromArgb(142, 68, 173));
-                CriarCardFin("Pix",                pix.ToString("C"),            Color.FromArgb(52, 152, 219));
-                CriarCardFin("Lucro Líquido",      lucro.ToString("C"),
-                    lucro >= 0 ? Color.FromArgb(39, 174, 96) : Color.FromArgb(192, 57, 43));
+                // ── Necessidades empresa ──
+                _gridNecessidades.DataSource = _necessidadesBLL.Listar(de, ate);
+                decimal necessidades = _necessidadesBLL.TotalPeriodo(de, ate);
 
                 lblFinResumo.Text =
                     $"Período: {de:dd/MM/yyyy} a {ate:dd/MM/yyyy}  |  " +
-                    $"Fat. Bruto: {totalBruto:C}  |  Custo Merc: {custoMerc:C}  |  " +
-                    $"Gastos: {gastosMaterial:C}  |  Despesas: {despesas:C}  |  Lucro: {lucro:C}";
+                    $"Fat. Bruto: {totalBruto:C}  |  " +
+                    $"Fat. Líquido: {fatLiquido:C}  |  " +
+                    $"Gastos material: {gastosMaterial:C}  |  Necessidades: {necessidades:C}";
             }
             catch (Exception ex) { MessageBox.Show("Erro ao carregar financeiro: " + ex.Message); }
+        }
+
+        private void ConfigurarColunasFinanceiro()
+        {
+            if (gridFinanceiro.Columns.Count == 0) return;
+            var hide = new[] { "Subtotal", "Descontos", "ValorEntrega", "ValorRetirada", "Dinheiro", "CustoMercadorias" };
+            foreach (var col in hide)
+                if (gridFinanceiro.Columns.Contains(col))
+                    gridFinanceiro.Columns[col].Visible = false;
+            var captions = new System.Collections.Generic.Dictionary<string, string>
+            {
+                ["Dia"]          = "Dia",
+                ["Pedidos"]      = "Pedidos",
+                ["TaxaEntrega"]  = "Taxa Entrega",
+                ["TotalBruto"]   = "Total Bruto",
+                ["Pix"]          = "Pix",
+                ["Cartao"]       = "Cartão",
+                ["TotalLiquido"] = "Total Líquido",
+            };
+            foreach (var kv in captions)
+                if (gridFinanceiro.Columns.Contains(kv.Key))
+                    gridFinanceiro.Columns[kv.Key].HeaderText = kv.Value;
         }
     }
 }

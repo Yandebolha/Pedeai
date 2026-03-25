@@ -53,9 +53,9 @@ namespace Pedeai.DAL
                             (auxCodigo, Codigo, Codigo_Grupo, mercMercadoria, mercApresentacao,
                              mercPreco_Venda, mercPreco_Custo, mercPreco_Promocional, mercEstoque_Atual,
                              mercControla_Estoque, mercImagem_Url, mercDestaque, mercOrdem,
-                             mercHabilitar_Ifood, Situacao, Status_Transmissao, Info, mercData_Cadastro)
+                             mercHabilitar_Ifood, mercHabilitar_Site, Situacao, Status_Transmissao, Info, mercData_Cadastro)
                             VALUES(@aux, @cod, @grp, @nome, @desc, @preco, @custo, @promo, @est,
-                                   @ctrl, @img, @dest, @ordem, @ifood, @sit, @trans, @info, @dt)";
+                                   @ctrl, @img, @dest, @ordem, @ifood, @site, @sit, @trans, @info, @dt)";
                 using var cmd = new MySqlCommand(sql, conn);
                 BindParams(cmd, obj);
                 cmd.ExecuteNonQuery();
@@ -74,7 +74,7 @@ namespace Pedeai.DAL
                             Codigo_Grupo=@grp, mercMercadoria=@nome, mercApresentacao=@desc,
                             mercPreco_Venda=@preco, mercPreco_Custo=@custo, mercPreco_Promocional=@promo, mercEstoque_Atual=@est,
                             mercControla_Estoque=@ctrl, mercImagem_Url=@img, mercDestaque=@dest,
-                            mercOrdem=@ordem, mercHabilitar_Ifood=@ifood, Situacao=@sit
+                            mercOrdem=@ordem, mercHabilitar_Ifood=@ifood, mercHabilitar_Site=@site, Situacao=@sit
                             WHERE Codigo=@cod";
                 using var cmd = new MySqlCommand(sql, conn);
                 BindParams(cmd, obj);
@@ -110,10 +110,19 @@ namespace Pedeai.DAL
             cmd.Parameters.AddWithValue("@dest",  obj.mercDestaque ? 1 : 0);
             cmd.Parameters.AddWithValue("@ordem", obj.mercOrdem);
             cmd.Parameters.AddWithValue("@ifood", obj.mercHabilitar_Ifood ? 1 : 0);
+            cmd.Parameters.AddWithValue("@site",  obj.mercHabilitar_Site  ? 1 : 0);
             cmd.Parameters.AddWithValue("@sit",   obj.Situacao ?? "A");
             cmd.Parameters.AddWithValue("@trans", obj.Status_Transmissao ?? "N");
             cmd.Parameters.AddWithValue("@info",  obj.Info ?? "");
             cmd.Parameters.AddWithValue("@dt",    obj.mercData_Cadastro);
+        }
+
+        private static bool ColExists(MySqlDataReader r, string col)
+        {
+            for (int i = 0; i < r.FieldCount; i++)
+                if (string.Equals(r.GetName(i), col, StringComparison.OrdinalIgnoreCase))
+                    return true;
+            return false;
         }
 
         private static Mercadoria MapearMercadoria(MySqlDataReader r)
@@ -134,6 +143,8 @@ namespace Pedeai.DAL
                 mercDestaque         = r["mercDestaque"]?.ToString() == "1" || r["mercDestaque"]?.ToString() == "True",
                 mercOrdem            = r["mercOrdem"] == DBNull.Value ? 0 : Convert.ToInt32(r["mercOrdem"]),
                 mercHabilitar_Ifood  = r["mercHabilitar_Ifood"]?.ToString() == "1" || r["mercHabilitar_Ifood"]?.ToString() == "True",
+                mercHabilitar_Site   = ColExists(r, "mercHabilitar_Site") &&
+                                       (r["mercHabilitar_Site"]?.ToString() == "1" || r["mercHabilitar_Site"]?.ToString() == "True"),
                 mercData_Cadastro    = r["mercData_Cadastro"] == DBNull.Value ? DateTime.Now : Convert.ToDateTime(r["mercData_Cadastro"]),
                 Situacao             = r["Situacao"]?.ToString() ?? "A",
                 Status_Transmissao   = r["Status_Transmissao"]?.ToString() ?? "N",

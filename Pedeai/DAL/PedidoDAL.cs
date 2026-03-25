@@ -287,6 +287,13 @@ namespace Pedeai.DAL
             cmd.Parameters.AddWithValue("@de",  de.Date);
             cmd.Parameters.AddWithValue("@ate", ate.Date);
             new MySqlDataAdapter(cmd).Fill(dt);
+            dt.Columns.Add("TotalLiquido", typeof(decimal));
+            foreach (DataRow row in dt.Rows)
+            {
+                var bruto  = row["TotalBruto"]         == DBNull.Value ? 0m : Convert.ToDecimal(row["TotalBruto"]);
+                var custo  = row["CustoMercadorias"]   == DBNull.Value ? 0m : Convert.ToDecimal(row["CustoMercadorias"]);
+                row["TotalLiquido"] = bruto - custo;
+            }
             return dt;
         }
 

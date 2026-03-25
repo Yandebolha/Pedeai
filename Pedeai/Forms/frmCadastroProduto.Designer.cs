@@ -43,5 +43,6 @@ namespace Pedeai.Forms
         private CheckBox      chkControlaEstoque;
         private CheckBox      chkDestaque;
         private CheckBox      chkIfood;
+        private CheckBox      chkSite;
     }
 }
