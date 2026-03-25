@@ -206,17 +206,34 @@ namespace Pedeai.DAL
         public void AtualizarSituacao(int codigo, int novaSituacao, string canceladoPor = null)
         {
             using var conn = AbrirConexao();
+            using var trans = conn.BeginTransaction();
+
             string sql;
             if (novaSituacao == 6 && canceladoPor != null)
                 sql = "UPDATE pedido_web SET pediSituacao=@sit, pediCancelado_Por=@cpor, pediData_Atualizacao=NOW() WHERE Codigo=@cod";
             else
                 sql = "UPDATE pedido_web SET pediSituacao=@sit, pediData_Atualizacao=NOW() WHERE Codigo=@cod";
-            using var cmd = new MySqlCommand(sql, conn);
+            using var cmd = new MySqlCommand(sql, conn, trans);
             cmd.Parameters.AddWithValue("@sit", novaSituacao);
             if (novaSituacao == 6 && canceladoPor != null)
                 cmd.Parameters.AddWithValue("@cpor", canceladoPor);
             cmd.Parameters.AddWithValue("@cod", codigo);
             cmd.ExecuteNonQuery();
+
+            // Ao cancelar (situação 6), devolver estoque dos itens do pedido
+            if (novaSituacao == 6)
+            {
+                var sqlRestaurar = @"UPDATE mercadoria m
+                                     JOIN itens_pedido_web i ON i.Codigo_Mercadoria = m.Codigo
+                                     SET m.mercEstoque_Atual = m.mercEstoque_Atual + i.itpwQtde
+                                     WHERE i.Codigo_Pedido = @cod
+                                       AND m.mercControla_Estoque = 1";
+                using var cmdRest = new MySqlCommand(sqlRestaurar, conn, trans);
+                cmdRest.Parameters.AddWithValue("@cod", codigo);
+                cmdRest.ExecuteNonQuery();
+            }
+
+            trans.Commit();
         }
 
         /// <summary>Finaliza pedido gravando valor pago e código de transação.</summary>
