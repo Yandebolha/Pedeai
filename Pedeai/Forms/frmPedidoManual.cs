@@ -41,10 +41,14 @@ namespace Pedeai.Forms
         // ── Visibilidade dinâmica ─────────────────────────────────────────────
         private void AtualizarVisibilidade()
         {
-            bool entrega   = cmbEntrega.SelectedIndex == 1;
-            bool dinheiro  = cmbPagamento.SelectedIndex == 0;
+            bool entrega  = cmbEntrega.SelectedIndex == 1;
+            bool dinheiro = cmbPagamento.SelectedIndex == 0;
             lblEndereco.Visible = txtEndereco.Visible = entrega;
             lblTroco.Visible    = numTroco.Visible    = dinheiro;
+            numTaxa.Visible = entrega;
+            // Zera taxa quando não é entrega para não impactar no total
+            if (!entrega) numTaxa.Value = 0;
+            AtualizarTotal();
         }
 
         // ── Produtos ─────────────────────────────────────────────────────────
@@ -110,9 +114,11 @@ namespace Pedeai.Forms
 
         private void AtualizarTotal()
         {
-            decimal sub   = 0;
+            decimal sub  = 0;
             foreach (var i in _itens) sub += i.itpwSubtotal;
-            decimal total = sub + numTaxa.Value;
+            bool entrega = cmbEntrega.SelectedIndex == 1;
+            decimal taxa = entrega ? numTaxa.Value : 0;
+            decimal total = sub + taxa;
             lblTotal.Text = $"Total: R$ {total:N2}";
         }
 
@@ -123,6 +129,9 @@ namespace Pedeai.Forms
             if (_itens.Count == 0) { MessageBox.Show("Adicione ao menos um item."); return; }
 
             decimal sub = 0; foreach (var i in _itens) sub += i.itpwSubtotal;
+            bool ehEntrega   = cmbEntrega.SelectedIndex == 1;
+            decimal taxa     = ehEntrega ? numTaxa.Value : 0m;
+            decimal total    = sub + taxa;
 
             var pedido = new PedidoWeb
             {
@@ -132,10 +141,10 @@ namespace Pedeai.Forms
                 pediTipo_Entrega     = cmbEntrega.SelectedIndex,   // 0=Retirada 1=Entrega
                 pediForma_Pagamento  = cmbPagamento.SelectedIndex, // 0=Dinheiro 1=Cartão 2=Pix
                 pediSubtotal         = sub,
-                pediTaxa_Entrega     = numTaxa.Value,
-                pediValor_Total      = sub + numTaxa.Value,
+                pediTaxa_Entrega     = taxa,
+                pediValor_Total      = total,
                 pediTroco_Para       = cmbPagamento.SelectedIndex == 0 && numTroco.Value > 0 ? numTroco.Value : (decimal?)null,
-                pediEndereco_Entrega = txtEndereco.Text.Trim(),
+                pediEndereco_Entrega = ehEntrega ? txtEndereco.Text.Trim() : "",
                 pediObservacoes      = txtObs.Text.Trim(),
                 pediOrigem           = 2, // Manual
             };
