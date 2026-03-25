@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
@@ -13,7 +13,8 @@ namespace Pedeai.Forms
         private readonly MercadoriaBLL _mercBLL    = new MercadoriaBLL();
         private readonly ClienteBLL    _clienteBLL = new ClienteBLL();
         private readonly List<ItemPedidoWeb> _itens = new List<ItemPedidoWeb>();
-        private static readonly Color CorHeader = Color.FromArgb(40, 40, 80);
+        private readonly List<ProdItem>      _produtos = new List<ProdItem>();
+        private ProdItem _produtoSelecionado = null;
         private int _codigoCliente = 0;
 
         public frmPedidoManual()
@@ -22,24 +23,23 @@ namespace Pedeai.Forms
             if (!DesignMode) CarregarProdutos();
         }
 
-        // ── Seleção de cliente ────────────────────────────────────────────────
+        // -- Selecao de cliente ----------------------------------------------
         private void BtnSelecionarCliente_Click(object sender, EventArgs e)
         {
             using var frm = new frmSelecionarCliente();
             if (frm.ShowDialog(this) == DialogResult.OK && frm.ClienteSelecionado != null)
             {
                 var c = frm.ClienteSelecionado;
-                _codigoCliente        = c.Codigo;
-                txtNome.Text          = c.clieNome_RazaoSocial ?? "";
-                txtTelefone.Text      = !string.IsNullOrWhiteSpace(c.clieCelular)
-                                        ? c.clieCelular
-                                        : c.clieTelefone ?? "";
+                _codigoCliente   = c.Codigo;
+                txtNome.Text     = c.clieNome_RazaoSocial ?? "";
+                txtTelefone.Text = !string.IsNullOrWhiteSpace(c.clieCelular)
+                                   ? c.clieCelular : c.clieTelefone ?? "";
                 if (!string.IsNullOrWhiteSpace(c.clieEndereco))
-                    txtEndereco.Text  = $"{c.clieEndereco}, {c.clieNumero}".Trim(',', ' ');
+                    txtEndereco.Text = (c.clieEndereco + ", " + c.clieNumero).Trim(',', ' ');
             }
         }
 
-        // ── Visibilidade dinâmica ─────────────────────────────────────────────
+        // -- Visibilidade dinamica -------------------------------------------
         private void AtualizarVisibilidade()
         {
             bool entrega  = cmbEntrega.SelectedIndex == 1;
@@ -47,42 +47,84 @@ namespace Pedeai.Forms
             lblEndereco.Visible = txtEndereco.Visible = entrega;
             lblTroco.Visible    = numTroco.Visible    = dinheiro;
             lblTaxa.Visible     = numTaxa.Visible     = entrega;
-            // Zera taxa quando não é entrega para não impactar no total
             if (!entrega) numTaxa.Value = 0;
             AtualizarTotal();
         }
 
-        // ── Produtos ─────────────────────────────────────────────────────────
+        // -- Produtos --------------------------------------------------------
         private void CarregarProdutos()
         {
             try
             {
                 var dt = _mercBLL.Listar();
-                cmbProduto.Items.Clear();
+                _produtos.Clear();
+                var collection = new AutoCompleteStringCollection();
                 foreach (System.Data.DataRow r in dt.Rows)
-                    cmbProduto.Items.Add(new ProdItem(
+                {
+                    var p = new ProdItem(
                         Convert.ToInt32(r["Codigo"]),
                         r["Nome"]?.ToString() ?? "",
-                        r["Preco"] == DBNull.Value ? 0 : Convert.ToDecimal(r["Preco"])));
+                        r["Preco"] == System.DBNull.Value ? 0 : Convert.ToDecimal(r["Preco"]));
+                    _produtos.Add(p);
+                    collection.Add(p.Nome);
+                }
+                txtBuscaProduto.AutoCompleteCustomSource = collection;
+                txtBuscaProduto.AutoCompleteMode         = AutoCompleteMode.SuggestAppend;
+                txtBuscaProduto.AutoCompleteSource       = AutoCompleteSource.CustomSource;
             }
             catch { }
         }
 
-        private void CmbProduto_Changed(object sender, EventArgs e)
+        private void TxtBusca_TextChanged(object sender, EventArgs e)
         {
-            if (cmbProduto.SelectedItem is ProdItem p)
-                numUnitario.Value = p.Preco;
+            var nome  = txtBuscaProduto.Text.Trim();
+            var found = _produtos.Find(p => p.Nome.Equals(nome, StringComparison.OrdinalIgnoreCase));
+            if (found != null)
+            {
+                _produtoSelecionado = found;
+                numUnitario.Value   = found.Preco > numUnitario.Maximum ? numUnitario.Maximum : found.Preco;
+            }
+            else
+            {
+                _produtoSelecionado = null;
+            }
+            AtualizarDesconto();
         }
 
-        // ── Itens ─────────────────────────────────────────────────────────────
+        private void NumUnitario_ValueChanged(object sender, EventArgs e)
+        {
+            AtualizarDesconto();
+            AtualizarTotal();
+        }
+
+        private void AtualizarDesconto()
+        {
+            if (_produtoSelecionado != null
+                && _produtoSelecionado.Preco > 0
+                && numUnitario.Value > 0
+                && numUnitario.Value < _produtoSelecionado.Preco)
+            {
+                decimal pct = (1m - numUnitario.Value / _produtoSelecionado.Preco) * 100m;
+                lblDesconto.Text    = "Desconto: " + pct.ToString("0.0") + "%";
+                lblDesconto.Visible = true;
+            }
+            else
+            {
+                lblDesconto.Visible = false;
+            }
+        }
+
+        // -- Itens -----------------------------------------------------------
         private void BtnAdicionarItem_Click(object sender, EventArgs e)
         {
-            if (numUnitario.Value <= 0) { MessageBox.Show("Informe o preço unitário."); return; }
-            string nome = "";
-            int codMerc = 0;
-            if (cmbProduto.SelectedItem is ProdItem p) { nome = p.Nome; codMerc = p.Codigo; }
-            else nome = cmbProduto.Text.Trim();
-            if (string.IsNullOrWhiteSpace(nome)) { MessageBox.Show("Selecione ou digite o produto."); return; }
+            if (numUnitario.Value <= 0) { MessageBox.Show("Informe o preco unitario."); return; }
+            string nome    = txtBuscaProduto.Text.Trim();
+            int    codMerc = _produtoSelecionado?.Codigo ?? 0;
+            if (string.IsNullOrWhiteSpace(nome)) { MessageBox.Show("Informe o produto."); return; }
+
+            decimal precoOriginal = _produtoSelecionado?.Preco ?? numUnitario.Value;
+            decimal descPct       = precoOriginal > 0 && numUnitario.Value < precoOriginal
+                ? Math.Round((1m - numUnitario.Value / precoOriginal) * 100m, 1) : 0m;
 
             var item = new ItemPedidoWeb
             {
@@ -94,13 +136,16 @@ namespace Pedeai.Forms
             };
             _itens.Add(item);
 
+            string descStr = descPct > 0 ? descPct.ToString("0.0") + "%" : "";
             gridItens.Rows.Add(item.itpwNome_Mercadoria, item.itpwQtde,
-                item.itpwPreco_Unitario.ToString("N2"),
+                item.itpwPreco_Unitario.ToString("N2"), descStr,
                 item.itpwSubtotal.ToString("N2"));
 
-            // Reset
-            cmbProduto.SelectedIndex = -1; cmbProduto.Text = "";
-            numQtde.Value = 1; numUnitario.Value = 0;
+            txtBuscaProduto.Text = "";
+            _produtoSelecionado  = null;
+            lblDesconto.Visible  = false;
+            numQtde.Value        = 1;
+            numUnitario.Value    = 0;
             AtualizarTotal();
         }
 
@@ -117,37 +162,64 @@ namespace Pedeai.Forms
         {
             decimal sub  = 0;
             foreach (var i in _itens) sub += i.itpwSubtotal;
-            bool entrega = cmbEntrega.SelectedIndex == 1;
-            decimal taxa = entrega ? numTaxa.Value : 0;
-            decimal total = sub + taxa;
-            lblTotal.Text = $"Total: R$ {total:N2}";
+            bool    entrega = cmbEntrega.SelectedIndex == 1;
+            decimal taxa    = entrega ? numTaxa.Value : 0;
+            decimal total   = sub + taxa;
+            lblTotal.Text   = "Total: R$ " + total.ToString("N2");
+            AtualizarTrocoInfo();
         }
 
-        // ── Salvar ────────────────────────────────────────────────────────────
+        private void AtualizarTrocoInfo()
+        {
+            if (cmbPagamento.SelectedIndex == 0 && numTroco.Value > 0)
+            {
+                decimal sub   = 0; foreach (var i in _itens) sub += i.itpwSubtotal;
+                bool    ehEnt = cmbEntrega.SelectedIndex == 1;
+                decimal total = sub + (ehEnt ? numTaxa.Value : 0);
+                decimal troco = numTroco.Value - total;
+                if (troco >= 0)
+                {
+                    lblTrocoInfo.Text      = "Troco: R$ " + troco.ToString("N2");
+                    lblTrocoInfo.ForeColor = Color.FromArgb(39, 174, 96);
+                }
+                else
+                {
+                    lblTrocoInfo.Text      = "Falta R$ " + (-troco).ToString("N2");
+                    lblTrocoInfo.ForeColor = Color.FromArgb(192, 57, 43);
+                }
+                lblTrocoInfo.Visible = true;
+            }
+            else
+            {
+                lblTrocoInfo.Visible = false;
+            }
+        }
+
+        // -- Salvar ----------------------------------------------------------
         private void BtnSalvar_Click(object sender, EventArgs e)
         {
             if (string.IsNullOrWhiteSpace(txtNome.Text)) { MessageBox.Show("Informe o nome do cliente."); return; }
             if (_itens.Count == 0) { MessageBox.Show("Adicione ao menos um item."); return; }
 
             decimal sub = 0; foreach (var i in _itens) sub += i.itpwSubtotal;
-            bool ehEntrega   = cmbEntrega.SelectedIndex == 1;
-            decimal taxa     = ehEntrega ? numTaxa.Value : 0m;
-            decimal total    = sub + taxa;
+            bool    ehEntrega = cmbEntrega.SelectedIndex == 1;
+            decimal taxa      = ehEntrega ? numTaxa.Value : 0m;
+            decimal total     = sub + taxa;
 
             var pedido = new PedidoWeb
             {
                 Codigo_Cliente       = _codigoCliente,
                 pediNome_Cliente     = txtNome.Text.Trim(),
                 pediTelefone_Cliente = txtTelefone.Text.Trim(),
-                pediTipo_Entrega     = cmbEntrega.SelectedIndex,   // 0=Retirada 1=Entrega
-                pediForma_Pagamento  = cmbPagamento.SelectedIndex, // 0=Dinheiro 1=Cartão 2=Pix
+                pediTipo_Entrega     = cmbEntrega.SelectedIndex,
+                pediForma_Pagamento  = cmbPagamento.SelectedIndex,
                 pediSubtotal         = sub,
                 pediTaxa_Entrega     = taxa,
                 pediValor_Total      = total,
                 pediTroco_Para       = cmbPagamento.SelectedIndex == 0 && numTroco.Value > 0 ? numTroco.Value : (decimal?)null,
                 pediEndereco_Entrega = ehEntrega ? txtEndereco.Text.Trim() : "",
                 pediObservacoes      = txtObs.Text.Trim(),
-                pediOrigem           = 2, // Manual
+                pediOrigem           = 2,
             };
 
             var erro = _pedidoBLL.InserirManual(pedido, _itens);
@@ -156,7 +228,7 @@ namespace Pedeai.Forms
             if (_codigoCliente > 0)
                 _clienteBLL.IncrementarTotais(_codigoCliente, total);
 
-            MessageBox.Show($"Pedido {pedido.pediNumero} criado com sucesso!", "Sucesso",
+            MessageBox.Show("Pedido " + pedido.pediNumero + " criado com sucesso!", "Sucesso",
                 MessageBoxButtons.OK, MessageBoxIcon.Information);
             DialogResult = DialogResult.OK;
             Close();
@@ -166,7 +238,6 @@ namespace Pedeai.Forms
         {
             public int Codigo; public string Nome; public decimal Preco;
             public ProdItem(int c, string n, decimal p) { Codigo = c; Nome = n; Preco = p; }
-            public override string ToString() => Nome;
         }
     }
 }

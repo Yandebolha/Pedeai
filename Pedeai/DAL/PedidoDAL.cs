@@ -30,6 +30,7 @@ namespace Pedeai.DAL
                                    WHEN 6 THEN 'Cancelado'
                                    ELSE CAST(p.pediSituacao AS CHAR)
                                END                          AS Status,
+                               (SELECT COUNT(*) FROM itens_pedido_web i WHERE i.Codigo_Pedido = p.Codigo) AS Itens,
                                CASE p.pediForma_Pagamento
                                    WHEN 0 THEN 'Dinheiro'
                                    WHEN 1 THEN 'Cartão'

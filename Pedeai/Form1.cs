@@ -59,6 +59,16 @@ namespace Pedeai
             return btn;
         }
 
+        // Chart panels and data
+        private Panel           _pnlChartCanal;
+        private Panel           _pnlChartProdutos;
+        private Panel           _pnlChartDias;
+        private DateTimePicker  _dtpChartDe;
+        private DateTimePicker  _dtpChartAte;
+        private (string label, float value)[] _dadosCanal    = Array.Empty<(string, float)>();
+        private (string label, float value)[] _dadosProdutos = Array.Empty<(string, float)>();
+        private (string label, float value)[] _dadosDias     = Array.Empty<(string, float)>();
+
         // --------------------------------------------------------------------
         // DASHBOARD
         // --------------------------------------------------------------------
@@ -81,27 +91,273 @@ namespace Pedeai
             lblClientes     = CriarCard(pnlCards, "Total Clientes",   "0",       Color.FromArgb(142, 68, 173));
             lblPendentes    = CriarCard(pnlCards, "Pedidos Pendentes","0",       Color.FromArgb(211, 84, 0));
 
-            // Tabela de Ultimos pedidos
-            var lblUltimos = new Label
+            // ── Barra de filtro de período ─────────────────────────────────────
+            var pnlFiltroChart = new Panel
             {
-                Text      = "Ultimos Pedidos",
-                ForeColor = Color.White,
-                Font      = new Font("Segoe UI", 11, FontStyle.Bold),
-                AutoSize  = true,
                 Dock      = DockStyle.Top,
-                Padding   = new Padding(0, 0, 0, 8)
+                Height    = 40,
+                BackColor = Color.Transparent
             };
+            var lblDe = new Label { Text = "Período:", ForeColor = Color.FromArgb(200, 210, 240), Left = 0, Top = 11, AutoSize = true };
+            _dtpChartDe = new DateTimePicker { Left = 66, Top = 6, Width = 115, Format = DateTimePickerFormat.Short, Value = DateTime.Today.AddDays(-30) };
+            var lblAte = new Label { Text = "até", ForeColor = Color.FromArgb(200, 210, 240), Left = 192, Top = 11, AutoSize = true };
+            _dtpChartAte = new DateTimePicker { Left = 216, Top = 6, Width = 115, Format = DateTimePickerFormat.Short, Value = DateTime.Today };
+            var btnFiltChart = new Button
+            {
+                Text = "Filtrar", Left = 342, Top = 5, Width = 72, Height = 28,
+                BackColor = CorBotaoAtivo, ForeColor = Color.White,
+                FlatStyle = FlatStyle.Flat, Cursor = Cursors.Hand
+            };
+            btnFiltChart.FlatAppearance.BorderSize = 0;
+            btnFiltChart.Click += (_, __) => CarregarCharts();
+            pnlFiltroChart.Controls.AddRange(new Control[] { lblDe, _dtpChartDe, lblAte, _dtpChartAte, btnFiltChart });
 
-            gridPedidos = CriarGrid();
-            gridPedidos.Dock = DockStyle.Fill;
+            // ── Área de gráficos (3 painéis lado a lado) ─────────────────────
+            var tbl = new TableLayoutPanel
+            {
+                Dock        = DockStyle.Fill,
+                ColumnCount = 3,
+                RowCount    = 1,
+                BackColor   = Color.Transparent,
+                Padding     = new Padding(0, 8, 0, 0)
+            };
+            tbl.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 33.3f));
+            tbl.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 33.4f));
+            tbl.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 33.3f));
+            tbl.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100));
 
-            var pnlGrid = new Panel { Dock = DockStyle.Fill, Padding = new Padding(0) };
-            pnlGrid.Controls.Add(gridPedidos);
-            pnlGrid.Controls.Add(lblUltimos);
+            _pnlChartCanal    = CriarPainelGrafico("Vendas por Canal", Color.FromArgb(41, 128, 185));
+            _pnlChartProdutos = CriarPainelGrafico("Top Produtos",     Color.FromArgb(142, 68, 173));
+            _pnlChartDias     = CriarPainelGrafico("Receita por Dia",  Color.FromArgb(39, 174, 96));
 
-            pnlDashboard.Controls.Add(pnlGrid);
+            _pnlChartCanal.Paint    += (s, e) => DesenharBarrasVerticais(e.Graphics, (Panel)s, _dadosCanal,    Color.FromArgb(52, 152, 219));
+            _pnlChartProdutos.Paint += (s, e) => DesenharBarrasHorizontais(e.Graphics, (Panel)s, _dadosProdutos, Color.FromArgb(155, 89, 182));
+            _pnlChartDias.Paint     += (s, e) => DesenharLinha(e.Graphics, (Panel)s, _dadosDias,    Color.FromArgb(46, 204, 113));
+
+            tbl.Controls.Add(_pnlChartCanal, 0, 0);
+            tbl.Controls.Add(_pnlChartProdutos, 1, 0);
+            tbl.Controls.Add(_pnlChartDias, 2, 0);
+
+            pnlDashboard.Controls.Add(tbl);
+            pnlDashboard.Controls.Add(pnlFiltroChart);
             pnlDashboard.Controls.Add(pnlCards);
             pnlContent.Controls.Add(pnlDashboard);
+        }
+
+        private Panel CriarPainelGrafico(string titulo, Color corBorda)
+        {
+            var pnl = new Panel
+            {
+                Dock      = DockStyle.Fill,
+                BackColor = Color.FromArgb(28, 37, 65),
+                Margin    = new Padding(0, 0, 8, 0),
+                Tag       = titulo
+            };
+            // Barra colorida no topo
+            var barra = new Panel
+            {
+                Height    = 4,
+                Dock      = DockStyle.Top,
+                BackColor = corBorda
+            };
+            pnl.Controls.Add(barra);
+            return pnl;
+        }
+
+        // ── Desenho GDI+ ─────────────────────────────────────────────────────
+
+        private static void DesenharBarrasVerticais(Graphics g, Panel pnl, (string label, float value)[] data, Color corBarra)
+        {
+            string titulo = pnl.Tag?.ToString() ?? "";
+            g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+            int W = pnl.Width, H = pnl.Height;
+
+            using var bgBrush    = new SolidBrush(Color.FromArgb(28, 37, 65));
+            using var titleFont  = new Font("Segoe UI", 9f, FontStyle.Bold);
+            using var labelFont  = new Font("Segoe UI", 7.5f);
+            using var whiteBrush = new SolidBrush(Color.White);
+            using var grayBrush  = new SolidBrush(Color.FromArgb(140, 160, 200));
+            using var barBrush   = new SolidBrush(corBarra);
+
+            g.FillRectangle(bgBrush, 0, 0, W, H);
+            g.DrawString(titulo, titleFont, whiteBrush, 10f, 12f);
+
+            if (data == null || data.Length == 0)
+            {
+                g.DrawString("Sem dados para o período", labelFont, grayBrush, 10f, 40f);
+                return;
+            }
+
+            float maxV = 0; foreach (var d in data) if (d.value > maxV) maxV = d.value;
+            if (maxV <= 0) maxV = 1;
+
+            float chartTop = 38f, chartBottom = H - 36f, chartLeft = 10f, chartRight = W - 10f;
+            float chartH = chartBottom - chartTop;
+            float slotW = (chartRight - chartLeft) / data.Length;
+            float barW  = Math.Max(slotW * 0.55f, 8f);
+
+            for (int i = 0; i < data.Length; i++)
+            {
+                float x    = chartLeft + i * slotW + (slotW - barW) / 2f;
+                float barH = (data[i].value / maxV) * chartH;
+                float barY = chartBottom - barH;
+                using var br = new SolidBrush(Color.FromArgb(200, corBarra));
+                g.FillRectangle(br, x, barY, barW, barH);
+
+                // valor acima da barra
+                string valStr = data[i].value >= 1000
+                    ? $"R${data[i].value / 1000:0.0}k"
+                    : $"R${data[i].value:0}";
+                g.DrawString(valStr, labelFont, whiteBrush, x, barY - 16f);
+
+                // label abaixo
+                string lbl = data[i].label.Length > 7 ? data[i].label[..7] : data[i].label;
+                g.DrawString(lbl, labelFont, grayBrush, x, chartBottom + 4f);
+            }
+        }
+
+        private static void DesenharBarrasHorizontais(Graphics g, Panel pnl, (string label, float value)[] data, Color corBarra)
+        {
+            string titulo = pnl.Tag?.ToString() ?? "";
+            g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+            int W = pnl.Width, H = pnl.Height;
+
+            using var bgBrush    = new SolidBrush(Color.FromArgb(28, 37, 65));
+            using var titleFont  = new Font("Segoe UI", 9f, FontStyle.Bold);
+            using var labelFont  = new Font("Segoe UI", 7.5f);
+            using var whiteBrush = new SolidBrush(Color.White);
+            using var grayBrush  = new SolidBrush(Color.FromArgb(140, 160, 200));
+
+            g.FillRectangle(bgBrush, 0, 0, W, H);
+            g.DrawString(titulo, titleFont, whiteBrush, 10f, 12f);
+
+            if (data == null || data.Length == 0)
+            {
+                g.DrawString("Sem dados para o período", labelFont, grayBrush, 10f, 40f);
+                return;
+            }
+
+            float maxV = 0; foreach (var d in data) if (d.value > maxV) maxV = d.value;
+            if (maxV <= 0) maxV = 1;
+
+            float chartTop = 38f, chartLeft = 90f, chartRight = W - 50f, chartBottom = H - 10f;
+            int maxItems = Math.Min(data.Length, 8);
+            float slotH = (chartBottom - chartTop) / maxItems;
+            float barH  = Math.Max(slotH * 0.55f, 6f);
+
+            for (int i = 0; i < maxItems; i++)
+            {
+                float y       = chartTop + i * slotH + (slotH - barH) / 2f;
+                float barW    = (data[i].value / maxV) * (chartRight - chartLeft);
+                using var br = new SolidBrush(Color.FromArgb(200, corBarra));
+                g.FillRectangle(br, chartLeft, y, barW, barH);
+
+                // nome à esquerda
+                string lbl = data[i].label.Length > 11 ? data[i].label[..11] : data[i].label;
+                g.DrawString(lbl, labelFont, grayBrush, 4f, y);
+
+                // valor à direita da barra
+                string valStr = data[i].value.ToString("0");
+                g.DrawString(valStr, labelFont, whiteBrush, chartLeft + barW + 4f, y);
+            }
+        }
+
+        private static void DesenharLinha(Graphics g, Panel pnl, (string label, float value)[] data, Color corLinha)
+        {
+            string titulo = pnl.Tag?.ToString() ?? "";
+            g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+            int W = pnl.Width, H = pnl.Height;
+
+            using var bgBrush    = new SolidBrush(Color.FromArgb(28, 37, 65));
+            using var titleFont  = new Font("Segoe UI", 9f, FontStyle.Bold);
+            using var labelFont  = new Font("Segoe UI", 7f);
+            using var whiteBrush = new SolidBrush(Color.White);
+            using var grayBrush  = new SolidBrush(Color.FromArgb(140, 160, 200));
+            using var linePen    = new System.Drawing.Pen(corLinha, 2f);
+            using var dotBrush   = new SolidBrush(corLinha);
+
+            g.FillRectangle(bgBrush, 0, 0, W, H);
+            g.DrawString(titulo, titleFont, whiteBrush, 10f, 12f);
+
+            if (data == null || data.Length < 2)
+            {
+                if (data != null && data.Length == 1)
+                    g.DrawString($"{data[0].label}: R${data[0].value:N0}", labelFont, grayBrush, 10f, 40f);
+                else
+                    g.DrawString("Sem dados para o período", labelFont, grayBrush, 10f, 40f);
+                return;
+            }
+
+            float maxV = 0; foreach (var d in data) if (d.value > maxV) maxV = d.value;
+            if (maxV <= 0) maxV = 1;
+
+            float chartTop = 38f, chartBottom = H - 36f, chartLeft = 10f, chartRight = W - 10f;
+            float chartH = chartBottom - chartTop;
+            float stepX  = (chartRight - chartLeft) / (data.Length - 1);
+
+            var pts = new System.Drawing.PointF[data.Length];
+            for (int i = 0; i < data.Length; i++)
+                pts[i] = new System.Drawing.PointF(chartLeft + i * stepX, chartBottom - (data[i].value / maxV) * chartH);
+
+            // Área preenchida abaixo da linha
+            var polyPts = new System.Drawing.PointF[data.Length + 2];
+            polyPts[0] = new System.Drawing.PointF(pts[0].X, chartBottom);
+            for (int i = 0; i < pts.Length; i++) polyPts[i + 1] = pts[i];
+            polyPts[polyPts.Length - 1] = new System.Drawing.PointF(pts[pts.Length - 1].X, chartBottom);
+            using var fillBrush = new SolidBrush(Color.FromArgb(40, corLinha));
+            g.FillPolygon(fillBrush, polyPts);
+
+            g.DrawLines(linePen, pts);
+
+            // Pontos e labels
+            int step = data.Length > 14 ? (int)Math.Ceiling(data.Length / 14.0) : 1;
+            for (int i = 0; i < data.Length; i++)
+            {
+                g.FillEllipse(dotBrush, pts[i].X - 3, pts[i].Y - 3, 6, 6);
+                if (i % step == 0)
+                {
+                    // trim date: show MM/dd
+                    string lbl = data[i].label.Length > 5 ? data[i].label[5..] : data[i].label;
+                    g.DrawString(lbl, labelFont, grayBrush, pts[i].X - 12f, chartBottom + 4f);
+                }
+            }
+        }
+
+        private static (string label, float value)[] DataTableParaChart(DataTable dt, string colLabel, string colValue, bool isDate = false)
+        {
+            if (dt == null || dt.Rows.Count == 0) return Array.Empty<(string, float)>();
+            var result = new (string label, float value)[dt.Rows.Count];
+            for (int i = 0; i < dt.Rows.Count; i++)
+            {
+                string lbl = isDate && dt.Rows[i][colLabel] is DateTime d
+                    ? d.ToString("MM/dd")
+                    : dt.Rows[i][colLabel]?.ToString() ?? "";
+                float val  = dt.Rows[i][colValue] == DBNull.Value ? 0f : Convert.ToSingle(dt.Rows[i][colValue]);
+                result[i]  = (lbl, val);
+            }
+            return result;
+        }
+
+        private void CarregarCharts()
+        {
+            if (_pnlChartCanal == null) return;
+            var de  = _dtpChartDe?.Value.Date  ?? DateTime.Today.AddDays(-30);
+            var ate = _dtpChartAte?.Value.Date ?? DateTime.Today;
+            try
+            {
+                var dtCanal = _dashBLL.GetVendasPorCanal(de, ate);
+                _dadosCanal = DataTableParaChart(dtCanal, "Canal", "TotalVendas");
+                _pnlChartCanal.Invalidate();
+
+                var dtProd = _dashBLL.GetTopProdutos(de, ate);
+                _dadosProdutos = DataTableParaChart(dtProd, "Produto", "Quantidade");
+                _pnlChartProdutos.Invalidate();
+
+                var dtDias = _dashBLL.GetVendasPorDia(de, ate);
+                _dadosDias = DataTableParaChart(dtDias, "Dia", "TotalVendas", isDate: true);
+                _pnlChartDias.Invalidate();
+            }
+            catch { /* ignore chart load errors silently */ }
         }
 
         private Label CriarCard(FlowLayoutPanel pai, string titulo, string valor, Color cor)
@@ -392,9 +648,7 @@ namespace Pedeai
                 lblClientes.Text    = cli.ToString();
                 lblPendentes.Text   = pend.ToString();
 
-                // ultimos pedidos no topo da dashboard (reusa gridPedidos se visivel)
-                if (_paginaAtual == 0)
-                    gridPedidos.DataSource = _pedidoBLL.Listar();
+                CarregarCharts();
             }
             catch (Exception ex)
             {
@@ -418,9 +672,59 @@ namespace Pedeai
                 }
                 DateTime? dt = dtpFiltroPedido?.Value.Date;
                 gridPedidos.DataSource = _pedidoBLL.Listar(filtro, dt);
+                AjustarColunasPedidos();
                 gridItens.DataSource   = null;
             }
             catch (Exception ex) { MessageBox.Show("Erro ao carregar pedidos: " + ex.Message); }
+        }
+
+        private void AjustarColunasPedidos()
+        {
+            if (gridPedidos.Columns.Count == 0) return;
+
+            // Ocultar colunas internas
+            if (gridPedidos.Columns["Codigo"] != null)  gridPedidos.Columns["Codigo"].Visible  = false;
+            if (gridPedidos.Columns["Origem"] != null)  gridPedidos.Columns["Origem"].Visible  = false;
+
+            // Nomes de exibição
+            var nomes = new System.Collections.Generic.Dictionary<string, string>
+            {
+                ["Numero"]   = "Nº Pedido",
+                ["Cliente"]  = "Cliente",
+                ["Telefone"] = "Telefone",
+                ["Status"]   = "Status",
+                ["Itens"]    = "Itens",
+                ["Pagamento"]= "Pagamento",
+                ["Entrega"]  = "Entrega",
+                ["Total"]    = "Total",
+                ["DataHora"] = "Data / Hora"
+            };
+            foreach (var kv in nomes)
+                if (gridPedidos.Columns[kv.Key] != null)
+                    gridPedidos.Columns[kv.Key].HeaderText = kv.Value;
+
+            // Ordem de exibição
+            string[] ordem = { "Numero", "Cliente", "Telefone", "Status", "Itens", "Pagamento", "Entrega", "Total", "DataHora" };
+            for (int i = 0; i < ordem.Length; i++)
+                if (gridPedidos.Columns[ordem[i]] != null)
+                    gridPedidos.Columns[ordem[i]].DisplayIndex = i;
+
+            // Larguras relativas (FillWeight)
+            var fills = new System.Collections.Generic.Dictionary<string, int>
+            {
+                ["Numero"]   = 80,
+                ["Cliente"]  = 160,
+                ["Telefone"] = 100,
+                ["Status"]   = 100,
+                ["Itens"]    = 45,
+                ["Pagamento"]= 80,
+                ["Entrega"]  = 70,
+                ["Total"]    = 80,
+                ["DataHora"] = 120
+            };
+            foreach (var kv in fills)
+                if (gridPedidos.Columns[kv.Key] != null)
+                    gridPedidos.Columns[kv.Key].FillWeight = kv.Value;
         }
 
         private void CarregarItensPedido(DataGridView grid)

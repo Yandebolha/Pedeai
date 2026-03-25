@@ -12,5 +12,9 @@ namespace Pedeai.BLL
             GetEstatisticas() => _dal.GetEstatisticas();
 
         public DataRow GetLoja() => _dal.GetLoja();
+
+        public DataTable GetVendasPorCanal(DateTime de, DateTime ate) => _dal.GetVendasPorCanal(de, ate);
+        public DataTable GetTopProdutos(DateTime de, DateTime ate)    => _dal.GetTopProdutos(de, ate);
+        public DataTable GetVendasPorDia(DateTime de, DateTime ate)   => _dal.GetVendasPorDia(de, ate);
     }
 }
