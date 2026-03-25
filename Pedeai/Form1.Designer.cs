@@ -71,8 +71,8 @@ namespace Pedeai
             int navY = 68;
             pnlSidebar.Controls.Add(BotaoNav("🏠  Dashboard",   navY, MostrarDashboard));     navY += 46;
             pnlSidebar.Controls.Add(BotaoNav("📋  Pedidos",     navY, MostrarPedidos));        navY += 46;
-            pnlSidebar.Controls.Add(BotaoNav("�  Financeiro",  navY, MostrarFinanceiro));     navY += 46;
-            pnlSidebar.Controls.Add(BotaoNav("�🛒  Produtos",    navY, () => AbrirForm(new frmCadastroProduto()))); navY += 46;
+            pnlSidebar.Controls.Add(BotaoNav("💰  Financeiro",  navY, MostrarFinanceiro));     navY += 46;
+            pnlSidebar.Controls.Add(BotaoNav("🛒  Produtos",    navY, () => AbrirForm(new frmCadastroProduto()))); navY += 46;
             pnlSidebar.Controls.Add(BotaoNav("🗂  Categorias",  navY, () => AbrirForm(new frmCadastroCategoria()))); navY += 46;
             pnlSidebar.Controls.Add(BotaoNav("👤  Clientes",    navY, () => AbrirForm(new frmCadastroCliente()))); navY += 46;
             pnlSidebar.Controls.Add(BotaoNav("🏭  Fornecedores",navY, () => AbrirForm(new frmCadastroFornecedor()))); navY += 46;

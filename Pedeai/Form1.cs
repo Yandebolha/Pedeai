@@ -260,12 +260,12 @@ namespace Pedeai
             };
             var acoes = new[]
             {
-                ("? Confirmar",    1, Color.FromArgb(39, 174, 96)),
-                ("? Em Preparo",  2, Color.FromArgb(243, 156, 18)),
-                ("? Pronto",      3, Color.FromArgb(22, 160, 133)),
-                ("?? Saiu",        4, Color.FromArgb(52, 152, 219)),
-                ("?? Entregue",    5, Color.FromArgb(41, 128, 185)),
-                ("? Cancelar",     6, Color.FromArgb(192, 57, 43)),
+                ("\u2713 Confirmar",    1, Color.FromArgb(39, 174, 96)),
+                ("\u23F3 Em Preparo",  2, Color.FromArgb(243, 156, 18)),
+                ("\u2705 Pronto",      3, Color.FromArgb(22, 160, 133)),
+                ("\U0001F6B4 Saiu",    4, Color.FromArgb(52, 152, 219)),
+                ("\U0001F4E6 Entregue",5, Color.FromArgb(41, 128, 185)),
+                ("\u2715 Cancelar",    6, Color.FromArgb(192, 57, 43)),
             };
             foreach (var (txt, sit, cor) in acoes)
             {
@@ -495,7 +495,7 @@ namespace Pedeai
             var txtT = new TextBox { Left = 150, Top = 52, Width = 220, Visible = needsTrans };
 
             int btnTop = needsTrans ? 108 : 64;
-            var btnOk  = new Button { Text = "? Confirmar", Left = 100, Top = btnTop, Width = 130, Height = 28, DialogResult = DialogResult.OK,  BackColor = Color.FromArgb(39, 174, 96),   ForeColor = Color.White, FlatStyle = FlatStyle.Flat };
+            var btnOk  = new Button { Text = "\u2714 Confirmar", Left = 100, Top = btnTop, Width = 130, Height = 28, DialogResult = DialogResult.OK,  BackColor = Color.FromArgb(39, 174, 96),   ForeColor = Color.White, FlatStyle = FlatStyle.Flat };
             var btnCan = new Button { Text = "Cancelar",     Left = 242, Top = btnTop, Width = 90,  Height = 28, DialogResult = DialogResult.Cancel, BackColor = Color.FromArgb(108,117,125), ForeColor = Color.White, FlatStyle = FlatStyle.Flat };
             btnOk.FlatAppearance.BorderSize = btnCan.FlatAppearance.BorderSize = 0;
 
