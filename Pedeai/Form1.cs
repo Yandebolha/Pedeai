@@ -112,19 +112,19 @@ namespace Pedeai
             btnFiltChart.Click += (_, __) => CarregarCharts();
             pnlFiltroChart.Controls.AddRange(new Control[] { lblDe, _dtpChartDe, lblAte, _dtpChartAte, btnFiltChart });
 
-            // ── Área de gráficos (3 painéis lado a lado) ─────────────────────
+            // ── Área de gráficos (3 painéis empilhados verticalmente) ──────────
             var tbl = new TableLayoutPanel
             {
                 Dock        = DockStyle.Fill,
-                ColumnCount = 3,
-                RowCount    = 1,
+                ColumnCount = 1,
+                RowCount    = 3,
                 BackColor   = Color.Transparent,
-                Padding     = new Padding(0, 8, 0, 0)
+                Padding     = new Padding(0, 4, 0, 0)
             };
-            tbl.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 33.3f));
-            tbl.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 33.4f));
-            tbl.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 33.3f));
-            tbl.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100));
+            tbl.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100));
+            tbl.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 33.3f));
+            tbl.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 33.4f));
+            tbl.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 33.3f));
 
             _pnlChartCanal    = CriarPainelGrafico("Vendas por Canal", Color.FromArgb(41, 128, 185));
             _pnlChartProdutos = CriarPainelGrafico("Top Produtos",     Color.FromArgb(142, 68, 173));
@@ -134,9 +134,13 @@ namespace Pedeai
             _pnlChartProdutos.Paint += (s, e) => DesenharBarrasHorizontais(e.Graphics, (Panel)s, _dadosProdutos, Color.FromArgb(155, 89, 182));
             _pnlChartDias.Paint     += (s, e) => DesenharLinha(e.Graphics, (Panel)s, _dadosDias,    Color.FromArgb(46, 204, 113));
 
-            tbl.Controls.Add(_pnlChartCanal, 0, 0);
-            tbl.Controls.Add(_pnlChartProdutos, 1, 0);
-            tbl.Controls.Add(_pnlChartDias, 2, 0);
+            _pnlChartCanal.Margin    = new Padding(0, 0, 0, 6);
+            _pnlChartProdutos.Margin = new Padding(0, 0, 0, 6);
+            _pnlChartDias.Margin     = new Padding(0, 0, 0, 0);
+
+            tbl.Controls.Add(_pnlChartCanal,    0, 0);
+            tbl.Controls.Add(_pnlChartProdutos, 0, 1);
+            tbl.Controls.Add(_pnlChartDias,     0, 2);
 
             pnlDashboard.Controls.Add(tbl);
             pnlDashboard.Controls.Add(pnlFiltroChart);

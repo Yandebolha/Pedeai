@@ -75,6 +75,84 @@ namespace Pedeai.Forms
             catch { }
         }
 
+        private void BtnBuscarProduto_Click(object sender, EventArgs e)
+        {
+            using var dlg = new Form();
+            dlg.Text            = "Selecionar Produto";
+            dlg.StartPosition   = FormStartPosition.CenterParent;
+            dlg.Size            = new Size(600, 440);
+            dlg.FormBorderStyle = FormBorderStyle.FixedDialog;
+            dlg.MaximizeBox     = dlg.MinimizeBox = false;
+            dlg.BackColor       = Color.FromArgb(28, 37, 65);
+
+            var txtFiltro = new TextBox { Dock = DockStyle.Top, Height = 28,
+                BackColor = Color.FromArgb(36, 48, 82), ForeColor = Color.White,
+                BorderStyle = BorderStyle.FixedSingle,
+                Font = new Font("Segoe UI", 10F),
+                PlaceholderText = "Filtrar por nome..." };
+
+            var grid = new DataGridView
+            {
+                Dock = DockStyle.Fill, ReadOnly = true, AllowUserToAddRows = false,
+                SelectionMode = DataGridViewSelectionMode.FullRowSelect,
+                RowHeadersVisible = false, AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill,
+                BackgroundColor = Color.FromArgb(28, 37, 65), GridColor = Color.FromArgb(50, 60, 100),
+                DefaultCellStyle = { BackColor = Color.FromArgb(28, 37, 65), ForeColor = Color.White,
+                    SelectionBackColor = Color.FromArgb(52, 152, 219), SelectionForeColor = Color.White },
+                ColumnHeadersDefaultCellStyle = { BackColor = Color.FromArgb(36, 48, 82), ForeColor = Color.White,
+                    Font = new Font("Segoe UI", 9F, FontStyle.Bold) },
+                BorderStyle = BorderStyle.None, Font = new Font("Segoe UI", 9F),
+                MultiSelect = false
+            };
+            grid.Columns.Add(new DataGridViewTextBoxColumn { Name = "Nome",  HeaderText = "Produto",   FillWeight = 60 });
+            grid.Columns.Add(new DataGridViewTextBoxColumn { Name = "Preco", HeaderText = "Preço R$",  FillWeight = 30 });
+
+            void Preencher(string filtro)
+            {
+                grid.Rows.Clear();
+                foreach (var p in _produtos)
+                    if (string.IsNullOrWhiteSpace(filtro) ||
+                        p.Nome.IndexOf(filtro, StringComparison.OrdinalIgnoreCase) >= 0)
+                        grid.Rows.Add(p.Nome, p.Preco.ToString("N2"));
+            }
+            Preencher("");
+
+            txtFiltro.TextChanged += (_, __) => Preencher(txtFiltro.Text.Trim());
+
+            ProdItem escolhido = null;
+            grid.CellDoubleClick += (_, __) =>
+            {
+                if (grid.CurrentRow == null) return;
+                var nome = grid.CurrentRow.Cells["Nome"].Value?.ToString() ?? "";
+                escolhido = _produtos.Find(p => p.Nome == nome);
+                dlg.DialogResult = DialogResult.OK;
+            };
+
+            var btnOk = new Button { Text = "Selecionar", Dock = DockStyle.Bottom, Height = 34,
+                BackColor = Color.FromArgb(33, 150, 243), ForeColor = Color.White,
+                FlatStyle = FlatStyle.Flat, Font = new Font("Segoe UI", 9F, FontStyle.Bold) };
+            btnOk.FlatAppearance.BorderSize = 0;
+            btnOk.Click += (_, __) =>
+            {
+                if (grid.CurrentRow == null) return;
+                var nome = grid.CurrentRow.Cells["Nome"].Value?.ToString() ?? "";
+                escolhido = _produtos.Find(p => p.Nome == nome);
+                dlg.DialogResult = DialogResult.OK;
+            };
+
+            dlg.Controls.Add(grid);
+            dlg.Controls.Add(btnOk);
+            dlg.Controls.Add(txtFiltro);
+
+            if (dlg.ShowDialog(this) == DialogResult.OK && escolhido != null)
+            {
+                _produtoSelecionado = escolhido;
+                txtBuscaProduto.Text = escolhido.Nome;
+                numUnitario.Value    = escolhido.Preco > numUnitario.Maximum ? numUnitario.Maximum : escolhido.Preco;
+                AtualizarDesconto();
+            }
+        }
+
         private void TxtBusca_TextChanged(object sender, EventArgs e)
         {
             var nome  = txtBuscaProduto.Text.Trim();

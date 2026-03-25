@@ -28,6 +28,7 @@ namespace Pedeai.Forms
             numTaxa              = new NumericUpDown();
             txtObs               = new TextBox();
             txtBuscaProduto      = new TextBox();
+            btnBuscarProduto     = new Button();
             lblDesconto          = new Label();
             numQtde              = new NumericUpDown();
             numUnitario          = new NumericUpDown();
@@ -109,21 +110,32 @@ namespace Pedeai.Forms
             // Barra de adicao de itens
             var pnlItem = new Panel { Dock = DockStyle.Top, Height = 72, BackColor = Color.FromArgb(228, 232, 250) };
 
-            var lblProd = new Label { Text = "Buscar produto:", Left = 10, Top = 14, AutoSize = true };
-            txtBuscaProduto.Left = 108; txtBuscaProduto.Top = 10; txtBuscaProduto.Width = 260;
-            txtBuscaProduto.PlaceholderText = "Digite o nome do produto...";
+            var lblProd = new Label { Text = "Produto:", Left = 10, Top = 14, AutoSize = true };
+            txtBuscaProduto.Left = 68; txtBuscaProduto.Top = 10; txtBuscaProduto.Width = 220;
+            txtBuscaProduto.PlaceholderText = "Digite ou pesquise...";
             txtBuscaProduto.TextChanged += TxtBusca_TextChanged;
 
-            var lblQtde = new Label { Text = "Qtde:", Left = 382, Top = 14, AutoSize = true };
-            numQtde.Left = 415; numQtde.Top = 10; numQtde.Width = 58;
+            btnBuscarProduto.Text      = "🔍";
+            btnBuscarProduto.Left      = 292; btnBuscarProduto.Top    = 8;
+            btnBuscarProduto.Width     = 32;  btnBuscarProduto.Height = 26;
+            btnBuscarProduto.BackColor = Color.FromArgb(63, 81, 181);
+            btnBuscarProduto.ForeColor = Color.White;
+            btnBuscarProduto.FlatStyle = FlatStyle.Flat;
+            btnBuscarProduto.Font      = new Font("Segoe UI", 9F);
+            btnBuscarProduto.FlatAppearance.BorderSize = 0;
+            btnBuscarProduto.Cursor    = Cursors.Hand;
+            btnBuscarProduto.Click    += BtnBuscarProduto_Click;
+
+            var lblQtde = new Label { Text = "Qtde:", Left = 336, Top = 14, AutoSize = true };
+            numQtde.Left = 370; numQtde.Top = 10; numQtde.Width = 58;
             numQtde.Minimum = 1; numQtde.Maximum = 999; numQtde.Value = 1;
 
-            var lblUnit = new Label { Text = "Unit. R$:", Left = 484, Top = 14, AutoSize = true };
-            numUnitario.Left = 537; numUnitario.Top = 10; numUnitario.Width = 90;
+            var lblUnit = new Label { Text = "Unit. R$:", Left = 438, Top = 14, AutoSize = true };
+            numUnitario.Left = 494; numUnitario.Top = 10; numUnitario.Width = 90;
             numUnitario.DecimalPlaces = 2; numUnitario.Maximum = 9999;
             numUnitario.ValueChanged += NumUnitario_ValueChanged;
 
-            var btnAdd = new Button { Text = "Adicionar", Top = 8, Width = 110, Height = 28,
+            var btnAdd = new Button { Text = "➕ Adicionar", Top = 8, Width = 120, Height = 28,
                 BackColor = Color.FromArgb(39, 174, 96), ForeColor = Color.White,
                 FlatStyle = FlatStyle.Flat, Font = new Font("Segoe UI", 9F, FontStyle.Bold),
                 Cursor = Cursors.Hand, Anchor = AnchorStyles.Top | AnchorStyles.Right };
@@ -132,12 +144,12 @@ namespace Pedeai.Forms
             pnlItem.SizeChanged += (_, __) => { btnAdd.Left = pnlItem.Width - btnAdd.Width - 8; };
             btnAdd.Left = 860;
 
-            lblDesconto.Text = ""; lblDesconto.Left = 108; lblDesconto.Top = 42;
+            lblDesconto.Text = ""; lblDesconto.Left = 68; lblDesconto.Top = 42;
             lblDesconto.AutoSize = true; lblDesconto.Font = new Font("Segoe UI", 8F, FontStyle.Bold);
             lblDesconto.ForeColor = Color.FromArgb(192, 57, 43); lblDesconto.Visible = false;
 
             pnlItem.Controls.AddRange(new Control[]
-                { lblProd, txtBuscaProduto, lblQtde, numQtde, lblUnit, numUnitario, btnAdd, lblDesconto });
+                { lblProd, txtBuscaProduto, btnBuscarProduto, lblQtde, numQtde, lblUnit, numUnitario, btnAdd, lblDesconto });
 
             // Grid de itens
             gridItens.Dock = DockStyle.Fill;
@@ -230,6 +242,7 @@ namespace Pedeai.Forms
         private Label         lblTaxa;
         private TextBox       txtObs;
         private TextBox       txtBuscaProduto;
+        private Button        btnBuscarProduto;
         private Label         lblDesconto;
         private NumericUpDown numQtde;
         private NumericUpDown numUnitario;
