@@ -34,7 +34,6 @@ namespace Pedeai.Forms
         private ComboBox      cmbCategoria;
         private TextBox       txtNome;
         private ComboBox      cmbSituacao;
-        private TextBox       txtDescricao;
         private Label         lblImagem;
         private NumericUpDown numPreco;
         private NumericUpDown numCusto;
@@ -42,7 +41,6 @@ namespace Pedeai.Forms
         private NumericUpDown numEstoque;
         private CheckBox      chkControlaEstoque;
         private CheckBox      chkDestaque;
-        private CheckBox      chkIfood;
         private CheckBox      chkSite;
     }
 }

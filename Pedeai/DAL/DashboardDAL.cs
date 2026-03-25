@@ -59,11 +59,12 @@ namespace Pedeai.DAL
             return dt;
         }
 
-        public DataTable GetTopProdutos(DateTime de, DateTime ate)
+        public DataTable GetTopProdutos(DateTime de, DateTime ate, int top = 8)
         {
             var dt = new DataTable();
             using var conn = AbrirConexao();
-            var sql = @"SELECT i.itpwNome_Mercadoria AS Produto,
+            int limit = Math.Max(1, Math.Min(top, 50));
+            var sql = $@"SELECT i.itpwNome_Mercadoria AS Produto,
                 CAST(SUM(i.itpwQtde) AS UNSIGNED) AS Quantidade,
                 COALESCE(SUM(i.itpwSubtotal), 0) AS TotalVendas
                 FROM itens_pedido_web i
@@ -72,7 +73,7 @@ namespace Pedeai.DAL
                   AND p.pediSituacao <> 6
                 GROUP BY i.itpwNome_Mercadoria
                 ORDER BY Quantidade DESC
-                LIMIT 8";
+                LIMIT {{limit}}";
             using var cmd = new MySqlCommand(sql, conn);
             cmd.Parameters.AddWithValue("@de",  de.Date);
             cmd.Parameters.AddWithValue("@ate", ate.Date);

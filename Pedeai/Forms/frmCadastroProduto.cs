@@ -30,7 +30,6 @@ namespace Pedeai.Forms
             cmbCategoria       = new ComboBox();
             txtNome            = new TextBox();
             cmbSituacao        = new ComboBox();
-            txtDescricao       = new TextBox();
             lblImagem          = new Label();
             numPreco           = new NumericUpDown();
             numCusto           = new NumericUpDown();
@@ -38,7 +37,6 @@ namespace Pedeai.Forms
             numEstoque         = new NumericUpDown();
             chkControlaEstoque = new CheckBox();
             chkDestaque        = new CheckBox();
-            chkIfood           = new CheckBox();
             chkSite            = new CheckBox();
 
             // ── Top bar ───────────────────────────────────────────────────
@@ -123,20 +121,17 @@ namespace Pedeai.Forms
             cmbSituacao.Items.AddRange(new object[] { "Ativo", "Inativo" });
             cmbSituacao.SelectedIndex = 0;
 
-            // Linha 2: Descrição | Imagem
-            var lblDesc = new Label { Text = "Descrição:",      Left = 10,  Top = 45, AutoSize = true };
-            txtDescricao.Left = 80; txtDescricao.Top = 42; txtDescricao.Width = 330;
-
+            // Linha 2: Imagem
             var btnImg = new Button
             {
-                Text = "Imagem", Left = 425, Top = 41, Width = 85, Height = 24,
+                Text = "Imagem", Left = 10, Top = 41, Width = 85, Height = 24,
                 BackColor = Color.FromArgb(52, 100, 170), ForeColor = Color.White, FlatStyle = FlatStyle.Flat
             };
             btnImg.FlatAppearance.BorderSize = 0; btnImg.Click += BtnImagem_Click;
 
             lblImagem.Text      = "nenhuma imagem selecionada";
-            lblImagem.Left      = 520; lblImagem.Top = 45;
-            lblImagem.Width     = 275; lblImagem.ForeColor = Color.Gray;
+            lblImagem.Left      = 105; lblImagem.Top = 45;
+            lblImagem.Width     = 690; lblImagem.ForeColor = Color.Gray;
             lblImagem.AutoSize  = false;
 
             // Linha 3: Preço | Custo | Promo | Estoque | Checkboxes
@@ -162,9 +157,6 @@ namespace Pedeai.Forms
             var lblPub = new Label { Text = "Publicações:", Left = 10, Top = 119, AutoSize = true, ForeColor = Color.FromArgb(180, 190, 220) };
             chkSite.Text     = "No site";   chkSite.Left     = 90;  chkSite.Top     = 116; chkSite.AutoSize = true;
             chkDestaque.Text = "Destaque";  chkDestaque.Left = 180; chkDestaque.Top = 116; chkDestaque.AutoSize = true;
-            chkIfood.Text    = "iFood";     chkIfood.Left    = 268; chkIfood.Top    = 116; chkIfood.AutoSize = true;
-            chkIfood.Font      = new Font("Segoe UI", 9F, FontStyle.Bold);
-            chkIfood.ForeColor = Color.FromArgb(200, 80, 0);
 
             // Botões
             var pnlBtns = new Panel { Dock = DockStyle.Bottom, Height = 48,
@@ -197,10 +189,9 @@ namespace Pedeai.Forms
             pnlForm.Controls.AddRange(new Control[]
             {
                 lblCat, cmbCategoria, lblNom, txtNome, lblSit, cmbSituacao,
-                lblDesc, txtDescricao, btnImg, lblImagem,
+                btnImg, lblImagem,
                 lblPrc, numPreco, lblCst, numCusto, lblPrm, numPromo, lblEst, numEstoque,
-                chkControlaEstoque, lblPub, chkSite, chkDestaque,
-                chkIfood
+                chkControlaEstoque, lblPub, chkSite, chkDestaque
             });
             pnlForm.Controls.Add(pnlBtns);
 
@@ -279,10 +270,10 @@ namespace Pedeai.Forms
             CarrecarComboCategorias();
             _codigoEditando = 0;
             cmbCategoria.Text = "";
-            txtNome.Clear(); txtDescricao.Clear();
+            txtNome.Clear();
             _caminhoImagem = ""; lblImagem.Text = "nenhuma imagem selecionada"; lblImagem.ForeColor = Color.Gray;
             numPreco.Value = 0; numCusto.Value = 0; numPromo.Value = 0; numEstoque.Value = 0;
-            chkControlaEstoque.Checked = false; chkDestaque.Checked = false; chkIfood.Checked = false; chkSite.Checked = false;
+            chkControlaEstoque.Checked = false; chkDestaque.Checked = false; chkSite.Checked = false;
             cmbSituacao.SelectedIndex = 0;
             pnlForm.Visible = true; txtNome.Focus();
         }
@@ -296,7 +287,6 @@ namespace Pedeai.Forms
             CarrecarComboCategorias();
             _codigoEditando   = cod;
             txtNome.Text      = obj.mercMercadoria ?? "";
-            txtDescricao.Text = obj.mercApresentacao ?? "";
             _caminhoImagem    = obj.mercImagem_Url ?? "";
             lblImagem.Text    = string.IsNullOrEmpty(_caminhoImagem) ? "nenhuma imagem selecionada" : Path.GetFileName(_caminhoImagem);
             lblImagem.ForeColor = string.IsNullOrEmpty(_caminhoImagem) ? Color.Gray : Color.FromArgb(30, 120, 30);
@@ -306,7 +296,6 @@ namespace Pedeai.Forms
             numEstoque.Value  = obj.mercEstoque_Atual;
             chkControlaEstoque.Checked = obj.mercControla_Estoque;
             chkDestaque.Checked        = obj.mercDestaque;
-            chkIfood.Checked           = obj.mercHabilitar_Ifood;
             chkSite.Checked            = obj.mercHabilitar_Site;
             cmbSituacao.SelectedItem   = obj.Situacao == "I" ? "Inativo" : "Ativo";
             cmbCategoria.Text = "";
@@ -333,7 +322,7 @@ namespace Pedeai.Forms
                 Codigo                = _codigoEditando,
                 Codigo_Grupo          = codigoGrupo,
                 mercMercadoria        = txtNome.Text.Trim(),
-                mercApresentacao      = txtDescricao.Text.Trim(),
+                mercApresentacao      = "",
                 mercPreco_Venda       = numPreco.Value,
                 mercPreco_Custo       = numCusto.Value,
                 mercPreco_Promocional = numPromo.Value,
@@ -342,7 +331,6 @@ namespace Pedeai.Forms
                 mercImagem_Url        = _caminhoImagem,
                 mercDestaque          = chkDestaque.Checked,
                 mercOrdem             = 0,
-                mercHabilitar_Ifood   = chkIfood.Checked,
                 mercHabilitar_Site    = chkSite.Checked,
                 Situacao              = cmbSituacao.SelectedItem?.ToString() == "Inativo" ? "I" : "A",
             };

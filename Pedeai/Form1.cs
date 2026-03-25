@@ -14,7 +14,7 @@ namespace Pedeai
         private readonly PedidoBLL        _pedidoBLL   = new PedidoBLL();
         private readonly DashboardBLL     _dashBLL     = new DashboardBLL();
         private readonly GastoMaterialBLL     _gastosBLL       = new GastoMaterialBLL();
-        private readonly NecessidadeEmpresaBLL  _necessidadesBLL = new NecessidadeEmpresaBLL();
+
 
         private int  _paginaAtual = 0; // 0=Dashboard 1=Pedidos 2=Financeiro
 
@@ -64,8 +64,10 @@ namespace Pedeai
         private Panel           _pnlChartCanal;
         private Panel           _pnlChartProdutos;
         private Panel           _pnlChartDias;
-        private DateTimePicker  _dtpChartDe;
-        private DateTimePicker  _dtpChartAte;
+        private DateTimePicker  _dtpCanalDe,  _dtpCanalAte;
+        private DateTimePicker  _dtpProdDe,   _dtpProdAte;
+        private DateTimePicker  _dtpDiasDe,   _dtpDiasAte;
+        private ComboBox        _cmbProdTop;
         private (string label, float value)[] _dadosCanal    = Array.Empty<(string, float)>();
         private (string label, float value)[] _dadosProdutos = Array.Empty<(string, float)>();
         private (string label, float value)[] _dadosDias     = Array.Empty<(string, float)>();
@@ -93,25 +95,16 @@ namespace Pedeai
             lblPendentes    = CriarCard(pnlCards, "Pedidos Pendentes","0",       Color.FromArgb(211, 84, 0));
 
             // ── Barra de filtro de período ─────────────────────────────────────
-            var pnlFiltroChart = new Panel
+            // ── Área de gráficos ──
+            Panel  MkOuter() => new Panel { Dock = DockStyle.Fill, BackColor = Color.FromArgb(28, 37, 65) };
+            Panel  MkFiltro() => new Panel { Dock = DockStyle.Top, Height = 34, BackColor = Color.FromArgb(22, 30, 55) };
+            Label  MkLbl(string t, int x) => new Label { Text = t, ForeColor = Color.FromArgb(180, 200, 240), Left = x, Top = 9, AutoSize = true };
+            DateTimePicker MkDtp(int x, DateTime v) => new DateTimePicker { Left = x, Top = 6, Width = 105, Format = DateTimePickerFormat.Short, Value = v };
+            Button MkBtn(int x, Action fn)
             {
-                Dock      = DockStyle.Top,
-                Height    = 40,
-                BackColor = Color.Transparent
-            };
-            var lblDe = new Label { Text = "Período:", ForeColor = Color.FromArgb(200, 210, 240), Left = 0, Top = 11, AutoSize = true };
-            _dtpChartDe = new DateTimePicker { Left = 66, Top = 6, Width = 115, Format = DateTimePickerFormat.Short, Value = DateTime.Today.AddDays(-30) };
-            var lblAte = new Label { Text = "até", ForeColor = Color.FromArgb(200, 210, 240), Left = 192, Top = 11, AutoSize = true };
-            _dtpChartAte = new DateTimePicker { Left = 216, Top = 6, Width = 115, Format = DateTimePickerFormat.Short, Value = DateTime.Today };
-            var btnFiltChart = new Button
-            {
-                Text = "Filtrar", Left = 342, Top = 5, Width = 72, Height = 28,
-                BackColor = CorBotaoAtivo, ForeColor = Color.White,
-                FlatStyle = FlatStyle.Flat, Cursor = Cursors.Hand
-            };
-            btnFiltChart.FlatAppearance.BorderSize = 0;
-            btnFiltChart.Click += (_, __) => CarregarCharts();
-            pnlFiltroChart.Controls.AddRange(new Control[] { lblDe, _dtpChartDe, lblAte, _dtpChartAte, btnFiltChart });
+                var b = new Button { Text = "Filtrar", Left = x, Top = 5, Width = 62, Height = 24, BackColor = CorBotaoAtivo, ForeColor = Color.White, FlatStyle = FlatStyle.Flat, Cursor = Cursors.Hand };
+                b.FlatAppearance.BorderSize = 0; b.Click += (_, __) => fn(); return b;
+            }
 
             // ── Área de gráficos (3 painéis empilhados verticalmente) ──────────
             var tbl = new TableLayoutPanel
@@ -127,24 +120,43 @@ namespace Pedeai
             tbl.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 33.4f));
             tbl.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 33.3f));
 
-            _pnlChartCanal    = CriarPainelGrafico("Vendas por Canal", Color.FromArgb(41, 128, 185));
-            _pnlChartProdutos = CriarPainelGrafico("Top Produtos",     Color.FromArgb(142, 68, 173));
-            _pnlChartDias     = CriarPainelGrafico("Receita por Dia",  Color.FromArgb(39, 174, 96));
+            // Gráfico 1: Vendas por Canal
+            var outerC = MkOuter(); var filtC = MkFiltro();
+            _dtpCanalDe  = MkDtp(38, DateTime.Today.AddDays(-30));
+            _dtpCanalAte = MkDtp(175, DateTime.Today);
+            filtC.Controls.AddRange(new Control[] { MkLbl("De:", 4), _dtpCanalDe, MkLbl("até:", 150), _dtpCanalAte, MkBtn(288, CarregarChartCanal) });
+            _pnlChartCanal = new Panel { Dock = DockStyle.Fill, BackColor = Color.FromArgb(28, 37, 65), Tag = "Vendas por Canal" };
+            _pnlChartCanal.Paint += (s, e) => DesenharBarrasVerticais(e.Graphics, (Panel)s, _dadosCanal, Color.FromArgb(52, 152, 219));
+            outerC.Controls.Add(_pnlChartCanal); outerC.Controls.Add(filtC);
+            outerC.Controls.Add(new Panel { Height = 4, Dock = DockStyle.Top, BackColor = Color.FromArgb(41, 128, 185) });
 
-            _pnlChartCanal.Paint    += (s, e) => DesenharBarrasVerticais(e.Graphics, (Panel)s, _dadosCanal,    Color.FromArgb(52, 152, 219));
+            // Gráfico 2: Top Produtos
+            var outerP = MkOuter(); var filtP = MkFiltro();
+            _dtpProdDe  = MkDtp(38, DateTime.Today.AddDays(-30));
+            _dtpProdAte = MkDtp(175, DateTime.Today);
+            _cmbProdTop = new ComboBox { Left = 295, Top = 6, Width = 60, DropDownStyle = ComboBoxStyle.DropDownList };
+            _cmbProdTop.Items.AddRange(new object[] { "5", "8", "10", "15" }); _cmbProdTop.SelectedIndex = 1;
+            filtP.Controls.AddRange(new Control[] { MkLbl("De:", 4), _dtpProdDe, MkLbl("até:", 150), _dtpProdAte, MkLbl("Top:", 288), _cmbProdTop, MkBtn(362, CarregarChartProdutos) });
+            _pnlChartProdutos = new Panel { Dock = DockStyle.Fill, BackColor = Color.FromArgb(28, 37, 65), Tag = "Top Produtos" };
             _pnlChartProdutos.Paint += (s, e) => DesenharBarrasHorizontais(e.Graphics, (Panel)s, _dadosProdutos, Color.FromArgb(155, 89, 182));
-            _pnlChartDias.Paint     += (s, e) => DesenharLinha(e.Graphics, (Panel)s, _dadosDias,    Color.FromArgb(46, 204, 113));
+            outerP.Controls.Add(_pnlChartProdutos); outerP.Controls.Add(filtP);
+            outerP.Controls.Add(new Panel { Height = 4, Dock = DockStyle.Top, BackColor = Color.FromArgb(142, 68, 173) });
 
-            _pnlChartCanal.Margin    = new Padding(0, 0, 0, 6);
-            _pnlChartProdutos.Margin = new Padding(0, 0, 0, 6);
-            _pnlChartDias.Margin     = new Padding(0, 0, 0, 0);
+            // Gráfico 3: Receita por Dia
+            var outerD = MkOuter(); var filtD = MkFiltro();
+            _dtpDiasDe  = MkDtp(38, DateTime.Today.AddDays(-30));
+            _dtpDiasAte = MkDtp(175, DateTime.Today);
+            filtD.Controls.AddRange(new Control[] { MkLbl("De:", 4), _dtpDiasDe, MkLbl("até:", 150), _dtpDiasAte, MkBtn(288, CarregarChartDias) });
+            _pnlChartDias = new Panel { Dock = DockStyle.Fill, BackColor = Color.FromArgb(28, 37, 65), Tag = "Receita por Dia" };
+            _pnlChartDias.Paint += (s, e) => DesenharLinha(e.Graphics, (Panel)s, _dadosDias, Color.FromArgb(46, 204, 113));
+            outerD.Controls.Add(_pnlChartDias); outerD.Controls.Add(filtD);
+            outerD.Controls.Add(new Panel { Height = 4, Dock = DockStyle.Top, BackColor = Color.FromArgb(39, 174, 96) });
 
-            tbl.Controls.Add(_pnlChartCanal,    0, 0);
-            tbl.Controls.Add(_pnlChartProdutos, 0, 1);
-            tbl.Controls.Add(_pnlChartDias,     0, 2);
+            tbl.Controls.Add(outerC, 0, 0);
+            tbl.Controls.Add(outerP, 0, 1);
+            tbl.Controls.Add(outerD, 0, 2);
 
             pnlDashboard.Controls.Add(tbl);
-            pnlDashboard.Controls.Add(pnlFiltroChart);
             pnlDashboard.Controls.Add(pnlCards);
             pnlContent.Controls.Add(pnlDashboard);
         }
@@ -343,26 +355,46 @@ namespace Pedeai
             return result;
         }
 
-        private void CarregarCharts()
+        private void CarregarCharts() { CarregarChartCanal(); CarregarChartProdutos(); CarregarChartDias(); }
+
+        private void CarregarChartCanal()
         {
             if (_pnlChartCanal == null) return;
-            var de  = _dtpChartDe?.Value.Date  ?? DateTime.Today.AddDays(-30);
-            var ate = _dtpChartAte?.Value.Date ?? DateTime.Today;
             try
             {
-                var dtCanal = _dashBLL.GetVendasPorCanal(de, ate);
-                _dadosCanal = DataTableParaChart(dtCanal, "Canal", "TotalVendas");
+                var de  = _dtpCanalDe?.Value.Date  ?? DateTime.Today.AddDays(-30);
+                var ate = _dtpCanalAte?.Value.Date ?? DateTime.Today;
+                _dadosCanal = DataTableParaChart(_dashBLL.GetVendasPorCanal(de, ate), "Canal", "TotalVendas");
                 _pnlChartCanal.Invalidate();
+            }
+            catch { }
+        }
 
-                var dtProd = _dashBLL.GetTopProdutos(de, ate);
-                _dadosProdutos = DataTableParaChart(dtProd, "Produto", "Quantidade");
+        private void CarregarChartProdutos()
+        {
+            if (_pnlChartProdutos == null) return;
+            try
+            {
+                var de  = _dtpProdDe?.Value.Date  ?? DateTime.Today.AddDays(-30);
+                var ate = _dtpProdAte?.Value.Date ?? DateTime.Today;
+                int top = _cmbProdTop?.SelectedItem is string s && int.TryParse(s, out int t) ? t : 8;
+                _dadosProdutos = DataTableParaChart(_dashBLL.GetTopProdutos(de, ate, top), "Produto", "Quantidade");
                 _pnlChartProdutos.Invalidate();
+            }
+            catch { }
+        }
 
-                var dtDias = _dashBLL.GetVendasPorDia(de, ate);
-                _dadosDias = DataTableParaChart(dtDias, "Dia", "TotalVendas", isDate: true);
+        private void CarregarChartDias()
+        {
+            if (_pnlChartDias == null) return;
+            try
+            {
+                var de  = _dtpDiasDe?.Value.Date  ?? DateTime.Today.AddDays(-30);
+                var ate = _dtpDiasAte?.Value.Date ?? DateTime.Today;
+                _dadosDias = DataTableParaChart(_dashBLL.GetVendasPorDia(de, ate), "Dia", "TotalVendas", isDate: true);
                 _pnlChartDias.Invalidate();
             }
-            catch { /* ignore chart load errors silently */ }
+            catch { }
         }
 
         private Label CriarCard(FlowLayoutPanel pai, string titulo, string valor, Color cor)
@@ -862,7 +894,6 @@ namespace Pedeai
         // Campos de UI do painel financeiro
         private FlowLayoutPanel _pnlFinCards;
         private DataGridView    _gridGastos;
-        private DataGridView    _gridNecessidades;
 
         private void MostrarFinanceiro()
         {
@@ -904,18 +935,9 @@ namespace Pedeai
             gridFinanceiro = CriarGrid();
             gridFinanceiro.Dock = DockStyle.Fill;
 
-            // ── Rodapé: SplitContainer Gastos | Necessidades ──
-            var splitBottom = new SplitContainer
-            {
-                Dock          = DockStyle.Bottom,
-                Height        = 210,
-                Orientation   = Orientation.Vertical,
-                BackColor     = Color.FromArgb(22, 30, 55),
-                Panel1MinSize = 50,
-                Panel2MinSize = 50,
-            };
+            // ── Rodapé: Gastos de Material / Insumos ──
+            var pnlGastos = new Panel { Dock = DockStyle.Bottom, Height = 210, BackColor = Color.FromArgb(22, 30, 55) };
 
-            // Panel1 – Gastos de Material / Insumos
             var lblGTitle = new Label
             {
                 Text      = "Gastos de Material / Insumos",
@@ -953,51 +975,9 @@ namespace Pedeai
             pnlGBtn.Controls.AddRange(new Control[] { btnAddGasto, btnDelGasto });
             _gridGastos = CriarGrid();
             _gridGastos.Dock = DockStyle.Fill;
-            splitBottom.Panel1.Controls.Add(_gridGastos);
-            splitBottom.Panel1.Controls.Add(pnlGBtn);
-            splitBottom.Panel1.Controls.Add(lblGTitle);
-
-            // Panel2 – Necessidades da Empresa
-            var lblNTitle = new Label
-            {
-                Text      = "Necessidades da Empresa",
-                ForeColor = Color.FromArgb(243, 156, 18),
-                Font      = new Font("Segoe UI", 10F, FontStyle.Bold),
-                Dock      = DockStyle.Top, Height = 32, Padding = new Padding(4, 8, 0, 0)
-            };
-            var pnlNBtn = new Panel { Dock = DockStyle.Top, Height = 36, BackColor = Color.Transparent };
-            var btnAddNecess = new Button
-            {
-                Text = "+ Lancar", Left = 4, Top = 4, Width = 110, Height = 28,
-                BackColor = Color.FromArgb(52, 73, 94), ForeColor = Color.White,
-                FlatStyle = FlatStyle.Flat, Cursor = Cursors.Hand
-            };
-            btnAddNecess.FlatAppearance.BorderSize = 0;
-            btnAddNecess.Click += (_, __) =>
-            {
-                using var frm = new Forms.frmCadastroNecessidade();
-                if (frm.ShowDialog(this) == DialogResult.OK) CarregarFinanceiro();
-            };
-            var btnDelNecess = new Button
-            {
-                Text = "\u2715 Excluir", Left = 122, Top = 4, Width = 100, Height = 28,
-                BackColor = Color.FromArgb(192, 57, 43), ForeColor = Color.White,
-                FlatStyle = FlatStyle.Flat, Cursor = Cursors.Hand
-            };
-            btnDelNecess.FlatAppearance.BorderSize = 0;
-            btnDelNecess.Click += (_, __) =>
-            {
-                if (_gridNecessidades.SelectedRows.Count == 0) return;
-                var cod = Convert.ToInt32(_gridNecessidades.SelectedRows[0].Cells["Codigo"].Value);
-                if (MessageBox.Show("Excluir esta necessidade?", "Confirmar", MessageBoxButtons.YesNo) == DialogResult.Yes)
-                { _necessidadesBLL.Excluir(cod); CarregarFinanceiro(); }
-            };
-            pnlNBtn.Controls.AddRange(new Control[] { btnAddNecess, btnDelNecess });
-            _gridNecessidades = CriarGrid();
-            _gridNecessidades.Dock = DockStyle.Fill;
-            splitBottom.Panel2.Controls.Add(_gridNecessidades);
-            splitBottom.Panel2.Controls.Add(pnlNBtn);
-            splitBottom.Panel2.Controls.Add(lblNTitle);
+            pnlGastos.Controls.Add(_gridGastos);
+            pnlGastos.Controls.Add(pnlGBtn);
+            pnlGastos.Controls.Add(lblGTitle);
 
             lblFinResumo = new Label
             {
@@ -1013,7 +993,7 @@ namespace Pedeai
             pnlFinanceiro.Controls.Add(gridFinanceiro);
             pnlFinanceiro.Controls.Add(_pnlFinCards);
             pnlFinanceiro.Controls.Add(pnlFil);
-            pnlFinanceiro.Controls.Add(splitBottom);
+            pnlFinanceiro.Controls.Add(pnlGastos);
             pnlFinanceiro.Controls.Add(lblFinResumo);
             pnlContent.Controls.Add(pnlFinanceiro);
         }
@@ -1077,15 +1057,11 @@ namespace Pedeai
                 _gridGastos.DataSource = _gastosBLL.Listar(de, ate);
                 decimal gastosMaterial = _gastosBLL.TotalPeriodo(de, ate);
 
-                // ── Necessidades empresa ──
-                _gridNecessidades.DataSource = _necessidadesBLL.Listar(de, ate);
-                decimal necessidades = _necessidadesBLL.TotalPeriodo(de, ate);
-
                 lblFinResumo.Text =
                     $"Período: {de:dd/MM/yyyy} a {ate:dd/MM/yyyy}  |  " +
                     $"Fat. Bruto: {totalBruto:C}  |  " +
                     $"Fat. Líquido: {fatLiquido:C}  |  " +
-                    $"Gastos material: {gastosMaterial:C}  |  Necessidades: {necessidades:C}";
+                    $"Gastos material: {gastosMaterial:C}";
             }
             catch (Exception ex) { MessageBox.Show("Erro ao carregar financeiro: " + ex.Message); }
         }
