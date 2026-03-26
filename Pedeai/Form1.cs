@@ -216,7 +216,7 @@ namespace Pedeai
             if (maxV <= 0) maxV = 1;
 
             float yAxisW      = 68f;
-            float xLblH       = 65f;
+            float xLblH       = 80f;
             float chartTop    = 44f;
             float chartBottom = H - xLblH;
             float chartLeft   = yAxisW;
@@ -265,7 +265,7 @@ namespace Pedeai
 
                 // Rotated x-axis labels (-45°)
                 var gState = g.Save();
-                g.TranslateTransform(cx, chartBottom + 5f);
+                g.TranslateTransform(cx, chartBottom + 10f);
                 g.RotateTransform(-45f);
                 g.DrawString(data[i].label, labelFont, grayBrush, 0f, 0f);
                 g.Restore(gState);
