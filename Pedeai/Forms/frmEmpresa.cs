@@ -16,7 +16,7 @@ namespace Pedeai.Forms
         public frmEmpresa()
         {
             InitializeComponent();
-            if (!DesignMode) { CarregarEmpresa(); CarregarUsuarios(); }
+            if (!DesignMode) { CarregarEmpresa(); CarregarUsuarios(); SetModoEdicao(false); }
         }
 
         // ── ABA EMPRESA ──────────────────────────────────────────────────────
@@ -80,7 +80,12 @@ namespace Pedeai.Forms
         private void LstUsuarios_DoubleClick(object sender, EventArgs e)
         {
             if (lstUsuarios.SelectedIndex < 0 || lstUsuarios.SelectedIndex >= _filtrados.Count) return;
-            _usuarioEditando = _usrBLL.PesquisaCodigo(_filtrados[lstUsuarios.SelectedIndex].Codigo);
+            CarregarUsuarioSelecionado(_filtrados[lstUsuarios.SelectedIndex].Codigo);
+        }
+
+        private void CarregarUsuarioSelecionado(int codigo)
+        {
+            _usuarioEditando = _usrBLL.PesquisaCodigo(codigo);
             if (_usuarioEditando == null) return;
             txtUsrNome.Text      = _usuarioEditando.usuNome;
             txtUsrLogin.Text     = _usuarioEditando.usuLogin;
@@ -98,8 +103,8 @@ namespace Pedeai.Forms
         {
             CarregarUsuarios();
             txtPesquisa.Clear();
-            pnlBuscaUsuarios.Visible = true;
-            txtPesquisa.Focus();
+            pnlBuscaUsuarios.Visible = !pnlBuscaUsuarios.Visible;
+            if (pnlBuscaUsuarios.Visible) txtPesquisa.Focus();
         }
 
         private void BtnNovoUsuario_Click(object sender, EventArgs e)
@@ -118,8 +123,9 @@ namespace Pedeai.Forms
 
         private void SetModoEdicao(bool editando)
         {
+            // Pesquisar is always visible; Novo shown in idle; Salvar+Cancelar shown when editing
             btnNovoUsr.Visible      = !editando;
-            btnPesquisarUsr.Visible = !editando;
+            btnPesquisarUsr.Visible = true;           // always visible
             btnSalvUsr.Visible      = editando;
             btnCancelarUsr.Visible  = editando;
         }
