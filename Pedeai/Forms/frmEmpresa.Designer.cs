@@ -15,7 +15,7 @@ namespace Pedeai.Forms
 
         private void InitializeComponent()
         {
-            this.Text            = "Empresa e UsuÃ¡rios";
+            this.Text            = "Empresa e Usuários";
             this.StartPosition   = FormStartPosition.CenterParent;
             this.FormBorderStyle = FormBorderStyle.Sizable;
             this.BackColor       = Color.FromArgb(13, 19, 40);
@@ -93,7 +93,7 @@ namespace Pedeai.Forms
                 Padding   = new Padding(0)
             };
 
-            // cabeÃ§alho decorativo
+            // cabeçalho decorativo
             var empHeader = new Panel
             {
                 Dock      = DockStyle.Top,
@@ -102,7 +102,7 @@ namespace Pedeai.Forms
             };
             var empHeaderTitle = new Label
             {
-                Text      = "ðŸ¢  Dados da Empresa",
+                Text      = "🏢  Dados da Empresa",
                 ForeColor = cWhite,
                 Font      = new Font("Segoe UI", 12F, FontStyle.Bold),
                 AutoSize  = true,
@@ -111,7 +111,7 @@ namespace Pedeai.Forms
             };
             var empHeaderSub = new Label
             {
-                Text      = "Configure as informaÃ§Ãµes da sua empresa",
+                Text      = "Configure as informações da sua empresa",
                 ForeColor = Color.FromArgb(140, 165, 210),
                 Font      = fntSmall,
                 AutoSize  = true,
@@ -153,12 +153,12 @@ namespace Pedeai.Forms
 
             var empFieldDefs = new[]
             {
-                ("RazÃ£o Social:",   (System.Windows.Forms.Control)txtEmpNome,     "Nome legal da empresa"),
-                ("Nome Fantasia:",  txtEmpFantasia,  "Como Ã© conhecida no mercado"),
-                ("CNPJ:",           txtEmpCNPJ,      "Somente nÃºmeros ou com pontuaÃ§Ã£o"),
+                ("Razão Social:",   (System.Windows.Forms.Control)txtEmpNome,     "Nome legal da empresa"),
+                ("Nome Fantasia:",  txtEmpFantasia,  "Como é conhecida no mercado"),
+                ("CNPJ:",           txtEmpCNPJ,      "Somente números ou com pontuação"),
                 ("Telefone:",       txtEmpTel,       ""),
                 ("E-mail:",         txtEmpEmail,     ""),
-                ("EndereÃ§o:",       txtEmpEnd,       "")
+                ("Endereço:",       txtEmpEnd,       "")
             };
 
             int ey = 18;
@@ -174,7 +174,7 @@ namespace Pedeai.Forms
 
             var btnSalvEmp = new Button
             {
-                Text      = "âœ”  Salvar Empresa",
+                Text      = "✓  Salvar Empresa",
                 Left      = ex + lw + 14,
                 Top       = ey + 8,
                 Width     = 160,
@@ -193,16 +193,16 @@ namespace Pedeai.Forms
             tabEmp.Controls.Add(empHeader);
 
             // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-            //  ABA USUÃRIOS
+            //  ABA USUÁRIOS
             // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-            var tabUsr = new TabPage("  UsuÃ¡rios  ")
+            var tabUsr = new TabPage("  Usuários  ")
             {
                 BackColor = cBg,
                 ForeColor = cWhite,
                 Padding   = new Padding(0)
             };
 
-            // cabeÃ§alho decorativo
+            // cabeçalho decorativo
             var usrHeader = new Panel
             {
                 Dock      = DockStyle.Top,
@@ -211,7 +211,7 @@ namespace Pedeai.Forms
             };
             var usrHeaderTitle = new Label
             {
-                Text      = "ðŸ‘¥  UsuÃ¡rios do Sistema",
+                Text      = "👥  Usuários do Sistema",
                 ForeColor = cWhite,
                 Font      = new Font("Segoe UI", 12F, FontStyle.Bold),
                 AutoSize  = true,
@@ -220,7 +220,7 @@ namespace Pedeai.Forms
             };
             var usrHeaderSub = new Label
             {
-                Text      = "Gerencie os usuÃ¡rios e seus acessos",
+                Text      = "Gerencie os usuários e seus acessos",
                 ForeColor = Color.FromArgb(140, 165, 210),
                 Font      = fntSmall,
                 AutoSize  = true,
@@ -247,7 +247,7 @@ namespace Pedeai.Forms
                 Padding   = new Padding(0)
             };
 
-            // faixa do tÃ­tulo sobre a grid
+            // faixa do título sobre a grid
             var pnlGridHead = new Panel
             {
                 Dock      = DockStyle.Top,
@@ -256,7 +256,7 @@ namespace Pedeai.Forms
             };
             var lblGridTitle = new Label
             {
-                Text      = "Lista de UsuÃ¡rios",
+                Text      = "Lista de Usuários",
                 ForeColor = cLbl,
                 Font      = new Font("Segoe UI", 9F, FontStyle.Bold),
                 AutoSize  = true,
@@ -313,7 +313,7 @@ namespace Pedeai.Forms
                 Padding   = new Padding(0)
             };
 
-            // cabeÃ§alho painel form
+            // cabeçalho painel form
             var pnlFormHead = new Panel
             {
                 Dock      = DockStyle.Top,
@@ -322,7 +322,7 @@ namespace Pedeai.Forms
             };
             var lblFormHeadTitle = new Label
             {
-                Text      = "Dados do UsuÃ¡rio",
+                Text      = "Dados do Usuário",
                 ForeColor = cLbl,
                 Font      = new Font("Segoe UI", 9F, FontStyle.Bold),
                 AutoSize  = true,
@@ -331,7 +331,7 @@ namespace Pedeai.Forms
             };
             pnlFormHead.Controls.Add(lblFormHeadTitle);
 
-            // card do formulÃ¡rio
+            // card do formulário
             var frmCard = new Panel
             {
                 Left      = 14,
@@ -388,8 +388,8 @@ namespace Pedeai.Forms
                 ("Login:",           txtUsrLogin),
                 ("Senha:",           txtUsrSenha),
                 ("Confirmar Senha:", txtUsrSenhaConf),
-                ("NÃ­vel:",           cmbUsrNivel),
-                ("SituaÃ§Ã£o:",        cmbUsrSit)
+                ("Nível:",           cmbUsrNivel),
+                ("Situação:",        cmbUsrSit)
             };
 
             foreach (var (label, ctrl) in usrFieldDefs)
@@ -402,13 +402,50 @@ namespace Pedeai.Forms
                 uy += uth + ugy;
             }
 
-            var lblHintSenha = MakeLbl("(deixe em branco para nÃ£o alterar)", true);
+            var lblHintSenha = MakeLbl("(deixe em branco para não alterar)", true);
             lblHintSenha.SetBounds(uf + ulw + 14, uy - ugy + 1, utw, 16);
             frmCard.Controls.Add(lblHintSenha);
 
+            uy += 16;
+
+            // ── Módulos de acesso ─────────────────────────────────────────────
+            var lblModTit = MakeSectionHead("Módulos de Acesso");
+            lblModTit.SetBounds(uf + 8, uy + 4, 250, 20);
+            frmCard.Controls.Add(lblModTit);
+            uy += 26;
+
+            var modNames  = new[] { "Dashboard", "Pedidos", "Financeiro", "Produtos", "Categorias", "Clientes", "Fornecedores", "Cupons", "Empresa" };
+            var modFields = new CheckBox[9];
+            int cbColW = 88, cbRowH = 24;
+            int cbX0   = uf + ulw + 14;
+            for (int i = 0; i < modNames.Length; i++)
+            {
+                var chk = new CheckBox
+                {
+                    Text      = modNames[i],
+                    ForeColor = cLbl,
+                    BackColor = cCard,
+                    Font      = fntLbl,
+                    AutoSize  = true
+                };
+                chk.SetBounds(cbX0 + (i % 3) * cbColW, uy + (i / 3) * cbRowH, cbColW, cbRowH);
+                frmCard.Controls.Add(chk);
+                modFields[i] = chk;
+            }
+            chkModDashboard    = modFields[0];
+            chkModPedidos      = modFields[1];
+            chkModFinanceiro   = modFields[2];
+            chkModProdutos     = modFields[3];
+            chkModCategorias   = modFields[4];
+            chkModClientes     = modFields[5];
+            chkModFornecedores = modFields[6];
+            chkModCupons       = modFields[7];
+            chkModEmpresa      = modFields[8];
+            uy += 3 * cbRowH + 8;
+
             uy += 10;
 
-            // botÃµes
+            // botões
             var pnlBtns = new Panel
             {
                 Left      = uf + ulw + 14,
@@ -436,7 +473,7 @@ namespace Pedeai.Forms
 
             var btnSalvUsr = new Button
             {
-                Text      = "âœ”  Salvar",
+                Text      = "✓  Salvar",
                 Left      = 118,
                 Top       = 0,
                 Width     = 112,
@@ -486,5 +523,16 @@ namespace Pedeai.Forms
         internal TextBox txtUsrSenhaConf;
         internal ComboBox cmbUsrNivel;
         internal ComboBox cmbUsrSit;
+
+        // ── Module checkboxes ────────────────────────────────────────────────
+        internal CheckBox chkModDashboard;
+        internal CheckBox chkModPedidos;
+        internal CheckBox chkModFinanceiro;
+        internal CheckBox chkModProdutos;
+        internal CheckBox chkModCategorias;
+        internal CheckBox chkModClientes;
+        internal CheckBox chkModFornecedores;
+        internal CheckBox chkModCupons;
+        internal CheckBox chkModEmpresa;
     }
 }

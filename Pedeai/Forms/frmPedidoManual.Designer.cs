@@ -37,20 +37,20 @@ namespace Pedeai.Forms
             lblTotal             = new Label();
 
             // Top bar
-            var topBar = new Panel { Dock = DockStyle.Top, Height = 46, BackColor = Color.FromArgb(40, 40, 80) };
+            var topBar = new Panel { Dock = DockStyle.Top, Height = 46, BackColor = Color.FromArgb(28, 37, 65) };
             topBar.Controls.Add(new Label { Text = "Pedido Manual", ForeColor = Color.White,
                 Font = new Font("Segoe UI", 13F, FontStyle.Bold), AutoSize = true, Top = 9, Left = 12 });
 
             // Painel dados do cliente
             var pnlDados = new Panel { Dock = DockStyle.Top, Height = 130,
-                BackColor = Color.FromArgb(245, 245, 250), Padding = new Padding(10, 0, 10, 0) };
+                BackColor = Color.FromArgb(15, 22, 45), Padding = new Padding(10, 0, 10, 0) };
 
             var lblCliente = new Label { Text = "Cliente:", Left = 10, Top = 11, AutoSize = true };
             txtNome.Left = 68; txtNome.Top = 7; txtNome.Width = 230;
 
             btnSelecionarCliente.Text      = "Buscar";
             btnSelecionarCliente.Left      = 305; btnSelecionarCliente.Top    = 5;
-            btnSelecionarCliente.Width     = 100; btnSelecionarCliente.Height = 24;
+            btnSelecionarCliente.Width     = 58; btnSelecionarCliente.Height = 24;
             btnSelecionarCliente.BackColor = Color.FromArgb(63, 81, 181);
             btnSelecionarCliente.ForeColor = Color.White;
             btnSelecionarCliente.FlatStyle = FlatStyle.Flat;
@@ -107,9 +107,19 @@ namespace Pedeai.Forms
                 lblPag,      cmbPagamento, lblTroco, numTroco, lblTrocoInfo, lblTaxa, numTaxa,
                 lblObs,      txtObs
             });
+            // dark palette for dados panel
+            var cDarkInput = Color.FromArgb(20, 28, 55);
+            var cLblDados  = Color.FromArgb(160, 175, 210);
+            foreach (Control c in pnlDados.Controls)
+            {
+                if (c is Label l && l != lblTrocoInfo) l.ForeColor = cLblDados;
+                else if (c is TextBox tb) { tb.BackColor = cDarkInput; tb.ForeColor = Color.White; }
+                else if (c is ComboBox cb) { cb.BackColor = cDarkInput; cb.ForeColor = Color.White; }
+                else if (c is NumericUpDown nud) { nud.BackColor = cDarkInput; nud.ForeColor = Color.White; }
+            }
 
             // Barra de adicao de itens
-            var pnlItem = new Panel { Dock = DockStyle.Top, Height = 78, BackColor = Color.FromArgb(228, 232, 250) };
+            var pnlItem = new Panel { Dock = DockStyle.Top, Height = 78, BackColor = Color.FromArgb(22, 30, 55) };
 
             var lblProd = new Label { Text = "Produto:", Left = 10, Top = 12, AutoSize = true };
             txtBuscaProduto.Left = 72; txtBuscaProduto.Top = 8; txtBuscaProduto.Width = 280;
@@ -118,7 +128,7 @@ namespace Pedeai.Forms
 
             btnBuscarProduto.Text      = "Buscar";
             btnBuscarProduto.Left      = 360; btnBuscarProduto.Top    = 6;
-            btnBuscarProduto.Width     = 90;  btnBuscarProduto.Height = 26;
+            btnBuscarProduto.Width     = 58;  btnBuscarProduto.Height = 26;
             btnBuscarProduto.BackColor = Color.FromArgb(63, 81, 181);
             btnBuscarProduto.ForeColor = Color.White;
             btnBuscarProduto.FlatStyle = FlatStyle.Flat;
@@ -132,7 +142,7 @@ namespace Pedeai.Forms
             numQtde.Left = 50; numQtde.Top = 44; numQtde.Width = 60;
             numQtde.Minimum = 1; numQtde.Maximum = 999; numQtde.Value = 1;
 
-            var lblUnit = new Label { Text = "Unit. R$:", Left = 124, Top = 48, AutoSize = true };
+            var lblUnit = new Label { Text = "Valor:", Left = 124, Top = 48, AutoSize = true };
             numUnitario.Left = 184; numUnitario.Top = 44; numUnitario.Width = 100;
             numUnitario.DecimalPlaces = 2; numUnitario.Maximum = 9999;
             numUnitario.ValueChanged += NumUnitario_ValueChanged;
@@ -158,6 +168,9 @@ namespace Pedeai.Forms
                 { lblProd, txtBuscaProduto, btnBuscarProduto,
                   lblQtde, numQtde, lblUnit, numUnitario,
                   lblDescItem, numDescontoItem, lblDesconto, btnAdd });
+            // dark palette for item panel labels
+            foreach (Control c in pnlItem.Controls)
+                if (c is Label l && l != lblDesconto) l.ForeColor = Color.FromArgb(160, 175, 210);
 
             // Grid de itens
             gridItens.Dock = DockStyle.Fill;
@@ -165,15 +178,20 @@ namespace Pedeai.Forms
             gridItens.ReadOnly = true; gridItens.AllowUserToAddRows = false;
             gridItens.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
             gridItens.RowHeadersVisible = false;
-            gridItens.BackgroundColor = Color.White;
+            gridItens.BackgroundColor = Color.FromArgb(15, 22, 45);
             gridItens.Font = new Font("Segoe UI", 9F);
             gridItens.BorderStyle = BorderStyle.None;
-            gridItens.ColumnHeadersDefaultCellStyle.BackColor = Color.FromArgb(40, 40, 80);
+            gridItens.GridColor = Color.FromArgb(30, 40, 70);
+            gridItens.DefaultCellStyle.BackColor = Color.FromArgb(15, 22, 45);
+            gridItens.DefaultCellStyle.ForeColor = Color.White;
+            gridItens.DefaultCellStyle.SelectionBackColor = Color.FromArgb(52, 152, 219);
+            gridItens.DefaultCellStyle.SelectionForeColor = Color.White;
+            gridItens.ColumnHeadersDefaultCellStyle.BackColor = Color.FromArgb(28, 37, 65);
             gridItens.ColumnHeadersDefaultCellStyle.ForeColor = Color.White;
             gridItens.ColumnHeadersDefaultCellStyle.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             gridItens.Columns.Add(new DataGridViewTextBoxColumn { Name = "Nome",     HeaderText = "Produto",     FillWeight = 40 });
             gridItens.Columns.Add(new DataGridViewTextBoxColumn { Name = "Qtde",     HeaderText = "Qtde",        FillWeight = 8  });
-            gridItens.Columns.Add(new DataGridViewTextBoxColumn { Name = "Unitario", HeaderText = "Unit. R$",    FillWeight = 14 });
+            gridItens.Columns.Add(new DataGridViewTextBoxColumn { Name = "Unitario", HeaderText = "Valor",       FillWeight = 14 });
             gridItens.Columns.Add(new DataGridViewTextBoxColumn { Name = "Desconto", HeaderText = "Desc.",       FillWeight = 10 });
             gridItens.Columns.Add(new DataGridViewTextBoxColumn { Name = "Subtotal", HeaderText = "Subtotal R$", FillWeight = 14 });
             var colDel = new DataGridViewButtonColumn { Name = "Remover", HeaderText = "", Text = "Remover",
@@ -182,7 +200,7 @@ namespace Pedeai.Forms
             gridItens.CellClick += GridItens_CellClick;
 
             // Rodape
-            var pnlRodape = new Panel { Dock = DockStyle.Bottom, Height = 52, BackColor = Color.FromArgb(240, 242, 248) };
+            var pnlRodape = new Panel { Dock = DockStyle.Bottom, Height = 52, BackColor = Color.FromArgb(20, 27, 50) };
 
             var btnSal = new Button { Text = "Salvar Pedido", Top = 11, Width = 140, Height = 30,
                 BackColor = Color.FromArgb(33, 150, 243), ForeColor = Color.White,
@@ -198,7 +216,7 @@ namespace Pedeai.Forms
 
             lblTotal.Text = "Total: R$ 0,00"; lblTotal.Top = 16;
             lblTotal.Font = new Font("Segoe UI", 13F, FontStyle.Bold);
-            lblTotal.ForeColor = Color.FromArgb(25, 111, 61); lblTotal.AutoSize = true;
+            lblTotal.ForeColor = Color.FromArgb(46, 213, 115); lblTotal.AutoSize = true;
 
             pnlRodape.SizeChanged += (_, __) =>
             {

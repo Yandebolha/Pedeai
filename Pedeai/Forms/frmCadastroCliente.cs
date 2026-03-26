@@ -80,55 +80,70 @@ namespace Pedeai.Forms
             grid.DoubleClick += (_, __) => CarregarParaEditar();
 
             // ── Painel formulário ──────────────────────────────────────────
-            pnlForm.Dock = DockStyle.Bottom; pnlForm.Height = 195;
+            pnlForm.Dock = DockStyle.Bottom; pnlForm.Height = 210;
             pnlForm.BackColor = Color.FromArgb(28, 37, 65);
             pnlForm.BorderStyle = BorderStyle.FixedSingle;
             pnlForm.Visible = false;
 
-            var lblNome = new Label { Text = "Nome / Razão Social:", Left = 10, Top = 11, AutoSize = true };
-            txtNome.Left = 150; txtNome.Top = 8; txtNome.Width = 260;
+            var cLblCliente = Color.FromArgb(160, 175, 210);
+            var cInputBg    = Color.FromArgb(20, 28, 55);
 
-            var lblCpf  = new Label { Text = "CPF / CNPJ:", Left = 422, Top = 11, AutoSize = true };
+            var lblNome = new Label { Text = "Nome / Razão Social:", Left = 10, Top = 11, AutoSize = true, ForeColor = cLblCliente };
+            txtNome.Left = 155; txtNome.Top = 8; txtNome.Width = 255;
+            txtNome.BackColor = cInputBg; txtNome.ForeColor = Color.White;
+
+            var lblCpf  = new Label { Text = "CPF / CNPJ:", Left = 422, Top = 11, AutoSize = true, ForeColor = cLblCliente };
             txtCpf.Left = 500; txtCpf.Top = 8; txtCpf.Width = 160;
+            txtCpf.BackColor = cInputBg; txtCpf.ForeColor = Color.White;
             txtCpf.KeyPress += (s, e) => { if (!System.Char.IsDigit(e.KeyChar) && !System.Char.IsControl(e.KeyChar)) e.Handled = true; };
             txtCpf.TextChanged += TxtCpf_TextChanged;
 
-            var lblSit  = new Label { Text = "Situação:", Left = 670, Top = 11, AutoSize = true };
-            cmbSituacao.Left = 724; cmbSituacao.Top = 8; cmbSituacao.Width = 100;
+            var lblSit  = new Label { Text = "Situação:", Left = 672, Top = 11, AutoSize = true, ForeColor = cLblCliente };
+            cmbSituacao.Left = 730; cmbSituacao.Top = 8; cmbSituacao.Width = 95;
             cmbSituacao.DropDownStyle = ComboBoxStyle.DropDownList;
             cmbSituacao.Items.AddRange(new object[] { "Ativo", "Inativo" });
             cmbSituacao.SelectedIndex = 0;
 
-            var lblTel  = new Label { Text = "Telefone:", Left = 10, Top = 43, AutoSize = true };
-            txtTelefone.Mask = "(00) 0000-0000"; txtTelefone.Left = 72; txtTelefone.Top = 40; txtTelefone.Width = 130;
+            var lblTel  = new Label { Text = "Telefone:", Left = 10, Top = 47, AutoSize = true, ForeColor = cLblCliente };
+            txtTelefone.Mask = "(00) 0000-0000"; txtTelefone.Left = 72; txtTelefone.Top = 44; txtTelefone.Width = 130;
+            txtTelefone.BackColor = cInputBg; txtTelefone.ForeColor = Color.White;
 
-            var lblCel  = new Label { Text = "Celular:",  Left = 214, Top = 43, AutoSize = true };
-            txtCelular.Mask = "(00) 00000-0000"; txtCelular.Left = 265; txtCelular.Top = 40; txtCelular.Width = 140;
+            var lblCel  = new Label { Text = "Celular:",  Left = 216, Top = 47, AutoSize = true, ForeColor = cLblCliente };
+            txtCelular.Mask = "(00) 00000-0000"; txtCelular.Left = 268; txtCelular.Top = 44; txtCelular.Width = 140;
+            txtCelular.BackColor = cInputBg; txtCelular.ForeColor = Color.White;
 
-            var lblEmail = new Label { Text = "E-mail:", Left = 416, Top = 43, AutoSize = true };
-            txtEmail.Left = 455; txtEmail.Top = 40; txtEmail.Width = 264;
+            var lblEmail = new Label { Text = "E-mail:", Left = 420, Top = 47, AutoSize = true, ForeColor = cLblCliente };
+            txtEmail.Left = 462; txtEmail.Top = 44; txtEmail.Width = 265;
+            txtEmail.BackColor = cInputBg; txtEmail.ForeColor = Color.White;
 
-            var lblCep  = new Label { Text = "CEP:",     Left = 10,  Top = 75, AutoSize = true };
-            txtCep.Mask = "00000-000"; txtCep.Left = 42; txtCep.Top = 72; txtCep.Width = 95;
+            var lblCep  = new Label { Text = "CEP:",     Left = 10,  Top = 83, AutoSize = true, ForeColor = cLblCliente };
+            txtCep.Mask = "00000-000"; txtCep.Left = 44; txtCep.Top = 80; txtCep.Width = 95;
+            txtCep.BackColor = cInputBg; txtCep.ForeColor = Color.White;
             txtCep.Leave += TxtCep_Leave;
 
-            var lblEnd  = new Label { Text = "Endereço:", Left = 148, Top = 75, AutoSize = true };
-            txtEndereco.Left = 210; txtEndereco.Top = 72; txtEndereco.Width = 230;
+            var lblEnd  = new Label { Text = "Endereço:", Left = 152, Top = 83, AutoSize = true, ForeColor = cLblCliente };
+            txtEndereco.Left = 218; txtEndereco.Top = 80; txtEndereco.Width = 225;
+            txtEndereco.BackColor = cInputBg; txtEndereco.ForeColor = Color.White;
 
-            var lblNum  = new Label { Text = "Nº:",      Left = 452, Top = 75, AutoSize = true };
-            txtNumero.Left = 468; txtNumero.Top = 72; txtNumero.Width = 60;
+            var lblNum  = new Label { Text = "Nº:",      Left = 456, Top = 83, AutoSize = true, ForeColor = cLblCliente };
+            txtNumero.Left = 476; txtNumero.Top = 80; txtNumero.Width = 58;
+            txtNumero.BackColor = cInputBg; txtNumero.ForeColor = Color.White;
 
-            var lblComp = new Label { Text = "Compl.:",  Left = 540, Top = 75, AutoSize = true };
-            txtComplemento.Left = 582; txtComplemento.Top = 72; txtComplemento.Width = 134;
+            var lblComp = new Label { Text = "Compl.:",  Left = 547, Top = 83, AutoSize = true, ForeColor = cLblCliente };
+            txtComplemento.Left = 594; txtComplemento.Top = 80; txtComplemento.Width = 130;
+            txtComplemento.BackColor = cInputBg; txtComplemento.ForeColor = Color.White;
 
-            var lblBai  = new Label { Text = "Bairro:",  Left = 10,  Top = 107, AutoSize = true };
-            txtBairro.Left = 55; txtBairro.Top = 104; txtBairro.Width = 190;
+            var lblBai  = new Label { Text = "Bairro:",  Left = 10,  Top = 119, AutoSize = true, ForeColor = cLblCliente };
+            txtBairro.Left = 58; txtBairro.Top = 116; txtBairro.Width = 188;
+            txtBairro.BackColor = cInputBg; txtBairro.ForeColor = Color.White;
 
-            var lblCid  = new Label { Text = "Cidade:",  Left = 257, Top = 107, AutoSize = true };
-            txtCidade.Left = 305; txtCidade.Top = 104; txtCidade.Width = 190;
+            var lblCid  = new Label { Text = "Cidade:",  Left = 260, Top = 119, AutoSize = true, ForeColor = cLblCliente };
+            txtCidade.Left = 308; txtCidade.Top = 116; txtCidade.Width = 188;
+            txtCidade.BackColor = cInputBg; txtCidade.ForeColor = Color.White;
 
-            var lblUF   = new Label { Text = "UF:",      Left = 507, Top = 107, AutoSize = true };
-            txtEstado.Left = 522; txtEstado.Top = 104; txtEstado.Width = 50;
+            var lblUF   = new Label { Text = "UF:",      Left = 508, Top = 119, AutoSize = true, ForeColor = cLblCliente };
+            txtEstado.Left = 528; txtEstado.Top = 116; txtEstado.Width = 50;
+            txtEstado.BackColor = cInputBg; txtEstado.ForeColor = Color.White;
 
             var pnlBtns = new Panel { Dock = DockStyle.Bottom, Height = 48,
                 BackColor = Color.FromArgb(28, 37, 65) };

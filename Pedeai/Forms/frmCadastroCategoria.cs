@@ -104,7 +104,14 @@ namespace Pedeai.Forms
 
         private void Carregar()
         {
-            try { grid.DataSource = _bll.Listar(); }
+            try
+            {
+                grid.DataSource = _bll.Listar();
+                // show only Codigo (hidden, for editing) and Nome
+                foreach (DataGridViewColumn col in grid.Columns)
+                    col.Visible = col.Name == "Codigo" || col.Name == "Nome";
+                if (grid.Columns.Contains("Codigo")) grid.Columns["Codigo"].Visible = false;
+            }
             catch (Exception ex) { MessageBox.Show("Erro: " + ex.Message); }
         }
 

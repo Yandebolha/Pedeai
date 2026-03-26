@@ -164,8 +164,8 @@ namespace Pedeai.DAL
             {
                 using var conn = AbrirConexao();
                 var sqlBase = alterarSenha
-                    ? "UPDATE usuario SET usuNome=@nome,usuLogin=@login,usuSenha=@senha,usuNivel=@nivel,Situacao=@sit WHERE Codigo=@cod"
-                    : "UPDATE usuario SET usuNome=@nome,usuLogin=@login,usuNivel=@nivel,Situacao=@sit WHERE Codigo=@cod";
+                    ? "UPDATE usuario SET usuNome=@nome,usuLogin=@login,usuSenha=@senha,usuNivel=@nivel,Situacao=@sit,Info=@info WHERE Codigo=@cod"
+                    : "UPDATE usuario SET usuNome=@nome,usuLogin=@login,usuNivel=@nivel,Situacao=@sit,Info=@info WHERE Codigo=@cod";
                 using var cmd = new MySqlCommand(sqlBase, conn);
                 cmd.Parameters.AddWithValue("@nome",  obj.usuNome);
                 cmd.Parameters.AddWithValue("@login", obj.usuLogin);
@@ -173,6 +173,7 @@ namespace Pedeai.DAL
                     cmd.Parameters.AddWithValue("@senha", HashSenha(obj.usuSenha));
                 cmd.Parameters.AddWithValue("@nivel", obj.usuNivel);
                 cmd.Parameters.AddWithValue("@sit",   obj.Situacao ?? "A");
+                cmd.Parameters.AddWithValue("@info",  obj.Info ?? "");
                 cmd.Parameters.AddWithValue("@cod",   obj.Codigo);
                 cmd.ExecuteNonQuery();
                 return "";

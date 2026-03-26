@@ -678,7 +678,7 @@ namespace Pedeai
                 ("\u23F3 Em Preparo",  2, Color.FromArgb(243, 156, 18)),
                 ("\u2705 Pronto",      3, Color.FromArgb(22, 160, 133)),
                 ("\U0001F6B4 Saiu",    4, Color.FromArgb(52, 152, 219)),
-                ("\U0001F4E6 Entregue",5, Color.FromArgb(41, 128, 185)),
+                ("\U0001F4E6 Entregue",3, Color.FromArgb(22, 160, 133)),
                 ("\u2715 Cancelar",    6, Color.FromArgb(192, 57, 43)),
             };
             foreach (var (txt, sit, cor) in acoes)
@@ -1189,7 +1189,7 @@ namespace Pedeai
         private void ConfigurarColunasFinanceiro()
         {
             if (gridFinanceiro.Columns.Count == 0) return;
-            var hide = new[] { "Subtotal", "Descontos", "ValorEntrega", "ValorRetirada", "Dinheiro", "CustoMercadorias" };
+            var hide = new[] { "Subtotal", "Descontos", "ValorEntrega", "ValorRetirada", "Dinheiro" };
             foreach (var col in hide)
                 if (gridFinanceiro.Columns.Contains(col))
                     gridFinanceiro.Columns[col].Visible = false;
@@ -1201,6 +1201,7 @@ namespace Pedeai
                 ["TotalBruto"]   = "Total Bruto",
                 ["Pix"]          = "Pix",
                 ["Cartao"]       = "Cartão",
+                ["CustoMercadorias"] = "Custo Merc.",
                 ["TotalLiquido"] = "Total Líquido",
             };
             foreach (var kv in captions)
