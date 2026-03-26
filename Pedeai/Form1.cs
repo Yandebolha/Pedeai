@@ -1208,6 +1208,26 @@ namespace Pedeai
                 if (gridFinanceiro.Columns.Contains(kv.Key))
                     gridFinanceiro.Columns[kv.Key].HeaderText = kv.Value;
         }
+
+        // -- Autenticação ---------------------------------------------------- 
+        private void BtnLogoff_Click(object sender, EventArgs e)
+        {
+            UsuarioSessao.Encerrar();
+            Application.Restart();
+        }
+
+        private void NavIniciarPrimeiro()
+        {
+            if      (UsuarioSessao.TemModulo("Dashboard"))    MostrarDashboard();
+            else if (UsuarioSessao.TemModulo("Pedidos"))      MostrarPedidos();
+            else if (UsuarioSessao.TemModulo("Financeiro"))   MostrarFinanceiro();
+            else if (UsuarioSessao.TemModulo("Produtos"))     AbrirForm(new frmCadastroProduto());
+            else if (UsuarioSessao.TemModulo("Categorias"))   AbrirForm(new frmCadastroCategoria());
+            else if (UsuarioSessao.TemModulo("Clientes"))     AbrirForm(new frmCadastroCliente());
+            else if (UsuarioSessao.TemModulo("Fornecedores")) AbrirForm(new frmCadastroFornecedor());
+            else if (UsuarioSessao.TemModulo("Cupons"))       AbrirForm(new frmCadastroCupom());
+            else if (UsuarioSessao.TemModulo("Empresa"))      MostrarEmpresa();
+        }
     }
 }
 

@@ -1,6 +1,7 @@
-﻿using System;
+using System;
 using System.Drawing;
 using System.Windows.Forms;
+using Pedeai.BLL;
 using Pedeai.Forms;
 
 namespace Pedeai
@@ -49,10 +50,43 @@ namespace Pedeai
                 BackColor = Color.FromArgb(52, 152, 219), ForeColor = Color.White,
                 FlatStyle = FlatStyle.Flat, Font = new Font("Segoe UI", 9F, FontStyle.Bold), Cursor = Cursors.Hand
             };
-            btnAtualizar.Location = new Point(pnlTopBar.Width - 122, 10);
             btnAtualizar.FlatAppearance.BorderSize = 0;
             btnAtualizar.Click += (_, __) => CarregarTudo();
             pnlTopBar.Controls.Add(btnAtualizar);
+
+            var btnSair = new Button
+            {
+                Text = "Sair", Width = 72, Height = 30,
+                BackColor = Color.FromArgb(180, 50, 40), ForeColor = Color.White,
+                FlatStyle = FlatStyle.Flat, Font = new Font("Segoe UI", 9F, FontStyle.Bold), Cursor = Cursors.Hand
+            };
+            btnSair.FlatAppearance.BorderSize = 0;
+            btnSair.Click += (_, __) =>
+            {
+                if (MessageBox.Show("Deseja fechar o sistema?", "Sair",
+                    MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+                    Application.Exit();
+            };
+            pnlTopBar.Controls.Add(btnSair);
+
+            btnLogoff = new Button
+            {
+                Text = "\u21aa Trocar Usu\u00e1rio", Width = 140, Height = 30,
+                BackColor = Color.FromArgb(36, 52, 88), ForeColor = Color.FromArgb(150, 185, 230),
+                FlatStyle = FlatStyle.Flat, Font = new Font("Segoe UI", 8.5F), Cursor = Cursors.Hand
+            };
+            btnLogoff.FlatAppearance.BorderSize = 1;
+            btnLogoff.FlatAppearance.BorderColor = Color.FromArgb(55, 75, 120);
+            btnLogoff.Click += BtnLogoff_Click;
+            pnlTopBar.Controls.Add(btnLogoff);
+
+            pnlTopBar.SizeChanged += (_, __) =>
+            {
+                btnAtualizar.Left = pnlTopBar.Width - btnAtualizar.Width - 12;
+                btnSair.Left      = btnAtualizar.Left - btnSair.Width - 6;
+                btnLogoff.Left    = btnSair.Left - btnLogoff.Width - 6;
+                btnAtualizar.Top  = btnSair.Top = btnLogoff.Top = 11;
+            };
 
             // ── Sidebar ──────────────────────────────────────────────────
             pnlSidebar.Dock = DockStyle.Left; pnlSidebar.Width = 210;
@@ -85,12 +119,33 @@ namespace Pedeai
             NavSe("Cupons",      "\U0001F3F7  Cupons",       () => AbrirForm(new frmCadastroCupom()));
             NavSe("Empresa",     "\U0001F3E2  Empresa",      MostrarEmpresa);
 
+            // ── Footer ───────────────────────────────────────────────────
+            pnlFooter = new Panel { Dock = DockStyle.Bottom, Height = 28, BackColor = Color.FromArgb(18, 25, 50) };
+            string _empNom = "";
+            try { _empNom = new EmpresaBLL().Carregar()?.empNome_Fantasia ?? ""; } catch { }
+            lblFooterEmpresa = new Label
+            {
+                Text = _empNom, ForeColor = Color.FromArgb(90, 120, 170),
+                Font = new Font("Segoe UI", 8F), AutoSize = true, Left = 12, Top = 7
+            };
+            lblFooterUsuario = new Label
+            {
+                Text = "\U0001F464  " + UsuarioSessao.NomeAtual,
+                ForeColor = Color.FromArgb(130, 165, 220),
+                Font = new Font("Segoe UI", 8F, FontStyle.Bold), AutoSize = true, Top = 7
+            };
+            pnlFooter.SizeChanged += (_, __) =>
+                lblFooterUsuario.Left = pnlFooter.Width - lblFooterUsuario.PreferredWidth - 12;
+            pnlFooter.Controls.Add(lblFooterEmpresa);
+            pnlFooter.Controls.Add(lblFooterUsuario);
+
             // ── Content ───────────────────────────────────────────────────
             pnlContent.Dock = DockStyle.Fill;
             pnlContent.BackColor = Color.FromArgb(15, 22, 45);
             pnlContent.Padding = new Padding(20);
 
             Controls.Add(pnlContent);
+            Controls.Add(pnlFooter);
             Controls.Add(pnlSidebar);
             Controls.Add(pnlTopBar);
 
@@ -107,10 +162,14 @@ namespace Pedeai
             StartPosition = FormStartPosition.CenterScreen;
             Text = "Pedeai — Painel de Controle";
 
-            Load += (_, __) => CarregarTudo();
+            Load += (_, __) => { CarregarTudo(); NavIniciarPrimeiro(); };
         }
 
         private Panel      pnlTopBar;
+        private Panel      pnlFooter;
+        private Label      lblFooterEmpresa;
+        private Label      lblFooterUsuario;
+        private Button     btnLogoff;
         private Panel      pnlSidebar;
         private Panel      pnlContent;
         private Panel      pnlDashboard;
