@@ -16,7 +16,8 @@ namespace Pedeai.Forms
         public frmEmpresa()
         {
             InitializeComponent();
-            if (!DesignMode) { _empBLL = new EmpresaBLL(); _usrBLL = new UsuarioBLL(); CarregarEmpresa(); CarregarUsuarios(); SetModoEdicao(false); }
+            _empBLL = new EmpresaBLL(); _usrBLL = new UsuarioBLL();
+            Load += (_, __) => { CarregarEmpresa(); CarregarUsuarios(); SetModoEdicao(false); };
         }
 
         // ── ABA EMPRESA ──────────────────────────────────────────────────────

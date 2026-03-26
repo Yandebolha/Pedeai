@@ -18,7 +18,8 @@ namespace Pedeai.Forms
         public frmCadastroProduto()
         {
             InitializeComponent();
-            if (!DesignMode) { _bll = new MercadoriaBLL(); _grpBLL = new GrupoMercadoriaBLL(); CarregarGrid(); }
+            _bll = new MercadoriaBLL(); _grpBLL = new GrupoMercadoriaBLL();
+            Load += (_, __) => CarregarGrid();
         }
 
 

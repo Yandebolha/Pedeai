@@ -18,9 +18,9 @@ namespace Pedeai.Forms
         public frmCadastroCliente()
         {
             InitializeComponent();
-            if (!DesignMode) { _bll = new ClienteBLL(); CarregarGrid(); }
+            _bll = new ClienteBLL();
+            Load += (_, __) => CarregarGrid();
         }
-
 
         private void TxtCpf_TextChanged(object sender, EventArgs e)
         {

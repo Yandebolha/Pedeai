@@ -20,7 +20,7 @@ namespace Pedeai.Forms
         public frmAutorizacao()
         {
             InitializeComponent();
-            if (!DesignMode) _bll = new UsuarioBLL();
+            _bll = new UsuarioBLL();
         }
 
         private void BtnAutorizar_Click(object sender, EventArgs e)

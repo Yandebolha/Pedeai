@@ -151,7 +151,6 @@ namespace Pedeai
 
             _timer = new Timer { Interval = 30000 };
             _timer.Tick += (_, __) => CarregarTudo();
-            _timer.Start();
 
             AutoScaleDimensions = new SizeF(6F, 13F);
             AutoScaleMode = AutoScaleMode.Font;
@@ -162,7 +161,7 @@ namespace Pedeai
             StartPosition = FormStartPosition.CenterScreen;
             Text = "Pedeai — Painel de Controle";
 
-            Load += (_, __) => { CarregarTudo(); NavIniciarPrimeiro(); };
+            Load += (_, __) => { CarregarTudo(); NavIniciarPrimeiro(); _timer.Start(); };
         }
 
         private Panel      pnlTopBar;

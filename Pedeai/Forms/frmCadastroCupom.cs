@@ -14,7 +14,8 @@ namespace Pedeai.Forms
         public frmCadastroCupom()
         {
             InitializeComponent();
-            if (!DesignMode) { _bll = new CupomBLL(); CarregarGrid(); }
+            _bll = new CupomBLL();
+            Load += (_, __) => CarregarGrid();
         }
 
 

@@ -12,7 +12,7 @@ namespace Pedeai.Forms
         public frmLogin()
         {
             InitializeComponent();
-            if (!DesignMode) _bll = new UsuarioBLL();
+            _bll = new UsuarioBLL();
         }
 
         private void BtnEntrar_Click(object sender, EventArgs e)

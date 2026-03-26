@@ -27,15 +27,12 @@ namespace Pedeai
         public Form1()
         {
             InitializeComponent();
-            if (!DesignMode)
-            {
-                _pedidoBLL = new PedidoBLL();
-                _dashBLL   = new DashboardBLL();
-                _gastosBLL = new GastoMaterialBLL();
-                BuildDashboard();
-                BuildPedidos();
-                BuildFinanceiro();
-            }
+            _pedidoBLL = new PedidoBLL();
+            _dashBLL   = new DashboardBLL();
+            _gastosBLL = new GastoMaterialBLL();
+            BuildDashboard();
+            BuildPedidos();
+            BuildFinanceiro();
         }
 
         private Button BotaoNav(string texto, int y, Action onClick)

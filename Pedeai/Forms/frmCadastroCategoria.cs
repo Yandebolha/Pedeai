@@ -14,9 +14,9 @@ namespace Pedeai.Forms
         public frmCadastroCategoria()
         {
             InitializeComponent();
-            if (!DesignMode) { _bll = new GrupoMercadoriaBLL(); Carregar(); }
+            _bll = new GrupoMercadoriaBLL();
+            Load += (_, __) => Carregar();
         }
-
 
         private void Carregar()
         {

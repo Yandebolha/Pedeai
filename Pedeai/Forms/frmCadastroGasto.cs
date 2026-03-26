@@ -13,7 +13,7 @@ namespace Pedeai.Forms
         public frmCadastroGasto()
         {
             InitializeComponent();
-            if (!DesignMode) _bll = new GastoMaterialBLL();
+            _bll = new GastoMaterialBLL();
             dtpData.Value = DateTime.Today;
         }
 

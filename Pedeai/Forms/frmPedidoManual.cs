@@ -20,7 +20,8 @@ namespace Pedeai.Forms
         public frmPedidoManual()
         {
             InitializeComponent();
-            if (!DesignMode) { _pedidoBLL = new PedidoBLL(); _mercBLL = new MercadoriaBLL(); _clienteBLL = new ClienteBLL(); CarregarProdutos(); }
+            _pedidoBLL = new PedidoBLL(); _mercBLL = new MercadoriaBLL(); _clienteBLL = new ClienteBLL();
+            Load += (_, __) => CarregarProdutos();
         }
 
         // -- Selecao de cliente ----------------------------------------------

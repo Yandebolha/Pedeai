@@ -17,10 +17,9 @@ namespace Pedeai.Forms
         public frmSelecionarCliente()
         {
             InitializeComponent();
-            if (!DesignMode) { _bll = new ClienteBLL(); CarregarGrid(); }
+            _bll = new ClienteBLL();
+            Load += (_, __) => CarregarGrid();
         }
-
-        // ── Grid ─────────────────────────────────────────────────────────────
 
         private void CarregarGrid()
         {
