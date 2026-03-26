@@ -109,15 +109,15 @@ namespace Pedeai.Forms
             });
 
             // Barra de adicao de itens
-            var pnlItem = new Panel { Dock = DockStyle.Top, Height = 72, BackColor = Color.FromArgb(228, 232, 250) };
+            var pnlItem = new Panel { Dock = DockStyle.Top, Height = 78, BackColor = Color.FromArgb(228, 232, 250) };
 
-            var lblProd = new Label { Text = "Produto:", Left = 10, Top = 14, AutoSize = true };
-            txtBuscaProduto.Left = 68; txtBuscaProduto.Top = 10; txtBuscaProduto.Width = 220;
+            var lblProd = new Label { Text = "Produto:", Left = 10, Top = 12, AutoSize = true };
+            txtBuscaProduto.Left = 72; txtBuscaProduto.Top = 8; txtBuscaProduto.Width = 280;
             txtBuscaProduto.PlaceholderText = "Digite ou pesquise...";
             txtBuscaProduto.TextChanged += TxtBusca_TextChanged;
 
             btnBuscarProduto.Text      = "Buscar";
-            btnBuscarProduto.Left      = 292; btnBuscarProduto.Top    = 8;
+            btnBuscarProduto.Left      = 360; btnBuscarProduto.Top    = 6;
             btnBuscarProduto.Width     = 90;  btnBuscarProduto.Height = 26;
             btnBuscarProduto.BackColor = Color.FromArgb(63, 81, 181);
             btnBuscarProduto.ForeColor = Color.White;
@@ -127,35 +127,37 @@ namespace Pedeai.Forms
             btnBuscarProduto.Cursor    = Cursors.Hand;
             btnBuscarProduto.Click    += BtnBuscarProduto_Click;
 
-            var lblQtde = new Label { Text = "Qtde:", Left = 394, Top = 14, AutoSize = true };
-            numQtde.Left = 428; numQtde.Top = 10; numQtde.Width = 58;
+            // Row 2: Qtde | Unit. R$ | Desc. % | + Adicionar
+            var lblQtde = new Label { Text = "Qtde:", Left = 10, Top = 48, AutoSize = true };
+            numQtde.Left = 50; numQtde.Top = 44; numQtde.Width = 60;
             numQtde.Minimum = 1; numQtde.Maximum = 999; numQtde.Value = 1;
 
-            var lblUnit = new Label { Text = "Unit. R$:", Left = 498, Top = 14, AutoSize = true };
-            numUnitario.Left = 556; numUnitario.Top = 10; numUnitario.Width = 90;
+            var lblUnit = new Label { Text = "Unit. R$:", Left = 124, Top = 48, AutoSize = true };
+            numUnitario.Left = 184; numUnitario.Top = 44; numUnitario.Width = 100;
             numUnitario.DecimalPlaces = 2; numUnitario.Maximum = 9999;
             numUnitario.ValueChanged += NumUnitario_ValueChanged;
 
-            var lblDescItem = new Label { Text = "Desc. %:", Left = 658, Top = 14, AutoSize = true };
-            numDescontoItem.Left = 716; numDescontoItem.Top = 10; numDescontoItem.Width = 70;
+            var lblDescItem = new Label { Text = "Desc. %:", Left = 296, Top = 48, AutoSize = true };
+            numDescontoItem.Left = 356; numDescontoItem.Top = 44; numDescontoItem.Width = 70;
             numDescontoItem.DecimalPlaces = 1; numDescontoItem.Minimum = 0; numDescontoItem.Maximum = 100;
 
-            var btnAdd = new Button { Text = "➕ Adicionar", Top = 8, Width = 120, Height = 28,
+            var btnAdd = new Button { Text = "+ Adicionar", Top = 42, Width = 130, Height = 28,
                 BackColor = Color.FromArgb(39, 174, 96), ForeColor = Color.White,
                 FlatStyle = FlatStyle.Flat, Font = new Font("Segoe UI", 9F, FontStyle.Bold),
                 Cursor = Cursors.Hand, Anchor = AnchorStyles.Top | AnchorStyles.Right };
             btnAdd.FlatAppearance.BorderSize = 0;
             btnAdd.Click += BtnAdicionarItem_Click;
-            pnlItem.SizeChanged += (_, __) => { btnAdd.Left = pnlItem.Width - btnAdd.Width - 8; };
-            btnAdd.Left = 860;
+            pnlItem.SizeChanged += (_, __) => { btnAdd.Left = pnlItem.Width - btnAdd.Width - 10; };
+            btnAdd.Left = 840;
 
-            lblDesconto.Text = ""; lblDesconto.Left = 68; lblDesconto.Top = 42;
+            lblDesconto.Text = ""; lblDesconto.Left = 460; lblDesconto.Top = 48;
             lblDesconto.AutoSize = true; lblDesconto.Font = new Font("Segoe UI", 8F, FontStyle.Bold);
             lblDesconto.ForeColor = Color.FromArgb(192, 57, 43); lblDesconto.Visible = false;
 
             pnlItem.Controls.AddRange(new Control[]
-                { lblProd, txtBuscaProduto, btnBuscarProduto, lblQtde, numQtde, lblUnit, numUnitario,
-                  lblDescItem, numDescontoItem, btnAdd, lblDesconto });
+                { lblProd, txtBuscaProduto, btnBuscarProduto,
+                  lblQtde, numQtde, lblUnit, numUnitario,
+                  lblDescItem, numDescontoItem, lblDesconto, btnAdd });
 
             // Grid de itens
             gridItens.Dock = DockStyle.Fill;
