@@ -190,7 +190,7 @@ namespace Pedeai
                 filtP.Controls.Add(bp);
             }
             _pnlChartProdutos = new Panel { Dock = DockStyle.Fill, BackColor = Color.FromArgb(13, 24, 46), Tag = "Top 3 Produtos" };
-            _pnlChartProdutos.Paint += (s, e) => DesenharBarrasVerticais(e.Graphics, (Panel)s, _dadosProdutos, Color.FromArgb(245, 175, 35));
+            _pnlChartProdutos.Paint += (s, e) => DesenharBarrasVerticais(e.Graphics, (Panel)s, _dadosProdutos, Color.FromArgb(245, 175, 35), "0");
             outerP.Controls.Add(_pnlChartProdutos); outerP.Controls.Add(filtP);
             outerP.Controls.Add(new Panel { Height = 4, Dock = DockStyle.Top, BackColor = Color.FromArgb(142, 68, 173) });
 
@@ -235,7 +235,7 @@ namespace Pedeai
 
         // ── Desenho GDI+ ─────────────────────────────────────────────────────
 
-        private static void DesenharBarrasVerticais(Graphics g, Panel pnl, (string label, float value)[] data, Color corBarra)
+        private static void DesenharBarrasVerticais(Graphics g, Panel pnl, (string label, float value)[] data, Color corBarra, string valueFormat = "0.00")
         {
             string titulo = pnl.Tag?.ToString() ?? "";
             g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
@@ -285,7 +285,7 @@ namespace Pedeai
                 float yVal = maxV * frac;
                 float yPos = chartBottom - frac * chartH;
                 g.DrawLine(gridPen, chartLeft, yPos, chartRight, yPos);
-                string yLbl = yVal >= 1000 ? $"{yVal / 1000:0.##}k" : $"{yVal:0.00}";
+                string yLbl = yVal >= 1000 ? $"{yVal / 1000:0.##}k" : yVal.ToString(valueFormat);
                 var ySize = g.MeasureString(yLbl, labelFont);
                 if (gi == 0 || frac * chartH > 14f)
                     g.DrawString(yLbl, labelFont, grayBrush, chartLeft - ySize.Width - 4f, yPos - ySize.Height / 2f);
@@ -310,7 +310,7 @@ namespace Pedeai
                 // value above bar, centered
                 string valStr = data[i].value >= 1000
                     ? $"{data[i].value / 1000:0.00}k"
-                    : $"{data[i].value:0.00}";
+                    : data[i].value.ToString(valueFormat);
                 var vSize = g.MeasureString(valStr, valFont);
                 float valY = barY - vSize.Height - 2f;
                 if (valY < 2f) valY = 2f;
