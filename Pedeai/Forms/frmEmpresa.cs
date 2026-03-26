@@ -153,6 +153,19 @@ namespace Pedeai.Forms
             var erro = _usrBLL.Salvar(obj, alteraSenha);
             if (!string.IsNullOrEmpty(erro)) { MessageBox.Show("Erro: " + erro); return; }
 
+            // Se editou o proprio usuario logado, atualiza a sessao e reconstroi o sidebar
+            if (UsuarioSessao.UsuarioAtual != null && obj.Codigo == UsuarioSessao.UsuarioAtual.Codigo)
+            {
+                var atualizado = _usrBLL.PesquisaCodigo(obj.Codigo);
+                if (atualizado != null)
+                {
+                    UsuarioSessao.Iniciar(atualizado);
+                    if (Owner is Form1 f1) f1.ReconstruirSidebar();
+                    else foreach (Form frm in Application.OpenForms)
+                        if (frm is Form1 main) { main.ReconstruirSidebar(); break; }
+                }
+            }
+
             MessageBox.Show("Usuario salvo com sucesso!", "OK", MessageBoxButtons.OK, MessageBoxIcon.Information);
             LimparFormUsuario();
             SetModoEdicao(false);
@@ -175,8 +188,10 @@ namespace Pedeai.Forms
 
         private void CarregarPermissoes(string info)
         {
+            // Admin sem Info configurado: marcar tudo por padrao
+            bool adminSemInfo = (_usuarioEditando?.usuNivel >= 9) && string.IsNullOrWhiteSpace(info);
             var ativos = (info ?? "").Split(new[] { ',' }, System.StringSplitOptions.RemoveEmptyEntries);
-            bool tem(string m) => System.Array.Exists(ativos, x => x.Trim().Equals(m, System.StringComparison.OrdinalIgnoreCase));
+            bool tem(string m) => adminSemInfo || System.Array.Exists(ativos, x => x.Trim().Equals(m, System.StringComparison.OrdinalIgnoreCase));
             chkModDashboard.Checked    = tem("Dashboard");
             chkModPedidos.Checked      = tem("Pedidos");
             chkModFinanceiro.Checked   = tem("Financeiro");

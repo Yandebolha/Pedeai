@@ -23,11 +23,13 @@ namespace Pedeai
             => Logado && UsuarioAtual.usuNivel >= nivelMinimo;
 
         /// <summary>Retorna true se o usuario tem acesso ao modulo informado.
-        /// Admins (nivel 9) sempre tem acesso a tudo.</summary>
+        /// O campo Info controla os modulos para todos os niveis.
+        /// Se Info estiver vazio e o nivel for 9 (Admin), libera tudo por padrao.</summary>
         public static bool TemModulo(string modulo)
         {
             if (!Logado) return false;
-            if (UsuarioAtual.usuNivel >= 9) return true;          // Admin: acesso total
+            // Admin sem permissoes configuradas: acesso total por padrao
+            if (UsuarioAtual.usuNivel >= 9 && string.IsNullOrWhiteSpace(UsuarioAtual.Info)) return true;
             if (string.IsNullOrWhiteSpace(UsuarioAtual.Info)) return false;
             var partes = UsuarioAtual.Info.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
             foreach (var p in partes)

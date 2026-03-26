@@ -1216,6 +1216,31 @@ namespace Pedeai
             Application.Restart();
         }
 
+        // Reconstroi os botoes do sidebar conforme permissoes da sessao atual
+        public void ReconstruirSidebar()
+        {
+            // Manter apenas os 2 primeiros controles (logo + separador)
+            while (pnlSidebar.Controls.Count > 2)
+                pnlSidebar.Controls.RemoveAt(2);
+
+            int navY = 68;
+            void NavSe(string modulo, string texto, Action acao)
+            {
+                if (!UsuarioSessao.TemModulo(modulo)) return;
+                pnlSidebar.Controls.Add(BotaoNav(texto, navY, acao));
+                navY += 46;
+            }
+            NavSe("Dashboard",    "\U0001F3E0  Dashboard",    MostrarDashboard);
+            NavSe("Pedidos",      "\U0001F4CB  Pedidos",      MostrarPedidos);
+            NavSe("Financeiro",   "\U0001F4B0  Financeiro",   MostrarFinanceiro);
+            NavSe("Produtos",     "\U0001F6D2  Produtos",     () => AbrirForm(new frmCadastroProduto()));
+            NavSe("Categorias",   "\U0001F5C2  Categorias",   () => AbrirForm(new frmCadastroCategoria()));
+            NavSe("Clientes",     "\U0001F464  Clientes",     () => AbrirForm(new frmCadastroCliente()));
+            NavSe("Fornecedores", "\U0001F3ED  Fornecedores", () => AbrirForm(new frmCadastroFornecedor()));
+            NavSe("Cupons",       "\U0001F3F7  Cupons",       () => AbrirForm(new frmCadastroCupom()));
+            NavSe("Empresa",      "\U0001F3E2  Empresa",      MostrarEmpresa);
+        }
+
         private void NavIniciarPrimeiro()
         {
             if      (UsuarioSessao.TemModulo("Dashboard"))    MostrarDashboard();
