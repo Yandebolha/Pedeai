@@ -96,7 +96,7 @@ namespace Pedeai
 
             // ── Barra de filtro de período ─────────────────────────────────────
             // ── Área de gráficos ──
-            Panel  MkOuter() => new Panel { Dock = DockStyle.Fill, BackColor = Color.FromArgb(28, 37, 65) };
+            Panel  MkOuter() => new Panel { Dock = DockStyle.Fill, BackColor = Color.FromArgb(13, 24, 46) };
             Panel  MkFiltro() => new Panel { Dock = DockStyle.Top, Height = 34, BackColor = Color.FromArgb(22, 30, 55) };
             Label  MkLbl(string t, int x) => new Label { Text = t, ForeColor = Color.FromArgb(180, 200, 240), Left = x, Top = 9, AutoSize = true };
             DateTimePicker MkDtp(int x, DateTime v) => new DateTimePicker { Left = x, Top = 6, Width = 105, Format = DateTimePickerFormat.Short, Value = v };
@@ -125,8 +125,8 @@ namespace Pedeai
             _dtpCanalDe  = MkDtp(38, DateTime.Today.AddDays(-30));
             _dtpCanalAte = MkDtp(175, DateTime.Today);
             filtC.Controls.AddRange(new Control[] { MkLbl("De:", 4), _dtpCanalDe, MkLbl("até:", 150), _dtpCanalAte, MkBtn(288, CarregarChartCanal) });
-            _pnlChartCanal = new Panel { Dock = DockStyle.Fill, BackColor = Color.FromArgb(28, 37, 65), Tag = "Vendas por Canal" };
-            _pnlChartCanal.Paint += (s, e) => DesenharBarrasVerticais(e.Graphics, (Panel)s, _dadosCanal, Color.FromArgb(52, 152, 219));
+            _pnlChartCanal = new Panel { Dock = DockStyle.Fill, BackColor = Color.FromArgb(13, 24, 46), Tag = "Vendas por Canal" };
+            _pnlChartCanal.Paint += (s, e) => DesenharBarrasVerticais(e.Graphics, (Panel)s, _dadosCanal, Color.FromArgb(245, 175, 35));
             outerC.Controls.Add(_pnlChartCanal); outerC.Controls.Add(filtC);
             outerC.Controls.Add(new Panel { Height = 4, Dock = DockStyle.Top, BackColor = Color.FromArgb(41, 128, 185) });
 
@@ -137,8 +137,8 @@ namespace Pedeai
             _cmbProdTop = new ComboBox { Left = 295, Top = 6, Width = 60, DropDownStyle = ComboBoxStyle.DropDownList };
             _cmbProdTop.Items.AddRange(new object[] { "5", "8", "10", "15" }); _cmbProdTop.SelectedIndex = 1;
             filtP.Controls.AddRange(new Control[] { MkLbl("De:", 4), _dtpProdDe, MkLbl("até:", 150), _dtpProdAte, MkLbl("Top:", 288), _cmbProdTop, MkBtn(362, CarregarChartProdutos) });
-            _pnlChartProdutos = new Panel { Dock = DockStyle.Fill, BackColor = Color.FromArgb(28, 37, 65), Tag = "Top Produtos" };
-            _pnlChartProdutos.Paint += (s, e) => DesenharBarrasHorizontais(e.Graphics, (Panel)s, _dadosProdutos, Color.FromArgb(155, 89, 182));
+            _pnlChartProdutos = new Panel { Dock = DockStyle.Fill, BackColor = Color.FromArgb(13, 24, 46), Tag = "Top Produtos" };
+            _pnlChartProdutos.Paint += (s, e) => DesenharBarrasHorizontais(e.Graphics, (Panel)s, _dadosProdutos, Color.FromArgb(245, 175, 35));
             outerP.Controls.Add(_pnlChartProdutos); outerP.Controls.Add(filtP);
             outerP.Controls.Add(new Panel { Height = 4, Dock = DockStyle.Top, BackColor = Color.FromArgb(142, 68, 173) });
 
@@ -147,8 +147,8 @@ namespace Pedeai
             _dtpDiasDe  = MkDtp(38, DateTime.Today.AddDays(-30));
             _dtpDiasAte = MkDtp(175, DateTime.Today);
             filtD.Controls.AddRange(new Control[] { MkLbl("De:", 4), _dtpDiasDe, MkLbl("até:", 150), _dtpDiasAte, MkBtn(288, CarregarChartDias) });
-            _pnlChartDias = new Panel { Dock = DockStyle.Fill, BackColor = Color.FromArgb(28, 37, 65), Tag = "Receita por Dia" };
-            _pnlChartDias.Paint += (s, e) => DesenharLinha(e.Graphics, (Panel)s, _dadosDias, Color.FromArgb(46, 204, 113));
+            _pnlChartDias = new Panel { Dock = DockStyle.Fill, BackColor = Color.FromArgb(13, 24, 46), Tag = "Receita por Dia" };
+            _pnlChartDias.Paint += (s, e) => DesenharLinha(e.Graphics, (Panel)s, _dadosDias, Color.FromArgb(245, 175, 35));
             outerD.Controls.Add(_pnlChartDias); outerD.Controls.Add(filtD);
             outerD.Controls.Add(new Panel { Height = 4, Dock = DockStyle.Top, BackColor = Color.FromArgb(39, 174, 96) });
 
@@ -187,17 +187,24 @@ namespace Pedeai
         {
             string titulo = pnl.Tag?.ToString() ?? "";
             g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+            g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.ClearTypeGridFit;
             int W = pnl.Width, H = pnl.Height;
 
-            using var bgBrush    = new SolidBrush(Color.FromArgb(28, 37, 65));
-            using var titleFont  = new Font("Segoe UI", 9f, FontStyle.Bold);
-            using var labelFont  = new Font("Segoe UI", 7.5f);
+            using var bgBrush    = new SolidBrush(Color.FromArgb(13, 24, 46));
+            using var titleFont  = new Font("Segoe UI", 10f, FontStyle.Bold);
+            using var labelFont  = new Font("Segoe UI", 7f);
+            using var valFont    = new Font("Segoe UI", 7f, FontStyle.Bold);
             using var whiteBrush = new SolidBrush(Color.White);
-            using var grayBrush  = new SolidBrush(Color.FromArgb(140, 160, 200));
+            using var grayBrush  = new SolidBrush(Color.FromArgb(140, 165, 205));
             using var barBrush   = new SolidBrush(corBarra);
+            using var gridPen    = new System.Drawing.Pen(Color.FromArgb(30, 50, 90), 1f);
+            gridPen.DashStyle    = System.Drawing.Drawing2D.DashStyle.Dot;
 
             g.FillRectangle(bgBrush, 0, 0, W, H);
-            g.DrawString(titulo, titleFont, whiteBrush, 10f, 12f);
+
+            // Title centered, uppercase
+            using var sfCenter = new StringFormat { Alignment = StringAlignment.Center };
+            g.DrawString(titulo.ToUpper(), titleFont, whiteBrush, W / 2f, 10f, sfCenter);
 
             if (data == null || data.Length == 0)
             {
@@ -208,28 +215,57 @@ namespace Pedeai
             float maxV = 0; foreach (var d in data) if (d.value > maxV) maxV = d.value;
             if (maxV <= 0) maxV = 1;
 
-            float chartTop = 38f, chartBottom = H - 36f, chartLeft = 10f, chartRight = W - 10f;
+            float yAxisW      = 52f;
+            float xLblH       = 58f;
+            float chartTop    = 38f;
+            float chartBottom = H - xLblH;
+            float chartLeft   = yAxisW;
+            float chartRight  = W - 14f;
             float chartH = chartBottom - chartTop;
-            float slotW = (chartRight - chartLeft) / data.Length;
-            float barW  = Math.Max(slotW * 0.55f, 8f);
+            float chartW = chartRight - chartLeft;
+
+            // Horizontal grid lines + Y-axis labels
+            int gridCount = 5;
+            for (int gi = 0; gi <= gridCount; gi++)
+            {
+                float frac = (float)gi / gridCount;
+                float yVal = maxV * frac;
+                float yPos = chartBottom - frac * chartH;
+                g.DrawLine(gridPen, chartLeft, yPos, chartRight, yPos);
+                string yLbl = yVal >= 1000 ? $"{yVal / 1000:0.#}k" : $"{yVal:0}";
+                var ySize = g.MeasureString(yLbl, labelFont);
+                g.DrawString(yLbl, labelFont, grayBrush, chartLeft - ySize.Width - 3f, yPos - ySize.Height / 2f);
+            }
+
+            float slotW = chartW / data.Length;
+            float barW  = Math.Max(Math.Min(slotW * 0.65f, 40f), 8f);
 
             for (int i = 0; i < data.Length; i++)
             {
-                float x    = chartLeft + i * slotW + (slotW - barW) / 2f;
+                float cx   = chartLeft + i * slotW + slotW / 2f;
+                float x    = cx - barW / 2f;
                 float barH = (data[i].value / maxV) * chartH;
                 float barY = chartBottom - barH;
-                using var br = new SolidBrush(Color.FromArgb(200, corBarra));
-                g.FillRectangle(br, x, barY, barW, barH);
 
-                // valor acima da barra
+                g.FillRectangle(barBrush, x, barY, barW, barH);
+                using var hl = new SolidBrush(Color.FromArgb(55, 255, 255, 255));
+                if (barH > 3) g.FillRectangle(hl, x, barY, barW, 3f);
+
+                // value above bar, centered
                 string valStr = data[i].value >= 1000
                     ? $"R${data[i].value / 1000:0.0}k"
                     : $"R${data[i].value:0}";
-                g.DrawString(valStr, labelFont, whiteBrush, x, barY - 16f);
+                var vSize = g.MeasureString(valStr, valFont);
+                float valY = barY - vSize.Height - 2f;
+                if (valY < 2f) valY = 2f;
+                g.DrawString(valStr, valFont, whiteBrush, cx - vSize.Width / 2f, valY);
 
-                // label abaixo
-                string lbl = data[i].label.Length > 7 ? data[i].label[..7] : data[i].label;
-                g.DrawString(lbl, labelFont, grayBrush, x, chartBottom + 4f);
+                // Rotated x-axis labels (-45°)
+                var gState = g.Save();
+                g.TranslateTransform(cx, chartBottom + 5f);
+                g.RotateTransform(-45f);
+                g.DrawString(data[i].label, labelFont, grayBrush, 0f, 0f);
+                g.Restore(gState);
             }
         }
 
@@ -237,16 +273,23 @@ namespace Pedeai
         {
             string titulo = pnl.Tag?.ToString() ?? "";
             g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+            g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.ClearTypeGridFit;
             int W = pnl.Width, H = pnl.Height;
 
-            using var bgBrush    = new SolidBrush(Color.FromArgb(28, 37, 65));
-            using var titleFont  = new Font("Segoe UI", 9f, FontStyle.Bold);
+            using var bgBrush    = new SolidBrush(Color.FromArgb(13, 24, 46));
+            using var titleFont  = new Font("Segoe UI", 10f, FontStyle.Bold);
             using var labelFont  = new Font("Segoe UI", 7.5f);
+            using var valFont    = new Font("Segoe UI", 7f, FontStyle.Bold);
             using var whiteBrush = new SolidBrush(Color.White);
-            using var grayBrush  = new SolidBrush(Color.FromArgb(140, 160, 200));
+            using var grayBrush  = new SolidBrush(Color.FromArgb(140, 165, 205));
+            using var barBrush   = new SolidBrush(corBarra);
+            using var gridPen    = new System.Drawing.Pen(Color.FromArgb(30, 50, 90), 1f);
+            gridPen.DashStyle    = System.Drawing.Drawing2D.DashStyle.Dot;
 
             g.FillRectangle(bgBrush, 0, 0, W, H);
-            g.DrawString(titulo, titleFont, whiteBrush, 10f, 12f);
+
+            using var sfCenter = new StringFormat { Alignment = StringAlignment.Center };
+            g.DrawString(titulo.ToUpper(), titleFont, whiteBrush, W / 2f, 10f, sfCenter);
 
             if (data == null || data.Length == 0)
             {
@@ -257,25 +300,29 @@ namespace Pedeai
             float maxV = 0; foreach (var d in data) if (d.value > maxV) maxV = d.value;
             if (maxV <= 0) maxV = 1;
 
-            float chartTop = 38f, chartLeft = 90f, chartRight = W - 50f, chartBottom = H - 10f;
+            float chartTop = 38f, chartLeft = 115f, chartRight = W - 52f, chartBottom = H - 10f;
             int maxItems = Math.Min(data.Length, 8);
             float slotH = (chartBottom - chartTop) / maxItems;
             float barH  = Math.Max(slotH * 0.55f, 6f);
 
             for (int i = 0; i < maxItems; i++)
             {
-                float y       = chartTop + i * slotH + (slotH - barH) / 2f;
-                float barW    = (data[i].value / maxV) * (chartRight - chartLeft);
-                using var br = new SolidBrush(Color.FromArgb(200, corBarra));
-                g.FillRectangle(br, chartLeft, y, barW, barH);
+                float cy   = chartTop + i * slotH + slotH / 2f;
+                float y    = cy - barH / 2f;
+                float barW = (data[i].value / maxV) * (chartRight - chartLeft);
 
-                // nome à esquerda
-                string lbl = data[i].label.Length > 11 ? data[i].label[..11] : data[i].label;
-                g.DrawString(lbl, labelFont, grayBrush, 4f, y);
+                g.FillRectangle(barBrush, chartLeft, y, barW, barH);
+                using var hl = new SolidBrush(Color.FromArgb(55, 255, 255, 255));
+                if (barW > 4) g.FillRectangle(hl, chartLeft, y, 4f, barH);
 
-                // valor à direita da barra
+                // name on the left, right-aligned to chartLeft
+                string lbl = data[i].label.Length > 15 ? data[i].label[..15] : data[i].label;
+                var lSize = g.MeasureString(lbl, labelFont);
+                g.DrawString(lbl, labelFont, grayBrush, chartLeft - lSize.Width - 5f, cy - lSize.Height / 2f);
+
+                // value to the right of the bar
                 string valStr = data[i].value.ToString("0");
-                g.DrawString(valStr, labelFont, whiteBrush, chartLeft + barW + 4f, y);
+                g.DrawString(valStr, valFont, whiteBrush, chartLeft + barW + 5f, cy - 7f);
             }
         }
 
@@ -283,18 +330,23 @@ namespace Pedeai
         {
             string titulo = pnl.Tag?.ToString() ?? "";
             g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+            g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.ClearTypeGridFit;
             int W = pnl.Width, H = pnl.Height;
 
-            using var bgBrush    = new SolidBrush(Color.FromArgb(28, 37, 65));
-            using var titleFont  = new Font("Segoe UI", 9f, FontStyle.Bold);
+            using var bgBrush    = new SolidBrush(Color.FromArgb(13, 24, 46));
+            using var titleFont  = new Font("Segoe UI", 10f, FontStyle.Bold);
             using var labelFont  = new Font("Segoe UI", 7f);
             using var whiteBrush = new SolidBrush(Color.White);
-            using var grayBrush  = new SolidBrush(Color.FromArgb(140, 160, 200));
-            using var linePen    = new System.Drawing.Pen(corLinha, 2f);
+            using var grayBrush  = new SolidBrush(Color.FromArgb(140, 165, 205));
+            using var linePen    = new System.Drawing.Pen(corLinha, 2.5f);
             using var dotBrush   = new SolidBrush(corLinha);
+            using var gridPen    = new System.Drawing.Pen(Color.FromArgb(30, 50, 90), 1f);
+            gridPen.DashStyle    = System.Drawing.Drawing2D.DashStyle.Dot;
 
             g.FillRectangle(bgBrush, 0, 0, W, H);
-            g.DrawString(titulo, titleFont, whiteBrush, 10f, 12f);
+
+            using var sfCenter = new StringFormat { Alignment = StringAlignment.Center };
+            g.DrawString(titulo.ToUpper(), titleFont, whiteBrush, W / 2f, 10f, sfCenter);
 
             if (data == null || data.Length < 2)
             {
@@ -308,32 +360,48 @@ namespace Pedeai
             float maxV = 0; foreach (var d in data) if (d.value > maxV) maxV = d.value;
             if (maxV <= 0) maxV = 1;
 
-            float chartTop = 38f, chartBottom = H - 36f, chartLeft = 10f, chartRight = W - 10f;
+            float yAxisW      = 52f;
+            float chartTop    = 38f;
+            float chartBottom = H - 36f;
+            float chartLeft   = yAxisW;
+            float chartRight  = W - 14f;
             float chartH = chartBottom - chartTop;
-            float stepX  = (chartRight - chartLeft) / (data.Length - 1);
+            float stepX  = (chartRight - chartLeft) / Math.Max(data.Length - 1, 1);
+
+            // Horizontal grid lines + Y-axis labels
+            int gridCount = 5;
+            for (int gi = 0; gi <= gridCount; gi++)
+            {
+                float frac = (float)gi / gridCount;
+                float yVal = maxV * frac;
+                float yPos = chartBottom - frac * chartH;
+                g.DrawLine(gridPen, chartLeft, yPos, chartRight, yPos);
+                string yLbl = yVal >= 1000 ? $"R${yVal / 1000:0.#}k" : $"R${yVal:0}";
+                var ySize = g.MeasureString(yLbl, labelFont);
+                g.DrawString(yLbl, labelFont, grayBrush, chartLeft - ySize.Width - 3f, yPos - ySize.Height / 2f);
+            }
 
             var pts = new System.Drawing.PointF[data.Length];
             for (int i = 0; i < data.Length; i++)
                 pts[i] = new System.Drawing.PointF(chartLeft + i * stepX, chartBottom - (data[i].value / maxV) * chartH);
 
-            // Área preenchida abaixo da linha
+            // Area fill
             var polyPts = new System.Drawing.PointF[data.Length + 2];
             polyPts[0] = new System.Drawing.PointF(pts[0].X, chartBottom);
             for (int i = 0; i < pts.Length; i++) polyPts[i + 1] = pts[i];
             polyPts[polyPts.Length - 1] = new System.Drawing.PointF(pts[pts.Length - 1].X, chartBottom);
-            using var fillBrush = new SolidBrush(Color.FromArgb(40, corLinha));
+            using var fillBrush = new SolidBrush(Color.FromArgb(50, corLinha));
             g.FillPolygon(fillBrush, polyPts);
 
             g.DrawLines(linePen, pts);
 
-            // Pontos e labels
+            // Dots and labels
             int step = data.Length > 14 ? (int)Math.Ceiling(data.Length / 14.0) : 1;
             for (int i = 0; i < data.Length; i++)
             {
-                g.FillEllipse(dotBrush, pts[i].X - 3, pts[i].Y - 3, 6, 6);
+                g.FillEllipse(dotBrush, pts[i].X - 3.5f, pts[i].Y - 3.5f, 7f, 7f);
                 if (i % step == 0)
                 {
-                    // trim date: show MM/dd
                     string lbl = data[i].label.Length > 5 ? data[i].label[5..] : data[i].label;
                     g.DrawString(lbl, labelFont, grayBrush, pts[i].X - 12f, chartBottom + 4f);
                 }
