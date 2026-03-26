@@ -15,6 +15,14 @@ namespace Pedeai.Forms
         private int       _codigoEditando = 0;
         private System.Data.DataTable _dtProdutos;
         private TextBox   _txtFiltro;
+        internal Button   btnNovo;
+        internal Button   btnEditar;
+        internal Button   btnCat;
+        internal Button   btnPesq;
+        internal Button   btnImg;
+        internal Button   btnS;
+        internal Button   btnC;
+        internal Button   btnD;
 
         public frmCadastroProduto()
         {
@@ -42,7 +50,7 @@ namespace Pedeai.Forms
             // ── Top bar ───────────────────────────────────────────────────
             var topBar = new Panel { Dock = DockStyle.Top, Height = 44,
                 BackColor = Color.FromArgb(36, 48, 82) };
-            var btnNovo = new Button
+            btnNovo = new Button
             {
                 Text = "+ Novo Produto", Left = 8, Top = 8, Width = 115, Height = 28,
                 BackColor = Color.FromArgb(39, 174, 96), ForeColor = Color.White,
@@ -50,7 +58,7 @@ namespace Pedeai.Forms
             };
             btnNovo.FlatAppearance.BorderSize = 0; btnNovo.Click += (_, __) => ModoNovo();
 
-            var btnEditar = new Button
+            btnEditar = new Button
             {
                 Text = "✏ Editar", Left = 133, Top = 8, Width = 95, Height = 28,
                 BackColor = Color.FromArgb(230, 126, 34), ForeColor = Color.White,
@@ -58,7 +66,7 @@ namespace Pedeai.Forms
             };
             btnEditar.FlatAppearance.BorderSize = 0; btnEditar.Click += (_, __) => CarregarParaEditar();
 
-            var btnCat = new Button
+            btnCat = new Button
             {
                 Text = "Categorias", Left = 238, Top = 8, Width = 100, Height = 28,
                 BackColor = Color.FromArgb(52, 152, 219), ForeColor = Color.White,
@@ -75,7 +83,7 @@ namespace Pedeai.Forms
                 Left = 8, Top = 7, Width = 260, Font = new Font("Segoe UI", 9.5F),
                 PlaceholderText = "Pesquisar por nome ou categoria..."
             };
-            var btnPesq = new Button
+            btnPesq = new Button
             {
                 Text = "Pesquisar", Left = 276, Top = 6, Width = 90, Height = 26,
                 BackColor = Color.FromArgb(52, 152, 219), ForeColor = Color.White, FlatStyle = FlatStyle.Flat, Cursor = Cursors.Hand
@@ -122,7 +130,7 @@ namespace Pedeai.Forms
             cmbSituacao.SelectedIndex = 0;
 
             // Linha 2: Imagem
-            var btnImg = new Button
+            btnImg = new Button
             {
                 Text = "Imagem", Left = 10, Top = 41, Width = 85, Height = 24,
                 BackColor = Color.FromArgb(52, 100, 170), ForeColor = Color.White, FlatStyle = FlatStyle.Flat
@@ -161,18 +169,18 @@ namespace Pedeai.Forms
             // Botões
             var pnlBtns = new Panel { Dock = DockStyle.Bottom, Height = 48,
                 BackColor = Color.FromArgb(28, 37, 65) };
-            var btnS = new Button { Text = "Salvar",    Top = 10, Width = 110, Height = 28,
+            btnS = new Button { Text = "Salvar",    Top = 10, Width = 110, Height = 28,
                 BackColor = Color.FromArgb(52, 152, 219),  ForeColor = Color.White, FlatStyle = FlatStyle.Flat,
                 Font = new Font("Segoe UI", 9F, FontStyle.Bold) };
             btnS.FlatAppearance.BorderSize = 0; btnS.Click += BtnSalvar_Click;
 
-            var btnC = new Button { Text = "Cancelar",  Top = 10, Width = 110, Height = 28,
+            btnC = new Button { Text = "Cancelar",  Top = 10, Width = 110, Height = 28,
                 BackColor = Color.FromArgb(80, 95, 130), ForeColor = Color.White, FlatStyle = FlatStyle.Flat,
                 Font = new Font("Segoe UI", 9F, FontStyle.Bold) };
             btnC.FlatAppearance.BorderSize = 0;
             btnC.Click += (_, __) => { pnlForm.Visible = false; _codigoEditando = 0; };
 
-            var btnD = new Button { Text = "Desativar", Top = 10, Width = 110, Height = 28,
+            btnD = new Button { Text = "Desativar", Top = 10, Width = 110, Height = 28,
                 BackColor = Color.FromArgb(192, 57, 43),   ForeColor = Color.White, FlatStyle = FlatStyle.Flat,
                 Font = new Font("Segoe UI", 9F, FontStyle.Bold) };
             btnD.FlatAppearance.BorderSize = 0; btnD.Click += BtnDesativar_Click;

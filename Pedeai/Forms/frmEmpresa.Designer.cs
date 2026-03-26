@@ -290,14 +290,13 @@ namespace Pedeai.Forms
             cmbUsrSit.Items.AddRange(new object[] { "Ativo", "Inativo" });
             cmbUsrSit.SelectedIndex = 0;
 
+            // Campos Nome, Login, Senha, Confirmar Senha
             var usrFieldDefs = new[]
             {
                 ("Nome:",            (System.Windows.Forms.Control)txtUsrNome),
                 ("Login:",           txtUsrLogin),
                 ("Senha:",           txtUsrSenha),
                 ("Confirmar Senha:", txtUsrSenhaConf),
-                ("N\u00edvel:",           cmbUsrNivel),
-                ("Situa\u00e7\u00e3o:",        cmbUsrSit)
             };
             foreach (var (label, ctrl) in usrFieldDefs)
             {
@@ -308,10 +307,27 @@ namespace Pedeai.Forms
                 frmCard.Controls.Add(ctrl);
                 uy += uth + ugy;
             }
+            // Hint de senha logo abaixo de "Confirmar Senha"
             var lblHintSenha = MakeLbl("(deixe em branco para n\u00e3o alterar)", true);
-            lblHintSenha.SetBounds(uf + ulw + 14, uy - ugy + 1, utw, 16);
+            lblHintSenha.SetBounds(uf + ulw + 14, uy - 8, utw, 16);
             frmCard.Controls.Add(lblHintSenha);
-            uy += 16;
+            uy += 6;
+
+            // Campos N\u00edvel e Situa\u00e7\u00e3o
+            var usrFieldDefs2 = new[]
+            {
+                ("N\u00edvel:",    (System.Windows.Forms.Control)cmbUsrNivel),
+                ("Situa\u00e7\u00e3o:", cmbUsrSit),
+            };
+            foreach (var (label, ctrl) in usrFieldDefs2)
+            {
+                var lbl = MakeLbl(label);
+                lbl.SetBounds(uf + 8, uy + 5, ulw, 18);
+                ctrl.SetBounds(uf + ulw + 14, uy, utw, uth);
+                frmCard.Controls.Add(lbl);
+                frmCard.Controls.Add(ctrl);
+                uy += uth + ugy;
+            }
 
             var lblModTit = MakeSectionHead("M\u00f3dulos de Acesso");
             lblModTit.SetBounds(uf + 8, uy + 4, 250, 20);

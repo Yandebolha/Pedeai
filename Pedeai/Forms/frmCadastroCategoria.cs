@@ -10,6 +10,10 @@ namespace Pedeai.Forms
     {
         private readonly GrupoMercadoriaBLL _bll = new GrupoMercadoriaBLL();
         private int _codigoEditando = 0;
+        internal Button btnNovo;
+        internal Button btnS;
+        internal Button btnC;
+        internal Button btnD;
 
         public frmCadastroCategoria()
         {
@@ -28,7 +32,7 @@ namespace Pedeai.Forms
             // ── Top bar ─────────────────────────────────────────────────
             var topBar = new Panel { Dock = DockStyle.Top, Height = 44,
                 BackColor = Color.FromArgb(36, 48, 82) };
-            var btnNovo = new Button
+            btnNovo = new Button
             {
                 Text = "+ Nova Categoria", Left = 8, Top = 8, Width = 140, Height = 28,
                 BackColor = Color.FromArgb(52, 152, 219), ForeColor = Color.White,
@@ -70,18 +74,18 @@ namespace Pedeai.Forms
 
             var pnlBtns = new Panel { Dock = DockStyle.Bottom, Height = 48,
                 BackColor = Color.FromArgb(28, 37, 65) };
-            var btnS = new Button { Text = "Salvar",    Top = 10, Width = 110, Height = 28,
+            btnS = new Button { Text = "Salvar",    Top = 10, Width = 110, Height = 28,
                 BackColor = Color.FromArgb(52, 152, 219),  ForeColor = Color.White, FlatStyle = FlatStyle.Flat,
                 Font = new Font("Segoe UI", 9F, FontStyle.Bold) };
             btnS.FlatAppearance.BorderSize = 0; btnS.Click += BtnSalvar_Click;
 
-            var btnC = new Button { Text = "Cancelar",  Top = 10, Width = 110, Height = 28,
+            btnC = new Button { Text = "Cancelar",  Top = 10, Width = 110, Height = 28,
                 BackColor = Color.FromArgb(80, 95, 130), ForeColor = Color.White, FlatStyle = FlatStyle.Flat,
                 Font = new Font("Segoe UI", 9F, FontStyle.Bold) };
             btnC.FlatAppearance.BorderSize = 0;
             btnC.Click += (_, __) => { pnlForm.Visible = false; _codigoEditando = 0; };
 
-            var btnD = new Button { Text = "Desativar", Top = 10, Width = 110, Height = 28,
+            btnD = new Button { Text = "Desativar", Top = 10, Width = 110, Height = 28,
                 BackColor = Color.FromArgb(192, 57, 43),   ForeColor = Color.White, FlatStyle = FlatStyle.Flat,
                 Font = new Font("Segoe UI", 9F, FontStyle.Bold) };
             btnD.FlatAppearance.BorderSize = 0; btnD.Click += BtnDesativar_Click;

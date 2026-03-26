@@ -72,7 +72,7 @@ namespace Pedeai.Forms
                 Bounds    = new System.Drawing.Rectangle(40, 190, 220, 22)
             };
 
-            var btnOk = new Button
+            btnOk = new Button
             {
                 Text      = "\u2714 Autorizar",
                 Bounds    = new System.Drawing.Rectangle(40, 190, 140, 30),
@@ -84,7 +84,7 @@ namespace Pedeai.Forms
             btnOk.FlatAppearance.BorderSize = 0;
             btnOk.Click += BtnAutorizar_Click;
 
-            var btnCancel = new Button
+            btnCancel = new Button
             {
                 Text         = "Cancelar",
                 Bounds       = new System.Drawing.Rectangle(200, 190, 140, 30),
@@ -108,8 +108,10 @@ namespace Pedeai.Forms
                 { lblTitulo, lblSub, lblLogin, txtLogin, lblSenha, txtSenha, lblMsg, btnOk, btnCancel });
         }
 
-        internal TextBox txtLogin;
-        internal TextBox txtSenha;
-        internal Label   lblMsg;
+        internal TextBox  txtLogin;
+        internal TextBox  txtSenha;
+        internal Label    lblMsg;
+        internal Button   btnOk;
+        internal Button   btnCancel;
     }
 }

@@ -117,7 +117,7 @@ namespace Pedeai.Forms
             };
 
             // Botão fechar (X) no canto
-            var btnFechar = new Button
+            btnFechar = new Button
             {
                 Text         = "\u2715",
                 Bounds       = new System.Drawing.Rectangle(448, 8, 30, 24),
@@ -275,7 +275,7 @@ namespace Pedeai.Forms
             };
 
             // ── Botão Entrar ──────────────────────────────────────────────────
-            var btnEntrar = new Button
+            btnEntrar = new Button
             {
                 Text      = "Entrar",
                 Bounds    = new System.Drawing.Rectangle(50, 362, 370, 44),
@@ -346,5 +346,7 @@ namespace Pedeai.Forms
         internal TextBox txtSenha;
         internal Label   lblMensagem;
         internal Label   lblNomeUsuario;
+        internal Button  btnFechar;
+        internal Button  btnEntrar;
     }
 }

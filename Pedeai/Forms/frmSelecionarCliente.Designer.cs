@@ -37,7 +37,7 @@ namespace Pedeai.Forms
             txtBusca.Left = 65; txtBusca.Top = 8; txtBusca.Width = 220;
             txtBusca.KeyDown += TxtBusca_KeyDown;
 
-            var btnB = new Button
+            btnB = new Button
             {
                 Text = "Buscar", Left = 295, Top = 8, Width = 80, Height = 28,
                 BackColor = Color.FromArgb(63, 81, 181), ForeColor = Color.White,
@@ -46,7 +46,7 @@ namespace Pedeai.Forms
             btnB.FlatAppearance.BorderSize = 0;
             btnB.Click += BtnBuscar_Click;
 
-            var btnN = new Button
+            btnN = new Button
             {
                 Text = "+ Novo", Left = 385, Top = 8, Width = 80, Height = 28,
                 BackColor = Color.FromArgb(0, 150, 136), ForeColor = Color.White,
@@ -55,7 +55,7 @@ namespace Pedeai.Forms
             btnN.FlatAppearance.BorderSize = 0;
             btnN.Click += BtnNovo_Click;
 
-            var btnSel = new Button
+            btnSel = new Button
             {
                 Text = "✔ Selecionar", Left = 475, Top = 8, Width = 110, Height = 28,
                 BackColor = Color.FromArgb(33, 150, 243), ForeColor = Color.White,
@@ -107,7 +107,7 @@ namespace Pedeai.Forms
             txtEmailCad.Left = 443; txtEmailCad.Top = 40; txtEmailCad.Width = 230;
 
             // Botões
-            var btnS = new Button
+            btnS = new Button
             {
                 Text = "Salvar", Left = 10, Top = 72, Width = 100, Height = 28,
                 BackColor = Color.FromArgb(33, 150, 243), ForeColor = Color.White,
@@ -116,7 +116,7 @@ namespace Pedeai.Forms
             btnS.FlatAppearance.BorderSize = 0;
             btnS.Click += BtnSalvarCad_Click;
 
-            var btnC = new Button
+            btnC = new Button
             {
                 Text = "Cancelar", Left = 120, Top = 72, Width = 100, Height = 28,
                 BackColor = Color.FromArgb(158, 158, 158), ForeColor = Color.White,
@@ -154,5 +154,10 @@ namespace Pedeai.Forms
         private TextBox       txtEmailCad;
         private TextBox       txtCpfCad;
         private ComboBox      cmbSituacao;
+        internal Button       btnB;
+        internal Button       btnN;
+        internal Button       btnSel;
+        internal Button       btnS;
+        internal Button       btnC;
     }
 }

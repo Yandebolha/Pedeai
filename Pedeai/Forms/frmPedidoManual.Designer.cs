@@ -89,7 +89,7 @@ namespace Pedeai.Forms
 
             // FOOTER
             var pnlRodape = new Panel { Dock = DockStyle.Bottom, Height = 54, BackColor = cPanel };
-            var btnSal = new Button
+            btnSal = new Button
             {
                 Text = "Salvar Pedido", Height = 34, Width = 148, Top = 10,
                 BackColor = cAccent, ForeColor = cWhite, FlatStyle = FlatStyle.Flat,
@@ -97,7 +97,7 @@ namespace Pedeai.Forms
             };
             btnSal.FlatAppearance.BorderSize = 0;
             btnSal.Click += BtnSalvar_Click;
-            var btnCanc = new Button
+            btnCanc = new Button
             {
                 Text = "Cancelar", Height = 34, Width = 98, Top = 10,
                 BackColor = Color.FromArgb(40, 50, 85), ForeColor = Color.FromArgb(120, 140, 180),
@@ -215,7 +215,7 @@ namespace Pedeai.Forms
             lblDesconto.ForeColor = Color.FromArgb(231, 76, 60); lblDesconto.Font = fntLbl;
             lblDesconto.AutoSize = true; lblDesconto.Visible = false;
 
-            var btnAdd = new Button
+            btnAdd = new Button
             {
                 Text = "+  Adicionar", Height = 26, Width = 124,
                 BackColor = cGreen, ForeColor = cWhite, FlatStyle = FlatStyle.Flat,
@@ -317,5 +317,8 @@ namespace Pedeai.Forms
         private NumericUpDown numDescontoItem;
         private DataGridView  gridItens;
         private Label         lblTotal;
+        internal Button       btnSal;
+        internal Button       btnCanc;
+        internal Button       btnAdd;
     }
 }

@@ -53,7 +53,7 @@ namespace Pedeai.Forms
             numValor.BackColor = Color.FromArgb(50, 65, 100);
             numValor.ForeColor = Color.White;
 
-            var btnSal = new Button
+            btnSal = new Button
             {
                 Text = "Salvar", Left = 110, Top = 162, Width = 110, Height = 30,
                 BackColor = Color.FromArgb(52, 152, 219), ForeColor = Color.White,
@@ -62,7 +62,7 @@ namespace Pedeai.Forms
             btnSal.FlatAppearance.BorderSize = 0;
             btnSal.Click += BtnSalvar_Click;
 
-            var btnCanc = new Button
+            btnCanc = new Button
             {
                 Text = "Cancelar", Left = 232, Top = 162, Width = 110, Height = 30,
                 BackColor = Color.FromArgb(108, 117, 125), ForeColor = Color.White,
@@ -80,5 +80,7 @@ namespace Pedeai.Forms
         private ComboBox       cmbCategoria;
         private TextBox        txtDescricao;
         private NumericUpDown  numValor;
+        internal Button        btnSal;
+        internal Button        btnCanc;
     }
 }

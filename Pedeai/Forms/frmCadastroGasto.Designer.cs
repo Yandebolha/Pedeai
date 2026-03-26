@@ -53,7 +53,7 @@ namespace Pedeai.Forms
             txtObs.SetBounds(ex+lw+8, y, tw, 26);
             y += 44;
 
-            var btnSalvar = new Button
+            btnSalvar = new Button
             {
                 Text      = "\u2714 Salvar",
                 Bounds    = new System.Drawing.Rectangle(ex+lw+8, y+4, 130, 30),
@@ -63,7 +63,7 @@ namespace Pedeai.Forms
             btnSalvar.FlatAppearance.BorderSize = 0;
             btnSalvar.Click += BtnSalvar_Click;
 
-            var btnCan = new Button
+            btnCan = new Button
             {
                 Text         = "Cancelar",
                 Bounds       = new System.Drawing.Rectangle(ex+lw+148, y+4, 130, 30),
@@ -84,5 +84,7 @@ namespace Pedeai.Forms
         internal System.Windows.Forms.TextBox txtDescricao;
         internal System.Windows.Forms.NumericUpDown numValor;
         internal System.Windows.Forms.TextBox txtObs;
+        internal Button btnSalvar;
+        internal Button btnCan;
     }
 }
