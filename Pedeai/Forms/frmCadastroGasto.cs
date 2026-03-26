@@ -8,11 +8,12 @@ namespace Pedeai.Forms
 {
     public partial class frmCadastroGasto : Form
     {
-        private readonly GastoMaterialBLL _bll = new GastoMaterialBLL();
+        private GastoMaterialBLL _bll;
 
         public frmCadastroGasto()
         {
             InitializeComponent();
+            if (!DesignMode) _bll = new GastoMaterialBLL();
             dtpData.Value = DateTime.Today;
         }
 

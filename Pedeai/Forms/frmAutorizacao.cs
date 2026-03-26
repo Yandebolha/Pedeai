@@ -12,7 +12,7 @@ namespace Pedeai.Forms
     /// </summary>
     public partial class frmAutorizacao : Form
     {
-        private readonly UsuarioBLL _bll = new UsuarioBLL();
+        private UsuarioBLL _bll;
 
         /// <summary>Usuario que autorizou a acao (preenchido apos OK).</summary>
         public Usuario UsuarioAutorizador { get; private set; }
@@ -20,6 +20,7 @@ namespace Pedeai.Forms
         public frmAutorizacao()
         {
             InitializeComponent();
+            if (!DesignMode) _bll = new UsuarioBLL();
         }
 
         private void BtnAutorizar_Click(object sender, EventArgs e)

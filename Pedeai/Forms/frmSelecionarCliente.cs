@@ -8,7 +8,7 @@ namespace Pedeai.Forms
 {
     public partial class frmSelecionarCliente : Form
     {
-        private readonly ClienteBLL _bll = new ClienteBLL();
+        private ClienteBLL _bll;
         private int _codigoEditando = 0;
 
         /// <summary>Cliente escolhido pelo usuário. Não-nulo somente quando DialogResult == OK.</summary>
@@ -17,7 +17,7 @@ namespace Pedeai.Forms
         public frmSelecionarCliente()
         {
             InitializeComponent();
-            if (!DesignMode) CarregarGrid();
+            if (!DesignMode) { _bll = new ClienteBLL(); CarregarGrid(); }
         }
 
         // ── Grid ─────────────────────────────────────────────────────────────

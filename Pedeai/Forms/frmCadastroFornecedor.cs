@@ -8,13 +8,13 @@ namespace Pedeai.Forms
 {
     public partial class frmCadastroFornecedor : Form
     {
-        private readonly FornecedorBLL _bll = new FornecedorBLL();
+        private FornecedorBLL _bll;
         private int _codigoEditando = 0;
 
         public frmCadastroFornecedor()
         {
             InitializeComponent();
-            if (!DesignMode) CarregarGrid();
+            if (!DesignMode) { _bll = new FornecedorBLL(); CarregarGrid(); }
         }
 
 

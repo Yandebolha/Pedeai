@@ -8,15 +8,15 @@ namespace Pedeai.Forms
 {
     public partial class frmEmpresa : Form
     {
-        private readonly EmpresaBLL  _empBLL = new EmpresaBLL();
-        private readonly UsuarioBLL  _usrBLL = new UsuarioBLL();
+        private EmpresaBLL  _empBLL;
+        private UsuarioBLL  _usrBLL;
         private Empresa _empresa;
         private Usuario _usuarioEditando;
 
         public frmEmpresa()
         {
             InitializeComponent();
-            if (!DesignMode) { CarregarEmpresa(); CarregarUsuarios(); SetModoEdicao(false); }
+            if (!DesignMode) { _empBLL = new EmpresaBLL(); _usrBLL = new UsuarioBLL(); CarregarEmpresa(); CarregarUsuarios(); SetModoEdicao(false); }
         }
 
         // ── ABA EMPRESA ──────────────────────────────────────────────────────

@@ -11,14 +11,14 @@ namespace Pedeai.Forms
 {
     public partial class frmCadastroCliente : Form
     {
-        private readonly ClienteBLL _bll = new ClienteBLL();
+        private ClienteBLL _bll;
         private int _codigoEditando = 0;
         private bool _formatingCpf = false;
 
         public frmCadastroCliente()
         {
             InitializeComponent();
-            if (!DesignMode) CarregarGrid();
+            if (!DesignMode) { _bll = new ClienteBLL(); CarregarGrid(); }
         }
 
 

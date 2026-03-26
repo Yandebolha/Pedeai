@@ -9,9 +9,9 @@ namespace Pedeai.Forms
 {
     public partial class frmPedidoManual : Form
     {
-        private readonly PedidoBLL     _pedidoBLL  = new PedidoBLL();
-        private readonly MercadoriaBLL _mercBLL    = new MercadoriaBLL();
-        private readonly ClienteBLL    _clienteBLL = new ClienteBLL();
+        private PedidoBLL     _pedidoBLL;
+        private MercadoriaBLL _mercBLL;
+        private ClienteBLL    _clienteBLL;
         private readonly List<ItemPedidoWeb> _itens = new List<ItemPedidoWeb>();
         private readonly List<ProdItem>      _produtos = new List<ProdItem>();
         private ProdItem _produtoSelecionado = null;
@@ -20,7 +20,7 @@ namespace Pedeai.Forms
         public frmPedidoManual()
         {
             InitializeComponent();
-            if (!DesignMode) CarregarProdutos();
+            if (!DesignMode) { _pedidoBLL = new PedidoBLL(); _mercBLL = new MercadoriaBLL(); _clienteBLL = new ClienteBLL(); CarregarProdutos(); }
         }
 
         // -- Selecao de cliente ----------------------------------------------

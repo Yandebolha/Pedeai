@@ -8,13 +8,13 @@ namespace Pedeai.Forms
 {
     public partial class frmCadastroCupom : Form
     {
-        private readonly CupomBLL _bll = new CupomBLL();
+        private CupomBLL _bll;
         private int _codigoEditando = 0;
 
         public frmCadastroCupom()
         {
             InitializeComponent();
-            if (!DesignMode) CarregarGrid();
+            if (!DesignMode) { _bll = new CupomBLL(); CarregarGrid(); }
         }
 
 

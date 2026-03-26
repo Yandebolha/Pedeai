@@ -9,8 +9,8 @@ namespace Pedeai.Forms
 {
     public partial class frmCadastroProduto : Form
     {
-        private readonly MercadoriaBLL      _bll    = new MercadoriaBLL();
-        private readonly GrupoMercadoriaBLL _grpBLL = new GrupoMercadoriaBLL();
+        private MercadoriaBLL      _bll;
+        private GrupoMercadoriaBLL _grpBLL;
         private string    _caminhoImagem = "";
         private int       _codigoEditando = 0;
         private System.Data.DataTable _dtProdutos;
@@ -18,7 +18,7 @@ namespace Pedeai.Forms
         public frmCadastroProduto()
         {
             InitializeComponent();
-            if (!DesignMode) CarregarGrid();
+            if (!DesignMode) { _bll = new MercadoriaBLL(); _grpBLL = new GrupoMercadoriaBLL(); CarregarGrid(); }
         }
 
 

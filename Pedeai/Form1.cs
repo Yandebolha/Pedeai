@@ -11,10 +11,9 @@ namespace Pedeai
     public partial class Form1 : Form
     {
         // -- BLL -------------------------------------------------------------
-        private readonly PedidoBLL        _pedidoBLL   = new PedidoBLL();
-        private readonly DashboardBLL     _dashBLL     = new DashboardBLL();
-        private readonly GastoMaterialBLL     _gastosBLL       = new GastoMaterialBLL();
-
+        private PedidoBLL        _pedidoBLL;
+        private DashboardBLL     _dashBLL;
+        private GastoMaterialBLL _gastosBLL;
 
         private int  _paginaAtual = 0; // 0=Dashboard 1=Pedidos 2=Financeiro
 
@@ -30,6 +29,9 @@ namespace Pedeai
             InitializeComponent();
             if (!DesignMode)
             {
+                _pedidoBLL = new PedidoBLL();
+                _dashBLL   = new DashboardBLL();
+                _gastosBLL = new GastoMaterialBLL();
                 BuildDashboard();
                 BuildPedidos();
                 BuildFinanceiro();
