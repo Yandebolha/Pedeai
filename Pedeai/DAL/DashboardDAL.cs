@@ -151,5 +151,32 @@ namespace Pedeai.DAL
             new MySqlDataAdapter(cmd).Fill(dt);
             return dt;
         }
+
+        public DataTable GetTopProdutosPeriodo(string periodo, int top = 3)
+        {
+            var dt = new DataTable();
+            using var conn = AbrirConexao();
+            string where;
+            if (periodo == "semana")
+                where = "p.pediData_Lancamento >= CURDATE() - INTERVAL 6 DAY";
+            else if (periodo == "mes")
+                where = "p.pediData_Lancamento >= CURDATE() - INTERVAL 29 DAY";
+            else if (periodo == "ano")
+                where = "YEAR(p.pediData_Lancamento) = YEAR(CURDATE())";
+            else // dia
+                where = "DATE(p.pediData_Lancamento) = CURDATE()";
+            var sql = $@"SELECT i.itpwNome_Mercadoria AS Produto,
+                CAST(SUM(i.itpwQtde) AS UNSIGNED) AS Quantidade
+                FROM itens_pedido_web i
+                JOIN pedido_web p ON p.Codigo = i.Codigo_Pedido
+                WHERE {where}
+                  AND p.pediSituacao <> 6
+                GROUP BY i.itpwNome_Mercadoria
+                ORDER BY Quantidade DESC
+                LIMIT {top}";
+            using var cmd = new MySqlCommand(sql, conn);
+            new MySqlDataAdapter(cmd).Fill(dt);
+            return dt;
+        }
     }
 }

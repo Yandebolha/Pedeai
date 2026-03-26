@@ -66,7 +66,9 @@ namespace Pedeai
         private Panel           _pnlChartDias;
         private DateTimePicker  _dtpDiasDe,   _dtpDiasAte;
         private string          _periodoCanal  = "dia";
+        private string          _periodoProd   = "dia";
         private Button[]        _btnsPeriodo;
+        private Button[]        _btnsProdPeriodo;
         private (string label, float value)[] _dadosCanal    = Array.Empty<(string, float)>();
         private (string label, float value)[] _dadosProdutos = Array.Empty<(string, float)>();
         private (string label, float value)[] _dadosDias     = Array.Empty<(string, float)>();
@@ -156,27 +158,39 @@ namespace Pedeai
             outerC.Controls.Add(_pnlChartCanal); outerC.Controls.Add(filtC);
             outerC.Controls.Add(new Panel { Height = 4, Dock = DockStyle.Top, BackColor = Color.FromArgb(41, 128, 185) });
 
-            // Gráfico 2: Top 3 Produtos do Dia
+            // Gráfico 2: Top 3 Produtos (Diário / Semanal / Mensal / Anual)
             var outerP = MkOuter();
             var filtP  = new Panel { Dock = DockStyle.Top, Height = 34, BackColor = Color.FromArgb(22, 30, 55) };
-            var lblTopHoje = new Label { Text = "Top 3 produtos do dia", ForeColor = Color.FromArgb(180, 200, 240), Left = 4, Top = 9, AutoSize = true };
-            var btnRefreshProd = new Button
+            var periodosProd = new[] { ("Diário", "dia"), ("Semanal", "semana"), ("Mensal", "mes"), ("Anual", "ano") };
+            _btnsProdPeriodo = new Button[4];
+            for (int pi = 0; pi < periodosProd.Length; pi++)
             {
-                Text      = "Atualizar",
-                Left      = 150,
-                Top       = 5,
-                Width     = 72,
-                Height    = 24,
-                BackColor = CorBotaoAtivo,
-                ForeColor = Color.White,
-                FlatStyle = FlatStyle.Flat,
-                Font      = new Font("Segoe UI", 8f),
-                Cursor    = Cursors.Hand
-            };
-            btnRefreshProd.FlatAppearance.BorderSize = 0;
-            btnRefreshProd.Click += (_, __) => CarregarChartProdutos();
-            filtP.Controls.AddRange(new Control[] { lblTopHoje, btnRefreshProd });
-            _pnlChartProdutos = new Panel { Dock = DockStyle.Fill, BackColor = Color.FromArgb(13, 24, 46), Tag = "Top 3 Produtos Hoje" };
+                int idx = pi; string per = periodosProd[pi].Item2;
+                var bp = new Button
+                {
+                    Text      = periodosProd[pi].Item1,
+                    Left      = 4 + idx * 76,
+                    Top       = 5,
+                    Width     = 70,
+                    Height    = 24,
+                    BackColor = idx == 0 ? CorBotaoAtivo : Color.FromArgb(40, 55, 95),
+                    ForeColor = Color.White,
+                    FlatStyle = FlatStyle.Flat,
+                    Cursor    = Cursors.Hand,
+                    Font      = new Font("Segoe UI", 8f)
+                };
+                bp.FlatAppearance.BorderSize = 0;
+                bp.Click += (_, __) =>
+                {
+                    _periodoProd = per;
+                    foreach (var b in _btnsProdPeriodo) b.BackColor = Color.FromArgb(40, 55, 95);
+                    bp.BackColor = CorBotaoAtivo;
+                    CarregarChartProdutos();
+                };
+                _btnsProdPeriodo[pi] = bp;
+                filtP.Controls.Add(bp);
+            }
+            _pnlChartProdutos = new Panel { Dock = DockStyle.Fill, BackColor = Color.FromArgb(13, 24, 46), Tag = "Top 3 Produtos" };
             _pnlChartProdutos.Paint += (s, e) => DesenharBarrasVerticais(e.Graphics, (Panel)s, _dadosProdutos, Color.FromArgb(245, 175, 35));
             outerP.Controls.Add(_pnlChartProdutos); outerP.Controls.Add(filtP);
             outerP.Controls.Add(new Panel { Height = 4, Dock = DockStyle.Top, BackColor = Color.FromArgb(142, 68, 173) });
@@ -187,7 +201,7 @@ namespace Pedeai
             _dtpDiasAte = MkDtp(175, DateTime.Today);
             filtD.Controls.AddRange(new Control[] { MkLbl("De:", 4), _dtpDiasDe, MkLbl("até:", 150), _dtpDiasAte, MkBtn(288, CarregarChartDias) });
             _pnlChartDias = new Panel { Dock = DockStyle.Fill, BackColor = Color.FromArgb(13, 24, 46), Tag = "Receita por Dia" };
-            _pnlChartDias.Paint += (s, e) => DesenharLinha(e.Graphics, (Panel)s, _dadosDias, Color.FromArgb(245, 175, 35));
+            _pnlChartDias.Paint += (s, e) => DesenharBarrasVerticais(e.Graphics, (Panel)s, _dadosDias, Color.FromArgb(245, 175, 35));
             outerD.Controls.Add(_pnlChartDias); outerD.Controls.Add(filtD);
             outerD.Controls.Add(new Panel { Height = 4, Dock = DockStyle.Top, BackColor = Color.FromArgb(39, 174, 96) });
 
@@ -296,8 +310,8 @@ namespace Pedeai
 
                 // value above bar, centered
                 string valStr = data[i].value >= 1000
-                    ? $"R${data[i].value / 1000:0.0}k"
-                    : $"R${data[i].value:0}";
+                    ? $"{data[i].value / 1000:0.0}k"
+                    : $"{data[i].value:0}";
                 var vSize = g.MeasureString(valStr, valFont);
                 float valY = barY - vSize.Height - 2f;
                 if (valY < 2f) valY = 2f;
@@ -484,7 +498,7 @@ namespace Pedeai
             try
             {
                 _dadosProdutos = DataTableParaChart(
-                    _dashBLL.GetTopProdutosHoje(3), "Produto", "Quantidade");
+                    _dashBLL.GetTopProdutosPeriodo(_periodoProd, 3), "Produto", "Quantidade");
                 _pnlChartProdutos.Invalidate();
             }
             catch { }
