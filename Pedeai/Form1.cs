@@ -216,17 +216,17 @@ namespace Pedeai
             if (maxV <= 0) maxV = 1;
 
             float yAxisW      = 68f;
-            float xLblH       = 80f;
+            float xLblH       = 28f;
             float chartTop    = 44f;
             float chartBottom = H - xLblH;
             float chartLeft   = yAxisW;
             float chartRight  = W - 14f;
-            float chartH = chartBottom - chartTop;
-            float chartW = chartRight - chartLeft;
+            float chartH      = Math.Max(chartBottom - chartTop, 1f);
+            float chartW      = chartRight - chartLeft;
 
             // Adaptive grid count: keep at least 18px between lines
-            int gridCount = chartH > 0 ? Math.Min(5, Math.Max(2, (int)(chartH / 18))) : 5;
-            float minLabelSpacing = 14f;
+            int gridCount = (int)(chartH / 18);
+            gridCount = Math.Max(2, Math.Min(5, gridCount));
             for (int gi = 0; gi <= gridCount; gi++)
             {
                 float frac = (float)gi / gridCount;
@@ -235,13 +235,14 @@ namespace Pedeai
                 g.DrawLine(gridPen, chartLeft, yPos, chartRight, yPos);
                 string yLbl = yVal >= 1000 ? $"{yVal / 1000:0.#}k" : $"{yVal:0}";
                 var ySize = g.MeasureString(yLbl, labelFont);
-                // Only draw if there's room
-                if (gi == 0 || frac * chartH > minLabelSpacing)
+                if (gi == 0 || frac * chartH > 14f)
                     g.DrawString(yLbl, labelFont, grayBrush, chartLeft - ySize.Width - 4f, yPos - ySize.Height / 2f);
             }
 
             float slotW = chartW / data.Length;
             float barW  = Math.Max(Math.Min(slotW * 0.65f, 40f), 8f);
+
+            using var sfXLabel = new StringFormat { Alignment = StringAlignment.Center, Trimming = StringTrimming.EllipsisCharacter };
 
             for (int i = 0; i < data.Length; i++)
             {
@@ -263,12 +264,9 @@ namespace Pedeai
                 if (valY < 2f) valY = 2f;
                 g.DrawString(valStr, valFont, whiteBrush, cx - vSize.Width / 2f, valY);
 
-                // Rotated x-axis labels (-45°)
-                var gState = g.Save();
-                g.TranslateTransform(cx, chartBottom + 10f);
-                g.RotateTransform(-45f);
-                g.DrawString(data[i].label, labelFont, grayBrush, 0f, 0f);
-                g.Restore(gState);
+                // Horizontal label centered below bar
+                var lblRect = new System.Drawing.RectangleF(cx - slotW / 2f, chartBottom + 4f, slotW, xLblH - 4f);
+                g.DrawString(data[i].label, labelFont, grayBrush, lblRect, sfXLabel);
             }
         }
 
