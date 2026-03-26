@@ -285,7 +285,7 @@ namespace Pedeai
                 float yVal = maxV * frac;
                 float yPos = chartBottom - frac * chartH;
                 g.DrawLine(gridPen, chartLeft, yPos, chartRight, yPos);
-                string yLbl = yVal >= 1000 ? $"{yVal / 1000:0.#}k" : $"{yVal:0}";
+                string yLbl = yVal >= 1000 ? $"{yVal / 1000:0.##}k" : $"{yVal:0.00}";
                 var ySize = g.MeasureString(yLbl, labelFont);
                 if (gi == 0 || frac * chartH > 14f)
                     g.DrawString(yLbl, labelFont, grayBrush, chartLeft - ySize.Width - 4f, yPos - ySize.Height / 2f);
@@ -309,8 +309,8 @@ namespace Pedeai
 
                 // value above bar, centered
                 string valStr = data[i].value >= 1000
-                    ? $"{data[i].value / 1000:0.0}k"
-                    : $"{data[i].value:0}";
+                    ? $"{data[i].value / 1000:0.00}k"
+                    : $"{data[i].value:0.00}";
                 var vSize = g.MeasureString(valStr, valFont);
                 float valY = barY - vSize.Height - 2f;
                 if (valY < 2f) valY = 2f;
@@ -374,7 +374,7 @@ namespace Pedeai
                 g.DrawString(lbl, labelFont, grayBrush, chartLeft - lSize.Width - 5f, cy - lSize.Height / 2f);
 
                 // value to the right of the bar
-                string valStr = data[i].value.ToString("0");
+                string valStr = data[i].value.ToString("0.00");
                 g.DrawString(valStr, valFont, whiteBrush, chartLeft + barW + 5f, cy - 7f);
             }
         }
@@ -404,7 +404,7 @@ namespace Pedeai
             if (data == null || data.Length < 2)
             {
                 if (data != null && data.Length == 1)
-                    g.DrawString($"{data[0].label}: R${data[0].value:N0}", labelFont, grayBrush, 10f, 40f);
+                    g.DrawString($"{data[0].label}: R${data[0].value:N2}", labelFont, grayBrush, 10f, 40f);
                 else
                     g.DrawString("Sem dados para o período", labelFont, grayBrush, 10f, 40f);
                 return;
@@ -429,7 +429,7 @@ namespace Pedeai
                 float yVal = maxV * frac;
                 float yPos = chartBottom - frac * chartH;
                 g.DrawLine(gridPen, chartLeft, yPos, chartRight, yPos);
-                string yLbl = yVal >= 1000 ? $"R${yVal / 1000:0.#}k" : $"R${yVal:0}";
+                string yLbl = yVal >= 1000 ? $"R${yVal / 1000:0.00}k" : $"R${yVal:0.00}";
                 var ySize = g.MeasureString(yLbl, labelFont);
                 if (gi == 0 || frac * chartH > 14f)
                     g.DrawString(yLbl, labelFont, grayBrush, chartLeft - ySize.Width - 4f, yPos - ySize.Height / 2f);
