@@ -116,25 +116,29 @@ namespace Pedeai.Forms
             txtBuscaProduto.PlaceholderText = "Digite ou pesquise...";
             txtBuscaProduto.TextChanged += TxtBusca_TextChanged;
 
-            btnBuscarProduto.Text      = "🔍";
+            btnBuscarProduto.Text      = "Buscar";
             btnBuscarProduto.Left      = 292; btnBuscarProduto.Top    = 8;
-            btnBuscarProduto.Width     = 32;  btnBuscarProduto.Height = 26;
+            btnBuscarProduto.Width     = 90;  btnBuscarProduto.Height = 26;
             btnBuscarProduto.BackColor = Color.FromArgb(63, 81, 181);
             btnBuscarProduto.ForeColor = Color.White;
             btnBuscarProduto.FlatStyle = FlatStyle.Flat;
-            btnBuscarProduto.Font      = new Font("Segoe UI", 9F);
+            btnBuscarProduto.Font      = new Font("Segoe UI", 8.5F);
             btnBuscarProduto.FlatAppearance.BorderSize = 0;
             btnBuscarProduto.Cursor    = Cursors.Hand;
             btnBuscarProduto.Click    += BtnBuscarProduto_Click;
 
-            var lblQtde = new Label { Text = "Qtde:", Left = 336, Top = 14, AutoSize = true };
-            numQtde.Left = 370; numQtde.Top = 10; numQtde.Width = 58;
+            var lblQtde = new Label { Text = "Qtde:", Left = 394, Top = 14, AutoSize = true };
+            numQtde.Left = 428; numQtde.Top = 10; numQtde.Width = 58;
             numQtde.Minimum = 1; numQtde.Maximum = 999; numQtde.Value = 1;
 
-            var lblUnit = new Label { Text = "Unit. R$:", Left = 438, Top = 14, AutoSize = true };
-            numUnitario.Left = 494; numUnitario.Top = 10; numUnitario.Width = 90;
+            var lblUnit = new Label { Text = "Unit. R$:", Left = 498, Top = 14, AutoSize = true };
+            numUnitario.Left = 556; numUnitario.Top = 10; numUnitario.Width = 90;
             numUnitario.DecimalPlaces = 2; numUnitario.Maximum = 9999;
             numUnitario.ValueChanged += NumUnitario_ValueChanged;
+
+            var lblDescItem = new Label { Text = "Desc. %:", Left = 658, Top = 14, AutoSize = true };
+            numDescontoItem.Left = 716; numDescontoItem.Top = 10; numDescontoItem.Width = 70;
+            numDescontoItem.DecimalPlaces = 1; numDescontoItem.Minimum = 0; numDescontoItem.Maximum = 100;
 
             var btnAdd = new Button { Text = "➕ Adicionar", Top = 8, Width = 120, Height = 28,
                 BackColor = Color.FromArgb(39, 174, 96), ForeColor = Color.White,
