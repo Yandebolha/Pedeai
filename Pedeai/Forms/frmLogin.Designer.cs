@@ -138,8 +138,8 @@ namespace Pedeai.Forms
                 Font      = new Font("Segoe UI", 20F, FontStyle.Bold),
                 ForeColor = Color.White,
                 AutoSize  = false,
-                TextAlign = ContentAlignment.MiddleLeft,
-                Bounds    = new System.Drawing.Rectangle(50, 56, 360, 44),
+                TextAlign = ContentAlignment.MiddleCenter,
+                Bounds    = new System.Drawing.Rectangle(0, 56, 490, 44),
                 BackColor = Color.Transparent
             };
 
@@ -149,8 +149,8 @@ namespace Pedeai.Forms
                 Font      = new Font("Segoe UI", 10F),
                 ForeColor = clrMuted,
                 AutoSize  = false,
-                TextAlign = ContentAlignment.MiddleLeft,
-                Bounds    = new System.Drawing.Rectangle(50, 100, 360, 22),
+                TextAlign = ContentAlignment.MiddleCenter,
+                Bounds    = new System.Drawing.Rectangle(0, 100, 490, 22),
                 BackColor = Color.Transparent
             };
 

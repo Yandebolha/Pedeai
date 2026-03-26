@@ -215,17 +215,18 @@ namespace Pedeai
             float maxV = 0; foreach (var d in data) if (d.value > maxV) maxV = d.value;
             if (maxV <= 0) maxV = 1;
 
-            float yAxisW      = 52f;
-            float xLblH       = 58f;
-            float chartTop    = 38f;
+            float yAxisW      = 68f;
+            float xLblH       = 65f;
+            float chartTop    = 44f;
             float chartBottom = H - xLblH;
             float chartLeft   = yAxisW;
             float chartRight  = W - 14f;
             float chartH = chartBottom - chartTop;
             float chartW = chartRight - chartLeft;
 
-            // Horizontal grid lines + Y-axis labels
-            int gridCount = 5;
+            // Adaptive grid count: keep at least 18px between lines
+            int gridCount = chartH > 0 ? Math.Min(5, Math.Max(2, (int)(chartH / 18))) : 5;
+            float minLabelSpacing = 14f;
             for (int gi = 0; gi <= gridCount; gi++)
             {
                 float frac = (float)gi / gridCount;
@@ -234,7 +235,9 @@ namespace Pedeai
                 g.DrawLine(gridPen, chartLeft, yPos, chartRight, yPos);
                 string yLbl = yVal >= 1000 ? $"{yVal / 1000:0.#}k" : $"{yVal:0}";
                 var ySize = g.MeasureString(yLbl, labelFont);
-                g.DrawString(yLbl, labelFont, grayBrush, chartLeft - ySize.Width - 3f, yPos - ySize.Height / 2f);
+                // Only draw if there's room
+                if (gi == 0 || frac * chartH > minLabelSpacing)
+                    g.DrawString(yLbl, labelFont, grayBrush, chartLeft - ySize.Width - 4f, yPos - ySize.Height / 2f);
             }
 
             float slotW = chartW / data.Length;
@@ -360,8 +363,8 @@ namespace Pedeai
             float maxV = 0; foreach (var d in data) if (d.value > maxV) maxV = d.value;
             if (maxV <= 0) maxV = 1;
 
-            float yAxisW      = 52f;
-            float chartTop    = 38f;
+            float yAxisW      = 68f;
+            float chartTop    = 44f;
             float chartBottom = H - 36f;
             float chartLeft   = yAxisW;
             float chartRight  = W - 14f;
@@ -369,7 +372,7 @@ namespace Pedeai
             float stepX  = (chartRight - chartLeft) / Math.Max(data.Length - 1, 1);
 
             // Horizontal grid lines + Y-axis labels
-            int gridCount = 5;
+            int gridCount = chartH > 0 ? Math.Min(5, Math.Max(2, (int)(chartH / 18))) : 5;
             for (int gi = 0; gi <= gridCount; gi++)
             {
                 float frac = (float)gi / gridCount;
@@ -378,7 +381,8 @@ namespace Pedeai
                 g.DrawLine(gridPen, chartLeft, yPos, chartRight, yPos);
                 string yLbl = yVal >= 1000 ? $"R${yVal / 1000:0.#}k" : $"R${yVal:0}";
                 var ySize = g.MeasureString(yLbl, labelFont);
-                g.DrawString(yLbl, labelFont, grayBrush, chartLeft - ySize.Width - 3f, yPos - ySize.Height / 2f);
+                if (gi == 0 || frac * chartH > 14f)
+                    g.DrawString(yLbl, labelFont, grayBrush, chartLeft - ySize.Width - 4f, yPos - ySize.Height / 2f);
             }
 
             var pts = new System.Drawing.PointF[data.Length];
