@@ -45,49 +45,83 @@ namespace Pedeai.Forms
         }
 
         // ── ABA USUARIOS ─────────────────────────────────────────────────────
+        private System.Collections.Generic.List<Usuario> _allUsuarios = new();
+        private System.Collections.Generic.List<Usuario> _filtrados   = new();
+
         private void CarregarUsuarios()
         {
-            var lista = _usrBLL.Listar();
-            gridUsuarios.DataSource = null;
-            var dt = new System.Data.DataTable();
-            dt.Columns.Add("Codigo",   typeof(int));
-            dt.Columns.Add("Nome",     typeof(string));
-            dt.Columns.Add("Login",    typeof(string));
-            dt.Columns.Add("Nivel",    typeof(string));
-            dt.Columns.Add("Situacao", typeof(string));
-            foreach (var u in lista)
-                dt.Rows.Add(u.Codigo, u.usuNome, u.usuLogin, LabelNivel(u.usuNivel), u.Situacao);
-            gridUsuarios.DataSource = dt;
-            if (gridUsuarios.Columns.Contains("Codigo")) gridUsuarios.Columns["Codigo"].Visible = false;
-            LimparFormUsuario();
+            _allUsuarios = _usrBLL.Listar();
+            FiltrarLista("");
+        }
+
+        private void FiltrarLista(string filtro)
+        {
+            var f = filtro.ToLowerInvariant();
+            _filtrados.Clear();
+            lstUsuarios.Items.Clear();
+            foreach (var u in _allUsuarios)
+            {
+                if (string.IsNullOrEmpty(f)
+                    || u.usuNome.ToLowerInvariant().Contains(f)
+                    || u.usuLogin.ToLowerInvariant().Contains(f))
+                {
+                    _filtrados.Add(u);
+                    lstUsuarios.Items.Add($"{u.usuNome}  —  {u.usuLogin}");
+                }
+            }
         }
 
         private string LabelNivel(int nivel)
-        {
-            return nivel switch { 9 => "Admin", 2 => "Gerente", _ => "Operador" };
-        }
+            => nivel switch { 9 => "Admin", 2 => "Gerente", _ => "Operador" };
 
-        private void GridUsuarios_SelectionChanged(object sender, EventArgs e)
+        private void TxtPesquisa_TextChanged(object sender, EventArgs e)
+            => FiltrarLista(txtPesquisa.Text.Trim());
+
+        private void LstUsuarios_DoubleClick(object sender, EventArgs e)
         {
-            if (gridUsuarios.SelectedRows.Count == 0) return;
-            var cod = Convert.ToInt32(gridUsuarios.SelectedRows[0].Cells["Codigo"].Value);
-            _usuarioEditando = _usrBLL.PesquisaCodigo(cod);
+            if (lstUsuarios.SelectedIndex < 0 || lstUsuarios.SelectedIndex >= _filtrados.Count) return;
+            _usuarioEditando = _usrBLL.PesquisaCodigo(_filtrados[lstUsuarios.SelectedIndex].Codigo);
             if (_usuarioEditando == null) return;
-            txtUsrNome.Text         = _usuarioEditando.usuNome;
-            txtUsrLogin.Text        = _usuarioEditando.usuLogin;
-            txtUsrSenha.Text        = "";
-            txtUsrSenhaConf.Text    = "";
+            txtUsrNome.Text      = _usuarioEditando.usuNome;
+            txtUsrLogin.Text     = _usuarioEditando.usuLogin;
+            txtUsrSenha.Text     = "";
+            txtUsrSenhaConf.Text = "";
             cmbUsrNivel.SelectedIndex = _usuarioEditando.usuNivel == 9 ? 2
                                       : _usuarioEditando.usuNivel == 2 ? 1 : 0;
             cmbUsrSit.SelectedIndex = _usuarioEditando.Situacao == "A" ? 0 : 1;
             CarregarPermissoes(_usuarioEditando.Info);
+            pnlBuscaUsuarios.Visible = false;
+            SetModoEdicao(true);
+        }
+
+        private void BtnPesquisarUsuario_Click(object sender, EventArgs e)
+        {
+            CarregarUsuarios();
+            txtPesquisa.Clear();
+            pnlBuscaUsuarios.Visible = true;
+            txtPesquisa.Focus();
         }
 
         private void BtnNovoUsuario_Click(object sender, EventArgs e)
         {
             _usuarioEditando = null;
             LimparFormUsuario();
+            SetModoEdicao(true);
             txtUsrNome.Focus();
+        }
+
+        private void BtnCancelarUsuario_Click(object sender, EventArgs e)
+        {
+            LimparFormUsuario();
+            SetModoEdicao(false);
+        }
+
+        private void SetModoEdicao(bool editando)
+        {
+            btnNovoUsr.Visible      = !editando;
+            btnPesquisarUsr.Visible = !editando;
+            btnSalvUsr.Visible      = editando;
+            btnCancelarUsr.Visible  = editando;
         }
 
         private void BtnSalvarUsuario_Click(object sender, EventArgs e)
@@ -114,7 +148,8 @@ namespace Pedeai.Forms
             if (!string.IsNullOrEmpty(erro)) { MessageBox.Show("Erro: " + erro); return; }
 
             MessageBox.Show("Usuario salvo com sucesso!", "OK", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            CarregarUsuarios();
+            LimparFormUsuario();
+            SetModoEdicao(false);
         }
 
         private string construirPermissoes()

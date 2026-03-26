@@ -1,4 +1,4 @@
-﻿using System.Drawing;
+using System.Drawing;
 using System.Windows.Forms;
 
 namespace Pedeai.Forms
@@ -231,154 +231,62 @@ namespace Pedeai.Forms
             usrHeader.Controls.Add(usrHeaderSub);
 
             // container principal (abaixo do header)
-            var usrBody = new Panel
-            {
-                Dock      = DockStyle.Fill,
-                BackColor = cBg,
-                Padding   = new Padding(0)
-            };
+            var usrBody = new Panel { Dock = DockStyle.Fill, BackColor = cBg, Padding = new Padding(0) };
 
             // â”€â”€ Grid (esquerda) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-            var pnlGrid = new Panel
-            {
-                Dock      = DockStyle.Left,
-                Width     = 440,
-                BackColor = cCard,
-                Padding   = new Padding(0)
-            };
+                        // -- Formulario centralizado -----------------------------------------
+            var pnlUsrForm = new Panel { Dock = DockStyle.Fill, BackColor = cBg };
 
-            // faixa do título sobre a grid
-            var pnlGridHead = new Panel
-            {
-                Dock      = DockStyle.Top,
-                Height    = 36,
-                BackColor = Color.FromArgb(30, 42, 78)
-            };
-            var lblGridTitle = new Label
-            {
-                Text      = "Lista de Usuários",
-                ForeColor = cLbl,
-                Font      = new Font("Segoe UI", 9F, FontStyle.Bold),
-                AutoSize  = true,
-                Left      = 12,
-                Top       = 9
-            };
-            pnlGridHead.Controls.Add(lblGridTitle);
+            var pnlFormHead = new Panel { Dock = DockStyle.Top, Height = 36, BackColor = Color.FromArgb(30, 42, 78) };
+            pnlFormHead.Controls.Add(new Label { Text = "Dados do Usu\u00e1rio", ForeColor = cLbl,
+                Font = new Font("Segoe UI", 9F, FontStyle.Bold), AutoSize = true, Left = 14, Top = 9 });
 
-            gridUsuarios = new DataGridView
-            {
-                Dock                            = DockStyle.Fill,
-                ReadOnly                        = true,
-                AllowUserToAddRows              = false,
-                SelectionMode                   = DataGridViewSelectionMode.FullRowSelect,
-                RowHeadersVisible               = false,
-                MultiSelect                     = false,
-                BackgroundColor                 = cCard,
-                GridColor                       = Color.FromArgb(38, 50, 88),
-                BorderStyle                     = BorderStyle.None,
-                Font                            = new Font("Segoe UI", 9F),
-                CellBorderStyle                 = DataGridViewCellBorderStyle.SingleHorizontal,
-                AutoSizeColumnsMode             = DataGridViewAutoSizeColumnsMode.Fill,
-                RowTemplate                     = { Height = 28 },
-                ColumnHeadersHeight             = 32,
-                ColumnHeadersHeightSizeMode     = DataGridViewColumnHeadersHeightSizeMode.DisableResizing
-            };
-            gridUsuarios.DefaultCellStyle.BackColor            = cCard;
-            gridUsuarios.DefaultCellStyle.ForeColor            = cWhite;
-            gridUsuarios.DefaultCellStyle.SelectionBackColor   = cAccent;
-            gridUsuarios.DefaultCellStyle.SelectionForeColor   = cWhite;
-            gridUsuarios.DefaultCellStyle.Padding              = new Padding(4, 0, 0, 0);
-            gridUsuarios.AlternatingRowsDefaultCellStyle.BackColor = Color.FromArgb(26, 36, 66);
-            gridUsuarios.ColumnHeadersDefaultCellStyle.BackColor   = Color.FromArgb(30, 42, 78);
-            gridUsuarios.ColumnHeadersDefaultCellStyle.ForeColor   = cLbl;
-            gridUsuarios.ColumnHeadersDefaultCellStyle.Font        = new Font("Segoe UI", 8.5F, FontStyle.Bold);
-            gridUsuarios.SelectionChanged += GridUsuarios_SelectionChanged;
+            // Painel de busca (oculto por padrao)
+            pnlBuscaUsuarios = new Panel { Dock = DockStyle.Top, Height = 200, BackColor = cCard,
+                Visible = false, Padding = new Padding(10, 6, 10, 6) };
+            var pnlSrchHead = new Panel { Dock = DockStyle.Top, Height = 28, BackColor = cCard };
+            pnlSrchHead.Controls.Add(new Label { Text = "Pesquisar usu\u00e1rio:", ForeColor = cLbl,
+                Font = fntLbl, AutoSize = true, Left = 0, Top = 5 });
+            var btnFch = new Button { Text = "\u2715", Top = 0, Width = 26, Height = 26,
+                BackColor = Color.FromArgb(70, 80, 110), ForeColor = cWhite, FlatStyle = FlatStyle.Flat,
+                Font = fntLbl, Cursor = Cursors.Hand, Anchor = AnchorStyles.Top | AnchorStyles.Right };
+            btnFch.FlatAppearance.BorderSize = 0;
+            btnFch.Click += (_, __) => pnlBuscaUsuarios.Visible = false;
+            pnlSrchHead.SizeChanged += (_, __) => btnFch.Left = pnlSrchHead.Width - btnFch.Width - 2;
+            pnlSrchHead.Controls.Add(btnFch);
 
-            pnlGrid.Controls.Add(gridUsuarios);
-            pnlGrid.Controls.Add(pnlGridHead);
+            txtPesquisa = new TextBox { Dock = DockStyle.Top, Height = 28, BackColor = cInput,
+                ForeColor = cWhite, Font = fntInput, BorderStyle = BorderStyle.FixedSingle };
+            txtPesquisa.PlaceholderText = "Digite nome ou login...";
+            txtPesquisa.TextChanged += TxtPesquisa_TextChanged;
 
-            // separador vertical
-            var vSep = new Panel
-            {
-                Dock      = DockStyle.Left,
-                Width     = 6,
-                BackColor = Color.FromArgb(20, 28, 52)
-            };
+            lstUsuarios = new ListBox { Dock = DockStyle.Fill, BackColor = cInput, ForeColor = cWhite,
+                Font = fntLbl, BorderStyle = BorderStyle.None };
+            lstUsuarios.DoubleClick += LstUsuarios_DoubleClick;
 
-            // â”€â”€ FormulÃ¡rio (direita) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-            var pnlForm = new Panel
-            {
-                Dock      = DockStyle.Fill,
-                BackColor = cBg,
-                Padding   = new Padding(0)
-            };
+            pnlBuscaUsuarios.Controls.Add(lstUsuarios);
+            pnlBuscaUsuarios.Controls.Add(txtPesquisa);
+            pnlBuscaUsuarios.Controls.Add(pnlSrchHead);
 
-            // cabeçalho painel form
-            var pnlFormHead = new Panel
-            {
-                Dock      = DockStyle.Top,
-                Height    = 36,
-                BackColor = Color.FromArgb(30, 42, 78)
-            };
-            var lblFormHeadTitle = new Label
-            {
-                Text      = "Dados do Usuário",
-                ForeColor = cLbl,
-                Font      = new Font("Segoe UI", 9F, FontStyle.Bold),
-                AutoSize  = true,
-                Left      = 14,
-                Top       = 9
-            };
-            pnlFormHead.Controls.Add(lblFormHeadTitle);
+            // Area que centraliza o card
+            var pnlCardArea = new Panel { Dock = DockStyle.Fill, BackColor = cBg };
 
-            // card do formulário
-            var frmCard = new Panel
-            {
-                Left      = 14,
-                Top       = 46,
-                Width     = 420,
-                BackColor = cCard,
-                Padding   = new Padding(0)
-            };
-            frmCard.Anchor = System.Windows.Forms.AnchorStyles.Top |
-                             System.Windows.Forms.AnchorStyles.Left;
+            // Card do formulario
+            var frmCard = new Panel { Width = 500, BackColor = cCard };
+            frmCard.Controls.Add(new Panel { Dock = DockStyle.Left, Width = 4, BackColor = Color.FromArgb(155, 89, 182) });
 
-            // borda esquerda accent
-            var frmAccentBar = new Panel
-            {
-                Dock      = DockStyle.Left,
-                Width     = 4,
-                BackColor = Color.FromArgb(155, 89, 182)
-            };
-            frmCard.Controls.Add(frmAccentBar);
-
-            int uf = 14, ulw = 138, utw = 240, uth = 26, ugy = 14;
-            int uy = 16;
+            int uf = 14, ulw = 138, utw = 280, uth = 26, ugy = 14, uy = 16;
 
             txtUsrNome      = MakeTxt();
             txtUsrLogin     = MakeTxt();
             txtUsrSenha     = MakeTxt(true);
             txtUsrSenhaConf = MakeTxt(true);
-
-            cmbUsrNivel = new ComboBox
-            {
-                DropDownStyle = ComboBoxStyle.DropDownList,
-                BackColor     = cInput,
-                ForeColor     = cWhite,
-                Font          = fntInput,
-                FlatStyle     = FlatStyle.Flat
-            };
+            cmbUsrNivel = new ComboBox { DropDownStyle = ComboBoxStyle.DropDownList, BackColor = cInput,
+                ForeColor = cWhite, Font = fntInput, FlatStyle = FlatStyle.Flat };
             cmbUsrNivel.Items.AddRange(new object[] { "Operador", "Gerente", "Admin" });
             cmbUsrNivel.SelectedIndex = 0;
-
-            cmbUsrSit = new ComboBox
-            {
-                DropDownStyle = ComboBoxStyle.DropDownList,
-                BackColor     = cInput,
-                ForeColor     = cWhite,
-                Font          = fntInput,
-                FlatStyle     = FlatStyle.Flat
-            };
+            cmbUsrSit = new ComboBox { DropDownStyle = ComboBoxStyle.DropDownList, BackColor = cInput,
+                ForeColor = cWhite, Font = fntInput, FlatStyle = FlatStyle.Flat };
             cmbUsrSit.Items.AddRange(new object[] { "Ativo", "Inativo" });
             cmbUsrSit.SelectedIndex = 0;
 
@@ -388,10 +296,9 @@ namespace Pedeai.Forms
                 ("Login:",           txtUsrLogin),
                 ("Senha:",           txtUsrSenha),
                 ("Confirmar Senha:", txtUsrSenhaConf),
-                ("Nível:",           cmbUsrNivel),
-                ("Situação:",        cmbUsrSit)
+                ("N\u00edvel:",           cmbUsrNivel),
+                ("Situa\u00e7\u00e3o:",        cmbUsrSit)
             };
-
             foreach (var (label, ctrl) in usrFieldDefs)
             {
                 var lbl = MakeLbl(label);
@@ -401,34 +308,24 @@ namespace Pedeai.Forms
                 frmCard.Controls.Add(ctrl);
                 uy += uth + ugy;
             }
-
-            var lblHintSenha = MakeLbl("(deixe em branco para não alterar)", true);
+            var lblHintSenha = MakeLbl("(deixe em branco para n\u00e3o alterar)", true);
             lblHintSenha.SetBounds(uf + ulw + 14, uy - ugy + 1, utw, 16);
             frmCard.Controls.Add(lblHintSenha);
-
             uy += 16;
 
-            // ── Módulos de acesso ─────────────────────────────────────────────
-            var lblModTit = MakeSectionHead("Módulos de Acesso");
+            var lblModTit = MakeSectionHead("M\u00f3dulos de Acesso");
             lblModTit.SetBounds(uf + 8, uy + 4, 250, 20);
             frmCard.Controls.Add(lblModTit);
-            uy += 26;
+            uy += 28;
 
             var modNames  = new[] { "Dashboard", "Pedidos", "Financeiro", "Produtos", "Categorias", "Clientes", "Fornecedores", "Cupons", "Empresa" };
             var modFields = new CheckBox[9];
-            int cbColW = 88, cbRowH = 24;
-            int cbX0   = uf + ulw + 14;
+            int cbColW = 96, cbRowH = 24, cbX0 = uf + ulw + 14;
             for (int i = 0; i < modNames.Length; i++)
             {
-                var chk = new CheckBox
-                {
-                    Text      = modNames[i],
-                    ForeColor = cLbl,
-                    BackColor = cCard,
-                    Font      = fntLbl,
-                    AutoSize  = true
-                };
-                chk.SetBounds(cbX0 + (i % 3) * cbColW, uy + (i / 3) * cbRowH, cbColW, cbRowH);
+                var chk = new CheckBox { Text = modNames[i], ForeColor = cLbl, BackColor = cCard,
+                    Font = fntLbl, AutoSize = false, Width = 94, Height = 22 };
+                chk.SetBounds(cbX0 + (i % 3) * cbColW, uy + (i / 3) * cbRowH, 94, 22);
                 frmCard.Controls.Add(chk);
                 modFields[i] = chk;
             }
@@ -441,63 +338,50 @@ namespace Pedeai.Forms
             chkModFornecedores = modFields[6];
             chkModCupons       = modFields[7];
             chkModEmpresa      = modFields[8];
-            uy += 3 * cbRowH + 8;
+            uy += 3 * cbRowH + 12;
 
-            uy += 10;
+            int bw = 128, bh = 32;
+            var pnlBtns = new Panel { Left = uf + 8, Top = uy + 6, Width = bw * 2 + 8, Height = bh, BackColor = cCard };
 
-            // botões
-            var pnlBtns = new Panel
-            {
-                Left      = uf + ulw + 14,
-                Top       = uy + 6,
-                Width     = utw,
-                Height    = 34,
-                BackColor = cCard
-            };
+            btnNovoUsr = new Button { Text = "+ Novo", Left = 0, Top = 0, Width = bw, Height = bh,
+                BackColor = Color.FromArgb(52, 73, 94), ForeColor = cWhite, FlatStyle = FlatStyle.Flat,
+                Font = new Font("Segoe UI", 9.5F, FontStyle.Bold), Cursor = Cursors.Hand };
+            btnNovoUsr.FlatAppearance.BorderSize = 0;
+            btnNovoUsr.Click += BtnNovoUsuario_Click;
 
-            var btnNovo = new Button
-            {
-                Text      = "+ Novo",
-                Left      = 0,
-                Top       = 0,
-                Width     = 108,
-                Height    = 32,
-                BackColor = Color.FromArgb(52, 73, 94),
-                ForeColor = cWhite,
-                FlatStyle = FlatStyle.Flat,
-                Font      = new Font("Segoe UI", 9.5F, FontStyle.Bold),
-                Cursor    = Cursors.Hand
-            };
-            btnNovo.FlatAppearance.BorderSize = 0;
-            btnNovo.Click += BtnNovoUsuario_Click;
+            btnPesquisarUsr = new Button { Text = "Pesquisar", Left = bw + 8, Top = 0, Width = bw, Height = bh,
+                BackColor = Color.FromArgb(52, 152, 219), ForeColor = cWhite, FlatStyle = FlatStyle.Flat,
+                Font = new Font("Segoe UI", 9.5F, FontStyle.Bold), Cursor = Cursors.Hand };
+            btnPesquisarUsr.FlatAppearance.BorderSize = 0;
+            btnPesquisarUsr.Click += BtnPesquisarUsuario_Click;
 
-            var btnSalvUsr = new Button
-            {
-                Text      = "✓  Salvar",
-                Left      = 118,
-                Top       = 0,
-                Width     = 112,
-                Height    = 32,
-                BackColor = cGreen,
-                ForeColor = cWhite,
-                FlatStyle = FlatStyle.Flat,
-                Font      = new Font("Segoe UI", 9.5F, FontStyle.Bold),
-                Cursor    = Cursors.Hand
-            };
+            btnSalvUsr = new Button { Text = "\u2713  Salvar", Left = 0, Top = 0, Width = bw, Height = bh,
+                BackColor = cGreen, ForeColor = cWhite, FlatStyle = FlatStyle.Flat,
+                Font = new Font("Segoe UI", 9.5F, FontStyle.Bold), Cursor = Cursors.Hand, Visible = false };
             btnSalvUsr.FlatAppearance.BorderSize = 0;
             btnSalvUsr.Click += BtnSalvarUsuario_Click;
 
-            pnlBtns.Controls.Add(btnNovo);
-            pnlBtns.Controls.Add(btnSalvUsr);
+            btnCancelarUsr = new Button { Text = "Cancelar", Left = bw + 8, Top = 0, Width = bw, Height = bh,
+                BackColor = Color.FromArgb(108, 117, 125), ForeColor = cWhite, FlatStyle = FlatStyle.Flat,
+                Font = new Font("Segoe UI", 9.5F, FontStyle.Bold), Cursor = Cursors.Hand, Visible = false };
+            btnCancelarUsr.FlatAppearance.BorderSize = 0;
+            btnCancelarUsr.Click += BtnCancelarUsuario_Click;
+
+            pnlBtns.Controls.AddRange(new Control[] { btnNovoUsr, btnPesquisarUsr, btnSalvUsr, btnCancelarUsr });
             frmCard.Controls.Add(pnlBtns);
+            frmCard.Height = uy + 6 + bh + 10;
 
-            frmCard.Height = uy + 6 + 40;
-            pnlForm.Controls.Add(frmCard);
-            pnlForm.Controls.Add(pnlFormHead);
+            pnlCardArea.SizeChanged += (_, __) =>
+            {
+                frmCard.Left = System.Math.Max(14, (pnlCardArea.Width  - frmCard.Width)  / 2);
+                frmCard.Top  = System.Math.Max(14, (pnlCardArea.Height - frmCard.Height) / 2);
+            };
+            pnlCardArea.Controls.Add(frmCard);
 
-            usrBody.Controls.Add(pnlForm);
-            usrBody.Controls.Add(vSep);
-            usrBody.Controls.Add(pnlGrid);
+            pnlUsrForm.Controls.Add(pnlCardArea);
+            pnlUsrForm.Controls.Add(pnlBuscaUsuarios);
+            pnlUsrForm.Controls.Add(pnlFormHead);
+            usrBody.Controls.Add(pnlUsrForm);
 
             tabUsr.Controls.Add(usrBody);
             tabUsr.Controls.Add(usrHeader);
@@ -516,13 +400,19 @@ namespace Pedeai.Forms
         internal TextBox txtEmpEnd;
 
         // â”€â”€ Usuario fields â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-        internal DataGridView gridUsuarios;
         internal TextBox txtUsrNome;
         internal TextBox txtUsrLogin;
         internal TextBox txtUsrSenha;
         internal TextBox txtUsrSenhaConf;
         internal ComboBox cmbUsrNivel;
         internal ComboBox cmbUsrSit;
+        internal Panel    pnlBuscaUsuarios;
+        internal TextBox  txtPesquisa;
+        internal ListBox  lstUsuarios;
+        internal Button   btnNovoUsr;
+        internal Button   btnPesquisarUsr;
+        internal Button   btnSalvUsr;
+        internal Button   btnCancelarUsr;
 
         // ── Module checkboxes ────────────────────────────────────────────────
         internal CheckBox chkModDashboard;
