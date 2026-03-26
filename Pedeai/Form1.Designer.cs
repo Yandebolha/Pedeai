@@ -69,15 +69,21 @@ namespace Pedeai
             pnlSidebar.Controls.Add(new Panel { Left = 16, Top = 56, Width = 178, Height = 1, BackColor = Color.FromArgb(60, 70, 110) });
 
             int navY = 68;
-            pnlSidebar.Controls.Add(BotaoNav("\U0001F3E0  Dashboard",   navY, MostrarDashboard));     navY += 46;
-            pnlSidebar.Controls.Add(BotaoNav("\U0001F4CB  Pedidos",     navY, MostrarPedidos));        navY += 46;
-            pnlSidebar.Controls.Add(BotaoNav("\U0001F4B0  Financeiro",  navY, MostrarFinanceiro));     navY += 46;
-            pnlSidebar.Controls.Add(BotaoNav("\U0001F6D2  Produtos",    navY, () => AbrirForm(new frmCadastroProduto()))); navY += 46;
-            pnlSidebar.Controls.Add(BotaoNav("\U0001F5C2  Categorias",  navY, () => AbrirForm(new frmCadastroCategoria()))); navY += 46;
-            pnlSidebar.Controls.Add(BotaoNav("\U0001F464  Clientes",    navY, () => AbrirForm(new frmCadastroCliente()))); navY += 46;
-            pnlSidebar.Controls.Add(BotaoNav("\U0001F3ED  Fornecedores",navY, () => AbrirForm(new frmCadastroFornecedor()))); navY += 46;
-            pnlSidebar.Controls.Add(BotaoNav("\U0001F3F7  Cupons",      navY, () => AbrirForm(new frmCadastroCupom()))); navY += 46;
-            pnlSidebar.Controls.Add(BotaoNav("\U0001F3E2  Empresa",     navY, MostrarEmpresa));
+            void NavSe(string modulo, string texto, Action acao)
+            {
+                if (!UsuarioSessao.TemModulo(modulo)) return;
+                pnlSidebar.Controls.Add(BotaoNav(texto, navY, acao));
+                navY += 46;
+            }
+            NavSe("Dashboard",   "\U0001F3E0  Dashboard",    MostrarDashboard);
+            NavSe("Pedidos",     "\U0001F4CB  Pedidos",      MostrarPedidos);
+            NavSe("Financeiro",  "\U0001F4B0  Financeiro",   MostrarFinanceiro);
+            NavSe("Produtos",    "\U0001F6D2  Produtos",     () => AbrirForm(new frmCadastroProduto()));
+            NavSe("Categorias",  "\U0001F5C2  Categorias",   () => AbrirForm(new frmCadastroCategoria()));
+            NavSe("Clientes",    "\U0001F464  Clientes",     () => AbrirForm(new frmCadastroCliente()));
+            NavSe("Fornecedores","\U0001F3ED  Fornecedores", () => AbrirForm(new frmCadastroFornecedor()));
+            NavSe("Cupons",      "\U0001F3F7  Cupons",       () => AbrirForm(new frmCadastroCupom()));
+            NavSe("Empresa",     "\U0001F3E2  Empresa",      MostrarEmpresa);
 
             // ── Content ───────────────────────────────────────────────────
             pnlContent.Dock = DockStyle.Fill;
