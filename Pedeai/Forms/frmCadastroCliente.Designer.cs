@@ -83,7 +83,7 @@ namespace Pedeai.Forms
             pnlForm.Dock = DockStyle.Bottom; pnlForm.Height = 210;
             pnlForm.BackColor = Color.FromArgb(28, 37, 65);
             pnlForm.BorderStyle = BorderStyle.FixedSingle;
-            pnlForm.Visible = false;
+            pnlForm.Visible = DesignMode;
 
             var cLbl = Color.FromArgb(160, 175, 210);
             var cIn  = Color.FromArgb(20, 28, 55);

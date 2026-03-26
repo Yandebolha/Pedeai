@@ -80,7 +80,7 @@ namespace Pedeai.Forms
             pnlForm.Dock = DockStyle.Bottom; pnlForm.Height = 240;
             pnlForm.BackColor = Color.FromArgb(28, 37, 65);
             pnlForm.BorderStyle = BorderStyle.FixedSingle;
-            pnlForm.Visible = false;
+            pnlForm.Visible = DesignMode;
 
             var lblRaz = new Label { Text = "Raz\u00e3o Social:", Left = 10, Top = 11, AutoSize = true };
             txtRazao.Left = 90; txtRazao.Top = 8; txtRazao.Width = 230;

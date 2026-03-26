@@ -103,7 +103,7 @@ namespace Pedeai.Forms
             pnlForm.Dock = DockStyle.Bottom; pnlForm.Height = 225;
             pnlForm.BackColor = Color.FromArgb(28, 37, 65);
             pnlForm.BorderStyle = BorderStyle.FixedSingle;
-            pnlForm.Visible = false;
+            pnlForm.Visible = DesignMode;
 
             var lblCat  = new Label { Text = "Categoria:",      Left = 10,  Top = 11, AutoSize = true };
             cmbCategoria.Left = 80; cmbCategoria.Top = 8; cmbCategoria.Width = 160;

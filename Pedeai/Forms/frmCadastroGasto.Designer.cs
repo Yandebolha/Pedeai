@@ -15,6 +15,7 @@ namespace Pedeai.Forms
 
         private void InitializeComponent()
         {
+            this.SuspendLayout();
             this.Text            = "Lancar Gasto de Material";
             this.StartPosition   = FormStartPosition.CenterParent;
             this.FormBorderStyle = FormBorderStyle.FixedDialog;
@@ -78,6 +79,7 @@ namespace Pedeai.Forms
 
             this.Controls.AddRange(new System.Windows.Forms.Control[]
                 { lblData, dtpData, lblDesc, txtDescricao, lblVal, numValor, lblObs, txtObs, btnSalvar, btnCan });
+            this.ResumeLayout(false);
         }
 
         internal DateTimePicker dtpData;

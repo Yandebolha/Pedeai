@@ -74,7 +74,7 @@ namespace Pedeai.Forms
             pnlForm.Dock = DockStyle.Bottom; pnlForm.Height = 150;
             pnlForm.BackColor = Color.FromArgb(28, 37, 65);
             pnlForm.BorderStyle = BorderStyle.FixedSingle;
-            pnlForm.Visible = false;
+            pnlForm.Visible = DesignMode;
 
             var lblCod  = new Label { Text = "C\u00f3digo:",    AutoSize = true, Left = 10,  Top = 11 };
             txtCodigo.Left = 65; txtCodigo.Top = 8; txtCodigo.Width = 100;

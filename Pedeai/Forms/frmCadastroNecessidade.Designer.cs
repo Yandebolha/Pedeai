@@ -16,6 +16,7 @@ namespace Pedeai.Forms
 
         private void InitializeComponent()
         {
+            this.SuspendLayout();
             dtpData      = new DateTimePicker();
             cmbCategoria = new ComboBox();
             txtDescricao = new TextBox();
@@ -74,6 +75,7 @@ namespace Pedeai.Forms
             Controls.AddRange(new Control[]
                 { lblData, dtpData, lblCat, cmbCategoria, lblDesc, txtDescricao,
                   lblVal, numValor, btnSal, btnCanc });
+            this.ResumeLayout(false);
         }
 
         private DateTimePicker dtpData;
