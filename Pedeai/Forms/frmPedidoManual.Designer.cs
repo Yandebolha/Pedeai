@@ -247,6 +247,7 @@ namespace Pedeai.Forms
         private Button        btnBuscarProduto;
         private Label         lblDesconto;
         private NumericUpDown numQtde;
+        private NumericUpDown numUnitario;
         private NumericUpDown numDescontoItem;
         private DataGridView  gridItens;
         private Label         lblTotal;
