@@ -32,6 +32,7 @@ namespace Pedeai.Forms
             lblDesconto          = new Label();
             numQtde              = new NumericUpDown();
             numUnitario          = new NumericUpDown();
+            numDescontoItem      = new NumericUpDown();
             gridItens            = new DataGridView();
             lblTotal             = new Label();
 
@@ -47,7 +48,7 @@ namespace Pedeai.Forms
             var lblCliente = new Label { Text = "Cliente:", Left = 10, Top = 11, AutoSize = true };
             txtNome.Left = 68; txtNome.Top = 7; txtNome.Width = 230;
 
-            btnSelecionarCliente.Text      = "Selecionar";
+            btnSelecionarCliente.Text      = "Buscar";
             btnSelecionarCliente.Left      = 305; btnSelecionarCliente.Top    = 5;
             btnSelecionarCliente.Width     = 100; btnSelecionarCliente.Height = 24;
             btnSelecionarCliente.BackColor = Color.FromArgb(63, 81, 181);
@@ -149,7 +150,8 @@ namespace Pedeai.Forms
             lblDesconto.ForeColor = Color.FromArgb(192, 57, 43); lblDesconto.Visible = false;
 
             pnlItem.Controls.AddRange(new Control[]
-                { lblProd, txtBuscaProduto, btnBuscarProduto, lblQtde, numQtde, lblUnit, numUnitario, btnAdd, lblDesconto });
+                { lblProd, txtBuscaProduto, btnBuscarProduto, lblQtde, numQtde, lblUnit, numUnitario,
+                  lblDescItem, numDescontoItem, btnAdd, lblDesconto });
 
             // Grid de itens
             gridItens.Dock = DockStyle.Fill;
@@ -245,7 +247,7 @@ namespace Pedeai.Forms
         private Button        btnBuscarProduto;
         private Label         lblDesconto;
         private NumericUpDown numQtde;
-        private NumericUpDown numUnitario;
+        private NumericUpDown numDescontoItem;
         private DataGridView  gridItens;
         private Label         lblTotal;
     }

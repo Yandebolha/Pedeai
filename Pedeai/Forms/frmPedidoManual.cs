@@ -200,9 +200,8 @@ namespace Pedeai.Forms
             int    codMerc = _produtoSelecionado?.Codigo ?? 0;
             if (string.IsNullOrWhiteSpace(nome)) { MessageBox.Show("Informe o produto."); return; }
 
-            decimal precoOriginal = _produtoSelecionado?.Preco ?? numUnitario.Value;
-            decimal descPct       = precoOriginal > 0 && numUnitario.Value < precoOriginal
-                ? Math.Round((1m - numUnitario.Value / precoOriginal) * 100m, 1) : 0m;
+            decimal descPct  = Math.Max(0, Math.Min(100, numDescontoItem.Value));
+            decimal unitFinal = numUnitario.Value * (1m - descPct / 100m);
 
             var item = new ItemPedidoWeb
             {
@@ -210,20 +209,21 @@ namespace Pedeai.Forms
                 itpwNome_Mercadoria = nome,
                 itpwQtde            = (int)numQtde.Value,
                 itpwPreco_Unitario  = numUnitario.Value,
-                itpwSubtotal        = numUnitario.Value * numQtde.Value,
+                itpwSubtotal        = unitFinal * numQtde.Value,
             };
             _itens.Add(item);
 
-            string descStr = descPct > 0 ? descPct.ToString("0.0") + "%" : "";
+            string descStr = descPct > 0 ? descPct.ToString("0.#") + "%" : "";
             gridItens.Rows.Add(item.itpwNome_Mercadoria, item.itpwQtde,
                 item.itpwPreco_Unitario.ToString("N2"), descStr,
                 item.itpwSubtotal.ToString("N2"));
 
-            txtBuscaProduto.Text = "";
-            _produtoSelecionado  = null;
-            lblDesconto.Visible  = false;
-            numQtde.Value        = 1;
-            numUnitario.Value    = 0;
+            txtBuscaProduto.Text   = "";
+            _produtoSelecionado    = null;
+            lblDesconto.Visible    = false;
+            numQtde.Value          = 1;
+            numUnitario.Value      = 0;
+            numDescontoItem.Value  = 0;
             AtualizarTotal();
         }
 
