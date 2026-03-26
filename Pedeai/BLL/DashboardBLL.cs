@@ -16,5 +16,7 @@ namespace Pedeai.BLL
         public DataTable GetVendasPorCanal(DateTime de, DateTime ate) => _dal.GetVendasPorCanal(de, ate);
         public DataTable GetTopProdutos(DateTime de, DateTime ate, int top = 8) => _dal.GetTopProdutos(de, ate, top);
         public DataTable GetVendasPorDia(DateTime de, DateTime ate)   => _dal.GetVendasPorDia(de, ate);
+        public DataTable GetVendasPorPeriodo(string periodo)          => _dal.GetVendasPorPeriodo(periodo);
+        public DataTable GetTopProdutosHoje(int top = 3)              => _dal.GetTopProdutosHoje(top);
     }
 }

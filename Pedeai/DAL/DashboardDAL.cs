@@ -99,5 +99,57 @@ namespace Pedeai.DAL
             new MySqlDataAdapter(cmd).Fill(dt);
             return dt;
         }
+
+        public DataTable GetVendasPorPeriodo(string periodo)
+        {
+            var dt = new DataTable();
+            using var conn = AbrirConexao();
+            string sql;
+            if (periodo == "semana")
+                sql = @"SELECT CONCAT(YEAR(pediData_Lancamento), '-S', LPAD(WEEK(pediData_Lancamento,1),2,'0')) AS Periodo,
+                        COALESCE(SUM(pediValor_Total),0) AS TotalVendas
+                        FROM pedido_web
+                        WHERE pediData_Lancamento >= CURDATE() - INTERVAL 8 WEEK
+                          AND pediSituacao <> 6
+                        GROUP BY YEARWEEK(pediData_Lancamento,1)
+                        ORDER BY YEARWEEK(pediData_Lancamento,1)";
+            else if (periodo == "mes")
+                sql = @"SELECT DATE_FORMAT(pediData_Lancamento,'%Y-%m') AS Periodo,
+                        COALESCE(SUM(pediValor_Total),0) AS TotalVendas
+                        FROM pedido_web
+                        WHERE pediData_Lancamento >= CURDATE() - INTERVAL 12 MONTH
+                          AND pediSituacao <> 6
+                        GROUP BY DATE_FORMAT(pediData_Lancamento,'%Y-%m')
+                        ORDER BY Periodo";
+            else // dia
+                sql = @"SELECT DATE_FORMAT(pediData_Lancamento,'%d/%m') AS Periodo,
+                        COALESCE(SUM(pediValor_Total),0) AS TotalVendas
+                        FROM pedido_web
+                        WHERE DATE(pediData_Lancamento) >= CURDATE() - INTERVAL 29 DAY
+                          AND pediSituacao <> 6
+                        GROUP BY DATE(pediData_Lancamento)
+                        ORDER BY DATE(pediData_Lancamento)";
+            using var cmd = new MySqlCommand(sql, conn);
+            new MySqlDataAdapter(cmd).Fill(dt);
+            return dt;
+        }
+
+        public DataTable GetTopProdutosHoje(int top = 3)
+        {
+            var dt = new DataTable();
+            using var conn = AbrirConexao();
+            var sql = $@"SELECT i.itpwNome_Mercadoria AS Produto,
+                CAST(SUM(i.itpwQtde) AS UNSIGNED) AS Quantidade
+                FROM itens_pedido_web i
+                JOIN pedido_web p ON p.Codigo = i.Codigo_Pedido
+                WHERE DATE(p.pediData_Lancamento) = CURDATE()
+                  AND p.pediSituacao <> 6
+                GROUP BY i.itpwNome_Mercadoria
+                ORDER BY Quantidade DESC
+                LIMIT {top}";
+            using var cmd = new MySqlCommand(sql, conn);
+            new MySqlDataAdapter(cmd).Fill(dt);
+            return dt;
+        }
     }
 }

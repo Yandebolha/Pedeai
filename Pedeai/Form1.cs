@@ -64,10 +64,9 @@ namespace Pedeai
         private Panel           _pnlChartCanal;
         private Panel           _pnlChartProdutos;
         private Panel           _pnlChartDias;
-        private DateTimePicker  _dtpCanalDe,  _dtpCanalAte;
-        private DateTimePicker  _dtpProdDe,   _dtpProdAte;
         private DateTimePicker  _dtpDiasDe,   _dtpDiasAte;
-        private ComboBox        _cmbProdTop;
+        private string          _periodoCanal  = "dia";
+        private Button[]        _btnsPeriodo;
         private (string label, float value)[] _dadosCanal    = Array.Empty<(string, float)>();
         private (string label, float value)[] _dadosProdutos = Array.Empty<(string, float)>();
         private (string label, float value)[] _dadosDias     = Array.Empty<(string, float)>();
@@ -120,25 +119,65 @@ namespace Pedeai
             tbl.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 33.4f));
             tbl.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 33.3f));
 
-            // Gráfico 1: Vendas por Canal
-            var outerC = MkOuter(); var filtC = MkFiltro();
-            _dtpCanalDe  = MkDtp(38, DateTime.Today.AddDays(-30));
-            _dtpCanalAte = MkDtp(175, DateTime.Today);
-            filtC.Controls.AddRange(new Control[] { MkLbl("De:", 4), _dtpCanalDe, MkLbl("até:", 150), _dtpCanalAte, MkBtn(288, CarregarChartCanal) });
+            // Gráfico 1: Vendas por Canal  (Diário / Semanal / Mensal)
+            var outerC = MkOuter();
+            var filtC  = new Panel { Dock = DockStyle.Top, Height = 34, BackColor = Color.FromArgb(22, 30, 55) };
+            var periodos = new[] { ("Diário", "dia"), ("Semanal", "semana"), ("Mensal", "mes") };
+            _btnsPeriodo = new Button[3];
+            for (int pi = 0; pi < periodos.Length; pi++)
+            {
+                int idx = pi; string per = periodos[pi].Item2;
+                var bp = new Button
+                {
+                    Text      = periodos[pi].Item1,
+                    Left      = 4 + idx * 76,
+                    Top       = 5,
+                    Width     = 70,
+                    Height    = 24,
+                    BackColor = idx == 0 ? CorBotaoAtivo : Color.FromArgb(40, 55, 95),
+                    ForeColor = Color.White,
+                    FlatStyle = FlatStyle.Flat,
+                    Cursor    = Cursors.Hand,
+                    Font      = new Font("Segoe UI", 8f)
+                };
+                bp.FlatAppearance.BorderSize = 0;
+                bp.Click += (_, __) =>
+                {
+                    _periodoCanal = per;
+                    foreach (var b in _btnsPeriodo) b.BackColor = Color.FromArgb(40, 55, 95);
+                    bp.BackColor = CorBotaoAtivo;
+                    CarregarChartCanal();
+                };
+                _btnsPeriodo[pi] = bp;
+                filtC.Controls.Add(bp);
+            }
             _pnlChartCanal = new Panel { Dock = DockStyle.Fill, BackColor = Color.FromArgb(13, 24, 46), Tag = "Vendas por Canal" };
             _pnlChartCanal.Paint += (s, e) => DesenharBarrasVerticais(e.Graphics, (Panel)s, _dadosCanal, Color.FromArgb(245, 175, 35));
             outerC.Controls.Add(_pnlChartCanal); outerC.Controls.Add(filtC);
             outerC.Controls.Add(new Panel { Height = 4, Dock = DockStyle.Top, BackColor = Color.FromArgb(41, 128, 185) });
 
-            // Gráfico 2: Top Produtos
-            var outerP = MkOuter(); var filtP = MkFiltro();
-            _dtpProdDe  = MkDtp(38, DateTime.Today.AddDays(-30));
-            _dtpProdAte = MkDtp(175, DateTime.Today);
-            _cmbProdTop = new ComboBox { Left = 295, Top = 6, Width = 60, DropDownStyle = ComboBoxStyle.DropDownList };
-            _cmbProdTop.Items.AddRange(new object[] { "5", "8", "10", "15" }); _cmbProdTop.SelectedIndex = 1;
-            filtP.Controls.AddRange(new Control[] { MkLbl("De:", 4), _dtpProdDe, MkLbl("até:", 150), _dtpProdAte, MkLbl("Top:", 288), _cmbProdTop, MkBtn(362, CarregarChartProdutos) });
-            _pnlChartProdutos = new Panel { Dock = DockStyle.Fill, BackColor = Color.FromArgb(13, 24, 46), Tag = "Top Produtos" };
-            _pnlChartProdutos.Paint += (s, e) => DesenharBarrasHorizontais(e.Graphics, (Panel)s, _dadosProdutos, Color.FromArgb(245, 175, 35));
+            // Gráfico 2: Top 3 Produtos do Dia
+            var outerP = MkOuter();
+            var filtP  = new Panel { Dock = DockStyle.Top, Height = 34, BackColor = Color.FromArgb(22, 30, 55) };
+            var lblTopHoje = new Label { Text = "Top 3 produtos do dia", ForeColor = Color.FromArgb(180, 200, 240), Left = 4, Top = 9, AutoSize = true };
+            var btnRefreshProd = new Button
+            {
+                Text      = "Atualizar",
+                Left      = 150,
+                Top       = 5,
+                Width     = 72,
+                Height    = 24,
+                BackColor = CorBotaoAtivo,
+                ForeColor = Color.White,
+                FlatStyle = FlatStyle.Flat,
+                Font      = new Font("Segoe UI", 8f),
+                Cursor    = Cursors.Hand
+            };
+            btnRefreshProd.FlatAppearance.BorderSize = 0;
+            btnRefreshProd.Click += (_, __) => CarregarChartProdutos();
+            filtP.Controls.AddRange(new Control[] { lblTopHoje, btnRefreshProd });
+            _pnlChartProdutos = new Panel { Dock = DockStyle.Fill, BackColor = Color.FromArgb(13, 24, 46), Tag = "Top 3 Produtos Hoje" };
+            _pnlChartProdutos.Paint += (s, e) => DesenharBarrasVerticais(e.Graphics, (Panel)s, _dadosProdutos, Color.FromArgb(245, 175, 35));
             outerP.Controls.Add(_pnlChartProdutos); outerP.Controls.Add(filtP);
             outerP.Controls.Add(new Panel { Height = 4, Dock = DockStyle.Top, BackColor = Color.FromArgb(142, 68, 173) });
 
@@ -432,9 +471,8 @@ namespace Pedeai
             if (_pnlChartCanal == null) return;
             try
             {
-                var de  = _dtpCanalDe?.Value.Date  ?? DateTime.Today.AddDays(-30);
-                var ate = _dtpCanalAte?.Value.Date ?? DateTime.Today;
-                _dadosCanal = DataTableParaChart(_dashBLL.GetVendasPorCanal(de, ate), "Canal", "TotalVendas");
+                _dadosCanal = DataTableParaChart(
+                    _dashBLL.GetVendasPorPeriodo(_periodoCanal), "Periodo", "TotalVendas");
                 _pnlChartCanal.Invalidate();
             }
             catch { }
@@ -445,10 +483,8 @@ namespace Pedeai
             if (_pnlChartProdutos == null) return;
             try
             {
-                var de  = _dtpProdDe?.Value.Date  ?? DateTime.Today.AddDays(-30);
-                var ate = _dtpProdAte?.Value.Date ?? DateTime.Today;
-                int top = _cmbProdTop?.SelectedItem is string s && int.TryParse(s, out int t) ? t : 8;
-                _dadosProdutos = DataTableParaChart(_dashBLL.GetTopProdutos(de, ate, top), "Produto", "Quantidade");
+                _dadosProdutos = DataTableParaChart(
+                    _dashBLL.GetTopProdutosHoje(3), "Produto", "Quantidade");
                 _pnlChartProdutos.Invalidate();
             }
             catch { }
