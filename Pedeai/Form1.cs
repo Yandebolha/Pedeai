@@ -72,6 +72,14 @@ namespace Pedeai
         private (string label, float value)[] _dadosProdutos = Array.Empty<(string, float)>();
         private (string label, float value)[] _dadosDias     = Array.Empty<(string, float)>();
 
+        // Botoes de acao da tela de pedidos
+        private Button _btnConfirmar;
+        private Button _btnEmPreparo;
+        private Button _btnPronto;
+        private Button _btnSaiu;
+        private Button _btnEntregue;
+        private Button _btnCancelar;
+
         // --------------------------------------------------------------------
         // DASHBOARD
         // --------------------------------------------------------------------
@@ -671,38 +679,38 @@ namespace Pedeai
                 WrapContents  = false,
                 BackColor     = Color.Transparent
             };
-            var acoes = new[]
+
+            Button MkBtn(string text, Color bg, int sit)
             {
-                ("\u2713 Confirmar",    1, Color.FromArgb(39, 174, 96)),
-                ("\u23F3 Em Preparo",  2, Color.FromArgb(243, 156, 18)),
-                ("\u2705 Pronto",      3, Color.FromArgb(22, 160, 133)),
-                ("\U0001F6B4 Saiu",    4, Color.FromArgb(52, 152, 219)),
-                ("\U0001F4E6 Entregue",3, Color.FromArgb(22, 160, 133)),
-                ("\u2715 Cancelar",    6, Color.FromArgb(192, 57, 43)),
-            };
-            foreach (var (txt, sit, cor) in acoes)
-            {
-                int s = sit;
                 var b = new Button
                 {
-                    Text      = txt,
-                    Width     = 110,
+                    Text      = text,
+                    Width     = 128,
                     Height    = 30,
-                    BackColor = cor,
+                    BackColor = bg,
                     ForeColor = Color.White,
                     FlatStyle = FlatStyle.Flat,
                     Margin    = new Padding(0, 4, 8, 0),
-                    Cursor    = Cursors.Hand
+                    Cursor    = Cursors.Hand,
+                    Visible   = false
                 };
                 b.FlatAppearance.BorderSize = 0;
-                b.Click += (_, __) => AtualizarSituacaoPedido(s);
+                b.Click += (_, __) => AtualizarSituacaoPedido(sit);
                 pnlAcoes.Controls.Add(b);
+                return b;
             }
+
+            _btnConfirmar = MkBtn("\u2713 Confirmar",          Color.FromArgb(39, 174, 96),  1);
+            _btnEmPreparo = MkBtn("\u23F3 Em Preparo",         Color.FromArgb(243, 156, 18), 2);
+            _btnPronto    = MkBtn("\u2705 Pronto",             Color.FromArgb(22, 160, 133), 3);
+            _btnSaiu      = MkBtn("\U0001F6B4 Saiu p/ Entrega",Color.FromArgb(52, 152, 219), 4);
+            _btnEntregue  = MkBtn("\U0001F4E6 Entregue",       Color.FromArgb(22, 160, 133), 5);
+            _btnCancelar  = MkBtn("\u2715 Cancelar",           Color.FromArgb(192, 57, 43),  6);
 
             // Main grid
             var gridMain = CriarGrid();
             gridMain.Dock = DockStyle.Fill;
-            gridMain.SelectionChanged += (_, __) => CarregarItensPedido(gridMain);
+            gridMain.SelectionChanged += (_, __) => { CarregarItensPedido(gridMain); AtualizarBotoesPedido(); };
             // Keep ref for save action
             gridPedidos = gridMain;
 
@@ -897,6 +905,37 @@ namespace Pedeai
             catch { }
         }
 
+        private void AtualizarBotoesPedido()
+        {
+            if (gridPedidos == null || gridPedidos.SelectedRows.Count == 0)
+            {
+                if (_btnConfirmar != null)
+                {
+                    _btnConfirmar.Visible = _btnEmPreparo.Visible = _btnPronto.Visible =
+                        _btnSaiu.Visible = _btnEntregue.Visible = _btnCancelar.Visible = false;
+                }
+                return;
+            }
+
+            try
+            {
+                var cod    = Convert.ToInt32(gridPedidos.SelectedRows[0].Cells["Codigo"].Value);
+                var pedido = _pedidoBLL.PesquisaCodigo(cod);
+                if (pedido == null) return;
+
+                bool retirada = pedido.pediTipo_Entrega == 0;
+                bool terminal = pedido.pediSituacao == 5 || pedido.pediSituacao == 6;
+
+                _btnConfirmar.Visible = !terminal;
+                _btnEmPreparo.Visible = !terminal;
+                _btnPronto.Visible    = retirada && !terminal;
+                _btnSaiu.Visible      = !retirada && !terminal;
+                _btnEntregue.Visible  = !retirada && !terminal;
+                _btnCancelar.Visible  = !terminal;
+            }
+            catch { }
+        }
+
         private void AtualizarSituacaoPedido(int novaSit)
         {
             if (gridPedidos.SelectedRows.Count == 0) { MessageBox.Show("Selecione um pedido na lista."); return; }
@@ -911,29 +950,14 @@ namespace Pedeai
                 return;
             }
 
-            // Cancelar
+            // Cancelar — sempre solicita autorizacao
             if (novaSit == 6)
             {
-                // Confirmado ou superior requer autorizacao gerencial
-                bool precisaAuth = PedidoBLL.CancelamentoRequerAutorizacao(pedido.pediSituacao);
-                if (precisaAuth && !UsuarioSessao.TemNivel(2) && !UsuarioSessao.TemModulo("CancelarPedidos"))
-                {
-                    // Solicita credenciais de gerente
-                    using var dlgAuth = new Forms.frmAutorizacao();
-                    if (dlgAuth.ShowDialog(this) != DialogResult.OK) return;
-                    string canceladoPor = dlgAuth.UsuarioAutorizador.usuNome;
-                    var eA = _pedidoBLL.AtualizarSituacao(cod, 6, canceladoPor);
-                    if (!string.IsNullOrEmpty(eA)) MessageBox.Show("Erro: " + eA);
-                    else CarregarPedidos();
-                    return;
-                }
-
-                if (MessageBox.Show("Cancelar este pedido?", "Confirmacao",
-                        MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes) return;
-
-                string autor = UsuarioSessao.NomeAtual;
-                var eC = _pedidoBLL.AtualizarSituacao(cod, 6, autor);
-                if (!string.IsNullOrEmpty(eC)) MessageBox.Show("Erro: " + eC);
+                using var dlgAuth = new Forms.frmAutorizacao();
+                if (dlgAuth.ShowDialog(this) != DialogResult.OK) return;
+                string canceladoPor = dlgAuth.UsuarioAutorizador.usuNome;
+                var eA = _pedidoBLL.AtualizarSituacao(cod, 6, canceladoPor);
+                if (!string.IsNullOrEmpty(eA)) MessageBox.Show("Erro: " + eA);
                 else CarregarPedidos();
                 return;
             }
