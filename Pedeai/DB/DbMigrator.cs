@@ -107,6 +107,32 @@ namespace Pedeai.DB
                         usuNivel = 9,
                         Situacao = 'A'");
 
+                // ── 7. Tabela: config_impressao ───────────────────────────────
+                Exec(conn, @"
+                    CREATE TABLE IF NOT EXISTS config_impressao (
+                        Codigo              INT           NOT NULL DEFAULT 1 PRIMARY KEY,
+                        cabNomeEmpresa      VARCHAR(100)  NOT NULL DEFAULT '',
+                        cabEndereco         VARCHAR(200)  NOT NULL DEFAULT '',
+                        cabTelefone         VARCHAR(50)   NOT NULL DEFAULT '',
+                        cabCNPJ             VARCHAR(30)   NOT NULL DEFAULT '',
+                        separador           VARCHAR(5)    NOT NULL DEFAULT '-',
+                        rodapeAvisoFiscal   VARCHAR(100)  NOT NULL DEFAULT '*** NAO E DOCUMENTO FISCAL ***',
+                        rodapeTextoLivre    TEXT          NOT NULL DEFAULT '',
+                        lblNumeroPedido     VARCHAR(50)   NOT NULL DEFAULT 'Pedido N.:',
+                        lblColunaItem       VARCHAR(50)   NOT NULL DEFAULT 'ITEM (V.Unit)',
+                        lblColunaTotal      VARCHAR(30)   NOT NULL DEFAULT 'Total',
+                        lblSubtotal         VARCHAR(50)   NOT NULL DEFAULT 'TOTAL:',
+                        lblTaxaEntrega      VARCHAR(50)   NOT NULL DEFAULT '+ ENTREGA:',
+                        lblTotalPagar       VARCHAR(50)   NOT NULL DEFAULT '= TOTAL A PAGAR:',
+                        lblAtendente        VARCHAR(50)   NOT NULL DEFAULT 'Atendente:',
+                        larguraCaracteres   INT           NOT NULL DEFAULT 42,
+                        impressoraNome      VARCHAR(200)  NOT NULL DEFAULT ''
+                    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+
+                Exec(conn, @"
+                    INSERT IGNORE INTO config_impressao (Codigo)
+                    VALUES (1)");
+
                 return true;
             }
             catch (Exception ex)

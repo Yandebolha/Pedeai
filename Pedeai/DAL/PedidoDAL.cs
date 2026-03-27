@@ -74,6 +74,33 @@ namespace Pedeai.DAL
             return MapearPedido(r);
         }
 
+        /// <summary>Lista os itens de um pedido como objetos (para impressao).</summary>
+        public System.Collections.Generic.List<ItemPedidoWeb> ListarItensObjetos(int codigoPedido)
+        {
+            var lista = new System.Collections.Generic.List<ItemPedidoWeb>();
+            using var conn = AbrirConexao();
+            var sql = @"SELECT * FROM itens_pedido_web WHERE Codigo_Pedido = @cod ORDER BY Codigo";
+            using var cmd = new MySqlCommand(sql, conn);
+            cmd.Parameters.AddWithValue("@cod", codigoPedido);
+            using var r = cmd.ExecuteReader();
+            while (r.Read())
+            {
+                lista.Add(new ItemPedidoWeb
+                {
+                    Codigo              = Convert.ToInt32(r["Codigo"]),
+                    auxCodigo           = r["auxCodigo"] == DBNull.Value ? 0 : Convert.ToInt32(r["auxCodigo"]),
+                    Codigo_Pedido       = Convert.ToInt32(r["Codigo_Pedido"]),
+                    Codigo_Mercadoria   = r["Codigo_Mercadoria"] == DBNull.Value ? 0 : Convert.ToInt32(r["Codigo_Mercadoria"]),
+                    itpwNome_Mercadoria = r["itpwNome_Mercadoria"]?.ToString() ?? "",
+                    itpwQtde            = Convert.ToDecimal(r["itpwQtde"]),
+                    itpwPreco_Unitario  = Convert.ToDecimal(r["itpwPreco_Unitario"]),
+                    itpwSubtotal        = Convert.ToDecimal(r["itpwSubtotal"]),
+                    itpwObservacoes     = r["itpwObservacoes"]?.ToString() ?? "",
+                });
+            }
+            return lista;
+        }
+
         /// <summary>Lista os itens de um pedido.</summary>
         public DataTable ListarItens(int codigoPedido)
         {
@@ -309,7 +336,11 @@ namespace Pedeai.DAL
                 pediSituacao          = Convert.ToInt32(r["pediSituacao"]),
                 pediForma_Pagamento   = r["pediForma_Pagamento"] == DBNull.Value ? 0 : Convert.ToInt32(r["pediForma_Pagamento"]),
                 pediTipo_Entrega      = r["pediTipo_Entrega"] == DBNull.Value ? 0 : Convert.ToInt32(r["pediTipo_Entrega"]),
+                pediSubtotal          = r["pediSubtotal"] == DBNull.Value ? 0m : Convert.ToDecimal(r["pediSubtotal"]),
+                pediTaxa_Entrega      = r["pediTaxa_Entrega"] == DBNull.Value ? 0m : Convert.ToDecimal(r["pediTaxa_Entrega"]),
                 pediValor_Total       = Convert.ToDecimal(r["pediValor_Total"]),
+                pediEndereco_Entrega  = r["pediEndereco_Entrega"]?.ToString() ?? "",
+                pediObservacoes       = r["pediObservacoes"]?.ToString() ?? "",
                 pediOrigem            = r["pediOrigem"] == DBNull.Value ? 0 : Convert.ToInt32(r["pediOrigem"]),
                 pediData_Lancamento   = Convert.ToDateTime(r["pediData_Lancamento"]),
                 pediCancelado_Por     = r["pediCancelado_Por"] == DBNull.Value ? null : r["pediCancelado_Por"]?.ToString(),

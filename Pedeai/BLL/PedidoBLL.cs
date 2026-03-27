@@ -22,6 +22,9 @@ namespace Pedeai.BLL
         public DataTable ListarItens(int codigoPedido)
             => _dal.ListarItens(codigoPedido);
 
+        public System.Collections.Generic.List<Modelo.ItemPedidoWeb> ListarItensObjetos(int codigoPedido)
+            => _dal.ListarItensObjetos(codigoPedido);
+
         /// <summary>
         /// Valida se a transicao de estados e permitida.
         /// Maquina de estados: 0→1→2→3→(4→)5  |  0→6 (cancelar pendente sem auth)

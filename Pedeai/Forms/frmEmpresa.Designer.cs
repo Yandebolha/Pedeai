@@ -417,8 +417,244 @@ namespace Pedeai.Forms
             tabUsr.Controls.Add(usrBody);
             tabUsr.Controls.Add(usrHeader);
 
+            // ══════════════════════════════════════════════════════════════
+            //  ABA CONFIGURACAO DE IMPRESSAO
+            // ══════════════════════════════════════════════════════════════
+            var tabImp = new TabPage("  Impressão  ")
+            {
+                BackColor = cBg,
+                ForeColor = cWhite,
+                Padding   = new Padding(0)
+            };
+
+            var impHeader = new Panel
+            {
+                Dock      = DockStyle.Top,
+                Height    = 52,
+                BackColor = Color.FromArgb(36, 52, 95)
+            };
+            impHeader.Controls.Add(new Label
+            {
+                Text      = "🖨  Configuração de Impressão",
+                ForeColor = cWhite,
+                Font      = new Font("Segoe UI", 12F, FontStyle.Bold),
+                AutoSize  = true,
+                Left      = 18,
+                Top       = 14
+            });
+            impHeader.Controls.Add(new Label
+            {
+                Text      = "Customize o cupom impresso a cada confirmação de pedido",
+                ForeColor = Color.FromArgb(140, 165, 210),
+                Font      = fntSmall,
+                AutoSize  = true,
+                Left      = 18,
+                Top       = 34
+            });
+
+            var impScroll = new Panel { Dock = DockStyle.Fill, AutoScroll = true, BackColor = cBg };
+
+            // card de conteudo
+            var impCard = new Panel
+            {
+                Left      = 30,
+                Top       = 14,
+                Width     = 700,
+                BackColor = cCard
+            };
+            impCard.Controls.Add(new Panel { Dock = DockStyle.Left, Width = 4, BackColor = Color.FromArgb(230, 126, 34) });
+
+            int ix = 16, ilw = 180, itw = 400, ith = 26, igy = 12, iy = 16;
+
+            Label ImpLbl(string t) => new Label { Text = t, ForeColor = cLbl, Font = fntLbl, AutoSize = true };
+            TextBox ImpTxt(bool ml = false)
+            {
+                var t = new TextBox { BackColor = cInput, ForeColor = cWhite, BorderStyle = BorderStyle.FixedSingle, Font = fntInput };
+                if (ml) { t.Multiline = true; t.ScrollBars = ScrollBars.Vertical; t.Height = 64; }
+                return t;
+            }
+
+            // Secao: Cabecalho
+            var lblSecCab = MakeSectionHead("Cabeçalho");
+            lblSecCab.SetBounds(ix + 8, iy, 300, 22);
+            impCard.Controls.Add(lblSecCab);
+            iy += 28;
+
+            impCard.Controls.Add(MakeSeparator());
+
+            var impDefs = new (string label, string hint)[]
+            {
+                ("Nome da Empresa (cabe.):",    "Deixe em branco para usar dados da aba Empresa"),
+                ("Endereço (cabe.):",            ""),
+                ("Telefone (cabe.):",            ""),
+                ("CNPJ (cabe.):",               ""),
+                ("Char separador:",             "Ex: - ou = (um caractere repetido)"),
+                ("Aviso fiscal:",               "Ex: *** NAO E DOCUMENTO FISCAL ***"),
+            };
+            var impTxts = new TextBox[impDefs.Length];
+            for (int i = 0; i < impDefs.Length; i++)
+            {
+                var lbl  = ImpLbl(impDefs[i].label);
+                lbl.SetBounds(ix + 8, iy + 5, ilw, 18);
+                impCard.Controls.Add(lbl);
+
+                impTxts[i] = ImpTxt();
+                impTxts[i].SetBounds(ix + ilw + 14, iy, itw, ith);
+                impCard.Controls.Add(impTxts[i]);
+
+                if (!string.IsNullOrEmpty(impDefs[i].hint))
+                {
+                    var h = ImpLbl(impDefs[i].hint);
+                    h.ForeColor = Color.FromArgb(90, 110, 150);
+                    h.Font      = fntSmall;
+                    h.SetBounds(ix + ilw + 14, iy + ith + 1, itw, 14);
+                    impCard.Controls.Add(h);
+                    iy += 14;
+                }
+                iy += ith + igy;
+            }
+
+            txtImpNomeEmpresa    = impTxts[0];
+            txtImpEndereco       = impTxts[1];
+            txtImpTelefone       = impTxts[2];
+            txtImpCNPJ           = impTxts[3];
+            txtImpSeparador      = impTxts[4];
+            txtImpAvisoFiscal    = impTxts[5];
+
+            // Rodape livre (multiline)
+            var lblRodape = ImpLbl("Rodapé livre:");
+            lblRodape.SetBounds(ix + 8, iy + 5, ilw, 18);
+            impCard.Controls.Add(lblRodape);
+            txtImpRodapeTexto = ImpTxt(true);
+            txtImpRodapeTexto.SetBounds(ix + ilw + 14, iy, itw, 64);
+            impCard.Controls.Add(txtImpRodapeTexto);
+            iy += 64 + igy;
+
+            // Secao: Etiquetas do cupom
+            iy += 8;
+            var lblSecEtiq = MakeSectionHead("Etiquetas do Cupom");
+            lblSecEtiq.SetBounds(ix + 8, iy, 300, 22);
+            impCard.Controls.Add(lblSecEtiq);
+            iy += 28;
+
+            var etiqDefs = new string[]
+            {
+                "Nº Pedido label:", "Coluna Item label:", "Coluna Total label:",
+                "Subtotal label:", "Taxa Entrega label:", "Total a Pagar label:", "Atendente label:"
+            };
+            var etiqTxts = new TextBox[etiqDefs.Length];
+            for (int i = 0; i < etiqDefs.Length; i++)
+            {
+                var lbl = ImpLbl(etiqDefs[i]);
+                lbl.SetBounds(ix + 8, iy + 5, ilw, 18);
+                impCard.Controls.Add(lbl);
+                etiqTxts[i] = ImpTxt();
+                etiqTxts[i].SetBounds(ix + ilw + 14, iy, 200, ith);
+                impCard.Controls.Add(etiqTxts[i]);
+                iy += ith + igy;
+            }
+            txtImpLblNumero       = etiqTxts[0];
+            txtImpLblColItem      = etiqTxts[1];
+            txtImpLblColTotal     = etiqTxts[2];
+            txtImpLblSubtotal     = etiqTxts[3];
+            txtImpLblTaxa         = etiqTxts[4];
+            txtImpLblTotalPagar   = etiqTxts[5];
+            txtImpLblAtendente    = etiqTxts[6];
+
+            // Secao: Impressora
+            iy += 8;
+            var lblSecImpr = MakeSectionHead("Impressora");
+            lblSecImpr.SetBounds(ix + 8, iy, 300, 22);
+            impCard.Controls.Add(lblSecImpr);
+            iy += 28;
+
+            var lblImpr = ImpLbl("Impressora:");
+            lblImpr.SetBounds(ix + 8, iy + 5, ilw, 18);
+            impCard.Controls.Add(lblImpr);
+            cmbImpressora = new ComboBox
+            {
+                DropDownStyle = ComboBoxStyle.DropDownList,
+                BackColor     = cInput,
+                ForeColor     = cWhite,
+                Font          = fntInput,
+                FlatStyle     = FlatStyle.Flat
+            };
+            cmbImpressora.SetBounds(ix + ilw + 14, iy, itw, ith);
+            // Preenche com impressoras instaladas
+            cmbImpressora.Items.Add("(Impressora padrão do sistema)");
+            foreach (string prt in System.Drawing.Printing.PrinterSettings.InstalledPrinters)
+                cmbImpressora.Items.Add(prt);
+            cmbImpressora.SelectedIndex = 0;
+            impCard.Controls.Add(cmbImpressora);
+            iy += ith + igy;
+
+            var lblLarg = ImpLbl("Largura (chars):");
+            lblLarg.SetBounds(ix + 8, iy + 5, ilw, 18);
+            impCard.Controls.Add(lblLarg);
+            numLargura = new NumericUpDown
+            {
+                Minimum    = 20,
+                Maximum    = 120,
+                Value      = 42,
+                BackColor  = cInput,
+                ForeColor  = cWhite,
+                Font       = fntInput
+            };
+            numLargura.SetBounds(ix + ilw + 14, iy, 80, ith);
+            impCard.Controls.Add(numLargura);
+            iy += ith + igy + 8;
+
+            // Botoes
+            var btnSalvImp = new Button
+            {
+                Text      = "\u2713  Salvar Configuração",
+                Left      = ix + ilw + 14,
+                Top       = iy,
+                Width     = 200,
+                Height    = 32,
+                BackColor = cGreen,
+                ForeColor = cWhite,
+                FlatStyle = FlatStyle.Flat,
+                Font      = new Font("Segoe UI", 9.5F, FontStyle.Bold),
+                Cursor    = Cursors.Hand
+            };
+            btnSalvImp.FlatAppearance.BorderSize = 0;
+            btnSalvImp.Click += BtnSalvarImpressao_Click;
+            impCard.Controls.Add(btnSalvImp);
+
+            var btnTesteImp = new Button
+            {
+                Text      = "Imprimir Teste",
+                Left      = ix + ilw + 14 + 208,
+                Top       = iy,
+                Width     = 140,
+                Height    = 32,
+                BackColor = Color.FromArgb(52, 152, 219),
+                ForeColor = cWhite,
+                FlatStyle = FlatStyle.Flat,
+                Font      = new Font("Segoe UI", 9.5F, FontStyle.Bold),
+                Cursor    = Cursors.Hand
+            };
+            btnTesteImp.FlatAppearance.BorderSize = 0;
+            btnTesteImp.Click += BtnImprimirTeste_Click;
+            impCard.Controls.Add(btnTesteImp);
+
+            iy += 32 + 16;
+            impCard.Height = iy;
+
+            impScroll.Controls.Add(impCard);
+            impScroll.SizeChanged += (_, __) =>
+            {
+                impCard.Left  = System.Math.Max(14, (impScroll.Width - impCard.Width) / 2);
+                impCard.Top   = 14;
+            };
+
+            tabImp.Controls.Add(impScroll);
+            tabImp.Controls.Add(impHeader);
+
             tab.TabPages.Add(tabEmp);
             tab.TabPages.Add(tabUsr);
+            tab.TabPages.Add(tabImp);
             this.Controls.Add(tab);
         }
 
@@ -456,5 +692,23 @@ namespace Pedeai.Forms
         internal CheckBox chkModCupons;
         internal CheckBox chkModEmpresa;
         internal CheckBox chkModCancelarPedidos;
+
+        // ── Impressao fields ─────────────────────────────────────────────────
+        internal TextBox        txtImpNomeEmpresa;
+        internal TextBox        txtImpEndereco;
+        internal TextBox        txtImpTelefone;
+        internal TextBox        txtImpCNPJ;
+        internal TextBox        txtImpSeparador;
+        internal TextBox        txtImpAvisoFiscal;
+        internal TextBox        txtImpRodapeTexto;
+        internal TextBox        txtImpLblNumero;
+        internal TextBox        txtImpLblColItem;
+        internal TextBox        txtImpLblColTotal;
+        internal TextBox        txtImpLblSubtotal;
+        internal TextBox        txtImpLblTaxa;
+        internal TextBox        txtImpLblTotalPagar;
+        internal TextBox        txtImpLblAtendente;
+        internal ComboBox       cmbImpressora;
+        internal NumericUpDown  numLargura;
     }
 }

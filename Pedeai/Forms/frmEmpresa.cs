@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
 using Pedeai.BLL;
@@ -10,14 +11,23 @@ namespace Pedeai.Forms
     {
         private EmpresaBLL  _empBLL;
         private UsuarioBLL  _usrBLL;
+        private ConfiguracaoImpressaoBLL _impBLL;
         private Empresa _empresa;
         private Usuario _usuarioEditando;
 
         public frmEmpresa()
         {
             InitializeComponent();
-            _empBLL = new EmpresaBLL(); _usrBLL = new UsuarioBLL();
-            Load += (_, __) => { CarregarEmpresa(); CarregarUsuarios(); SetModoEdicao(false); };
+            _empBLL = new EmpresaBLL();
+            _usrBLL = new UsuarioBLL();
+            _impBLL = new ConfiguracaoImpressaoBLL();
+            Load += (_, __) =>
+            {
+                CarregarEmpresa();
+                CarregarUsuarios();
+                CarregarConfiguracaoImpressao();
+                SetModoEdicao(false);
+            };
         }
 
         // ── ABA EMPRESA ──────────────────────────────────────────────────────
@@ -216,6 +226,111 @@ namespace Pedeai.Forms
             cmbUsrNivel.SelectedIndex = 0;
             cmbUsrSit.SelectedIndex   = 0;
             CarregarPermissoes("");
+        }
+
+        // ── ABA IMPRESSAO ─────────────────────────────────────────────────────
+
+        private void CarregarConfiguracaoImpressao()
+        {
+            var cfg = _impBLL.Carregar();
+            txtImpNomeEmpresa.Text  = cfg.cabNomeEmpresa;
+            txtImpEndereco.Text     = cfg.cabEndereco;
+            txtImpTelefone.Text     = cfg.cabTelefone;
+            txtImpCNPJ.Text         = cfg.cabCNPJ;
+            txtImpSeparador.Text    = cfg.separador;
+            txtImpAvisoFiscal.Text  = cfg.rodapeAvisoFiscal;
+            txtImpRodapeTexto.Text  = cfg.rodapeTextoLivre;
+            txtImpLblNumero.Text    = cfg.lblNumeroPedido;
+            txtImpLblColItem.Text   = cfg.lblColunaItem;
+            txtImpLblColTotal.Text  = cfg.lblColunaTotal;
+            txtImpLblSubtotal.Text  = cfg.lblSubtotal;
+            txtImpLblTaxa.Text      = cfg.lblTaxaEntrega;
+            txtImpLblTotalPagar.Text= cfg.lblTotalPagar;
+            txtImpLblAtendente.Text = cfg.lblAtendente;
+            numLargura.Value        = System.Math.Max(20, cfg.larguraCaracteres);
+
+            // Selecionar impressora salva
+            cmbImpressora.SelectedIndex = 0;
+            if (!string.IsNullOrWhiteSpace(cfg.impressoraNome))
+            {
+                for (int i = 1; i < cmbImpressora.Items.Count; i++)
+                {
+                    if (cmbImpressora.Items[i].ToString() == cfg.impressoraNome)
+                    {
+                        cmbImpressora.SelectedIndex = i;
+                        break;
+                    }
+                }
+            }
+        }
+
+        private ConfiguracaoImpressao ObterConfiguracaoImpressao()
+        {
+            return new ConfiguracaoImpressao
+            {
+                cabNomeEmpresa    = txtImpNomeEmpresa.Text.Trim(),
+                cabEndereco       = txtImpEndereco.Text.Trim(),
+                cabTelefone       = txtImpTelefone.Text.Trim(),
+                cabCNPJ           = txtImpCNPJ.Text.Trim(),
+                separador         = txtImpSeparador.Text.Trim().Length > 0 ? txtImpSeparador.Text.Trim() : "-",
+                rodapeAvisoFiscal = txtImpAvisoFiscal.Text.Trim(),
+                rodapeTextoLivre  = txtImpRodapeTexto.Text.Trim(),
+                lblNumeroPedido   = txtImpLblNumero.Text.Trim(),
+                lblColunaItem     = txtImpLblColItem.Text.Trim(),
+                lblColunaTotal    = txtImpLblColTotal.Text.Trim(),
+                lblSubtotal       = txtImpLblSubtotal.Text.Trim(),
+                lblTaxaEntrega    = txtImpLblTaxa.Text.Trim(),
+                lblTotalPagar     = txtImpLblTotalPagar.Text.Trim(),
+                lblAtendente      = txtImpLblAtendente.Text.Trim(),
+                larguraCaracteres = (int)numLargura.Value,
+                impressoraNome    = cmbImpressora.SelectedIndex <= 0 ? "" : cmbImpressora.SelectedItem.ToString()
+            };
+        }
+
+        private void BtnSalvarImpressao_Click(object sender, EventArgs e)
+        {
+            var cfg  = ObterConfiguracaoImpressao();
+            var erro = _impBLL.Salvar(cfg);
+            if (!string.IsNullOrEmpty(erro))
+                MessageBox.Show("Erro ao salvar: " + erro, "Erro", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            else
+                MessageBox.Show("Configuração de impressão salva!", "OK", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+
+        private void BtnImprimirTeste_Click(object sender, EventArgs e)
+        {
+            var cfg     = ObterConfiguracaoImpressao();
+            var empresa = _empBLL.Carregar();
+
+            // Pedido de teste ficticio
+            var pedTeste = new PedidoWeb
+            {
+                pediNumero            = "TESTE001",
+                pediNome_Cliente      = "Cliente Teste",
+                pediTelefone_Cliente  = "(11) 99999-9999",
+                pediTipo_Entrega      = 1,
+                pediEndereco_Entrega  = "Rua Exemplo, 100 - Centro",
+                pediSubtotal          = 32.90m,
+                pediTaxa_Entrega      = 5.00m,
+                pediValor_Total       = 37.90m,
+                pediObservacoes       = "Sem cebola",
+                pediData_Lancamento   = DateTime.Now,
+                pediForma_Pagamento   = 0
+            };
+            var itensTeste = new List<ItemPedidoWeb>
+            {
+                new ItemPedidoWeb
+                {
+                    itpwNome_Mercadoria = "Chesse Barbecue",
+                    itpwQtde            = 1,
+                    itpwPreco_Unitario  = 32.90m,
+                    itpwSubtotal        = 32.90m
+                }
+            };
+
+            var erro = ImpressaoPedido.Imprimir(pedTeste, itensTeste, cfg, empresa, "Atendente");
+            if (!string.IsNullOrEmpty(erro))
+                MessageBox.Show("Erro ao imprimir: " + erro, "Erro", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
     }
 }

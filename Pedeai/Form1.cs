@@ -14,6 +14,8 @@ namespace Pedeai
         private PedidoBLL        _pedidoBLL;
         private DashboardBLL     _dashBLL;
         private GastoMaterialBLL _gastosBLL;
+        private BLL.EmpresaBLL                   _empBLL;
+        private BLL.ConfiguracaoImpressaoBLL     _impBLL;
 
         private int  _paginaAtual = 0; // 0=Dashboard 1=Pedidos 2=Financeiro
 
@@ -30,6 +32,8 @@ namespace Pedeai
             _pedidoBLL = new PedidoBLL();
             _dashBLL   = new DashboardBLL();
             _gastosBLL = new GastoMaterialBLL();
+            _empBLL    = new BLL.EmpresaBLL();
+            _impBLL    = new BLL.ConfiguracaoImpressaoBLL();
             BuildDashboard();
             BuildPedidos();
             BuildFinanceiro();
@@ -988,7 +992,33 @@ namespace Pedeai
 
             var erro = _pedidoBLL.AtualizarSituacao(cod, novaSit);
             if (!string.IsNullOrEmpty(erro)) { MessageBox.Show("Erro: " + erro); return; }
+
+            // Ao confirmar (situação 1), imprimir duas vias do cupom
+            if (novaSit == 1)
+                ImprimirCupomPedido(cod);
+
             CarregarPedidos();
+        }
+
+        private void ImprimirCupomPedido(int codigoPedido)
+        {
+            try
+            {
+                var pedido  = _pedidoBLL.PesquisaCodigo(codigoPedido);
+                if (pedido == null) return;
+                var itens   = _pedidoBLL.ListarItensObjetos(codigoPedido);
+                var cfg     = _impBLL.Carregar();
+                var empresa = _empBLL.Carregar();
+                var erro    = BLL.ImpressaoPedido.Imprimir(pedido, itens, cfg, empresa, UsuarioSessao.NomeAtual);
+                if (!string.IsNullOrEmpty(erro))
+                    MessageBox.Show("Aviso: nao foi possivel imprimir o cupom.\n" + erro,
+                                    "Impressao", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Erro ao imprimir cupom: " + ex.Message,
+                                "Impressao", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
         }
 
         private bool MostrarDialogPagamento(PedidoWeb pedido, out decimal valorPago, out string transacao)
