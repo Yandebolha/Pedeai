@@ -78,6 +78,7 @@ namespace Pedeai.Forms
             grid.ColumnHeadersDefaultCellStyle.BackColor = Color.FromArgb(36, 48, 82);
             grid.ColumnHeadersDefaultCellStyle.ForeColor = Color.White;
             grid.DoubleClick += (_, __) => CarregarParaEditar();
+            grid.DataError += (_, e) => e.ThrowException = false;
 
             // ── Painel formulário ──────────────────────────────────────────
             pnlForm.Dock = DockStyle.Bottom; pnlForm.Height = 210;
