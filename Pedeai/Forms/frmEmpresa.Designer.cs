@@ -369,6 +369,34 @@ namespace Pedeai.Forms
             chkModCancelarPedidos.SetBounds(cbX0, uy + 3 * cbRowH, 200, 22);
             frmCard.Controls.Add(chkModCancelarPedidos);
 
+            // Privilegio extra: Entrada de Mercadorias
+            chkModEntradaMercadoria = new CheckBox
+            {
+                Text      = "Entrada Mercadorias",
+                ForeColor = cLbl,
+                BackColor = cCard,
+                Font      = fntLbl,
+                AutoSize  = false,
+                Width     = 200,
+                Height    = 22
+            };
+            chkModEntradaMercadoria.SetBounds(cbX0 + 210, uy + 3 * cbRowH, 200, 22);
+            frmCard.Controls.Add(chkModEntradaMercadoria);
+
+            // Privilegio extra: Avisos
+            chkModAvisos = new CheckBox
+            {
+                Text      = "Avisos",
+                ForeColor = cLbl,
+                BackColor = cCard,
+                Font      = fntLbl,
+                AutoSize  = false,
+                Width     = 200,
+                Height    = 22
+            };
+            chkModAvisos.SetBounds(cbX0 + 420, uy + 3 * cbRowH, 200, 22);
+            frmCard.Controls.Add(chkModAvisos);
+
             uy += 4 * cbRowH + 12;
 
             int bw = 128, bh = 32;
@@ -692,6 +720,8 @@ namespace Pedeai.Forms
         internal CheckBox chkModCupons;
         internal CheckBox chkModEmpresa;
         internal CheckBox chkModCancelarPedidos;
+        internal CheckBox chkModEntradaMercadoria;
+        internal CheckBox chkModAvisos;
 
         // ── Impressao fields ─────────────────────────────────────────────────
         internal TextBox        txtImpNomeEmpresa;

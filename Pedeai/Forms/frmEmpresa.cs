@@ -194,7 +194,9 @@ namespace Pedeai.Forms
             if (chkModFornecedores.Checked)     mods.Add("Fornecedores");
             if (chkModCupons.Checked)           mods.Add("Cupons");
             if (chkModEmpresa.Checked)          mods.Add("Empresa");
-            if (chkModCancelarPedidos.Checked)  mods.Add("CancelarPedidos");
+            if (chkModCancelarPedidos.Checked)   mods.Add("CancelarPedidos");
+            if (chkModEntradaMercadoria.Checked) mods.Add("EntradaMercadoria");
+            if (chkModAvisos.Checked)           mods.Add("Avisos");
             return string.Join(",", mods);
         }
 
@@ -213,7 +215,9 @@ namespace Pedeai.Forms
             chkModFornecedores.Checked     = tem("Fornecedores");
             chkModCupons.Checked           = tem("Cupons");
             chkModEmpresa.Checked          = tem("Empresa");
-            chkModCancelarPedidos.Checked  = tem("CancelarPedidos");
+            chkModCancelarPedidos.Checked   = tem("CancelarPedidos");
+            chkModEntradaMercadoria.Checked = tem("EntradaMercadoria");
+            chkModAvisos.Checked            = tem("Avisos");
         }
 
         private void LimparFormUsuario()

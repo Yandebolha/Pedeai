@@ -73,6 +73,12 @@ namespace Pedeai.BLL
         public System.Data.DataTable GetFinanceiro(DateTime de, DateTime ate)
             => _dal.GetFinanceiro(de, ate);
 
+        public System.Data.DataTable GetComprasPorDia(DateTime de, DateTime ate)
+            => _dal.GetComprasPorDia(de, ate);
+
+        public System.Data.DataTable GetMovimentacoesDia(DateTime dia)
+            => _dal.GetMovimentacoesDia(dia);
+
         public string InserirManual(PedidoWeb pedido, System.Collections.Generic.List<ItemPedidoWeb> itens)
         {
             if (string.IsNullOrWhiteSpace(pedido.pediNome_Cliente))

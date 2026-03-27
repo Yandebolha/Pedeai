@@ -121,6 +121,14 @@ namespace Pedeai.DAL
                           AND pediSituacao <> 6
                         GROUP BY DATE_FORMAT(pediData_Lancamento,'%Y-%m')
                         ORDER BY Periodo";
+            else if (periodo == "ano")
+                sql = @"SELECT DATE_FORMAT(pediData_Lancamento,'%Y-%m') AS Periodo,
+                        COALESCE(SUM(pediValor_Total),0) AS TotalVendas
+                        FROM pedido_web
+                        WHERE YEAR(pediData_Lancamento) = YEAR(CURDATE())
+                          AND pediSituacao <> 6
+                        GROUP BY DATE_FORMAT(pediData_Lancamento,'%Y-%m')
+                        ORDER BY Periodo";
             else // dia
                 sql = @"SELECT DATE_FORMAT(pediData_Lancamento,'%d/%m') AS Periodo,
                         COALESCE(SUM(pediValor_Total),0) AS TotalVendas

@@ -57,16 +57,11 @@ namespace Pedeai
             var btnSair = new Button
             {
                 Text = "Sair", Width = 72, Height = 30,
-                BackColor = Color.FromArgb(180, 50, 40), ForeColor = Color.White,
-                FlatStyle = FlatStyle.Flat, Font = new Font("Segoe UI", 9F, FontStyle.Bold), Cursor = Cursors.Hand
+                BackColor = Color.FromArgb(80, 40, 35), ForeColor = Color.FromArgb(200, 130, 120),
+                FlatStyle = FlatStyle.Flat, Font = new Font("Segoe UI", 9F), Cursor = Cursors.Hand,
+                Visible = false  // substituido pelo botao X no canto
             };
             btnSair.FlatAppearance.BorderSize = 0;
-            btnSair.Click += (_, __) =>
-            {
-                if (MessageBox.Show("Deseja fechar o sistema?", "Sair",
-                    MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
-                    Application.Exit();
-            };
             pnlTopBar.Controls.Add(btnSair);
 
             btnLogoff = new Button
@@ -77,32 +72,130 @@ namespace Pedeai
             };
             btnLogoff.FlatAppearance.BorderSize = 1;
             btnLogoff.FlatAppearance.BorderColor = Color.FromArgb(55, 75, 120);
-            btnLogoff.Click += BtnLogoff_Click;
             pnlTopBar.Controls.Add(btnLogoff);
+
+            // ── Botoes de janela (fechar / maximizar / minimizar) ─────────────
+            var btnClose = new Button
+            {
+                Text      = "✕",
+                Width     = 40, Height = 30,
+                BackColor = Color.FromArgb(192, 57, 43),
+                ForeColor = Color.White,
+                FlatStyle = FlatStyle.Flat,
+                Font      = new Font("Segoe UI", 10F, FontStyle.Bold),
+                Cursor    = Cursors.Hand
+            };
+            btnClose.FlatAppearance.BorderSize = 0;
+            btnClose.Click += (_, __) =>
+            {
+                if (MessageBox.Show("Deseja fechar o sistema?", "Sair",
+                    MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+                    Application.Exit();
+            };
+
+            var btnMaximize = new Button
+            {
+                Text      = "□",
+                Width     = 36, Height = 30,
+                BackColor = Color.FromArgb(52, 68, 105),
+                ForeColor = Color.White,
+                FlatStyle = FlatStyle.Flat,
+                Font      = new Font("Segoe UI", 10F),
+                Cursor    = Cursors.Hand
+            };
+            btnMaximize.FlatAppearance.BorderSize = 0;
+            btnMaximize.Click += (_, __) =>
+            {
+                WindowState = WindowState == FormWindowState.Maximized
+                    ? FormWindowState.Normal
+                    : FormWindowState.Maximized;
+            };
+
+            var btnMinimize = new Button
+            {
+                Text      = "─",
+                Width     = 36, Height = 30,
+                BackColor = Color.FromArgb(52, 68, 105),
+                ForeColor = Color.White,
+                FlatStyle = FlatStyle.Flat,
+                Font      = new Font("Segoe UI", 10F),
+                Cursor    = Cursors.Hand
+            };
+            btnMinimize.FlatAppearance.BorderSize = 0;
+            btnMinimize.Click += (_, __) => WindowState = FormWindowState.Minimized;
+
+            pnlTopBar.Controls.Add(btnClose);
+            pnlTopBar.Controls.Add(btnMaximize);
+            pnlTopBar.Controls.Add(btnMinimize);
+
+            // ── Logo centralizada no TopBar ───────────────────────────────
+            lblLogoTopBar = new Label
+            {
+                Text      = "🍕 PedeAi",
+                ForeColor = Color.White,
+                Font      = new Font("Segoe UI", 17F, FontStyle.Bold),
+                AutoSize  = true,
+                Top       = 11
+            };
+            pnlTopBar.Controls.Add(lblLogoTopBar);
 
             pnlTopBar.SizeChanged += (_, __) =>
             {
-                btnAtualizar.Left = pnlTopBar.Width - btnAtualizar.Width - 12;
+                // Botões janela — direita, sem gaps, estilo Windows
+                btnClose.Left    = pnlTopBar.Width - btnClose.Width;
+                btnMaximize.Left = btnClose.Left   - btnMaximize.Width - 1;
+                btnMinimize.Left = btnMaximize.Left- btnMinimize.Width - 1;
+                int btnTop = (pnlTopBar.Height - btnClose.Height) / 2;
+                btnClose.Top = btnMaximize.Top = btnMinimize.Top = btnTop;
+
+                // Botões de ação — à esquerda dos botões de janela
+                btnAtualizar.Left = btnMinimize.Left - btnAtualizar.Width - 16;
                 btnSair.Left      = btnAtualizar.Left - btnSair.Width - 6;
-                btnLogoff.Left    = btnSair.Left - btnLogoff.Width - 6;
-                btnAtualizar.Top  = btnSair.Top = btnLogoff.Top = 11;
+                btnLogoff.Left    = btnSair.Left      - btnLogoff.Width - 8;
+                int acTop = (pnlTopBar.Height - btnAtualizar.Height) / 2;
+                btnAtualizar.Top = btnSair.Top = btnLogoff.Top = acTop;
+
+                // Logo PedeAi — centralizada
+                lblLogoTopBar.Left = (pnlTopBar.Width - lblLogoTopBar.PreferredWidth) / 2;
+                lblLogoTopBar.Top  = (pnlTopBar.Height - lblLogoTopBar.PreferredHeight) / 2;
+
+                // Título da página — alinhado à esquerda (respeita sidebar)
+                lblTitulo.Left = 16;
+                lblTitulo.Top  = (pnlTopBar.Height - lblTitulo.PreferredHeight) / 2;
             };
+
+            // Arrastar janela pelo top bar
+            bool _dragging = false;
+            System.Drawing.Point _dragStart = System.Drawing.Point.Empty;
+            MouseEventHandler mdHandler = (s, me) => { if (me.Button == MouseButtons.Left) { _dragging = true; _dragStart = System.Windows.Forms.Cursor.Position; } };
+            MouseEventHandler mmHandler = (s, me) =>
+            {
+                if (_dragging && WindowState == FormWindowState.Normal)
+                {
+                    var delta = new System.Drawing.Point(System.Windows.Forms.Cursor.Position.X - _dragStart.X, System.Windows.Forms.Cursor.Position.Y - _dragStart.Y);
+                    Location  = new System.Drawing.Point(Location.X + delta.X, Location.Y + delta.Y);
+                    _dragStart = System.Windows.Forms.Cursor.Position;
+                }
+            };
+            MouseEventHandler muHandler = (s, me) => { _dragging = false; };
+            pnlTopBar.MouseDown += mdHandler;
+            pnlTopBar.MouseMove += mmHandler;
+            pnlTopBar.MouseUp   += muHandler;
+            lblTitulo.MouseDown    += mdHandler;
+            lblTitulo.MouseMove    += mmHandler;
+            lblTitulo.MouseUp      += muHandler;
+            lblLogoTopBar.MouseDown += mdHandler;
+            lblLogoTopBar.MouseMove += mmHandler;
+            lblLogoTopBar.MouseUp   += muHandler;
 
             // ── Sidebar ──────────────────────────────────────────────────
             pnlSidebar.Dock = DockStyle.Left; pnlSidebar.Width = 210;
             pnlSidebar.BackColor = Color.FromArgb(28, 37, 65);
 
-            var lblLogo = new Label
-            {
-                Text = "🍕 Pedeai", ForeColor = Color.White,
-                Font = new Font("Segoe UI", 15F, FontStyle.Bold),
-                AutoSize = false, Width = 210, Height = 52, TextAlign = ContentAlignment.MiddleCenter,
-                Top = 0, Left = 0
-            };
-            pnlSidebar.Controls.Add(lblLogo);
-            pnlSidebar.Controls.Add(new Panel { Left = 16, Top = 56, Width = 178, Height = 1, BackColor = Color.FromArgb(60, 70, 110) });
+            // Linha colorida no topo da sidebar
+            pnlSidebar.Controls.Add(new Panel { Left = 0, Top = 0, Width = 210, Height = 4, BackColor = Color.FromArgb(52, 152, 219) });
 
-            int navY = 68;
+            int navY = 8;
             void NavSe(string modulo, string texto, Action acao)
             {
                 if (!UsuarioSessao.TemModulo(modulo)) return;
@@ -158,8 +251,7 @@ namespace Pedeai
             ClientSize = new Size(1264, 741);
             Font = new Font("Segoe UI", 9F);
             MinimumSize = new Size(1024, 680);
-            StartPosition = FormStartPosition.CenterScreen;
-            Text = "Pedeai — Painel de Controle";
+            StartPosition = FormStartPosition.CenterScreen;            FormBorderStyle = FormBorderStyle.None;            Text = "PedeAi — Painel de Controle";
 
             Load += (_, __) => { CarregarTudo(); NavIniciarPrimeiro(); _timer.Start(); };
         }
@@ -175,6 +267,7 @@ namespace Pedeai
         private Panel      pnlPedidos;
         private Panel      pnlFinanceiro;
         private Label      lblTitulo;
+        private Label      lblLogoTopBar;
         private Label      lblPedidosHoje;
         private Label      lblFaturamento;
         private Label      lblClientes;

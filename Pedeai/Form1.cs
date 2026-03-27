@@ -67,11 +67,12 @@ namespace Pedeai
         private Panel           _pnlChartCanal;
         private Panel           _pnlChartProdutos;
         private Panel           _pnlChartDias;
-        private DateTimePicker  _dtpDiasDe,   _dtpDiasAte;
         private string          _periodoCanal  = "dia";
         private string          _periodoProd   = "dia";
+        private string          _periodoDias   = "dia";
         private Button[]        _btnsPeriodo;
         private Button[]        _btnsProdPeriodo;
+        private Button[]        _btnsDiasPeriodo;
         private (string label, float value)[] _dadosCanal    = Array.Empty<(string, float)>();
         private (string label, float value)[] _dadosProdutos = Array.Empty<(string, float)>();
         private (string label, float value)[] _dadosDias     = Array.Empty<(string, float)>();
@@ -132,11 +133,11 @@ namespace Pedeai
             tbl.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 33.4f));
             tbl.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 33.3f));
 
-            // Gráfico 1: Vendas por Canal  (Diário / Semanal / Mensal)
+            // Gráfico 1: Vendas por Canal  (Diário / Semanal / Mensal / Anual)
             var outerC = MkOuter();
             var filtC  = new Panel { Dock = DockStyle.Top, Height = 34, BackColor = Color.FromArgb(22, 30, 55) };
-            var periodos = new[] { ("Diário", "dia"), ("Semanal", "semana"), ("Mensal", "mes") };
-            _btnsPeriodo = new Button[3];
+            var periodos = new[] { ("Diário", "dia"), ("Semanal", "semana"), ("Mensal", "mes"), ("Anual", "ano") };
+            _btnsPeriodo = new Button[4];
             for (int pi = 0; pi < periodos.Length; pi++)
             {
                 int idx = pi; string per = periodos[pi].Item2;
@@ -206,11 +207,38 @@ namespace Pedeai
             outerP.Controls.Add(_pnlChartProdutos); outerP.Controls.Add(filtP);
             outerP.Controls.Add(new Panel { Height = 4, Dock = DockStyle.Top, BackColor = Color.FromArgb(142, 68, 173) });
 
-            // Gráfico 3: Receita por Dia
-            var outerD = MkOuter(); var filtD = MkFiltro();
-            _dtpDiasDe  = MkDtp(38, DateTime.Today.AddDays(-30));
-            _dtpDiasAte = MkDtp(175, DateTime.Today);
-            filtD.Controls.AddRange(new Control[] { MkLbl("De:", 4), _dtpDiasDe, MkLbl("até:", 150), _dtpDiasAte, MkBtn(288, CarregarChartDias) });
+            // Gráfico 3: Receita por Dia (Diário / Semanal / Mensal / Anual)
+            var outerD = MkOuter();
+            var filtD  = new Panel { Dock = DockStyle.Top, Height = 34, BackColor = Color.FromArgb(22, 30, 55) };
+            var periodosDias = new[] { ("Diário", "dia"), ("Semanal", "semana"), ("Mensal", "mes"), ("Anual", "ano") };
+            _btnsDiasPeriodo = new Button[4];
+            for (int pi = 0; pi < periodosDias.Length; pi++)
+            {
+                int idx = pi; string per = periodosDias[pi].Item2;
+                var bp = new Button
+                {
+                    Text      = periodosDias[pi].Item1,
+                    Left      = 4 + idx * 76,
+                    Top       = 5,
+                    Width     = 70,
+                    Height    = 24,
+                    BackColor = idx == 0 ? CorBotaoAtivo : Color.FromArgb(40, 55, 95),
+                    ForeColor = Color.White,
+                    FlatStyle = FlatStyle.Flat,
+                    Cursor    = Cursors.Hand,
+                    Font      = new Font("Segoe UI", 8f)
+                };
+                bp.FlatAppearance.BorderSize = 0;
+                bp.Click += (_, __) =>
+                {
+                    _periodoDias = per;
+                    foreach (var b in _btnsDiasPeriodo) b.BackColor = Color.FromArgb(40, 55, 95);
+                    bp.BackColor = CorBotaoAtivo;
+                    CarregarChartDias();
+                };
+                _btnsDiasPeriodo[pi] = bp;
+                filtD.Controls.Add(bp);
+            }
             _pnlChartDias = new Panel { Dock = DockStyle.Fill, BackColor = Color.FromArgb(13, 24, 46), Tag = "Receita por Dia" };
             _pnlChartDias.Paint += (s, e) => DesenharBarrasVerticais(e.Graphics, (Panel)s, _dadosDias, Color.FromArgb(245, 175, 35));
             outerD.Controls.Add(_pnlChartDias); outerD.Controls.Add(filtD);
@@ -520,9 +548,8 @@ namespace Pedeai
             if (_pnlChartDias == null) return;
             try
             {
-                var de  = _dtpDiasDe?.Value.Date  ?? DateTime.Today.AddDays(-30);
-                var ate = _dtpDiasAte?.Value.Date ?? DateTime.Today;
-                _dadosDias = DataTableParaChart(_dashBLL.GetVendasPorDia(de, ate), "Dia", "TotalVendas", isDate: true);
+                _dadosDias = DataTableParaChart(
+                    _dashBLL.GetVendasPorPeriodo(_periodoDias), "Periodo", "TotalVendas");
                 _pnlChartDias.Invalidate();
             }
             catch { }
@@ -1056,6 +1083,22 @@ namespace Pedeai
             {
                 valorPago = numV.Value;
                 transacao  = txtT.Text.Trim();
+
+                // Desconto detectado: requer autorização de usuário com permissão
+                if (valorPago < pedido.pediValor_Total)
+                {
+                    decimal desconto = pedido.pediValor_Total - valorPago;
+                    MessageBox.Show(
+                        $"Valor pago (R$ {valorPago:N2}) é menor que o total (R$ {pedido.pediValor_Total:N2}).\n" +
+                        $"Desconto de R$ {desconto:N2} requer autorização.",
+                        "Autorização Necessária",
+                        MessageBoxButtons.OK, MessageBoxIcon.Warning);
+
+                    using var dlgAuth = new Forms.frmAutorizacao();
+                    if (dlgAuth.ShowDialog(this) != DialogResult.OK)
+                        return false; // autorização negada ou cancelada
+                }
+
                 return true;
             }
             return false;
@@ -1107,8 +1150,9 @@ namespace Pedeai
             // ── Grid principal (receitas do dia) ──
             gridFinanceiro = CriarGrid();
             gridFinanceiro.Dock = DockStyle.Fill;
-            // Suprime erro de conversao de cultura (grid e somente leitura)
             gridFinanceiro.DataError += (_, e2) => e2.ThrowException = false;
+            gridFinanceiro.Cursor = Cursors.Hand;
+            gridFinanceiro.CellDoubleClick += FinanceiroDia_DblClick;
 
             // ── Rodapé: Gastos de Material / Insumos ──
             var pnlGastos = new Panel { Dock = DockStyle.Bottom, Height = 210, BackColor = Color.FromArgb(22, 30, 55) };
@@ -1208,7 +1252,7 @@ namespace Pedeai
                 gridFinanceiro.DataSource = dt;
                 ConfigurarColunasFinanceiro();
 
-                // ── Totais ──
+                // ── Totais de vendas ──
                 decimal pedidos = 0, taxaEnt = 0, totalBruto = 0, custoMerc = 0;
                 foreach (DataRow r in dt.Rows)
                 {
@@ -1218,25 +1262,41 @@ namespace Pedeai
                     totalBruto += V("TotalBruto");
                     custoMerc  += V("CustoMercadorias");
                 }
-                decimal fatLiquido = totalBruto - custoMerc;
 
-                // ── 4 cards ──
-                _pnlFinCards.Controls.Clear();
-                CriarCardFin("Total de Pedidos",    pedidos.ToString("N0"),   Color.FromArgb(41, 128, 185));
-                CriarCardFin("Taxa de Entrega",     taxaEnt.ToString("C"),    Color.FromArgb(22, 160, 133));
-                CriarCardFin("Faturamento Bruto",   totalBruto.ToString("C"), Color.FromArgb(39, 174, 96));
-                CriarCardFin("Faturamento Líquido", fatLiquido.ToString("C"),
-                    fatLiquido >= 0 ? Color.FromArgb(52, 152, 219) : Color.FromArgb(192, 57, 43));
+                // ── Totais de compras (entradas de mercadoria) ──
+                var dtCompras = _pedidoBLL.GetComprasPorDia(de, ate);
+                decimal totalCompras = 0;
+                foreach (DataRow r in dtCompras.Rows)
+                    if (r["TotalCompras"] != DBNull.Value) totalCompras += Convert.ToDecimal(r["TotalCompras"]);
+
+                decimal fatLiquido = totalBruto - custoMerc;
+                decimal lucroReal  = totalBruto - totalCompras;
+                decimal saidas     = custoMerc + totalCompras;
 
                 // ── Gastos material ──
-                _gridGastos.DataSource = _gastosBLL.Listar(de, ate);
                 decimal gastosMaterial = _gastosBLL.TotalPeriodo(de, ate);
+                decimal lucroFinal     = totalBruto - totalCompras - gastosMaterial;
+
+                // ── 6 cards ──
+                _pnlFinCards.Controls.Clear();
+                CriarCardFin("Total de Pedidos",    pedidos.ToString("N0"),    Color.FromArgb(41,  128, 185));
+                CriarCardFin("Entradas (Vendas)",   totalBruto.ToString("C"),  Color.FromArgb(39,  174,  96));
+                CriarCardFin("Compras/Entradas",    totalCompras.ToString("C"),Color.FromArgb(192,  57,  43));
+                CriarCardFin("Gastos Material",     gastosMaterial.ToString("C"), Color.FromArgb(165, 105, 18));
+                CriarCardFin("Taxa de Entrega",     taxaEnt.ToString("C"),     Color.FromArgb(22,  160, 133));
+                CriarCardFin("Lucro Estimado",      lucroFinal.ToString("C"),
+                    lucroFinal >= 0 ? Color.FromArgb(52, 152, 219) : Color.FromArgb(192, 57, 43));
+
+                // ── Gastos material grid ──
+                _gridGastos.DataSource = _gastosBLL.Listar(de, ate);
 
                 lblFinResumo.Text =
                     $"Período: {de:dd/MM/yyyy} a {ate:dd/MM/yyyy}  |  " +
-                    $"Fat. Bruto: {totalBruto:C}  |  " +
-                    $"Fat. Líquido: {fatLiquido:C}  |  " +
-                    $"Gastos material: {gastosMaterial:C}";
+                    $"Entradas: {totalBruto:C}  |  " +
+                    $"Compras: {totalCompras:C}  |  " +
+                    $"Gastos: {gastosMaterial:C}  |  " +
+                    $"Lucro estimado: {lucroFinal:C}  |  " +
+                    $"Fat. Líquido (- custo merc.): {fatLiquido:C}";
             }
             catch (Exception ex) { MessageBox.Show("Erro ao carregar financeiro: " + ex.Message); }
         }
@@ -1264,6 +1324,23 @@ namespace Pedeai
                     gridFinanceiro.Columns[kv.Key].HeaderText = kv.Value;
         }
 
+        private void FinanceiroDia_DblClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex < 0) return;
+            var row = gridFinanceiro.Rows[e.RowIndex];
+            if (row.DataBoundItem == null) return;
+            var drv = (System.Data.DataRowView)row.DataBoundItem;
+            if (drv.Row["Dia"] == DBNull.Value) return;
+            var dia = Convert.ToDateTime(drv.Row["Dia"]);
+            try
+            {
+                var dt = _pedidoBLL.GetMovimentacoesDia(dia);
+                using var frm = new Forms.frmMovimentacoesDia(dia, dt);
+                frm.ShowDialog(this);
+            }
+            catch (Exception ex) { MessageBox.Show("Erro: " + ex.Message); }
+        }
+
         // -- Autenticação ---------------------------------------------------- 
         private void BtnLogoff_Click(object sender, EventArgs e)
         {
@@ -1274,11 +1351,11 @@ namespace Pedeai
         // Reconstroi os botoes do sidebar conforme permissoes da sessao atual
         public void ReconstruirSidebar()
         {
-            // Manter apenas os 2 primeiros controles (logo + separador)
-            while (pnlSidebar.Controls.Count > 2)
-                pnlSidebar.Controls.RemoveAt(2);
+            // Manter apenas o primeiro controle (accent bar)
+            while (pnlSidebar.Controls.Count > 1)
+                pnlSidebar.Controls.RemoveAt(1);
 
-            int navY = 68;
+            int navY = 8;
             void NavSe(string modulo, string texto, Action acao)
             {
                 if (!UsuarioSessao.TemModulo(modulo)) return;
@@ -1291,9 +1368,11 @@ namespace Pedeai
             NavSe("Produtos",     "\U0001F6D2  Produtos",     () => AbrirForm(new frmCadastroProduto()));
             NavSe("Categorias",   "\U0001F5C2  Categorias",   () => AbrirForm(new frmCadastroCategoria()));
             NavSe("Clientes",     "\U0001F464  Clientes",     () => AbrirForm(new frmCadastroCliente()));
-            NavSe("Fornecedores", "\U0001F3ED  Fornecedores", () => AbrirForm(new frmCadastroFornecedor()));
-            NavSe("Cupons",       "\U0001F3F7  Cupons",       () => AbrirForm(new frmCadastroCupom()));
-            NavSe("Empresa",      "\U0001F3E2  Empresa",      MostrarEmpresa);
+            NavSe("Fornecedores",    "\U0001F3ED  Fornecedores",    () => AbrirForm(new frmCadastroFornecedor()));
+            NavSe("Cupons",          "\U0001F3F7  Cupons",          () => AbrirForm(new frmCadastroCupom()));
+            NavSe("EntradaMercadoria", "\U0001F4E6  Entrada Mercad.", () => AbrirForm(new frmEntradaMercadoria()));
+            NavSe("Avisos",           "\U0001F514  Avisos",          () => AbrirForm(new frmAvisos()));
+            NavSe("Empresa",         "\U0001F3E2  Empresa",         MostrarEmpresa);
         }
 
         private void NavIniciarPrimeiro()

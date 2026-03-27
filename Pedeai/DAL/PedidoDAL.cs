@@ -326,6 +326,68 @@ namespace Pedeai.DAL
             return dt;
         }
 
+        /// <summary>Retorna total de compras (entradas de mercadoria) por dia no período.</summary>
+        public DataTable GetComprasPorDia(DateTime de, DateTime ate)
+        {
+            var dt = new DataTable();
+            using var conn = AbrirConexao();
+            var sql = @"SELECT
+                DATE(e.entData)       AS Dia,
+                COUNT(*)              AS NumEntradas,
+                SUM(e.entValorTotal)  AS TotalCompras
+              FROM entrada_mercadoria e
+              WHERE DATE(e.entData) BETWEEN @de AND @ate
+                AND e.Situacao = 'A'
+              GROUP BY DATE(e.entData)
+              ORDER BY Dia DESC";
+            using var cmd = new MySqlCommand(sql, conn);
+            cmd.Parameters.AddWithValue("@de",  de.Date);
+            cmd.Parameters.AddWithValue("@ate", ate.Date);
+            new MySqlDataAdapter(cmd).Fill(dt);
+            return dt;
+        }
+
+        /// <summary>Retorna detalhe de movimentações de um dia (vendas + compras).</summary>
+        public DataTable GetMovimentacoesDia(DateTime dia)
+        {
+            var dt = new DataTable();
+            using var conn = AbrirConexao();
+            var sql = @"
+                SELECT
+                    p.pediData_Lancamento   AS Horario,
+                    'Venda'                 AS Tipo,
+                    p.pediNumero            AS Referencia,
+                    p.pediNome_Cliente      AS Descricao,
+                    p.pediValor_Total       AS Valor,
+                    CASE p.pediForma_Pagamento
+                        WHEN 0 THEN 'Dinheiro' WHEN 1 THEN 'Cartão' WHEN 2 THEN 'Pix'
+                        ELSE 'Outro' END     AS Pagamento,
+                    CASE p.pediSituacao
+                        WHEN 0 THEN 'Pendente' WHEN 1 THEN 'Confirmado' WHEN 2 THEN 'Em Preparo'
+                        WHEN 3 THEN 'Pronto'   WHEN 4 THEN 'Entregue'   WHEN 6 THEN 'Cancelado'
+                        ELSE CAST(p.pediSituacao AS CHAR) END AS Status
+                FROM pedido_web p
+                WHERE DATE(p.pediData_Lancamento) = @dia
+                  AND p.pediSituacao NOT IN (6)
+                UNION ALL
+                SELECT
+                    e.entData_Lancamento    AS Horario,
+                    'Compra'                AS Tipo,
+                    CONCAT('#', e.Codigo)  AS Referencia,
+                    CONCAT('Entrada - ', e.entNome_Fornecedor) AS Descricao,
+                    -e.entValorTotal        AS Valor,
+                    ''                      AS Pagamento,
+                    'Lançado'               AS Status
+                FROM entrada_mercadoria e
+                WHERE DATE(e.entData) = @dia
+                  AND e.Situacao = 'A'
+                ORDER BY Horario ASC";
+            using var cmd = new MySqlCommand(sql, conn);
+            cmd.Parameters.AddWithValue("@dia", dia.Date);
+            new MySqlDataAdapter(cmd).Fill(dt);
+            return dt;
+        }
+
         private static PedidoWeb MapearPedido(MySqlDataReader r)
         {
             return new PedidoWeb

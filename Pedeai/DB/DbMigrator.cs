@@ -133,6 +133,49 @@ namespace Pedeai.DB
                     INSERT IGNORE INTO config_impressao (Codigo)
                     VALUES (1)");
 
+                // ── 8. Tabela: entrada_mercadoria ─────────────────────────────
+                Exec(conn, @"
+                    CREATE TABLE IF NOT EXISTS entrada_mercadoria (
+                        auxCodigo           INT           NOT NULL DEFAULT 1,
+                        Codigo              INT           NOT NULL AUTO_INCREMENT PRIMARY KEY,
+                        Codigo_Fornecedor   INT           NULL,
+                        entNome_Fornecedor  VARCHAR(150)  NOT NULL DEFAULT '',
+                        entData             DATE          NOT NULL,
+                        entNumeroDoc        VARCHAR(50)   NOT NULL DEFAULT '',
+                        entObservacoes      VARCHAR(500)  NOT NULL DEFAULT '',
+                        entValorTotal       DECIMAL(12,2) NOT NULL DEFAULT 0.00,
+                        Situacao            CHAR(1)       NOT NULL DEFAULT 'A',
+                        Info                VARCHAR(255)  NOT NULL DEFAULT '',
+                        entData_Lancamento  DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP
+                    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+
+                Exec(conn, @"
+                    CREATE TABLE IF NOT EXISTS item_entrada_mercadoria (
+                        auxCodigo           INT           NOT NULL DEFAULT 1,
+                        Codigo              INT           NOT NULL AUTO_INCREMENT PRIMARY KEY,
+                        Codigo_Entrada      INT           NOT NULL,
+                        Codigo_Mercadoria   INT           NOT NULL DEFAULT 0,
+                        itmNome_Mercadoria  VARCHAR(150)  NOT NULL DEFAULT '',
+                        itmQtde             DECIMAL(12,4) NOT NULL DEFAULT 0,
+                        itmPreco_Custo      DECIMAL(12,4) NOT NULL DEFAULT 0,
+                        itmSubtotal         DECIMAL(12,2) NOT NULL DEFAULT 0,
+                        itmAtualizar_Custo  TINYINT(1)    NOT NULL DEFAULT 1,
+                        Situacao            CHAR(1)       NOT NULL DEFAULT 'A'
+                    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+
+                Exec(conn, @"
+                    CREATE TABLE IF NOT EXISTS parcela_entrada_mercadoria (
+                        auxCodigo       INT           NOT NULL DEFAULT 1,
+                        Codigo          INT           NOT NULL AUTO_INCREMENT PRIMARY KEY,
+                        Codigo_Entrada  INT           NOT NULL,
+                        parNumero       TINYINT       NOT NULL DEFAULT 1,
+                        parVencimento   DATE          NOT NULL,
+                        parValor        DECIMAL(12,2) NOT NULL DEFAULT 0,
+                        parObservacao   VARCHAR(250)  NOT NULL DEFAULT '',
+                        Situacao        CHAR(1)       NOT NULL DEFAULT 'A',
+                        parData_Pagamento DATE        NULL
+                    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+
                 return true;
             }
             catch (Exception ex)
