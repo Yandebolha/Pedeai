@@ -117,7 +117,7 @@ namespace Pedeai.DB
                         cabCNPJ             VARCHAR(30)   NOT NULL DEFAULT '',
                         separador           VARCHAR(5)    NOT NULL DEFAULT '-',
                         rodapeAvisoFiscal   VARCHAR(100)  NOT NULL DEFAULT '*** NAO E DOCUMENTO FISCAL ***',
-                        rodapeTextoLivre    TEXT          NOT NULL DEFAULT '',
+                        rodapeTextoLivre    TEXT          NOT NULL,
                         lblNumeroPedido     VARCHAR(50)   NOT NULL DEFAULT 'Pedido N.:',
                         lblColunaItem       VARCHAR(50)   NOT NULL DEFAULT 'ITEM (V.Unit)',
                         lblColunaTotal      VARCHAR(30)   NOT NULL DEFAULT 'Total',
