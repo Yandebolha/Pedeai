@@ -299,13 +299,15 @@ namespace Pedeai.DAL
                 SUM(CASE WHEN p.pediForma_Pagamento=0 THEN p.pediValor_Total ELSE 0 END) AS Dinheiro,
                 SUM(CASE WHEN p.pediForma_Pagamento=1 THEN p.pediValor_Total ELSE 0 END) AS Cartao,
                 SUM(CASE WHEN p.pediForma_Pagamento=2 THEN p.pediValor_Total ELSE 0 END) AS Pix,
-                COALESCE((
-                    SELECT SUM(i.itpwQtde * COALESCE(m.mercPreco_Custo, 0))
-                    FROM itens_pedido_web i
-                    LEFT JOIN mercadoria m ON m.Codigo = i.Codigo_Mercadoria
-                    WHERE i.Codigo_Pedido = p.Codigo
-                ), 0) AS CustoMercadorias
+                COALESCE(SUM(custo.CustoMerc), 0)   AS CustoMercadorias
               FROM pedido_web p
+              LEFT JOIN (
+                  SELECT i.Codigo_Pedido,
+                         SUM(i.itpwQtde * COALESCE(m.mercPreco_Custo, 0)) AS CustoMerc
+                  FROM itens_pedido_web i
+                  LEFT JOIN mercadoria m ON m.Codigo = i.Codigo_Mercadoria
+                  GROUP BY i.Codigo_Pedido
+              ) custo ON custo.Codigo_Pedido = p.Codigo
               WHERE DATE(p.pediData_Lancamento) BETWEEN @de AND @ate
                 AND p.pediSituacao NOT IN (6)
               GROUP BY DATE(p.pediData_Lancamento)

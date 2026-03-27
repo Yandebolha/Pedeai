@@ -1107,6 +1107,8 @@ namespace Pedeai
             // ── Grid principal (receitas do dia) ──
             gridFinanceiro = CriarGrid();
             gridFinanceiro.Dock = DockStyle.Fill;
+            // Suprime erro de conversao de cultura (grid e somente leitura)
+            gridFinanceiro.DataError += (_, e2) => e2.ThrowException = false;
 
             // ── Rodapé: Gastos de Material / Insumos ──
             var pnlGastos = new Panel { Dock = DockStyle.Bottom, Height = 210, BackColor = Color.FromArgb(22, 30, 55) };
