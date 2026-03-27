@@ -916,7 +916,7 @@ namespace Pedeai
             {
                 // Confirmado ou superior requer autorizacao gerencial
                 bool precisaAuth = PedidoBLL.CancelamentoRequerAutorizacao(pedido.pediSituacao);
-                if (precisaAuth && !UsuarioSessao.TemNivel(2))
+                if (precisaAuth && !UsuarioSessao.TemNivel(2) && !UsuarioSessao.TemModulo("CancelarPedidos"))
                 {
                     // Solicita credenciais de gerente
                     using var dlgAuth = new Forms.frmAutorizacao();

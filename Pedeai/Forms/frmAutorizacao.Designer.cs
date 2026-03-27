@@ -22,7 +22,7 @@ namespace Pedeai.Forms
             this.BackColor       = Color.FromArgb(28, 37, 65);
             this.ForeColor       = Color.White;
             this.Font            = new Font("Segoe UI", 10F);
-            this.ClientSize      = new Size(380, 240);
+            this.ClientSize      = new Size(380, 276);
 
             var lblTitulo = new Label
             {
@@ -36,7 +36,7 @@ namespace Pedeai.Forms
 
             var lblSub = new Label
             {
-                Text      = "Informe as credenciais de um Gerente ou Admin:",
+                Text      = "Informe as credenciais de um usuario autorizado:",
                 ForeColor = Color.FromArgb(180, 190, 220),
                 AutoSize  = false,
                 TextAlign = System.Drawing.ContentAlignment.MiddleCenter,
@@ -51,11 +51,21 @@ namespace Pedeai.Forms
                 ForeColor   = Color.White,
                 BorderStyle = BorderStyle.FixedSingle
             };
+            txtLogin.Leave   += TxtLogin_Leave;
+            txtLogin.KeyDown += TxtLogin_KeyDown;
 
-            var lblSenha = new Label { Text = "Senha:", ForeColor = Color.FromArgb(180, 190, 220), Bounds = new System.Drawing.Rectangle(40, 134, 60, 22) };
+            lblNomeUsuario = new Label
+            {
+                Text      = "",
+                ForeColor = Color.FromArgb(39, 174, 96),
+                AutoSize  = false,
+                Bounds    = new System.Drawing.Rectangle(40, 128, 300, 18)
+            };
+
+            var lblSenha = new Label { Text = "Senha:", ForeColor = Color.FromArgb(180, 190, 220), Bounds = new System.Drawing.Rectangle(40, 150, 60, 22) };
             txtSenha = new TextBox
             {
-                Bounds        = new System.Drawing.Rectangle(40, 156, 300, 28),
+                Bounds        = new System.Drawing.Rectangle(40, 172, 300, 28),
                 BackColor     = Color.FromArgb(15, 22, 45),
                 ForeColor     = Color.White,
                 BorderStyle   = BorderStyle.FixedSingle,
@@ -69,13 +79,13 @@ namespace Pedeai.Forms
                 ForeColor = Color.FromArgb(231, 76, 60),
                 AutoSize  = false,
                 TextAlign = System.Drawing.ContentAlignment.MiddleCenter,
-                Bounds    = new System.Drawing.Rectangle(40, 190, 220, 22)
+                Bounds    = new System.Drawing.Rectangle(40, 204, 300, 20)
             };
 
             btnOk = new Button
             {
                 Text      = "\u2714 Autorizar",
-                Bounds    = new System.Drawing.Rectangle(40, 190, 140, 30),
+                Bounds    = new System.Drawing.Rectangle(40, 232, 140, 30),
                 BackColor = Color.FromArgb(39, 174, 96),
                 ForeColor = Color.White,
                 FlatStyle = FlatStyle.Flat,
@@ -87,7 +97,7 @@ namespace Pedeai.Forms
             btnCancel = new Button
             {
                 Text         = "Cancelar",
-                Bounds       = new System.Drawing.Rectangle(200, 190, 140, 30),
+                Bounds       = new System.Drawing.Rectangle(200, 232, 140, 30),
                 BackColor    = Color.FromArgb(108, 117, 125),
                 ForeColor    = Color.White,
                 FlatStyle    = FlatStyle.Flat,
@@ -99,17 +109,13 @@ namespace Pedeai.Forms
             this.AcceptButton = btnOk;
             this.CancelButton = btnCancel;
 
-            // msg label is above buttons — adjust layout so they don't overlap
-            lblMsg.Bounds    = new System.Drawing.Rectangle(40, 164, 300, 20);
-            btnOk.Bounds     = new System.Drawing.Rectangle(40, 196, 140, 30);
-            btnCancel.Bounds = new System.Drawing.Rectangle(200, 196, 140, 30);
-
             this.Controls.AddRange(new System.Windows.Forms.Control[]
-                { lblTitulo, lblSub, lblLogin, txtLogin, lblSenha, txtSenha, lblMsg, btnOk, btnCancel });
+                { lblTitulo, lblSub, lblLogin, txtLogin, lblNomeUsuario, lblSenha, txtSenha, lblMsg, btnOk, btnCancel });
         }
 
         internal TextBox  txtLogin;
         internal TextBox  txtSenha;
+        internal Label    lblNomeUsuario;
         internal Label    lblMsg;
         internal Button   btnOk;
         internal Button   btnCancel;

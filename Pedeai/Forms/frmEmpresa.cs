@@ -175,15 +175,16 @@ namespace Pedeai.Forms
         private string construirPermissoes()
         {
             var mods = new System.Collections.Generic.List<string>();
-            if (chkModDashboard.Checked)    mods.Add("Dashboard");
-            if (chkModPedidos.Checked)      mods.Add("Pedidos");
-            if (chkModFinanceiro.Checked)   mods.Add("Financeiro");
-            if (chkModProdutos.Checked)     mods.Add("Produtos");
-            if (chkModCategorias.Checked)   mods.Add("Categorias");
-            if (chkModClientes.Checked)     mods.Add("Clientes");
-            if (chkModFornecedores.Checked) mods.Add("Fornecedores");
-            if (chkModCupons.Checked)       mods.Add("Cupons");
-            if (chkModEmpresa.Checked)      mods.Add("Empresa");
+            if (chkModDashboard.Checked)       mods.Add("Dashboard");
+            if (chkModPedidos.Checked)          mods.Add("Pedidos");
+            if (chkModFinanceiro.Checked)       mods.Add("Financeiro");
+            if (chkModProdutos.Checked)         mods.Add("Produtos");
+            if (chkModCategorias.Checked)       mods.Add("Categorias");
+            if (chkModClientes.Checked)         mods.Add("Clientes");
+            if (chkModFornecedores.Checked)     mods.Add("Fornecedores");
+            if (chkModCupons.Checked)           mods.Add("Cupons");
+            if (chkModEmpresa.Checked)          mods.Add("Empresa");
+            if (chkModCancelarPedidos.Checked)  mods.Add("CancelarPedidos");
             return string.Join(",", mods);
         }
 
@@ -193,15 +194,16 @@ namespace Pedeai.Forms
             bool adminSemInfo = (_usuarioEditando?.usuNivel >= 9) && string.IsNullOrWhiteSpace(info);
             var ativos = (info ?? "").Split(new[] { ',' }, System.StringSplitOptions.RemoveEmptyEntries);
             bool tem(string m) => adminSemInfo || System.Array.Exists(ativos, x => x.Trim().Equals(m, System.StringComparison.OrdinalIgnoreCase));
-            chkModDashboard.Checked    = tem("Dashboard");
-            chkModPedidos.Checked      = tem("Pedidos");
-            chkModFinanceiro.Checked   = tem("Financeiro");
-            chkModProdutos.Checked     = tem("Produtos");
-            chkModCategorias.Checked   = tem("Categorias");
-            chkModClientes.Checked     = tem("Clientes");
-            chkModFornecedores.Checked = tem("Fornecedores");
-            chkModCupons.Checked       = tem("Cupons");
-            chkModEmpresa.Checked      = tem("Empresa");
+            chkModDashboard.Checked       = tem("Dashboard");
+            chkModPedidos.Checked          = tem("Pedidos");
+            chkModFinanceiro.Checked       = tem("Financeiro");
+            chkModProdutos.Checked         = tem("Produtos");
+            chkModCategorias.Checked       = tem("Categorias");
+            chkModClientes.Checked         = tem("Clientes");
+            chkModFornecedores.Checked     = tem("Fornecedores");
+            chkModCupons.Checked           = tem("Cupons");
+            chkModEmpresa.Checked          = tem("Empresa");
+            chkModCancelarPedidos.Checked  = tem("CancelarPedidos");
         }
 
         private void LimparFormUsuario()

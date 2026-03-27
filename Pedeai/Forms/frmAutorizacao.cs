@@ -7,8 +7,8 @@ using Pedeai.Modelo;
 namespace Pedeai.Forms
 {
     /// <summary>
-    /// Dialog de autorizacao: solicita credenciais de um usuario Gerente ou Admin
-    /// para liberar acoes que o operador atual nao pode realizar.
+    /// Dialog de autorizacao: solicita credenciais de um usuario com permissao
+    /// para cancelar pedidos (Gerente, Admin ou com modulo "CancelarPedidos").
     /// </summary>
     public partial class frmAutorizacao : Form
     {
@@ -21,6 +21,53 @@ namespace Pedeai.Forms
         {
             InitializeComponent();
             _bll = new UsuarioBLL();
+        }
+
+        // ── Resolucao do login (igual ao formulario de login) ─────────────────
+        private bool ResolverLogin()
+        {
+            lblMsg.Text = "";
+            var texto = txtLogin.Text.Trim();
+            if (string.IsNullOrEmpty(texto)) { lblNomeUsuario.Text = ""; return false; }
+
+            try
+            {
+                string nome = "";
+
+                if (int.TryParse(texto, out int cod) && cod > 0)
+                    nome = _bll.BuscarNomePorCodigo(cod);
+
+                if (string.IsNullOrEmpty(nome))
+                    nome = _bll.BuscarNomePorLogin(texto);
+
+                if (!string.IsNullOrEmpty(nome))
+                {
+                    txtLogin.Text = nome;
+                    txtLogin.SelectionStart = nome.Length;
+                    lblNomeUsuario.ForeColor = Color.FromArgb(39, 174, 96);
+                    lblNomeUsuario.Text = "\u2713 Usuario identificado";
+                    return true;
+                }
+                else
+                {
+                    lblNomeUsuario.ForeColor = Color.FromArgb(231, 76, 60);
+                    lblNomeUsuario.Text = "Usuario nao encontrado";
+                    return false;
+                }
+            }
+            catch { lblNomeUsuario.Text = ""; return false; }
+        }
+
+        private void TxtLogin_Leave(object sender, EventArgs e) => ResolverLogin();
+
+        private void TxtLogin_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Enter)
+            {
+                if (ResolverLogin()) txtSenha.Focus();
+                e.Handled = true;
+                e.SuppressKeyPress = true;
+            }
         }
 
         private void BtnAutorizar_Click(object sender, EventArgs e)
@@ -39,7 +86,7 @@ namespace Pedeai.Forms
                 return;
             }
 
-            if (usu.usuNivel < 2)
+            if (usu.usuNivel < 2 && !TemPermissao(usu, "CancelarPedidos"))
             {
                 lblMsg.Text = "Usuario sem permissao para cancelar pedidos.";
                 txtSenha.Clear();
@@ -54,6 +101,16 @@ namespace Pedeai.Forms
         private void TxtSenha_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.KeyCode == Keys.Enter) BtnAutorizar_Click(null, null);
+        }
+
+        /// <summary>Verifica se o usuario possui o modulo informado no campo Info.</summary>
+        private static bool TemPermissao(Usuario usu, string modulo)
+        {
+            if (usu.usuNivel >= 9 && string.IsNullOrWhiteSpace(usu.Info)) return true;
+            if (string.IsNullOrWhiteSpace(usu.Info)) return false;
+            foreach (var p in usu.Info.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
+                if (p.Trim().Equals(modulo, System.StringComparison.OrdinalIgnoreCase)) return true;
+            return false;
         }
     }
 }

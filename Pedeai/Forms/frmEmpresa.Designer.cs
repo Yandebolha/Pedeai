@@ -354,7 +354,22 @@ namespace Pedeai.Forms
             chkModFornecedores = modFields[6];
             chkModCupons       = modFields[7];
             chkModEmpresa      = modFields[8];
-            uy += 3 * cbRowH + 12;
+
+            // Privilegio extra: Cancelar Pedidos
+            chkModCancelarPedidos = new CheckBox
+            {
+                Text      = "Cancelar Pedidos",
+                ForeColor = cLbl,
+                BackColor = cCard,
+                Font      = fntLbl,
+                AutoSize  = false,
+                Width     = 200,
+                Height    = 22
+            };
+            chkModCancelarPedidos.SetBounds(cbX0, uy + 3 * cbRowH, 200, 22);
+            frmCard.Controls.Add(chkModCancelarPedidos);
+
+            uy += 4 * cbRowH + 12;
 
             int bw = 128, bh = 32;
             var pnlBtns = new Panel { Left = uf + 8, Top = uy + 6, Width = bw * 2 + 8, Height = bh, BackColor = cCard };
@@ -440,5 +455,6 @@ namespace Pedeai.Forms
         internal CheckBox chkModFornecedores;
         internal CheckBox chkModCupons;
         internal CheckBox chkModEmpresa;
+        internal CheckBox chkModCancelarPedidos;
     }
 }
