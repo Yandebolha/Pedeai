@@ -70,13 +70,21 @@ namespace Pedeai.Forms
             grid.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
             grid.ReadOnly = true; grid.AllowUserToAddRows = false;
             grid.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-            grid.RowHeadersVisible = false; grid.BackgroundColor = Color.FromArgb(20, 28, 55);
+            grid.RowHeadersVisible = false;
+            grid.BackgroundColor = Color.FromArgb(20, 28, 55);
             grid.DefaultCellStyle.BackColor = Color.FromArgb(20, 28, 55);
             grid.DefaultCellStyle.ForeColor = Color.White;
+            grid.DefaultCellStyle.SelectionBackColor = Color.FromArgb(52, 152, 219);
+            grid.DefaultCellStyle.SelectionForeColor = Color.White;
+            grid.AlternatingRowsDefaultCellStyle.BackColor = Color.FromArgb(28, 37, 65);
             grid.GridColor = Color.FromArgb(40, 55, 90);
             grid.Font = new Font("Segoe UI", 9F); grid.BorderStyle = BorderStyle.None;
             grid.ColumnHeadersDefaultCellStyle.BackColor = Color.FromArgb(36, 48, 82);
             grid.ColumnHeadersDefaultCellStyle.ForeColor = Color.White;
+            grid.ColumnHeadersDefaultCellStyle.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            grid.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
+            grid.ColumnHeadersHeight = 34;
+            grid.RowTemplate.Height = 28;
             grid.DoubleClick += (_, __) => CarregarParaEditar();
             grid.DataError += (_, e) => e.ThrowException = false;
 
@@ -102,6 +110,8 @@ namespace Pedeai.Forms
             var lblSit  = new Label { Text = "Situação:", Left = 672, Top = 11, AutoSize = true, ForeColor = cLbl };
             cmbSituacao.Left = 730; cmbSituacao.Top = 8; cmbSituacao.Width = 95;
             cmbSituacao.DropDownStyle = ComboBoxStyle.DropDownList;
+            cmbSituacao.BackColor = Color.FromArgb(20, 28, 55);
+            cmbSituacao.ForeColor = Color.White;
             cmbSituacao.Items.AddRange(new object[] { "Ativo", "Inativo" });
             cmbSituacao.SelectedIndex = 0;
 

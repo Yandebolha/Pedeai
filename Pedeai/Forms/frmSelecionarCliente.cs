@@ -23,7 +23,14 @@ namespace Pedeai.Forms
 
         private void CarregarGrid()
         {
-            try { grid.DataSource = _bll.Listar(txtBusca?.Text?.Trim() ?? ""); }
+            try
+            {
+                var dt = _bll.Listar(txtBusca?.Text?.Trim() ?? "");
+                // Sort by Codigo ascending
+                dt.DefaultView.Sort = "Codigo ASC";
+                grid.DataSource = dt.DefaultView.ToTable();
+                if (grid.Columns.Contains("Situacao")) grid.Columns["Situacao"].Visible = false;
+            }
             catch (Exception ex) { MessageBox.Show("Erro ao carregar clientes: " + ex.Message); }
         }
 

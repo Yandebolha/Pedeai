@@ -29,7 +29,7 @@ namespace Pedeai.Forms
             var topBar = new Panel
             {
                 Dock = DockStyle.Top, Height = 44,
-                BackColor = Color.FromArgb(40, 40, 80)
+                BackColor = Color.FromArgb(36, 48, 82)
             };
 
             var lblB = new Label { Text = "Buscar:", ForeColor = Color.White, Left = 8, Top = 12, AutoSize = true };
@@ -71,16 +71,27 @@ namespace Pedeai.Forms
             grid.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
             grid.ReadOnly = true; grid.AllowUserToAddRows = false;
             grid.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-            grid.RowHeadersVisible = false; grid.BackgroundColor = Color.White;
+            grid.RowHeadersVisible = false;
+            grid.BackgroundColor = Color.FromArgb(28, 37, 65);
+            grid.GridColor = Color.FromArgb(50, 60, 100);
+            grid.DefaultCellStyle.BackColor = Color.FromArgb(28, 37, 65);
+            grid.DefaultCellStyle.ForeColor = Color.White;
+            grid.DefaultCellStyle.SelectionBackColor = Color.FromArgb(52, 152, 219);
+            grid.DefaultCellStyle.SelectionForeColor = Color.White;
+            grid.AlternatingRowsDefaultCellStyle.BackColor = Color.FromArgb(36, 48, 82);
             grid.Font = new Font("Segoe UI", 9F); grid.BorderStyle = BorderStyle.None;
-            grid.ColumnHeadersDefaultCellStyle.BackColor = Color.FromArgb(40, 40, 80);
+            grid.ColumnHeadersDefaultCellStyle.BackColor = Color.FromArgb(36, 48, 82);
             grid.ColumnHeadersDefaultCellStyle.ForeColor = Color.White;
+            grid.ColumnHeadersDefaultCellStyle.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            grid.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
+            grid.ColumnHeadersHeight = 34;
+            grid.RowTemplate.Height = 28;
             grid.DoubleClick += Grid_DoubleClick;
             grid.DataError += (_, e) => e.ThrowException = false;
 
             // ── Painel formulário novo cliente ────────────────────────────
             pnlForm.Dock = DockStyle.Bottom; pnlForm.Height = 110;
-            pnlForm.BackColor = Color.FromArgb(245, 245, 250);
+            pnlForm.BackColor = Color.FromArgb(28, 37, 65);
             pnlForm.BorderStyle = BorderStyle.FixedSingle;
             pnlForm.Visible = false;
 
@@ -141,6 +152,8 @@ namespace Pedeai.Forms
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new System.Drawing.Size(820, 500);
             Font = new Font("Segoe UI", 9F);
+            BackColor = Color.FromArgb(15, 22, 45);
+            ForeColor = Color.White;
             MinimumSize = new System.Drawing.Size(700, 400);
             StartPosition = FormStartPosition.CenterParent;
             Text = "Selecionar Cliente";

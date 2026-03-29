@@ -64,10 +64,17 @@ namespace Pedeai.Forms
             grid.RowHeadersVisible = false; grid.BackgroundColor = Color.FromArgb(20, 28, 55);
             grid.DefaultCellStyle.BackColor = Color.FromArgb(20, 28, 55);
             grid.DefaultCellStyle.ForeColor = Color.White;
+            grid.DefaultCellStyle.SelectionBackColor = Color.FromArgb(52, 152, 219);
+            grid.DefaultCellStyle.SelectionForeColor = Color.White;
+            grid.AlternatingRowsDefaultCellStyle.BackColor = Color.FromArgb(28, 37, 65);
             grid.GridColor = Color.FromArgb(40, 55, 90);
             grid.Font = new Font("Segoe UI", 9F); grid.BorderStyle = BorderStyle.None;
             grid.ColumnHeadersDefaultCellStyle.BackColor = Color.FromArgb(36, 48, 82);
             grid.ColumnHeadersDefaultCellStyle.ForeColor = Color.White;
+            grid.ColumnHeadersDefaultCellStyle.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            grid.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
+            grid.ColumnHeadersHeight = 34;
+            grid.RowTemplate.Height = 28;
             grid.DoubleClick += (_, __) => CarregarParaEditar();
             grid.DataError += (_, e) => e.ThrowException = false;
 
