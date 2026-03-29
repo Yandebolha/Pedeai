@@ -364,9 +364,12 @@ namespace Pedeai.DAL
                         WHEN 0 THEN 'Dinheiro' WHEN 1 THEN 'Cartão' WHEN 2 THEN 'Pix'
                         ELSE 'Outro' END     AS Pagamento,
                     CASE p.pediSituacao
-                        WHEN 0 THEN 'Pendente' WHEN 1 THEN 'Confirmado' WHEN 2 THEN 'Em Preparo'
-                        WHEN 3 THEN 'Pronto'   WHEN 4 THEN 'Entregue'   WHEN 6 THEN 'Cancelado'
-                        ELSE CAST(p.pediSituacao AS CHAR) END AS Status
+                        WHEN 0 THEN 'Pendente'         WHEN 1 THEN 'Confirmado'
+                        WHEN 2 THEN 'Em Preparo'       WHEN 3 THEN 'Pronto'
+                        WHEN 4 THEN 'Saiu p/ Entrega'  WHEN 5 THEN 'Entregue'
+                        WHEN 6 THEN 'Cancelado'
+                        ELSE CAST(p.pediSituacao AS CHAR) END AS Status,
+                    p.Codigo                AS CodigoPedido
                 FROM pedido_web p
                 WHERE DATE(p.pediData_Lancamento) = @dia
                   AND p.pediSituacao NOT IN (6)
@@ -378,7 +381,8 @@ namespace Pedeai.DAL
                     CONCAT('Entrada - ', e.entNome_Fornecedor) AS Descricao,
                     -e.entValorTotal        AS Valor,
                     ''                      AS Pagamento,
-                    'Lançado'               AS Status
+                    'Lançado'               AS Status,
+                    0                       AS CodigoPedido
                 FROM entrada_mercadoria e
                 WHERE DATE(e.entData) = @dia
                   AND e.Situacao = 'A'

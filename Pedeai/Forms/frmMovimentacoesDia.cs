@@ -7,7 +7,7 @@ namespace Pedeai.Forms
 {
     public class frmMovimentacoesDia : Form
     {
-        public frmMovimentacoesDia(DateTime dia, DataTable dt)
+        public frmMovimentacoesDia(DateTime dia, DataTable dt, Func<int, DataTable> getItens = null)
         {
             var corFundo  = Color.FromArgb(15, 22, 45);
             var corCard   = Color.FromArgb(28, 37, 65);
@@ -99,6 +99,28 @@ namespace Pedeai.Forms
                 ConfigurarColunas(grid);
                 ColorirLinhas(grid);
             }
+
+            if (getItens != null)
+            {
+                grid.Cursor = Cursors.Hand;
+                grid.CellDoubleClick += (_, e) =>
+                {
+                    if (e.RowIndex < 0) return;
+                    var dr = ((DataRowView)grid.Rows[e.RowIndex].DataBoundItem)?.Row;
+                    if (dr == null || dr["Tipo"]?.ToString() != "Venda") return;
+                    int cod = dr["CodigoPedido"] == DBNull.Value ? 0 : Convert.ToInt32(dr["CodigoPedido"]);
+                    if (cod <= 0) return;
+                    try
+                    {
+                        var dtItens = getItens(cod);
+                        MostrarItensDialog(
+                            dr["Referencia"]?.ToString() ?? "",
+                            dr["Descricao"]?.ToString() ?? "",
+                            dtItens);
+                    }
+                    catch (Exception ex) { MessageBox.Show("Erro ao carregar itens: " + ex.Message); }
+                };
+            }
         }
 
         private void ConfigurarColunas(DataGridView grid)
@@ -119,6 +141,90 @@ namespace Pedeai.Forms
             foreach (var kv in show)
                 if (grid.Columns.Contains(kv.Key))
                     grid.Columns[kv.Key].HeaderText = kv.Value;
+        }
+
+        private static void MostrarItensDialog(string numPedido, string cliente, DataTable dtItens)
+        {
+            var corFundo  = Color.FromArgb(15, 22, 45);
+            var corCard   = Color.FromArgb(28, 37, 65);
+            var corTopBar = Color.FromArgb(36, 48, 82);
+
+            using var frm = new Form();
+            frm.Text             = $"Itens — Pedido {numPedido}";
+            frm.BackColor        = corFundo;
+            frm.ForeColor        = Color.White;
+            frm.Font             = new Font("Segoe UI", 9F);
+            frm.ClientSize       = new Size(720, 420);
+            frm.StartPosition    = FormStartPosition.CenterParent;
+            frm.FormBorderStyle  = FormBorderStyle.FixedDialog;
+            frm.MaximizeBox      = frm.MinimizeBox = false;
+
+            var pnlTop = new Panel { Dock = DockStyle.Top, Height = 44, BackColor = corTopBar };
+            var lblTit = new Label
+            {
+                Text      = $"Pedido {numPedido}  |  Cliente: {cliente}",
+                AutoSize  = true, Top = 12, Left = 12,
+                Font      = new Font("Segoe UI", 10F, FontStyle.Bold),
+                ForeColor = Color.White
+            };
+            pnlTop.Controls.Add(lblTit);
+
+            var grid2 = new DataGridView
+            {
+                Dock                      = DockStyle.Fill,
+                ReadOnly                  = true,
+                AllowUserToAddRows        = false,
+                SelectionMode             = DataGridViewSelectionMode.FullRowSelect,
+                RowHeadersVisible         = false,
+                BackgroundColor           = corCard,
+                DefaultCellStyle          = { BackColor = corCard, ForeColor = Color.White,
+                                              SelectionBackColor = Color.FromArgb(52, 152, 219), SelectionForeColor = Color.White },
+                AlternatingRowsDefaultCellStyle = { BackColor = Color.FromArgb(36, 48, 82) },
+                ColumnHeadersDefaultCellStyle   = { BackColor = corTopBar, ForeColor = Color.White,
+                                                    Font = new Font("Segoe UI", 9F, FontStyle.Bold) },
+                ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.DisableResizing,
+                ColumnHeadersHeight        = 36,
+                RowTemplate                = { Height = 28 },
+                GridColor                  = Color.FromArgb(50, 60, 100),
+                BorderStyle                = BorderStyle.None,
+                Font                       = new Font("Segoe UI", 9F),
+                AutoSizeColumnsMode        = DataGridViewAutoSizeColumnsMode.Fill
+            };
+            grid2.DataError += (_, e) => e.ThrowException = false;
+
+            var pnlFoot = new Panel { Dock = DockStyle.Bottom, Height = 42, BackColor = corCard };
+            var btnFech = new Button
+            {
+                Text      = "Fechar", Width = 100, Height = 28, Top = 7,
+                BackColor = Color.FromArgb(80, 95, 130), ForeColor = Color.White,
+                FlatStyle = FlatStyle.Flat, Cursor = Cursors.Hand
+            };
+            btnFech.FlatAppearance.BorderSize = 0;
+            btnFech.Click += (_, __) => frm.Close();
+            pnlFoot.SizeChanged += (_, __) => btnFech.Left = (pnlFoot.Width - btnFech.Width) / 2;
+            pnlFoot.Controls.Add(btnFech);
+
+            frm.Controls.Add(grid2);
+            frm.Controls.Add(pnlFoot);
+            frm.Controls.Add(pnlTop);
+
+            if (dtItens != null)
+            {
+                grid2.DataSource = dtItens;
+                var captions = new System.Collections.Generic.Dictionary<string, string>
+                {
+                    ["Produto"]  = "Produto",
+                    ["Qtde"]     = "Qtde",
+                    ["Unitario"] = "Unitário (R$)",
+                    ["Subtotal"] = "Subtotal (R$)",
+                    ["Obs"]      = "Observações",
+                };
+                foreach (var kv in captions)
+                    if (grid2.Columns.Contains(kv.Key))
+                        grid2.Columns[kv.Key].HeaderText = kv.Value;
+            }
+
+            frm.ShowDialog();
         }
 
         private void ColorirLinhas(DataGridView grid)

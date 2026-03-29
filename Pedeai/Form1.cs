@@ -1167,7 +1167,7 @@ namespace Pedeai
             gridFinanceiro.Dock = DockStyle.Fill;
             gridFinanceiro.DataError += (_, e2) => e2.ThrowException = false;
             gridFinanceiro.Cursor = Cursors.Hand;
-            gridFinanceiro.CellDoubleClick += FinanceiroDia_DblClick;
+            gridFinanceiro.CellClick += FinanceiroDia_DblClick;
 
             // ── Rodapé: Gastos de Material / Insumos ──
             var pnlGastos = new Panel { Dock = DockStyle.Bottom, Height = 210, BackColor = Color.FromArgb(22, 30, 55) };
@@ -1350,7 +1350,7 @@ namespace Pedeai
             try
             {
                 var dt = _pedidoBLL.GetMovimentacoesDia(dia);
-                using var frm = new Forms.frmMovimentacoesDia(dia, dt);
+                using var frm = new Forms.frmMovimentacoesDia(dia, dt, _pedidoBLL.ListarItens);
                 frm.ShowDialog(this);
             }
             catch (Exception ex) { MessageBox.Show("Erro: " + ex.Message); }

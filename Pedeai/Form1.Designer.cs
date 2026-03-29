@@ -72,6 +72,7 @@ namespace Pedeai
             };
             btnLogoff.FlatAppearance.BorderSize = 1;
             btnLogoff.FlatAppearance.BorderColor = Color.FromArgb(55, 75, 120);
+            btnLogoff.Click += BtnLogoff_Click;
             pnlTopBar.Controls.Add(btnLogoff);
 
             // ── Botoes de janela (fechar / maximizar / minimizar) ─────────────
@@ -254,6 +255,8 @@ namespace Pedeai
             Font = new Font("Segoe UI", 9F);
             MinimumSize = new Size(1024, 680);
             StartPosition = FormStartPosition.CenterScreen;            FormBorderStyle = FormBorderStyle.None;            Text = "PedeAi — Painel de Controle";
+            KeyPreview = true;
+            KeyDown += (_, ke) => { if (ke.KeyCode == Keys.Home) { ke.Handled = true; BtnLogoff_Click(this, EventArgs.Empty); } };
 
             Load += (_, __) => { CarregarTudo(); NavIniciarPrimeiro(); _timer.Start(); };
         }
