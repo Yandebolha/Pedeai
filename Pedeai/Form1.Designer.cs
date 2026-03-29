@@ -209,8 +209,10 @@ namespace Pedeai
             NavSe("Categorias",  "\U0001F5C2  Categorias",   () => AbrirForm(new frmCadastroCategoria()));
             NavSe("Clientes",    "\U0001F464  Clientes",     () => AbrirForm(new frmCadastroCliente()));
             NavSe("Fornecedores","\U0001F3ED  Fornecedores", () => AbrirForm(new frmCadastroFornecedor()));
-            NavSe("Cupons",      "\U0001F3F7  Cupons",       () => AbrirForm(new frmCadastroCupom()));
-            NavSe("Empresa",     "\U0001F3E2  Empresa",      MostrarEmpresa);
+            NavSe("Cupons",          "\U0001F3F7  Cupons",          () => AbrirForm(new frmCadastroCupom()));
+            NavSe("EntradaMercadoria", "\U0001F4E6  Entrada Mercad.", () => AbrirForm(new frmEntradaMercadoria()));
+            NavSe("Avisos",           "\U0001F514  Avisos",          () => AbrirForm(new frmAvisos()));
+            NavSe("Empresa",         "\U0001F3E2  Empresa",         MostrarEmpresa);
 
             // ── Footer ───────────────────────────────────────────────────
             pnlFooter = new Panel { Dock = DockStyle.Bottom, Height = 28, BackColor = Color.FromArgb(18, 25, 50) };
