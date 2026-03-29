@@ -164,9 +164,6 @@ namespace Pedeai.Forms
 
             if (string.IsNullOrWhiteSpace(txtNumero.Text))
                 { MessageBox.Show("Informe o número do endereço.", "Campo obrigatório", MessageBoxButtons.OK, MessageBoxIcon.Warning); txtNumero.Focus(); return; }
-
-            if (string.IsNullOrWhiteSpace(txtComplemento.Text))
-                { MessageBox.Show("Informe o complemento.", "Campo obrigatório", MessageBoxButtons.OK, MessageBoxIcon.Warning); txtComplemento.Focus(); return; }
             var obj = new Cliente
             {
                 Codigo               = _codigoEditando,

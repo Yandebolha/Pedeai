@@ -36,7 +36,13 @@ namespace Pedeai.Forms
                 txtTelefone.Text = !string.IsNullOrWhiteSpace(c.clieCelular)
                                    ? c.clieCelular : c.clieTelefone ?? "";
                 if (!string.IsNullOrWhiteSpace(c.clieEndereco))
-                    txtEndereco.Text = (c.clieEndereco + ", " + c.clieNumero).Trim(',', ' ');
+                {
+                    var endParts = new System.Collections.Generic.List<string>();
+                    var rua = (c.clieEndereco + ", " + c.clieNumero).Trim(',', ' ');
+                    if (!string.IsNullOrWhiteSpace(rua)) endParts.Add(rua);
+                    if (!string.IsNullOrWhiteSpace(c.clieComplemento)) endParts.Add(c.clieComplemento.Trim());
+                    txtEndereco.Text = string.Join(" - ", endParts);
+                }
             }
         }
 

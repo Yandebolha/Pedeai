@@ -79,7 +79,7 @@ namespace Pedeai
             var btnClose = new Button
             {
                 Text      = "✕",
-                Width     = 40, Height = 30,
+                Width     = 40, Height = 52,
                 BackColor = Color.FromArgb(192, 57, 43),
                 ForeColor = Color.White,
                 FlatStyle = FlatStyle.Flat,
@@ -87,17 +87,12 @@ namespace Pedeai
                 Cursor    = Cursors.Hand
             };
             btnClose.FlatAppearance.BorderSize = 0;
-            btnClose.Click += (_, __) =>
-            {
-                if (MessageBox.Show("Deseja fechar o sistema?", "Sair",
-                    MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
-                    Application.Exit();
-            };
+            btnClose.Click += (_, __) => Application.Exit();
 
             var btnMaximize = new Button
             {
                 Text      = "□",
-                Width     = 36, Height = 30,
+                Width     = 36, Height = 52,
                 BackColor = Color.FromArgb(52, 68, 105),
                 ForeColor = Color.White,
                 FlatStyle = FlatStyle.Flat,
@@ -115,7 +110,7 @@ namespace Pedeai
             var btnMinimize = new Button
             {
                 Text      = "─",
-                Width     = 36, Height = 30,
+                Width     = 36, Height = 52,
                 BackColor = Color.FromArgb(52, 68, 105),
                 ForeColor = Color.White,
                 FlatStyle = FlatStyle.Flat,
@@ -142,12 +137,11 @@ namespace Pedeai
 
             pnlTopBar.SizeChanged += (_, __) =>
             {
-                // Botões janela — direita, sem gaps, estilo Windows
+                // Botões janela — direita, colados ao topo
                 btnClose.Left    = pnlTopBar.Width - btnClose.Width;
                 btnMaximize.Left = btnClose.Left   - btnMaximize.Width - 1;
                 btnMinimize.Left = btnMaximize.Left- btnMinimize.Width - 1;
-                int btnTop = (pnlTopBar.Height - btnClose.Height) / 2;
-                btnClose.Top = btnMaximize.Top = btnMinimize.Top = btnTop;
+                btnClose.Top = btnMaximize.Top = btnMinimize.Top = 0;
 
                 // Botões de ação — à esquerda dos botões de janela
                 btnAtualizar.Left = btnMinimize.Left - btnAtualizar.Width - 16;
