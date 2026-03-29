@@ -357,9 +357,7 @@ namespace Pedeai
                 if (barH > 3) g.FillRectangle(hl, x, barY, barW, 3f);
 
                 // value above bar, centered
-                string valStr = data[i].value >= 1000
-                    ? $"{data[i].value / 1000:0.00}k"
-                    : data[i].value.ToString(valueFormat);
+                string valStr = data[i].value.ToString("N2");
                 var vSize = g.MeasureString(valStr, valFont);
                 float valY = barY - vSize.Height - 2f;
                 if (valY < 2f) valY = 2f;
