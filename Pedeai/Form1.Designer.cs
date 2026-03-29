@@ -248,7 +248,7 @@ namespace Pedeai
             ClientSize = new Size(1100, 660);
             Font = new Font("Segoe UI", 9F);
             MinimumSize = new Size(920, 560);
-            StartPosition = FormStartPosition.CenterScreen;            FormBorderStyle = FormBorderStyle.None;            Text = "PedeAi — Painel de Controle";
+            StartPosition = FormStartPosition.CenterScreen;            FormBorderStyle = FormBorderStyle.None;            Text = "PedeAi — Painel de Controle";            WindowState = FormWindowState.Maximized;
             KeyPreview = true;
             KeyDown += (_, ke) => { if (ke.KeyCode == Keys.Home) { ke.Handled = true; BtnLogoff_Click(this, EventArgs.Empty); } };
 
