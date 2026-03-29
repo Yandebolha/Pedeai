@@ -106,13 +106,13 @@ namespace Pedeai.DAL
             using var conn = AbrirConexao();
             string sql;
             if (periodo == "semana")
-                sql = @"SELECT CONCAT(YEAR(pediData_Lancamento), '-S', LPAD(WEEK(pediData_Lancamento,1),2,'0')) AS Periodo,
+                sql = @"SELECT CONCAT(YEAR(pediData_Lancamento), '-S', LPAD(WEEK(pediData_Lancamento,0),2,'0')) AS Periodo,
                         COALESCE(SUM(pediValor_Total),0) AS TotalVendas
                         FROM pedido_web
                         WHERE pediData_Lancamento >= CURDATE() - INTERVAL 8 WEEK
                           AND pediSituacao <> 6
-                        GROUP BY YEARWEEK(pediData_Lancamento,1)
-                        ORDER BY YEARWEEK(pediData_Lancamento,1)";
+                        GROUP BY YEARWEEK(pediData_Lancamento,0)
+                        ORDER BY YEARWEEK(pediData_Lancamento,0)";
             else if (periodo == "mes")
                 sql = @"SELECT DATE_FORMAT(pediData_Lancamento,'%Y-%m') AS Periodo,
                         COALESCE(SUM(pediValor_Total),0) AS TotalVendas
@@ -166,7 +166,7 @@ namespace Pedeai.DAL
             using var conn = AbrirConexao();
             string where;
             if (periodo == "semana")
-                where = "p.pediData_Lancamento >= CURDATE() - INTERVAL 6 DAY";
+                where = "p.pediData_Lancamento >= DATE_SUB(CURDATE(), INTERVAL DAYOFWEEK(CURDATE())-1 DAY)";
             else if (periodo == "mes")
                 where = "p.pediData_Lancamento >= CURDATE() - INTERVAL 29 DAY";
             else if (periodo == "ano")
