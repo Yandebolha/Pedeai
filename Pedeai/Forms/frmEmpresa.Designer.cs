@@ -334,68 +334,29 @@ namespace Pedeai.Forms
             frmCard.Controls.Add(lblModTit);
             uy += 28;
 
-            var modNames  = new[] { "Dashboard", "Pedidos", "Financeiro", "Produtos", "Categorias", "Clientes", "Fornecedores", "Cupons", "Empresa" };
-            var modFields = new CheckBox[9];
-            int cbColW = 96, cbRowH = 24, cbX0 = uf + ulw + 14;
+            var modNames  = new[] { "Dashboard", "Pedidos", "Financeiro", "Produtos", "Categorias", "Clientes", "Fornecedores", "Cupons", "Empresa", "Cancelar Pedidos", "Ent. Mercadoria", "Avisos" };
+            var modFields = new CheckBox[12];
+            int cbColW = 106, cbRowH = 26, cbX0 = uf + ulw + 14;
             for (int i = 0; i < modNames.Length; i++)
             {
                 var chk = new CheckBox { Text = modNames[i], ForeColor = cLbl, BackColor = cCard,
-                    Font = fntLbl, AutoSize = false, Width = 94, Height = 22 };
-                chk.SetBounds(cbX0 + (i % 3) * cbColW, uy + (i / 3) * cbRowH, 94, 22);
+                    Font = fntLbl, AutoSize = false, Width = 102, Height = 22 };
+                chk.SetBounds(cbX0 + (i % 3) * cbColW, uy + (i / 3) * cbRowH, 102, 22);
                 frmCard.Controls.Add(chk);
                 modFields[i] = chk;
             }
-            chkModDashboard    = modFields[0];
-            chkModPedidos      = modFields[1];
-            chkModFinanceiro   = modFields[2];
-            chkModProdutos     = modFields[3];
-            chkModCategorias   = modFields[4];
-            chkModClientes     = modFields[5];
-            chkModFornecedores = modFields[6];
-            chkModCupons       = modFields[7];
-            chkModEmpresa      = modFields[8];
-
-            // Privilegio extra: Cancelar Pedidos
-            chkModCancelarPedidos = new CheckBox
-            {
-                Text      = "Cancelar Pedidos",
-                ForeColor = cLbl,
-                BackColor = cCard,
-                Font      = fntLbl,
-                AutoSize  = false,
-                Width     = 200,
-                Height    = 22
-            };
-            chkModCancelarPedidos.SetBounds(cbX0, uy + 3 * cbRowH, 200, 22);
-            frmCard.Controls.Add(chkModCancelarPedidos);
-
-            // Privilegio extra: Entrada de Mercadorias
-            chkModEntradaMercadoria = new CheckBox
-            {
-                Text      = "Entrada Mercadorias",
-                ForeColor = cLbl,
-                BackColor = cCard,
-                Font      = fntLbl,
-                AutoSize  = false,
-                Width     = 200,
-                Height    = 22
-            };
-            chkModEntradaMercadoria.SetBounds(cbX0 + 210, uy + 3 * cbRowH, 200, 22);
-            frmCard.Controls.Add(chkModEntradaMercadoria);
-
-            // Privilegio extra: Avisos
-            chkModAvisos = new CheckBox
-            {
-                Text      = "Avisos",
-                ForeColor = cLbl,
-                BackColor = cCard,
-                Font      = fntLbl,
-                AutoSize  = false,
-                Width     = 200,
-                Height    = 22
-            };
-            chkModAvisos.SetBounds(cbX0 + 420, uy + 3 * cbRowH, 200, 22);
-            frmCard.Controls.Add(chkModAvisos);
+            chkModDashboard         = modFields[0];
+            chkModPedidos           = modFields[1];
+            chkModFinanceiro        = modFields[2];
+            chkModProdutos          = modFields[3];
+            chkModCategorias        = modFields[4];
+            chkModClientes          = modFields[5];
+            chkModFornecedores      = modFields[6];
+            chkModCupons            = modFields[7];
+            chkModEmpresa           = modFields[8];
+            chkModCancelarPedidos   = modFields[9];
+            chkModEntradaMercadoria = modFields[10];
+            chkModAvisos            = modFields[11];
 
             uy += 4 * cbRowH + 12;
 

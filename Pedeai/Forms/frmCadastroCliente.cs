@@ -102,17 +102,12 @@ namespace Pedeai.Forms
             Col("Cidade",       "Cidade",         120);
             Col("TotalPedidos", "Pedidos",         70,  DataGridViewContentAlignment.MiddleCenter);
             Col("TotalGasto",   "Total Gasto",     90,  DataGridViewContentAlignment.MiddleRight);
-            Col("Situacao",     "Sit.",             45,  DataGridViewContentAlignment.MiddleCenter);
+            if (grid.Columns.Contains("Situacao")) grid.Columns["Situacao"].Visible = false;
 
-            // Colore a célula Situacao: verde = A, vermelho = I
+            // Formata TotalGasto com R$
             foreach (DataGridViewRow row in grid.Rows)
             {
                 if (row.IsNewRow) continue;
-                var sit = row.Cells["Situacao"].Value?.ToString();
-                row.Cells["Situacao"].Style.ForeColor     = sit == "A" ? System.Drawing.Color.FromArgb(39, 200, 100) : System.Drawing.Color.FromArgb(231, 76, 60);
-                row.Cells["Situacao"].Style.Font          = new Font(grid.Font, FontStyle.Bold);
-
-                // Formata TotalGasto com R$
                 if (grid.Columns.Contains("TotalGasto") && row.Cells["TotalGasto"].Value is decimal d)
                     row.Cells["TotalGasto"].Value = d.ToString("N2");
             }

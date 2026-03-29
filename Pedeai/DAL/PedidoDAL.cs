@@ -49,6 +49,7 @@ namespace Pedeai.DAL
                         WHERE 1=1";
 
             if      (filtro == "emPreparo")  sql += " AND p.pediSituacao = 2";
+            else if (filtro == "pendentes")   sql += " AND p.pediSituacao = 0";
             else if (filtro == "finalizados") sql += " AND p.pediSituacao IN (3,4,5)";
             else if (filtro == "cancelados")  sql += " AND p.pediSituacao = 6";
 

@@ -33,7 +33,7 @@ namespace Pedeai.Forms
 
         private void ModoNovo()
         {
-            _codigoEditando = 0; txtNome.Clear(); cmbSituacao.SelectedIndex = 0;
+            _codigoEditando = 0; txtNome.Clear();
             pnlForm.Visible = true; txtNome.Focus();
         }
 
@@ -56,7 +56,7 @@ namespace Pedeai.Forms
                 Codigo         = _codigoEditando,
                 grmeDescricao_ = txtNome.Text.Trim(),
                 grmeOrdem      = 0,
-                Situacao       = cmbSituacao.SelectedItem?.ToString() ?? "A",
+                Situacao       = _codigoEditando == 0 ? "A" : (cmbSituacao.SelectedItem?.ToString() ?? "A"),
             };
             var erro = _bll.Salvar(obj);
             if (!string.IsNullOrEmpty(erro)) { MessageBox.Show("Erro: " + erro); return; }

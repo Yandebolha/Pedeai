@@ -37,7 +37,7 @@ namespace Pedeai.BLL
             {
                 case 0: return novo == 1 || novo == 6;   // Pendente → Confirmado ou Cancelar
                 case 1: return novo == 2;                 // Confirmado → Em Preparo
-                case 2: return novo == 3;                 // Em Preparo → Pronto
+                case 2: return novo == 3 || novo == 4; // Em Preparo → Pronto ou Saiu p/ Entrega
                 case 3: return novo == 4 || novo == 5;   // Pronto → Saiu ou Entregue
                 case 4: return novo == 5;                 // Saiu → Entregue
                 default: return false;
@@ -96,8 +96,8 @@ namespace Pedeai.BLL
                 case 1: return "✓ Confirmado";
                 case 2: return "⏳ Em Preparo";
                 case 3: return "✅ Pronto";
-                case 4: return "🚴 Saiu p/ Entrega";
-                case 5: return "📦 Entregue";
+                case 4: return "\u2192 Saiu p/ Entrega";
+                case 5: return "\u2713 Entregue";
                 case 6: return "✕ Cancelado";
                 default: return s.ToString();
             }

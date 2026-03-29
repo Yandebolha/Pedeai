@@ -105,7 +105,16 @@ namespace Pedeai
             lblPedidosHoje  = CriarCard(pnlCards, "Pedidos Hoje",     "0",       Color.FromArgb(41, 128, 185));
             lblFaturamento  = CriarCard(pnlCards, "Faturamento Hoje", "R$ 0,00", Color.FromArgb(39, 174, 96));
             lblClientes     = CriarCard(pnlCards, "Total Clientes",   "0",       Color.FromArgb(142, 68, 173));
-            lblPendentes    = CriarCard(pnlCards, "Pedidos Pendentes","0",       Color.FromArgb(211, 84, 0));
+            lblPendentes    = CriarCard(pnlCards, "Pedidos Pendentes","0",       Color.FromArgb(211, 84, 0), () =>
+            {
+                MostrarPedidos();
+                if (cmbFiltroPedido != null)
+                {
+                    for (int i = 0; i < cmbFiltroPedido.Items.Count; i++)
+                        if (cmbFiltroPedido.Items[i].ToString() == "Pendentes") { cmbFiltroPedido.SelectedIndex = i; break; }
+                    CarregarPedidos();
+                }
+            });
 
             // ── Barra de filtro de período ─────────────────────────────────────
             // ── Área de gráficos ──
@@ -555,7 +564,7 @@ namespace Pedeai
             catch { }
         }
 
-        private Label CriarCard(FlowLayoutPanel pai, string titulo, string valor, Color cor)
+        private Label CriarCard(FlowLayoutPanel pai, string titulo, string valor, Color cor, Action onClick = null)
         {
             int w = 230;
             var pnl = new Panel
@@ -563,8 +572,13 @@ namespace Pedeai
                 Width     = w,
                 Height    = 110,
                 BackColor = cor,
-                Margin    = new Padding(0, 0, 16, 0)
+                Margin    = new Padding(0, 0, 16, 0),
+                Cursor    = onClick != null ? Cursors.Hand : Cursors.Default
             };
+            if (onClick != null)
+            {
+                pnl.Click += (_, __) => onClick();
+            }
 
             pnl.Controls.Add(new Label
             {
@@ -619,7 +633,7 @@ namespace Pedeai
                 Width         = 160,
                 DropDownStyle = ComboBoxStyle.DropDownList
             };
-            cmbFiltroPedido.Items.AddRange(new object[] { "Todos", "Em Preparo", "Finalizados", "Cancelados" });
+            cmbFiltroPedido.Items.AddRange(new object[] { "Todos", "Pendentes", "Em Preparo", "Finalizados", "Cancelados" });
             cmbFiltroPedido.SelectedIndex = 0;
 
             var lblDt = new Label { Text = "Data:", ForeColor = Color.White, Left = 244, Top = 14, AutoSize = true };
@@ -734,8 +748,8 @@ namespace Pedeai
             _btnConfirmar = MkBtn("\u2713 Confirmar",          Color.FromArgb(39, 174, 96),  1);
             _btnEmPreparo = MkBtn("\u23F3 Em Preparo",         Color.FromArgb(243, 156, 18), 2);
             _btnPronto    = MkBtn("\u2705 Pronto",             Color.FromArgb(22, 160, 133), 3);
-            _btnSaiu      = MkBtn("\U0001F6B4 Saiu p/ Entrega",Color.FromArgb(52, 152, 219), 4);
-            _btnEntregue  = MkBtn("\U0001F4E6 Entregue",       Color.FromArgb(22, 160, 133), 5);
+            _btnSaiu      = MkBtn("\u2192 Saiu p/ Entrega",Color.FromArgb(52, 152, 219), 4);
+            _btnEntregue  = MkBtn("\u2713 Entregue",       Color.FromArgb(22, 160, 133), 5);
             _btnCancelar  = MkBtn("\u2715 Cancelar",           Color.FromArgb(192, 57, 43),  6);
 
             // Main grid
@@ -861,7 +875,8 @@ namespace Pedeai
                 if (cmbFiltroPedido?.SelectedIndex > 0)
                 {
                     var sel = cmbFiltroPedido.SelectedItem?.ToString() ?? "";
-                    if      (sel == "Em Preparo")  filtro = "emPreparo";
+                    if      (sel == "Pendentes")   filtro = "pendentes";
+                    else if (sel == "Em Preparo")  filtro = "emPreparo";
                     else if (sel == "Finalizados") filtro = "finalizados";
                     else if (sel == "Cancelados")  filtro = "cancelados";
                 }
