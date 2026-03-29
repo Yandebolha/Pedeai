@@ -14,6 +14,7 @@ namespace Pedeai
         private PedidoBLL        _pedidoBLL;
         private DashboardBLL     _dashBLL;
         private GastoMaterialBLL _gastosBLL;
+        private BLL.EntradaMercadoriaBLL         _entradaBLL;
         private BLL.EmpresaBLL                   _empBLL;
         private BLL.ConfiguracaoImpressaoBLL     _impBLL;
 
@@ -29,11 +30,12 @@ namespace Pedeai
         public Form1()
         {
             InitializeComponent();
-            _pedidoBLL = new PedidoBLL();
-            _dashBLL   = new DashboardBLL();
-            _gastosBLL = new GastoMaterialBLL();
-            _empBLL    = new BLL.EmpresaBLL();
-            _impBLL    = new BLL.ConfiguracaoImpressaoBLL();
+            _pedidoBLL   = new PedidoBLL();
+            _dashBLL     = new DashboardBLL();
+            _gastosBLL   = new GastoMaterialBLL();
+            _entradaBLL  = new BLL.EntradaMercadoriaBLL();
+            _empBLL      = new BLL.EmpresaBLL();
+            _impBLL      = new BLL.ConfiguracaoImpressaoBLL();
             BuildDashboard();
             BuildPedidos();
             BuildFinanceiro();
@@ -1171,11 +1173,11 @@ namespace Pedeai
             _pnlFinCards = new FlowLayoutPanel
             {
                 Dock          = DockStyle.Top,
-                Height        = 100,
+                Height        = 108,
                 FlowDirection = FlowDirection.LeftToRight,
                 WrapContents  = false,
                 BackColor     = Color.Transparent,
-                Padding       = new Padding(0, 8, 0, 8)
+                Padding       = new Padding(0, 10, 0, 6)
             };
 
             // ── Grid principal (receitas do dia) ──
@@ -1250,8 +1252,8 @@ namespace Pedeai
 
         private Label CriarCardFin(string titulo, string valor, Color cor)
         {
-            int w = 160;
-            var pnl = new Panel { Width = w, Height = 80, BackColor = cor, Margin = new Padding(0, 0, 12, 0) };
+            int w = 141;
+            var pnl = new Panel { Width = w, Height = 84, BackColor = cor, Margin = new Padding(0, 0, 7, 0) };
             pnl.Controls.Add(new Label
             {
                 Text      = titulo,
@@ -1295,10 +1297,7 @@ namespace Pedeai
                 }
 
                 // ── Totais de compras (entradas de mercadoria) ──
-                var dtCompras = _pedidoBLL.GetComprasPorDia(de, ate);
-                decimal totalCompras = 0;
-                foreach (DataRow r in dtCompras.Rows)
-                    if (r["TotalCompras"] != DBNull.Value) totalCompras += Convert.ToDecimal(r["TotalCompras"]);
+                decimal totalCompras = _entradaBLL.TotalPeriodo(de, ate);
 
                 decimal fatLiquido = totalBruto - custoMerc;
                 decimal lucroReal  = totalBruto - totalCompras;
@@ -1311,7 +1310,7 @@ namespace Pedeai
                 // ── 6 cards ──
                 _pnlFinCards.Controls.Clear();
                 CriarCardFin("Total de Pedidos",    pedidos.ToString("N0"),    Color.FromArgb(41,  128, 185));
-                CriarCardFin("Entradas (Vendas)",   totalBruto.ToString("C"),  Color.FromArgb(39,  174,  96));
+                CriarCardFin("Vendas",              totalBruto.ToString("C"),  Color.FromArgb(39,  174,  96));
                 CriarCardFin("Compras/Entradas",    totalCompras.ToString("C"),Color.FromArgb(192,  57,  43));
                 CriarCardFin("Gastos Material",     gastosMaterial.ToString("C"), Color.FromArgb(165, 105, 18));
                 CriarCardFin("Taxa de Entrega",     taxaEnt.ToString("C"),     Color.FromArgb(22,  160, 133));

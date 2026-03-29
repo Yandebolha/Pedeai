@@ -59,6 +59,8 @@ namespace Pedeai.BLL
             return _dal.Inserir(entrada, itens, parcelas);
         }
 
+        public decimal TotalPeriodo(DateTime de, DateTime ate) => _dal.TotalPeriodo(de, ate);
+
         public string Cancelar(int codigo) => _dal.Cancelar(codigo);
     }
 }

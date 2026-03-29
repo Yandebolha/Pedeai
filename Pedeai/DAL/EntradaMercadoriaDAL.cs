@@ -200,6 +200,20 @@ namespace Pedeai.DAL
             catch (Exception ex) { return ex.Message; }
         }
 
+        public decimal TotalPeriodo(DateTime de, DateTime ate)
+        {
+            using var conn = AbrirConexao();
+            using var cmd  = new MySqlCommand(
+                @"SELECT COALESCE(SUM(entValorTotal), 0)
+                  FROM entrada_mercadoria
+                  WHERE Situacao = 'A'
+                    AND entData >= @de
+                    AND entData <= @ate", conn);
+            cmd.Parameters.AddWithValue("@de",  de.Date);
+            cmd.Parameters.AddWithValue("@ate", ate.Date);
+            return Convert.ToDecimal(cmd.ExecuteScalar());
+        }
+
         // ── Mapear ───────────────────────────────────────────────────────────
         private static EntradaMercadoria Mapear(MySqlDataReader r) => new EntradaMercadoria
         {

@@ -245,9 +245,9 @@ namespace Pedeai
             AutoScaleDimensions = new SizeF(6F, 13F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.FromArgb(15, 22, 45);
-            ClientSize = new Size(1264, 741);
+            ClientSize = new Size(1100, 660);
             Font = new Font("Segoe UI", 9F);
-            MinimumSize = new Size(1024, 680);
+            MinimumSize = new Size(920, 560);
             StartPosition = FormStartPosition.CenterScreen;            FormBorderStyle = FormBorderStyle.None;            Text = "PedeAi — Painel de Controle";
             KeyPreview = true;
             KeyDown += (_, ke) => { if (ke.KeyCode == Keys.Home) { ke.Handled = true; BtnLogoff_Click(this, EventArgs.Empty); } };
