@@ -33,13 +33,10 @@ namespace Pedeai.BLL
             {
                 int larg = cfg.larguraCaracteres > 0 ? cfg.larguraCaracteres : 42;
 
-                // Monta as linhas para as duas vias separadas por um corte (linha em branco dupla)
+                // Monta as linhas para as duas vias — página separada para cada
                 _linhas = new List<string>();
                 _linhas.AddRange(GerarVia(pedido, itens, cfg, empresa, nomeAtendente, larg, "PRODUCAO"));
-                _linhas.Add("");
-                _linhas.Add(new string(cfg.separador.Length > 0 ? cfg.separador[0] : '-', larg));
-                _linhas.Add(new string(cfg.separador.Length > 0 ? cfg.separador[0] : '-', larg));
-                _linhas.Add("");
+                _linhas.Add("§P§"); // quebra de página
                 _linhas.AddRange(GerarVia(pedido, itens, cfg, empresa, nomeAtendente, larg, "ENTREGA"));
                 _linhas.Add("");
                 _linhas.Add("");
@@ -80,6 +77,14 @@ namespace Pedeai.BLL
             while (_linhaAtual < _linhas.Count)
             {
                 string linha = _linhas[_linhaAtual];
+
+                // Quebra de página explícita
+                if (linha == "§P§")
+                {
+                    _linhaAtual++;
+                    e.HasMorePages = _linhaAtual < _linhas.Count;
+                    return;
+                }
 
                 // Detectar linhas em negrito (marcadas com prefixo §B§)
                 Font f;

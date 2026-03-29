@@ -1048,6 +1048,24 @@ namespace Pedeai
             {
                 var pedido  = _pedidoBLL.PesquisaCodigo(codigoPedido);
                 if (pedido == null) return;
+
+                // Se o pedido tem cliente vinculado e o complemento não está no endereço, acrescenta
+                if (pedido.Codigo_Cliente > 0 && pedido.pediTipo_Entrega == 1
+                    && !string.IsNullOrWhiteSpace(pedido.pediEndereco_Entrega))
+                {
+                    try
+                    {
+                        var cli = new BLL.ClienteBLL().PesquisaCodigo(pedido.Codigo_Cliente);
+                        if (cli != null && !string.IsNullOrWhiteSpace(cli.clieComplemento))
+                        {
+                            string comp = cli.clieComplemento.Trim();
+                            if (!pedido.pediEndereco_Entrega.Contains(comp))
+                                pedido.pediEndereco_Entrega += " - " + comp;
+                        }
+                    }
+                    catch { }
+                }
+
                 var itens   = _pedidoBLL.ListarItensObjetos(codigoPedido);
                 var cfg     = _impBLL.Carregar();
                 var empresa = _empBLL.Carregar();
