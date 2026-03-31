@@ -18,6 +18,7 @@ namespace Pedeai.Forms
         public frmEmpresa()
         {
             InitializeComponent();
+            if (System.ComponentModel.LicenseManager.UsageMode == System.ComponentModel.LicenseUsageMode.Designtime) return;
             _empBLL = new EmpresaBLL();
             _usrBLL = new UsuarioBLL();
             _impBLL = new ConfiguracaoImpressaoBLL();
@@ -335,6 +336,11 @@ namespace Pedeai.Forms
             var erro = ImpressaoPedido.Imprimir(pedTeste, itensTeste, cfg, empresa, "Atendente");
             if (!string.IsNullOrEmpty(erro))
                 MessageBox.Show("Erro ao imprimir: " + erro, "Erro", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+
+        private void frmEmpresa_Load(object sender, EventArgs e)
+        {
+
         }
     }
 }

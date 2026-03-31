@@ -14,6 +14,7 @@ namespace Pedeai.Forms
         public frmCadastroCupom()
         {
             InitializeComponent();
+            if (System.ComponentModel.LicenseManager.UsageMode == System.ComponentModel.LicenseUsageMode.Designtime) return;
             _bll = new CupomBLL();
             Load += (_, __) => CarregarGrid();
         }

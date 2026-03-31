@@ -1,5 +1,4 @@
-﻿using System;
-using System.Drawing;
+﻿using System.Drawing;
 using System.Windows.Forms;
 
 namespace Pedeai.Forms
@@ -7,27 +6,154 @@ namespace Pedeai.Forms
     partial class frmCadastroCupom
     {
         private System.ComponentModel.IContainer components = null;
-
         protected override void Dispose(bool disposing)
         {
             if (disposing && components != null) components.Dispose();
             base.Dispose(disposing);
         }
-
         private void InitializeComponent()
         {
-            grid        = new DataGridView();
-            pnlForm     = new Panel();
-            txtCodigo   = new TextBox();
-            txtDescricao = new TextBox();
-            cmbTipo     = new ComboBox();
-            cmbSituacao = new ComboBox();
-            numValor    = new NumericUpDown();
-            numMinimo   = new NumericUpDown();
-            numLimite   = new NumericUpDown();
-            dtpValido   = new DateTimePicker();
-
+            this.grid        = new System.Windows.Forms.DataGridView();
+            this.topBar      = new System.Windows.Forms.Panel();
+            this.btnN        = new System.Windows.Forms.Button();
+            this.btnR        = new System.Windows.Forms.Button();
+            this.pnlForm     = new System.Windows.Forms.Panel();
+            this.pnlBtns     = new System.Windows.Forms.Panel();
+            this.btnS        = new System.Windows.Forms.Button();
+            this.btnC        = new System.Windows.Forms.Button();
+            this.btnD        = new System.Windows.Forms.Button();
+            this.txtCodigo   = new System.Windows.Forms.TextBox();
+            this.txtDescricao= new System.Windows.Forms.TextBox();
+            this.cmbTipo     = new System.Windows.Forms.ComboBox();
+            this.cmbSituacao = new System.Windows.Forms.ComboBox();
+            this.numValor    = new System.Windows.Forms.NumericUpDown();
+            this.numMinimo   = new System.Windows.Forms.NumericUpDown();
+            this.numLimite   = new System.Windows.Forms.NumericUpDown();
+            this.dtpValido   = new System.Windows.Forms.DateTimePicker();
+            this.lblCod      = new System.Windows.Forms.Label();
+            this.lblDesc     = new System.Windows.Forms.Label();
+            this.lblTipo     = new System.Windows.Forms.Label();
+            this.lblSit      = new System.Windows.Forms.Label();
+            this.lblVal      = new System.Windows.Forms.Label();
+            this.lblMin      = new System.Windows.Forms.Label();
+            this.lblLim      = new System.Windows.Forms.Label();
+            this.lblVal2     = new System.Windows.Forms.Label();
             this.SuspendLayout();
+            // grid
+            this.grid.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.grid.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
+            this.grid.ReadOnly = true;
+            this.grid.AllowUserToAddRows = false;
+            this.grid.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
+            this.grid.RowHeadersVisible = false;
+            this.grid.BackgroundColor = System.Drawing.Color.FromArgb(20, 28, 55);
+            this.grid.DefaultCellStyle.BackColor = System.Drawing.Color.FromArgb(20, 28, 55);
+            this.grid.DefaultCellStyle.ForeColor = System.Drawing.Color.White;
+            this.grid.DefaultCellStyle.SelectionBackColor = System.Drawing.Color.FromArgb(52, 152, 219);
+            this.grid.DefaultCellStyle.SelectionForeColor = System.Drawing.Color.White;
+            this.grid.AlternatingRowsDefaultCellStyle.BackColor = System.Drawing.Color.FromArgb(28, 37, 65);
+            this.grid.GridColor = System.Drawing.Color.FromArgb(40, 55, 90);
+            this.grid.Font = new System.Drawing.Font("Segoe UI", 9F);
+            this.grid.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.grid.ColumnHeadersDefaultCellStyle.BackColor = System.Drawing.Color.FromArgb(36, 48, 82);
+            this.grid.ColumnHeadersDefaultCellStyle.ForeColor = System.Drawing.Color.White;
+            this.grid.ColumnHeadersDefaultCellStyle.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
+            this.grid.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
+            this.grid.ColumnHeadersHeight = 34;
+            this.grid.RowTemplate.Height = 28;
+            this.grid.DoubleClick += new System.EventHandler(this.Grid_DoubleClick);
+            this.grid.DataError += new System.Windows.Forms.DataGridViewDataErrorEventHandler(this.Grid_DataError);
+            // topBar
+            this.topBar.Dock = System.Windows.Forms.DockStyle.Top;
+            this.topBar.Height = 44;
+            this.topBar.BackColor = System.Drawing.Color.FromArgb(36, 48, 82);
+            this.topBar.Controls.Add(this.btnN);
+            this.topBar.Controls.Add(this.btnR);
+            // btnN
+            this.btnN.Text = "+ Novo Cupom";
+            this.btnN.Left = 8; this.btnN.Top = 8; this.btnN.Width = 110; this.btnN.Height = 28;
+            this.btnN.BackColor = System.Drawing.Color.FromArgb(39, 174, 96);
+            this.btnN.ForeColor = System.Drawing.Color.White;
+            this.btnN.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnN.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
+            this.btnN.FlatAppearance.BorderSize = 0;
+            this.btnN.Click += new System.EventHandler(this.BtnNovoCupom_Click);
+            // btnR
+            this.btnR.Text = "Atualizar";
+            this.btnR.Left = 128; this.btnR.Top = 8; this.btnR.Width = 100; this.btnR.Height = 28;
+            this.btnR.BackColor = System.Drawing.Color.FromArgb(52, 152, 219);
+            this.btnR.ForeColor = System.Drawing.Color.White;
+            this.btnR.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnR.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
+            this.btnR.FlatAppearance.BorderSize = 0;
+            this.btnR.Click += new System.EventHandler(this.BtnAtualizarCupom_Click);
+            // pnlForm
+            this.pnlForm.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.pnlForm.Height = 150;
+            this.pnlForm.BackColor = System.Drawing.Color.FromArgb(28, 37, 65);
+            this.pnlForm.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.pnlForm.Visible = false;
+            this.pnlForm.Controls.Add(this.lblCod);    this.pnlForm.Controls.Add(this.txtCodigo);
+            this.pnlForm.Controls.Add(this.lblDesc);   this.pnlForm.Controls.Add(this.txtDescricao);
+            this.pnlForm.Controls.Add(this.lblTipo);   this.pnlForm.Controls.Add(this.cmbTipo);
+            this.pnlForm.Controls.Add(this.lblSit);    this.pnlForm.Controls.Add(this.cmbSituacao);
+            this.pnlForm.Controls.Add(this.lblVal);    this.pnlForm.Controls.Add(this.numValor);
+            this.pnlForm.Controls.Add(this.lblMin);    this.pnlForm.Controls.Add(this.numMinimo);
+            this.pnlForm.Controls.Add(this.lblLim);    this.pnlForm.Controls.Add(this.numLimite);
+            this.pnlForm.Controls.Add(this.lblVal2);   this.pnlForm.Controls.Add(this.dtpValido);
+            this.pnlForm.Controls.Add(this.pnlBtns);
+            // row 1 labels/fields
+            this.lblCod.Text = "C\u00f3digo:";    this.lblCod.AutoSize = true;  this.lblCod.Left = 10;  this.lblCod.Top = 11;
+            this.txtCodigo.Left = 65; this.txtCodigo.Top = 8; this.txtCodigo.Width = 100;
+            this.lblDesc.Text = "Descri\u00e7\u00e3o:"; this.lblDesc.AutoSize = true; this.lblDesc.Left = 175; this.lblDesc.Top = 11;
+            this.txtDescricao.Left = 245; this.txtDescricao.Top = 8; this.txtDescricao.Width = 200;
+            this.lblTipo.Text = "Tipo:"; this.lblTipo.AutoSize = true; this.lblTipo.Left = 455; this.lblTipo.Top = 11;
+            this.cmbTipo.Left = 490; this.cmbTipo.Top = 8; this.cmbTipo.Width = 100;
+            this.cmbTipo.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cmbTipo.Items.AddRange(new object[] { "PERCENTUAL", "VALOR" });
+            this.cmbTipo.SelectedIndex = 0;
+            this.lblSit.Text = "Situa\u00e7\u00e3o:"; this.lblSit.AutoSize = true; this.lblSit.Left = 601; this.lblSit.Top = 11;
+            this.cmbSituacao.Left = 660; this.cmbSituacao.Top = 8; this.cmbSituacao.Width = 90;
+            this.cmbSituacao.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cmbSituacao.Items.AddRange(new object[] { "Ativo", "Inativo" });
+            this.cmbSituacao.SelectedIndex = 0;
+            // row 2
+            this.lblVal.Text = "Valor:"; this.lblVal.AutoSize = true; this.lblVal.Left = 10; this.lblVal.Top = 45;
+            this.numValor.Left = 55; this.numValor.Top = 42; this.numValor.Width = 80;
+            this.numValor.DecimalPlaces = 2; this.numValor.Maximum = 9999;
+            this.lblMin.Text = "Ped. M\u00ednimo:"; this.lblMin.AutoSize = true; this.lblMin.Left = 145; this.lblMin.Top = 45;
+            this.numMinimo.Left = 230; this.numMinimo.Top = 42; this.numMinimo.Width = 80;
+            this.numMinimo.DecimalPlaces = 2; this.numMinimo.Maximum = 9999;
+            this.lblLim.Text = "Limite Usos:"; this.lblLim.AutoSize = true; this.lblLim.Left = 320; this.lblLim.Top = 45;
+            this.numLimite.Left = 404; this.numLimite.Top = 42; this.numLimite.Width = 70;
+            this.numLimite.Minimum = 0; this.numLimite.Maximum = 99999;
+            this.lblVal2.Text = "V\u00e1lido at\u00e9:"; this.lblVal2.AutoSize = true; this.lblVal2.Left = 484; this.lblVal2.Top = 45;
+            this.dtpValido.Left = 555; this.dtpValido.Top = 42; this.dtpValido.Width = 120;
+            this.dtpValido.Format = System.Windows.Forms.DateTimePickerFormat.Short;
+            // pnlBtns
+            this.pnlBtns.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.pnlBtns.Height = 48;
+            this.pnlBtns.BackColor = System.Drawing.Color.FromArgb(28, 37, 65);
+            this.pnlBtns.Controls.Add(this.btnS);
+            this.pnlBtns.Controls.Add(this.btnC);
+            this.pnlBtns.Controls.Add(this.btnD);
+            this.pnlBtns.SizeChanged += new System.EventHandler(this.PnlBtns_SizeChanged);
+            // btnS
+            this.btnS.Text = "Salvar"; this.btnS.Left = 10; this.btnS.Top = 10; this.btnS.Width = 110; this.btnS.Height = 28;
+            this.btnS.BackColor = System.Drawing.Color.FromArgb(52, 152, 219); this.btnS.ForeColor = System.Drawing.Color.White;
+            this.btnS.FlatStyle = System.Windows.Forms.FlatStyle.Flat; this.btnS.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
+            this.btnS.FlatAppearance.BorderSize = 0; this.btnS.Click += new System.EventHandler(this.BtnSalvar_Click);
+            // btnC
+            this.btnC.Text = "Cancelar"; this.btnC.Left = 130; this.btnC.Top = 10; this.btnC.Width = 110; this.btnC.Height = 28;
+            this.btnC.BackColor = System.Drawing.Color.FromArgb(80, 95, 130); this.btnC.ForeColor = System.Drawing.Color.White;
+            this.btnC.FlatStyle = System.Windows.Forms.FlatStyle.Flat; this.btnC.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
+            this.btnC.FlatAppearance.BorderSize = 0; this.btnC.Click += new System.EventHandler(this.BtnCancelarCupom_Click);
+            // btnD
+            this.btnD.Text = "Desativar"; this.btnD.Left = 250; this.btnD.Top = 10; this.btnD.Width = 110; this.btnD.Height = 28;
+            this.btnD.BackColor = System.Drawing.Color.FromArgb(192, 57, 43); this.btnD.ForeColor = System.Drawing.Color.White;
+            this.btnD.FlatStyle = System.Windows.Forms.FlatStyle.Flat; this.btnD.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
+            this.btnD.FlatAppearance.BorderSize = 0; this.btnD.Click += new System.EventHandler(this.BtnDesativar_Click);
+            // Form
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(834, 481);
@@ -37,138 +163,48 @@ namespace Pedeai.Forms
             this.Font = new System.Drawing.Font("Segoe UI", 9F);
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "Cadastro de Cupons";
-
-            // ── Top bar ──────────────────────────────────────────────────
-            var topBar = new Panel { Dock = DockStyle.Top, Height = 44, BackColor = Color.FromArgb(36, 48, 82) };
-            btnN = new Button
-            {
-                Text = "+ Novo Cupom", Left = 8, Top = 8, Width = 110, Height = 28,
-                BackColor = Color.FromArgb(39, 174, 96), ForeColor = Color.White,
-                FlatStyle = FlatStyle.Flat, Font = new Font("Segoe UI", 9F, FontStyle.Bold)
-            };
-            btnN.FlatAppearance.BorderSize = 0; btnN.Click += (_, __) => ModoNovo();
-            btnR = new Button
-            {
-                Text = "Atualizar", Left = 128, Top = 8, Width = 100, Height = 28,
-                BackColor = Color.FromArgb(52, 152, 219), ForeColor = Color.White,
-                FlatStyle = FlatStyle.Flat, Font = new Font("Segoe UI", 9F, FontStyle.Bold)
-            };
-            btnR.FlatAppearance.BorderSize = 0; btnR.Click += (_, __) => CarregarGrid();
-            topBar.Controls.AddRange(new Control[] { btnN, btnR });
-
-            // ── Grid ──────────────────────────────────────────────────────
-            grid.Dock = DockStyle.Fill;
-            grid.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
-            grid.ReadOnly = true; grid.AllowUserToAddRows = false;
-            grid.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-            grid.RowHeadersVisible = false; grid.BackgroundColor = Color.FromArgb(20, 28, 55);
-            grid.DefaultCellStyle.BackColor = Color.FromArgb(20, 28, 55);
-            grid.DefaultCellStyle.ForeColor = Color.White;
-            grid.DefaultCellStyle.SelectionBackColor = Color.FromArgb(52, 152, 219);
-            grid.DefaultCellStyle.SelectionForeColor = Color.White;
-            grid.AlternatingRowsDefaultCellStyle.BackColor = Color.FromArgb(28, 37, 65);
-            grid.GridColor = Color.FromArgb(40, 55, 90);
-            grid.Font = new Font("Segoe UI", 9F); grid.BorderStyle = BorderStyle.None;
-            grid.ColumnHeadersDefaultCellStyle.BackColor = Color.FromArgb(36, 48, 82);
-            grid.ColumnHeadersDefaultCellStyle.ForeColor = Color.White;
-            grid.ColumnHeadersDefaultCellStyle.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
-            grid.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
-            grid.ColumnHeadersHeight = 34;
-            grid.RowTemplate.Height = 28;
-            grid.DoubleClick += (_, __) => CarregarParaEditar();
-            grid.DataError += (_, e) => e.ThrowException = false;
-
-            // ── Painel formulário ──────────────────────────────────────────
-            pnlForm.Dock = DockStyle.Bottom; pnlForm.Height = 150;
-            pnlForm.BackColor = Color.FromArgb(28, 37, 65);
-            pnlForm.BorderStyle = BorderStyle.FixedSingle;
-            pnlForm.Visible = DesignMode;
-
-            var lblCod  = new Label { Text = "C\u00f3digo:",    AutoSize = true, Left = 10,  Top = 11 };
-            txtCodigo.Left = 65; txtCodigo.Top = 8; txtCodigo.Width = 100;
-
-            var lblDesc = new Label { Text = "Descri\u00e7\u00e3o:", AutoSize = true, Left = 175, Top = 11 };
-            txtDescricao.Left = 245; txtDescricao.Top = 8; txtDescricao.Width = 200;
-
-            var lblTipo = new Label { Text = "Tipo:",      AutoSize = true, Left = 455, Top = 11 };
-            cmbTipo.Left = 490; cmbTipo.Top = 8; cmbTipo.Width = 100;
-            cmbTipo.DropDownStyle = ComboBoxStyle.DropDownList;
-            cmbTipo.Items.AddRange(new object[] { "PERCENTUAL", "VALOR" });
-            cmbTipo.SelectedIndex = 0;
-
-            var lblSit  = new Label { Text = "Situa\u00e7\u00e3o:",  AutoSize = true, Left = 601, Top = 11 };
-            cmbSituacao.Left = 665; cmbSituacao.Top = 8; cmbSituacao.Width = 90;
-            cmbSituacao.DropDownStyle = ComboBoxStyle.DropDownList;
-            cmbSituacao.Items.AddRange(new object[] { "Ativo", "Inativo" });
-            cmbSituacao.SelectedIndex = 0;
-
-            var lblVal  = new Label { Text = "Valor:",         AutoSize = true, Left = 10,  Top = 45 };
-            numValor.Left = 55;  numValor.Top = 42;  numValor.Width = 80;
-            numValor.DecimalPlaces = 2; numValor.Maximum = 9999;
-
-            var lblMin  = new Label { Text = "Ped. M\u00ednimo:",   AutoSize = true, Left = 145, Top = 45 };
-            numMinimo.Left = 230; numMinimo.Top = 42; numMinimo.Width = 80;
-            numMinimo.DecimalPlaces = 2; numMinimo.Maximum = 9999;
-
-            var lblLim  = new Label { Text = "Limite Usos:",   AutoSize = true, Left = 320, Top = 45 };
-            numLimite.Left = 404; numLimite.Top = 42; numLimite.Width = 70;
-            numLimite.Minimum = 0; numLimite.Maximum = 99999;
-
-            var lblVal2 = new Label { Text = "V\u00e1lido at\u00e9:",    AutoSize = true, Left = 484, Top = 45 };
-            dtpValido.Left = 555; dtpValido.Top = 42; dtpValido.Width = 120;
-            dtpValido.Format = DateTimePickerFormat.Short;
-
-            var pnlBtns = new Panel { Dock = DockStyle.Bottom, Height = 48, BackColor = Color.FromArgb(28, 37, 65) };
-            btnS = new Button { Text = "Salvar",    Top = 10, Width = 110, Height = 28,
-                BackColor = Color.FromArgb(52, 152, 219), ForeColor = Color.White, FlatStyle = FlatStyle.Flat,
-                Font = new Font("Segoe UI", 9F, FontStyle.Bold) };
-            btnS.FlatAppearance.BorderSize = 0; btnS.Click += BtnSalvar_Click;
-
-            btnC = new Button { Text = "Cancelar",  Top = 10, Width = 110, Height = 28,
-                BackColor = Color.FromArgb(80, 95, 130), ForeColor = Color.White, FlatStyle = FlatStyle.Flat,
-                Font = new Font("Segoe UI", 9F, FontStyle.Bold) };
-            btnC.FlatAppearance.BorderSize = 0;
-            btnC.Click += (_, __) => { pnlForm.Visible = false; _codigoEditando = 0; };
-
-            btnD = new Button { Text = "Desativar", Top = 10, Width = 110, Height = 28,
-                BackColor = Color.FromArgb(192, 57, 43), ForeColor = Color.White, FlatStyle = FlatStyle.Flat,
-                Font = new Font("Segoe UI", 9F, FontStyle.Bold) };
-            btnD.FlatAppearance.BorderSize = 0; btnD.Click += BtnDesativar_Click;
-
-            void CentrarBotoes()
-            {
-                int x = (pnlBtns.Width - 110 * 3 - 10 * 2) / 2;
-                if (x < 10) x = 10;
-                btnS.Left = x; btnC.Left = x + 120; btnD.Left = x + 240;
-            }
-            pnlBtns.SizeChanged += (_, __) => CentrarBotoes();
-            pnlBtns.Controls.AddRange(new Control[] { btnS, btnC, btnD });
-
-            pnlForm.Controls.AddRange(new Control[]
-            {
-                lblCod, txtCodigo, lblDesc, txtDescricao, lblTipo, cmbTipo, lblSit, cmbSituacao,
-                lblVal, numValor, lblMin, numMinimo, lblLim, numLimite, lblVal2, dtpValido
-            });
-            pnlForm.Controls.Add(pnlBtns);
-
-            Controls.Add(grid); Controls.Add(topBar); Controls.Add(pnlForm);
+            this.Controls.Add(this.grid);
+            this.Controls.Add(this.topBar);
+            this.Controls.Add(this.pnlForm);
             this.ResumeLayout(false);
         }
 
-        internal DataGridView  grid;
-        internal Panel         pnlForm;
-        internal TextBox       txtCodigo;
-        internal TextBox       txtDescricao;
-        internal ComboBox      cmbTipo;
-        internal ComboBox      cmbSituacao;
-        internal NumericUpDown numValor;
-        internal NumericUpDown numMinimo;
-        internal NumericUpDown numLimite;
-        internal DateTimePicker dtpValido;
-        internal Button        btnN;
-        internal Button        btnR;
-        internal Button        btnS;
-        internal Button        btnC;
-        internal Button        btnD;
+        internal System.Windows.Forms.DataGridView   grid;
+        internal System.Windows.Forms.Panel          pnlForm;
+        internal System.Windows.Forms.TextBox        txtCodigo;
+        internal System.Windows.Forms.TextBox        txtDescricao;
+        internal System.Windows.Forms.ComboBox       cmbTipo;
+        internal System.Windows.Forms.ComboBox       cmbSituacao;
+        internal System.Windows.Forms.NumericUpDown  numValor;
+        internal System.Windows.Forms.NumericUpDown  numMinimo;
+        internal System.Windows.Forms.NumericUpDown  numLimite;
+        internal System.Windows.Forms.DateTimePicker dtpValido;
+        internal System.Windows.Forms.Button         btnN;
+        internal System.Windows.Forms.Button         btnR;
+        internal System.Windows.Forms.Button         btnS;
+        internal System.Windows.Forms.Button         btnC;
+        internal System.Windows.Forms.Button         btnD;
+        private  System.Windows.Forms.Panel          topBar;
+        private  System.Windows.Forms.Panel          pnlBtns;
+        private  System.Windows.Forms.Label          lblCod;
+        private  System.Windows.Forms.Label          lblDesc;
+        private  System.Windows.Forms.Label          lblTipo;
+        private  System.Windows.Forms.Label          lblSit;
+        private  System.Windows.Forms.Label          lblVal;
+        private  System.Windows.Forms.Label          lblMin;
+        private  System.Windows.Forms.Label          lblLim;
+        private  System.Windows.Forms.Label          lblVal2;
+
+        private void Grid_DoubleClick(object s, System.EventArgs e) { CarregarParaEditar(); }
+        private void Grid_DataError(object s, System.Windows.Forms.DataGridViewDataErrorEventArgs e) { e.ThrowException = false; }
+        private void BtnNovoCupom_Click(object s, System.EventArgs e)    { ModoNovo(); }
+        private void BtnAtualizarCupom_Click(object s, System.EventArgs e){ CarregarGrid(); }
+        private void BtnCancelarCupom_Click(object s, System.EventArgs e) { pnlForm.Visible = false; _codigoEditando = 0; }
+        private void PnlBtns_SizeChanged(object s, System.EventArgs e)
+        {
+            int x = (pnlBtns.Width - 110 * 3 - 20) / 2;
+            if (x < 10) x = 10;
+            btnS.Left = x; btnC.Left = x + 120; btnD.Left = x + 240;
+        }
     }
 }

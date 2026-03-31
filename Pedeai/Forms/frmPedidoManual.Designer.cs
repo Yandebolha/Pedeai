@@ -1,12 +1,11 @@
+﻿using System.Windows.Forms;
 using System.Drawing;
-using System.Windows.Forms;
 
 namespace Pedeai.Forms
 {
     partial class frmPedidoManual
     {
         private System.ComponentModel.IContainer components = null;
-
         protected override void Dispose(bool disposing)
         {
             if (disposing && components != null) components.Dispose();
@@ -15,310 +14,463 @@ namespace Pedeai.Forms
 
         private void InitializeComponent()
         {
-            // palette
-            var cBg     = Color.FromArgb(11, 16, 36);
-            var cPanel  = Color.FromArgb(17, 24, 50);
-            var cCard   = Color.FromArgb(22, 31, 60);
-            var cInput  = Color.FromArgb(14, 21, 46);
-            var cBorder = Color.FromArgb(34, 46, 82);
-            var cLbl    = Color.FromArgb(110, 130, 175);
-            var cSecHd  = Color.FromArgb(80, 105, 160);
-            var cAccent = Color.FromArgb(52, 152, 219);
-            var cGreen  = Color.FromArgb(39, 174, 96);
-            var cWhite  = Color.White;
-            var fntLbl  = new Font("Segoe UI", 8.5F);
-            var fntInp  = new Font("Segoe UI", 9.5F);
-            var fntSec  = new Font("Segoe UI", 7.5F, FontStyle.Bold);
+            this.topBar               = new System.Windows.Forms.Panel();
+            this.lblTituloPed         = new System.Windows.Forms.Label();
+            this.pnlRodape            = new System.Windows.Forms.Panel();
+            this.lblTotalTag          = new System.Windows.Forms.Label();
+            this.mainArea             = new System.Windows.Forms.Panel();
+            this.sidebar              = new System.Windows.Forms.Panel();
+            this.sideContent          = new System.Windows.Forms.Panel();
+            this.sideDiv              = new System.Windows.Forms.Panel();
+            this.rightArea            = new System.Windows.Forms.Panel();
+            this.pnlAddItem           = new System.Windows.Forms.Panel();
+            this.lblSecCliente        = new System.Windows.Forms.Label();
+            this.lblSecEntrega        = new System.Windows.Forms.Label();
+            this.lblSecPagamento      = new System.Windows.Forms.Label();
+            this.lblSecObs            = new System.Windows.Forms.Label();
+            this.lblSecAddItem        = new System.Windows.Forms.Label();
+            this.lNome                = new System.Windows.Forms.Label();
+            this.lTel                 = new System.Windows.Forms.Label();
+            this.lQtde                = new System.Windows.Forms.Label();
+            this.lVal                 = new System.Windows.Forms.Label();
+            this.lDsc                 = new System.Windows.Forms.Label();
+            this.pnlDiv1              = new System.Windows.Forms.Panel();
+            this.pnlDiv2              = new System.Windows.Forms.Panel();
+            this.pnlDiv3              = new System.Windows.Forms.Panel();
+            this.txtNome              = new System.Windows.Forms.TextBox();
+            this.btnSelecionarCliente = new System.Windows.Forms.Button();
+            this.txtTelefone          = new System.Windows.Forms.TextBox();
+            this.cmbEntrega           = new System.Windows.Forms.ComboBox();
+            this.txtEndereco          = new System.Windows.Forms.TextBox();
+            this.lblEndereco          = new System.Windows.Forms.Label();
+            this.cmbPagamento         = new System.Windows.Forms.ComboBox();
+            this.numTroco             = new System.Windows.Forms.NumericUpDown();
+            this.lblTroco             = new System.Windows.Forms.Label();
+            this.lblTrocoInfo         = new System.Windows.Forms.Label();
+            this.numTaxa              = new System.Windows.Forms.NumericUpDown();
+            this.lblTaxa              = new System.Windows.Forms.Label();
+            this.txtObs               = new System.Windows.Forms.TextBox();
+            this.txtBuscaProduto      = new System.Windows.Forms.TextBox();
+            this.btnBuscarProduto     = new System.Windows.Forms.Button();
+            this.lblDesconto          = new System.Windows.Forms.Label();
+            this.numQtde              = new System.Windows.Forms.NumericUpDown();
+            this.numUnitario          = new System.Windows.Forms.NumericUpDown();
+            this.numDescontoItem      = new System.Windows.Forms.NumericUpDown();
+            this.gridItens            = new System.Windows.Forms.DataGridView();
+            this.lblTotal             = new System.Windows.Forms.Label();
+            this.btnSal               = new System.Windows.Forms.Button();
+            this.btnCanc              = new System.Windows.Forms.Button();
+            this.btnAdd               = new System.Windows.Forms.Button();
+            this.SuspendLayout();
 
-            // helpers
-            Label MkLbl(string t) => new Label { Text = t, ForeColor = cLbl, AutoSize = true, Font = fntLbl };
-            Label MkSec(string t) => new Label { Text = t.ToUpper(), ForeColor = cSecHd, AutoSize = true, Font = fntSec };
-            Panel MkDiv() => new Panel { BackColor = cBorder, Height = 1 };
+            // topBar
+            this.topBar.Dock = System.Windows.Forms.DockStyle.Top;
+            this.topBar.Height = 44;
+            this.topBar.BackColor = System.Drawing.Color.FromArgb(17, 24, 50);
+            this.lblTituloPed.Text = "Pedido Manual";
+            this.lblTituloPed.ForeColor = System.Drawing.Color.White;
+            this.lblTituloPed.Font = new System.Drawing.Font("Segoe UI", 11F, System.Drawing.FontStyle.Bold);
+            this.lblTituloPed.AutoSize = true;
+            this.lblTituloPed.SetBounds(16, 10, 200, 24);
+            this.topBar.Controls.Add(this.lblTituloPed);
 
-            // form setup
-            BackColor = cBg; ForeColor = cWhite;
-            Text = "Novo Pedido Manual";
-            ClientSize    = new Size(1050, 680);
-            MinimumSize   = new Size(900, 560);
-            StartPosition = FormStartPosition.CenterParent;
-            Font          = new Font("Segoe UI", 9F);
-            AutoScaleDimensions = new SizeF(6F, 13F);
-            AutoScaleMode       = AutoScaleMode.Font;
+            // pnlRodape
+            this.pnlRodape.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.pnlRodape.Height = 54;
+            this.pnlRodape.BackColor = System.Drawing.Color.FromArgb(17, 24, 50);
+            this.pnlRodape.SizeChanged += new System.EventHandler(this.PnlRodape_SizeChanged);
+            this.btnSal.Text = "Salvar Pedido";
+            this.btnSal.Height = 34; this.btnSal.Width = 148; this.btnSal.Top = 10;
+            this.btnSal.BackColor = System.Drawing.Color.FromArgb(52, 152, 219);
+            this.btnSal.ForeColor = System.Drawing.Color.White;
+            this.btnSal.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnSal.Font = new System.Drawing.Font("Segoe UI", 9.5F, System.Drawing.FontStyle.Bold);
+            this.btnSal.FlatAppearance.BorderSize = 0;
+            this.btnSal.Click += new System.EventHandler(this.BtnSalvar_Click);
+            this.btnCanc.Text = "Cancelar";
+            this.btnCanc.Height = 34; this.btnCanc.Width = 98; this.btnCanc.Top = 10;
+            this.btnCanc.BackColor = System.Drawing.Color.FromArgb(40, 50, 85);
+            this.btnCanc.ForeColor = System.Drawing.Color.FromArgb(120, 140, 180);
+            this.btnCanc.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnCanc.Font = new System.Drawing.Font("Segoe UI", 9.5F);
+            this.btnCanc.FlatAppearance.BorderSize = 0;
+            this.btnCanc.Click += new System.EventHandler(this.BtnCanc_Click);
+            this.lblTotal.Text = "R$ 0,00";
+            this.lblTotal.Font = new System.Drawing.Font("Segoe UI", 16F, System.Drawing.FontStyle.Bold);
+            this.lblTotal.ForeColor = System.Drawing.Color.FromArgb(39, 174, 96);
+            this.lblTotal.AutoSize = true; this.lblTotal.Top = 12;
+            this.lblTotalTag.Text = "Total";
+            this.lblTotalTag.ForeColor = System.Drawing.Color.FromArgb(110, 130, 175);
+            this.lblTotalTag.Font = new System.Drawing.Font("Segoe UI", 8.5F);
+            this.lblTotalTag.AutoSize = true; this.lblTotalTag.Top = 18;
+            this.pnlRodape.Controls.Add(this.lblTotalTag);
+            this.pnlRodape.Controls.Add(this.lblTotal);
+            this.pnlRodape.Controls.Add(this.btnSal);
+            this.pnlRodape.Controls.Add(this.btnCanc);
 
-            // controls
-            txtNome              = new TextBox  { BackColor = cInput, ForeColor = cWhite, Font = fntInp, BorderStyle = BorderStyle.FixedSingle };
-            txtTelefone          = new TextBox  { BackColor = cInput, ForeColor = cWhite, Font = fntInp, BorderStyle = BorderStyle.FixedSingle };
-            txtEndereco          = new TextBox  { BackColor = cInput, ForeColor = cWhite, Font = fntInp, BorderStyle = BorderStyle.FixedSingle };
-            txtObs               = new TextBox  { BackColor = cInput, ForeColor = cWhite, Font = fntInp, BorderStyle = BorderStyle.FixedSingle };
-            txtBuscaProduto      = new TextBox  { BackColor = cInput, ForeColor = cWhite, Font = fntInp, BorderStyle = BorderStyle.FixedSingle, PlaceholderText = "Pesquisar produto..." };
-            cmbEntrega           = new ComboBox { BackColor = cInput, ForeColor = cWhite, Font = fntInp, FlatStyle = FlatStyle.Flat, DropDownStyle = ComboBoxStyle.DropDownList };
-            cmbPagamento         = new ComboBox { BackColor = cInput, ForeColor = cWhite, Font = fntInp, FlatStyle = FlatStyle.Flat, DropDownStyle = ComboBoxStyle.DropDownList };
-            numTroco             = new NumericUpDown { BackColor = cInput, ForeColor = cWhite, Font = fntInp, DecimalPlaces = 2, Maximum = 9999 };
-            numTaxa              = new NumericUpDown { BackColor = cInput, ForeColor = cWhite, Font = fntInp, DecimalPlaces = 2, Maximum = 999 };
-            numQtde              = new NumericUpDown { BackColor = cInput, ForeColor = cWhite, Font = fntInp, Minimum = 1, Maximum = 999, Value = 1 };
-            numUnitario          = new NumericUpDown { BackColor = cInput, ForeColor = cWhite, Font = fntInp, DecimalPlaces = 2, Maximum = 99999 };
-            numDescontoItem      = new NumericUpDown { BackColor = cInput, ForeColor = cWhite, Font = fntInp, DecimalPlaces = 1, Maximum = 100 };
-            gridItens            = new DataGridView();
-            lblTotal             = new Label();
-            lblEndereco          = new Label();
-            lblTroco             = new Label();
-            lblTrocoInfo         = new Label();
-            lblTaxa              = new Label();
-            lblDesconto          = new Label();
-            btnSelecionarCliente = new Button();
-            btnBuscarProduto     = new Button();
+            // sidebar section
+            this.lblSecCliente.Text = "CLIENTE";
+            this.lblSecCliente.ForeColor = System.Drawing.Color.FromArgb(80, 105, 160);
+            this.lblSecCliente.AutoSize = true;
+            this.lblSecCliente.Font = new System.Drawing.Font("Segoe UI", 7.5F, System.Drawing.FontStyle.Bold);
+            this.lblSecCliente.SetBounds(14, 12, 282, 16);
+            this.lNome.Text = "Nome / Raz\u00e3o Social";
+            this.lNome.ForeColor = System.Drawing.Color.FromArgb(110, 130, 175);
+            this.lNome.AutoSize = true;
+            this.lNome.Font = new System.Drawing.Font("Segoe UI", 8.5F);
+            this.lNome.SetBounds(14, 32, 282, 16);
+            this.txtNome.BackColor = System.Drawing.Color.FromArgb(14, 21, 46);
+            this.txtNome.ForeColor = System.Drawing.Color.White;
+            this.txtNome.Font = new System.Drawing.Font("Segoe UI", 9.5F);
+            this.txtNome.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.txtNome.SetBounds(14, 50, 214, 26);
+            this.btnSelecionarCliente.Text = "Buscar";
+            this.btnSelecionarCliente.BackColor = System.Drawing.Color.FromArgb(52, 152, 219);
+            this.btnSelecionarCliente.ForeColor = System.Drawing.Color.White;
+            this.btnSelecionarCliente.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnSelecionarCliente.Font = new System.Drawing.Font("Segoe UI", 8F);
+            this.btnSelecionarCliente.FlatAppearance.BorderSize = 0;
+            this.btnSelecionarCliente.SetBounds(232, 50, 64, 26);
+            this.btnSelecionarCliente.Click += new System.EventHandler(this.BtnSelecionarCliente_Click);
+            this.lTel.Text = "Telefone";
+            this.lTel.ForeColor = System.Drawing.Color.FromArgb(110, 130, 175);
+            this.lTel.AutoSize = true;
+            this.lTel.Font = new System.Drawing.Font("Segoe UI", 8.5F);
+            this.lTel.SetBounds(14, 82, 282, 16);
+            this.txtTelefone.BackColor = System.Drawing.Color.FromArgb(14, 21, 46);
+            this.txtTelefone.ForeColor = System.Drawing.Color.White;
+            this.txtTelefone.Font = new System.Drawing.Font("Segoe UI", 9.5F);
+            this.txtTelefone.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.txtTelefone.SetBounds(14, 100, 282, 26);
+            this.pnlDiv1.BackColor = System.Drawing.Color.FromArgb(34, 46, 82);
+            this.pnlDiv1.SetBounds(0, 136, 310, 1);
+            this.lblSecEntrega.Text = "ENTREGA";
+            this.lblSecEntrega.ForeColor = System.Drawing.Color.FromArgb(80, 105, 160);
+            this.lblSecEntrega.AutoSize = true;
+            this.lblSecEntrega.Font = new System.Drawing.Font("Segoe UI", 7.5F, System.Drawing.FontStyle.Bold);
+            this.lblSecEntrega.SetBounds(14, 147, 282, 16);
+            this.cmbEntrega.BackColor = System.Drawing.Color.FromArgb(14, 21, 46);
+            this.cmbEntrega.ForeColor = System.Drawing.Color.White;
+            this.cmbEntrega.Font = new System.Drawing.Font("Segoe UI", 9.5F);
+            this.cmbEntrega.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.cmbEntrega.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cmbEntrega.Items.AddRange(new object[] { "Retirada", "Entrega" });
+            this.cmbEntrega.SelectedIndex = 0;
+            this.cmbEntrega.SetBounds(14, 167, 282, 26);
+            this.cmbEntrega.SelectedIndexChanged += new System.EventHandler(this.CmbEntrega_SelectedIndexChanged);
+            this.lblEndereco.Text = "Endere\u00e7o";
+            this.lblEndereco.ForeColor = System.Drawing.Color.FromArgb(110, 130, 175);
+            this.lblEndereco.AutoSize = true;
+            this.lblEndereco.Font = new System.Drawing.Font("Segoe UI", 8.5F);
+            this.lblEndereco.SetBounds(14, 199, 282, 16);
+            this.txtEndereco.BackColor = System.Drawing.Color.FromArgb(14, 21, 46);
+            this.txtEndereco.ForeColor = System.Drawing.Color.White;
+            this.txtEndereco.Font = new System.Drawing.Font("Segoe UI", 9.5F);
+            this.txtEndereco.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.txtEndereco.SetBounds(14, 217, 282, 26);
+            this.lblTaxa.Text = "Taxa de Entrega (R$)";
+            this.lblTaxa.ForeColor = System.Drawing.Color.FromArgb(110, 130, 175);
+            this.lblTaxa.AutoSize = true;
+            this.lblTaxa.Font = new System.Drawing.Font("Segoe UI", 8.5F);
+            this.lblTaxa.SetBounds(14, 249, 282, 16);
+            this.numTaxa.BackColor = System.Drawing.Color.FromArgb(14, 21, 46);
+            this.numTaxa.ForeColor = System.Drawing.Color.White;
+            this.numTaxa.Font = new System.Drawing.Font("Segoe UI", 9.5F);
+            this.numTaxa.DecimalPlaces = 2; this.numTaxa.Maximum = 999;
+            this.numTaxa.SetBounds(14, 267, 130, 26);
+            this.numTaxa.ValueChanged += new System.EventHandler(this.NumTaxa_ValueChanged);
+            this.pnlDiv2.BackColor = System.Drawing.Color.FromArgb(34, 46, 82);
+            this.pnlDiv2.SetBounds(0, 303, 310, 1);
+            this.lblSecPagamento.Text = "PAGAMENTO";
+            this.lblSecPagamento.ForeColor = System.Drawing.Color.FromArgb(80, 105, 160);
+            this.lblSecPagamento.AutoSize = true;
+            this.lblSecPagamento.Font = new System.Drawing.Font("Segoe UI", 7.5F, System.Drawing.FontStyle.Bold);
+            this.lblSecPagamento.SetBounds(14, 314, 282, 16);
+            this.cmbPagamento.BackColor = System.Drawing.Color.FromArgb(14, 21, 46);
+            this.cmbPagamento.ForeColor = System.Drawing.Color.White;
+            this.cmbPagamento.Font = new System.Drawing.Font("Segoe UI", 9.5F);
+            this.cmbPagamento.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.cmbPagamento.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cmbPagamento.Items.AddRange(new object[] { "Dinheiro", "Cart\u00e3o", "Pix" });
+            this.cmbPagamento.SelectedIndex = 0;
+            this.cmbPagamento.SetBounds(14, 334, 282, 26);
+            this.cmbPagamento.SelectedIndexChanged += new System.EventHandler(this.CmbPagamento_SelectedIndexChanged);
+            this.lblTroco.Text = "Troco para (R$)";
+            this.lblTroco.ForeColor = System.Drawing.Color.FromArgb(110, 130, 175);
+            this.lblTroco.AutoSize = true;
+            this.lblTroco.Font = new System.Drawing.Font("Segoe UI", 8.5F);
+            this.lblTroco.SetBounds(14, 366, 282, 16);
+            this.numTroco.BackColor = System.Drawing.Color.FromArgb(14, 21, 46);
+            this.numTroco.ForeColor = System.Drawing.Color.White;
+            this.numTroco.Font = new System.Drawing.Font("Segoe UI", 9.5F);
+            this.numTroco.DecimalPlaces = 2; this.numTroco.Maximum = 9999;
+            this.numTroco.SetBounds(14, 384, 130, 26);
+            this.numTroco.ValueChanged += new System.EventHandler(this.NumTroco_ValueChanged);
+            this.lblTrocoInfo.Text = "";
+            this.lblTrocoInfo.ForeColor = System.Drawing.Color.FromArgb(39, 174, 96);
+            this.lblTrocoInfo.AutoSize = true;
+            this.lblTrocoInfo.Font = new System.Drawing.Font("Segoe UI", 8.5F, System.Drawing.FontStyle.Bold);
+            this.lblTrocoInfo.SetBounds(154, 388, 140, 18);
+            this.pnlDiv3.BackColor = System.Drawing.Color.FromArgb(34, 46, 82);
+            this.pnlDiv3.SetBounds(0, 420, 310, 1);
+            this.lblSecObs.Text = "OBSERVA\u00c7\u00d5ES";
+            this.lblSecObs.ForeColor = System.Drawing.Color.FromArgb(80, 105, 160);
+            this.lblSecObs.AutoSize = true;
+            this.lblSecObs.Font = new System.Drawing.Font("Segoe UI", 7.5F, System.Drawing.FontStyle.Bold);
+            this.lblSecObs.SetBounds(14, 431, 282, 16);
+            this.txtObs.BackColor = System.Drawing.Color.FromArgb(14, 21, 46);
+            this.txtObs.ForeColor = System.Drawing.Color.White;
+            this.txtObs.Font = new System.Drawing.Font("Segoe UI", 9.5F);
+            this.txtObs.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.txtObs.SetBounds(14, 451, 282, 26);
+            this.sideContent.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.sideContent.BackColor = System.Drawing.Color.FromArgb(17, 24, 50);
+            this.sideContent.Controls.Add(this.lblSecCliente);
+            this.sideContent.Controls.Add(this.lNome);
+            this.sideContent.Controls.Add(this.txtNome);
+            this.sideContent.Controls.Add(this.btnSelecionarCliente);
+            this.sideContent.Controls.Add(this.lTel);
+            this.sideContent.Controls.Add(this.txtTelefone);
+            this.sideContent.Controls.Add(this.pnlDiv1);
+            this.sideContent.Controls.Add(this.lblSecEntrega);
+            this.sideContent.Controls.Add(this.cmbEntrega);
+            this.sideContent.Controls.Add(this.lblEndereco);
+            this.sideContent.Controls.Add(this.txtEndereco);
+            this.sideContent.Controls.Add(this.lblTaxa);
+            this.sideContent.Controls.Add(this.numTaxa);
+            this.sideContent.Controls.Add(this.pnlDiv2);
+            this.sideContent.Controls.Add(this.lblSecPagamento);
+            this.sideContent.Controls.Add(this.cmbPagamento);
+            this.sideContent.Controls.Add(this.lblTroco);
+            this.sideContent.Controls.Add(this.numTroco);
+            this.sideContent.Controls.Add(this.lblTrocoInfo);
+            this.sideContent.Controls.Add(this.pnlDiv3);
+            this.sideContent.Controls.Add(this.lblSecObs);
+            this.sideContent.Controls.Add(this.txtObs);
+            this.sidebar.Dock = System.Windows.Forms.DockStyle.Left;
+            this.sidebar.Width = 310;
+            this.sidebar.BackColor = System.Drawing.Color.FromArgb(17, 24, 50);
+            this.sidebar.Controls.Add(this.sideContent);
+            this.sideDiv.Dock = System.Windows.Forms.DockStyle.Left;
+            this.sideDiv.Width = 1;
+            this.sideDiv.BackColor = System.Drawing.Color.FromArgb(34, 46, 82);
 
-            cmbEntrega.Items.AddRange(new object[] { "Retirada", "Entrega" });
-            cmbEntrega.SelectedIndex = 0;
-            cmbEntrega.SelectedIndexChanged += (_, __) => AtualizarVisibilidade();
-            cmbPagamento.Items.AddRange(new object[] { "Dinheiro", "Cart\u00e3o", "Pix" });
-            cmbPagamento.SelectedIndex = 0;
-            cmbPagamento.SelectedIndexChanged += (_, __) => AtualizarVisibilidade();
-            numTroco.ValueChanged    += (_, __) => AtualizarTrocoInfo();
-            numTaxa.ValueChanged     += (_, __) => AtualizarTotal();
-            numUnitario.ValueChanged += NumUnitario_ValueChanged;
-            txtBuscaProduto.TextChanged += TxtBusca_TextChanged;
+            // pnlAddItem
+            this.pnlAddItem.Dock = System.Windows.Forms.DockStyle.Top;
+            this.pnlAddItem.Height = 84;
+            this.pnlAddItem.BackColor = System.Drawing.Color.FromArgb(22, 31, 60);
+            this.pnlAddItem.SizeChanged += new System.EventHandler(this.PnlAddItem_SizeChanged);
+            this.lblSecAddItem.Text = "ADICIONAR ITEM";
+            this.lblSecAddItem.ForeColor = System.Drawing.Color.FromArgb(80, 105, 160);
+            this.lblSecAddItem.AutoSize = true;
+            this.lblSecAddItem.Font = new System.Drawing.Font("Segoe UI", 7.5F, System.Drawing.FontStyle.Bold);
+            this.lblSecAddItem.SetBounds(14, 10, 200, 16);
+            this.txtBuscaProduto.BackColor = System.Drawing.Color.FromArgb(14, 21, 46);
+            this.txtBuscaProduto.ForeColor = System.Drawing.Color.White;
+            this.txtBuscaProduto.Font = new System.Drawing.Font("Segoe UI", 9.5F);
+            this.txtBuscaProduto.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.txtBuscaProduto.PlaceholderText = "Pesquisar produto...";
+            this.txtBuscaProduto.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
+            this.txtBuscaProduto.SetBounds(14, 28, 400, 26);
+            this.txtBuscaProduto.TextChanged += new System.EventHandler(this.TxtBusca_TextChanged);
+            this.btnBuscarProduto.Text = "Buscar";
+            this.btnBuscarProduto.BackColor = System.Drawing.Color.FromArgb(38, 50, 90);
+            this.btnBuscarProduto.ForeColor = System.Drawing.Color.FromArgb(110, 130, 175);
+            this.btnBuscarProduto.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnBuscarProduto.Font = new System.Drawing.Font("Segoe UI", 8.5F);
+            this.btnBuscarProduto.Height = 26; this.btnBuscarProduto.Width = 64;
+            this.btnBuscarProduto.FlatAppearance.BorderSize = 1;
+            this.btnBuscarProduto.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(34, 46, 82);
+            this.btnBuscarProduto.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
+            this.btnBuscarProduto.Click += new System.EventHandler(this.BtnBuscarProduto_Click);
+            this.lQtde.Text = "Qtde";
+            this.lQtde.ForeColor = System.Drawing.Color.FromArgb(110, 130, 175);
+            this.lQtde.AutoSize = true;
+            this.lQtde.Font = new System.Drawing.Font("Segoe UI", 8.5F);
+            this.numQtde.BackColor = System.Drawing.Color.FromArgb(14, 21, 46);
+            this.numQtde.ForeColor = System.Drawing.Color.White;
+            this.numQtde.Font = new System.Drawing.Font("Segoe UI", 9.5F);
+            this.numQtde.Minimum = 1; this.numQtde.Maximum = 999; this.numQtde.Value = 1;
+            this.numQtde.Width = 68;
+            this.lVal.Text = "Valor";
+            this.lVal.ForeColor = System.Drawing.Color.FromArgb(110, 130, 175);
+            this.lVal.AutoSize = true;
+            this.lVal.Font = new System.Drawing.Font("Segoe UI", 8.5F);
+            this.numUnitario.BackColor = System.Drawing.Color.FromArgb(14, 21, 46);
+            this.numUnitario.ForeColor = System.Drawing.Color.White;
+            this.numUnitario.Font = new System.Drawing.Font("Segoe UI", 9.5F);
+            this.numUnitario.DecimalPlaces = 2; this.numUnitario.Maximum = 99999;
+            this.numUnitario.Width = 90;
+            this.numUnitario.ValueChanged += new System.EventHandler(this.NumUnitario_ValueChanged);
+            this.lDsc.Text = "Desc.%";
+            this.lDsc.ForeColor = System.Drawing.Color.FromArgb(110, 130, 175);
+            this.lDsc.AutoSize = true;
+            this.lDsc.Font = new System.Drawing.Font("Segoe UI", 8.5F);
+            this.numDescontoItem.BackColor = System.Drawing.Color.FromArgb(14, 21, 46);
+            this.numDescontoItem.ForeColor = System.Drawing.Color.White;
+            this.numDescontoItem.Font = new System.Drawing.Font("Segoe UI", 9.5F);
+            this.numDescontoItem.DecimalPlaces = 1; this.numDescontoItem.Maximum = 100;
+            this.numDescontoItem.Width = 68;
+            this.lblDesconto.ForeColor = System.Drawing.Color.FromArgb(231, 76, 60);
+            this.lblDesconto.Font = new System.Drawing.Font("Segoe UI", 8.5F);
+            this.lblDesconto.AutoSize = true; this.lblDesconto.Visible = false;
+            this.btnAdd.Text = "+  Adicionar";
+            this.btnAdd.Height = 26; this.btnAdd.Width = 124;
+            this.btnAdd.BackColor = System.Drawing.Color.FromArgb(39, 174, 96);
+            this.btnAdd.ForeColor = System.Drawing.Color.White;
+            this.btnAdd.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnAdd.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
+            this.btnAdd.FlatAppearance.BorderSize = 0;
+            this.btnAdd.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
+            this.btnAdd.Click += new System.EventHandler(this.BtnAdicionarItem_Click);
+            this.pnlAddItem.Controls.Add(this.lblSecAddItem);
+            this.pnlAddItem.Controls.Add(this.txtBuscaProduto);
+            this.pnlAddItem.Controls.Add(this.btnBuscarProduto);
+            this.pnlAddItem.Controls.Add(this.lQtde);
+            this.pnlAddItem.Controls.Add(this.numQtde);
+            this.pnlAddItem.Controls.Add(this.lVal);
+            this.pnlAddItem.Controls.Add(this.numUnitario);
+            this.pnlAddItem.Controls.Add(this.lDsc);
+            this.pnlAddItem.Controls.Add(this.numDescontoItem);
+            this.pnlAddItem.Controls.Add(this.lblDesconto);
+            this.pnlAddItem.Controls.Add(this.btnAdd);
 
-            // TOP BAR
-            var topBar = new Panel { Dock = DockStyle.Top, Height = 44, BackColor = cPanel };
-            topBar.Controls.Add(new Label
-            {
-                Text = "Pedido Manual", ForeColor = cWhite,
-                Font = new Font("Segoe UI", 11F, FontStyle.Bold), AutoSize = true, Top = 10, Left = 16
-            });
+            // gridItens
+            this.gridItens.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.gridItens.ReadOnly = true; this.gridItens.AllowUserToAddRows = false;
+            this.gridItens.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
+            this.gridItens.RowHeadersVisible = false; this.gridItens.MultiSelect = false;
+            this.gridItens.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
+            this.gridItens.BackgroundColor = System.Drawing.Color.FromArgb(11, 16, 36);
+            this.gridItens.GridColor = System.Drawing.Color.FromArgb(34, 46, 82);
+            this.gridItens.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.gridItens.Font = new System.Drawing.Font("Segoe UI", 9F);
+            this.gridItens.RowTemplate.Height = 32;
+            this.gridItens.CellBorderStyle = System.Windows.Forms.DataGridViewCellBorderStyle.SingleHorizontal;
+            this.gridItens.DefaultCellStyle.BackColor = System.Drawing.Color.FromArgb(11, 16, 36);
+            this.gridItens.DefaultCellStyle.ForeColor = System.Drawing.Color.White;
+            this.gridItens.DefaultCellStyle.SelectionBackColor = System.Drawing.Color.FromArgb(30, 70, 120);
+            this.gridItens.DefaultCellStyle.SelectionForeColor = System.Drawing.Color.White;
+            this.gridItens.DefaultCellStyle.Padding = new System.Windows.Forms.Padding(6, 0, 0, 0);
+            this.gridItens.AlternatingRowsDefaultCellStyle.BackColor = System.Drawing.Color.FromArgb(14, 20, 45);
+            this.gridItens.ColumnHeadersDefaultCellStyle.BackColor = System.Drawing.Color.FromArgb(22, 31, 60);
+            this.gridItens.ColumnHeadersDefaultCellStyle.ForeColor = System.Drawing.Color.FromArgb(110, 130, 175);
+            this.gridItens.ColumnHeadersDefaultCellStyle.Font = new System.Drawing.Font("Segoe UI", 8F, System.Drawing.FontStyle.Bold);
+            this.gridItens.ColumnHeadersHeight = 30;
+            this.gridItens.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
+            this.gridItens.Columns.Add(new System.Windows.Forms.DataGridViewTextBoxColumn { Name = "Nome",     HeaderText = "Produto",  FillWeight = 45 });
+            this.gridItens.Columns.Add(new System.Windows.Forms.DataGridViewTextBoxColumn { Name = "Qtde",     HeaderText = "Qtde",     FillWeight = 8  });
+            this.gridItens.Columns.Add(new System.Windows.Forms.DataGridViewTextBoxColumn { Name = "Unitario", HeaderText = "Valor",    FillWeight = 12 });
+            this.gridItens.Columns.Add(new System.Windows.Forms.DataGridViewTextBoxColumn { Name = "Desconto", HeaderText = "Desc.",    FillWeight = 10 });
+            this.gridItens.Columns.Add(new System.Windows.Forms.DataGridViewTextBoxColumn { Name = "Subtotal", HeaderText = "Subtotal", FillWeight = 14 });
+            this.gridItens.Columns.Add(new System.Windows.Forms.DataGridViewButtonColumn { Name = "Remover", HeaderText = "", Text = "\u2715", UseColumnTextForButtonValue = true, FillWeight = 7, MinimumWidth = 42, FlatStyle = System.Windows.Forms.FlatStyle.Flat });
+            this.gridItens.CellClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.GridItens_CellClick);
 
-            // FOOTER
-            var pnlRodape = new Panel { Dock = DockStyle.Bottom, Height = 54, BackColor = cPanel };
-            btnSal = new Button
-            {
-                Text = "Salvar Pedido", Height = 34, Width = 148, Top = 10,
-                BackColor = cAccent, ForeColor = cWhite, FlatStyle = FlatStyle.Flat,
-                Font = new Font("Segoe UI", 9.5F, FontStyle.Bold), Cursor = Cursors.Hand
-            };
-            btnSal.FlatAppearance.BorderSize = 0;
-            btnSal.Click += BtnSalvar_Click;
-            btnCanc = new Button
-            {
-                Text = "Cancelar", Height = 34, Width = 98, Top = 10,
-                BackColor = Color.FromArgb(40, 50, 85), ForeColor = Color.FromArgb(120, 140, 180),
-                FlatStyle = FlatStyle.Flat, Font = new Font("Segoe UI", 9.5F), Cursor = Cursors.Hand
-            };
-            btnCanc.FlatAppearance.BorderSize = 0;
-            btnCanc.Click += (_, __) => Close();
-            lblTotal.Text = "R$ 0,00";
-            lblTotal.Font = new Font("Segoe UI", 16F, FontStyle.Bold);
-            lblTotal.ForeColor = cGreen; lblTotal.AutoSize = true; lblTotal.Top = 12;
-            var lblTotalTag = new Label { Text = "Total", ForeColor = cLbl, Font = fntLbl, AutoSize = true, Top = 18 };
-            void LayoutFooter() {
-                int cx = (pnlRodape.Width - btnSal.Width - 8 - btnCanc.Width) / 2;
-                btnSal.Left = cx; btnCanc.Left = cx + btnSal.Width + 8;
-                lblTotal.Left = pnlRodape.Width - lblTotal.PreferredWidth - 20;
-                lblTotalTag.Left = lblTotal.Left - lblTotalTag.PreferredWidth - 6;
-            }
-            pnlRodape.SizeChanged  += (_, __) => LayoutFooter();
-            pnlRodape.HandleCreated += (_, __) => LayoutFooter();
-            pnlRodape.Controls.AddRange(new Control[] { lblTotalTag, lblTotal, btnSal, btnCanc });
+            // rightArea
+            this.rightArea.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.rightArea.BackColor = System.Drawing.Color.FromArgb(11, 16, 36);
+            this.rightArea.Controls.Add(this.gridItens);
+            this.rightArea.Controls.Add(this.pnlAddItem);
 
-            // MAIN SPLIT
-            var mainArea = new Panel { Dock = DockStyle.Fill, BackColor = cBg };
+            // mainArea
+            this.mainArea.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.mainArea.BackColor = System.Drawing.Color.FromArgb(11, 16, 36);
+            this.mainArea.Controls.Add(this.rightArea);
+            this.mainArea.Controls.Add(this.sideDiv);
+            this.mainArea.Controls.Add(this.sidebar);
 
-            // SIDEBAR
-            var sidebar = new Panel { Dock = DockStyle.Left, Width = 310, BackColor = cPanel };
-            var sideContent = new Panel { Dock = DockStyle.Fill, BackColor = cPanel };
-
-            const int sx = 14, sw = 282, sh = 26, sg = 6, ss = 10;
-            int sy = 12;
-
-            // CLIENTE
-            var s1 = MkSec("Cliente");
-            s1.SetBounds(sx, sy, sw, 16); sideContent.Controls.Add(s1); sy += 20;
-            var lNome = MkLbl("Nome / Raz\u00e3o Social");
-            lNome.SetBounds(sx, sy, sw, 16); sideContent.Controls.Add(lNome); sy += 18;
-            txtNome.SetBounds(sx, sy, sw - 68, sh); sideContent.Controls.Add(txtNome);
-            btnSelecionarCliente.Text = "Buscar";
-            btnSelecionarCliente.BackColor = cAccent; btnSelecionarCliente.ForeColor = cWhite;
-            btnSelecionarCliente.FlatStyle = FlatStyle.Flat;
-            btnSelecionarCliente.Font = new Font("Segoe UI", 8F);
-            btnSelecionarCliente.FlatAppearance.BorderSize = 0;
-            btnSelecionarCliente.Cursor = Cursors.Hand;
-            btnSelecionarCliente.SetBounds(sx + sw - 64, sy, 64, sh);
-            btnSelecionarCliente.Click += BtnSelecionarCliente_Click;
-            sideContent.Controls.Add(btnSelecionarCliente);
-            sy += sh + sg;
-            var lTel = MkLbl("Telefone");
-            lTel.SetBounds(sx, sy, sw, 16); sideContent.Controls.Add(lTel); sy += 18;
-            txtTelefone.SetBounds(sx, sy, sw, sh); sideContent.Controls.Add(txtTelefone);
-            sy += sh + ss;
-            var d1 = MkDiv(); d1.SetBounds(0, sy, 310, 1); sideContent.Controls.Add(d1); sy += 1 + ss;
-
-            // ENTREGA
-            var s2 = MkSec("Entrega");
-            s2.SetBounds(sx, sy, sw, 16); sideContent.Controls.Add(s2); sy += 20;
-            cmbEntrega.SetBounds(sx, sy, sw, sh); sideContent.Controls.Add(cmbEntrega);
-            sy += sh + sg;
-            lblEndereco.Text = "Endere\u00e7o"; lblEndereco.ForeColor = cLbl; lblEndereco.AutoSize = true; lblEndereco.Font = fntLbl;
-            lblEndereco.SetBounds(sx, sy, sw, 16); sideContent.Controls.Add(lblEndereco); sy += 18;
-            txtEndereco.SetBounds(sx, sy, sw, sh); sideContent.Controls.Add(txtEndereco);
-            sy += sh + sg;
-            lblTaxa.Text = "Taxa de Entrega (R$)"; lblTaxa.ForeColor = cLbl; lblTaxa.AutoSize = true; lblTaxa.Font = fntLbl;
-            lblTaxa.SetBounds(sx, sy, sw, 16); sideContent.Controls.Add(lblTaxa); sy += 18;
-            numTaxa.SetBounds(sx, sy, 130, sh); sideContent.Controls.Add(numTaxa);
-            sy += sh + ss;
-            var d2 = MkDiv(); d2.SetBounds(0, sy, 310, 1); sideContent.Controls.Add(d2); sy += 1 + ss;
-
-            // PAGAMENTO
-            var s3 = MkSec("Pagamento");
-            s3.SetBounds(sx, sy, sw, 16); sideContent.Controls.Add(s3); sy += 20;
-            cmbPagamento.SetBounds(sx, sy, sw, sh); sideContent.Controls.Add(cmbPagamento);
-            sy += sh + sg;
-            lblTroco.Text = "Troco para (R$)"; lblTroco.ForeColor = cLbl; lblTroco.AutoSize = true; lblTroco.Font = fntLbl;
-            lblTroco.SetBounds(sx, sy, sw, 16); sideContent.Controls.Add(lblTroco); sy += 18;
-            numTroco.SetBounds(sx, sy, 130, sh); sideContent.Controls.Add(numTroco);
-            lblTrocoInfo.Text = ""; lblTrocoInfo.ForeColor = cGreen; lblTrocoInfo.AutoSize = true;
-            lblTrocoInfo.Font = new Font("Segoe UI", 8.5F, FontStyle.Bold);
-            lblTrocoInfo.SetBounds(sx + 140, sy + 4, 140, 18); sideContent.Controls.Add(lblTrocoInfo);
-            sy += sh + ss;
-            var d3 = MkDiv(); d3.SetBounds(0, sy, 310, 1); sideContent.Controls.Add(d3); sy += 1 + ss;
-
-            // OBSERVACOES
-            var s4 = MkSec("Observa\u00e7\u00f5es");
-            s4.SetBounds(sx, sy, sw, 16); sideContent.Controls.Add(s4); sy += 20;
-            txtObs.SetBounds(sx, sy, sw, sh); sideContent.Controls.Add(txtObs);
-
-            sidebar.Controls.Add(sideContent);
-            var sideDiv = new Panel { Dock = DockStyle.Left, Width = 1, BackColor = cBorder };
-
-            // RIGHT AREA
-            var rightArea = new Panel { Dock = DockStyle.Fill, BackColor = cBg };
-
-            // ADD ITEM PANEL
-            var pnlAddItem = new Panel { Dock = DockStyle.Top, Height = 84, BackColor = cCard };
-            var aiSec = MkSec("Adicionar Item");
-            aiSec.SetBounds(14, 10, 200, 16); pnlAddItem.Controls.Add(aiSec);
-
-            txtBuscaProduto.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-            btnBuscarProduto.Text = "Buscar";
-            btnBuscarProduto.BackColor = Color.FromArgb(38, 50, 90); btnBuscarProduto.ForeColor = cLbl;
-            btnBuscarProduto.FlatStyle = FlatStyle.Flat; btnBuscarProduto.Font = fntLbl;
-            btnBuscarProduto.Height = 26; btnBuscarProduto.Width = 64;
-            btnBuscarProduto.FlatAppearance.BorderSize = 1; btnBuscarProduto.FlatAppearance.BorderColor = cBorder;
-            btnBuscarProduto.Cursor = Cursors.Hand;
-            btnBuscarProduto.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            btnBuscarProduto.Click += BtnBuscarProduto_Click;
-
-            var lQtde = MkLbl("Qtde");
-            numQtde.Width = 68;
-            var lVal  = MkLbl("Valor");
-            numUnitario.Width = 90;
-            var lDsc  = MkLbl("Desc.%");
-            numDescontoItem.Width = 68;
-            lblDesconto.ForeColor = Color.FromArgb(231, 76, 60); lblDesconto.Font = fntLbl;
-            lblDesconto.AutoSize = true; lblDesconto.Visible = false;
-
-            btnAdd = new Button
-            {
-                Text = "+  Adicionar", Height = 26, Width = 124,
-                BackColor = cGreen, ForeColor = cWhite, FlatStyle = FlatStyle.Flat,
-                Font = new Font("Segoe UI", 9F, FontStyle.Bold), Cursor = Cursors.Hand,
-                Anchor = AnchorStyles.Top | AnchorStyles.Right
-            };
-            btnAdd.FlatAppearance.BorderSize = 0;
-            btnAdd.Click += BtnAdicionarItem_Click;
-
-            pnlAddItem.Controls.AddRange(new Control[]
-            {
-                txtBuscaProduto, btnBuscarProduto,
-                lQtde, numQtde, lVal, numUnitario, lDsc, numDescontoItem, lblDesconto, btnAdd
-            });
-
-            pnlAddItem.SizeChanged += (_, __) =>
-            {
-                int pw = pnlAddItem.Width - 14;
-                txtBuscaProduto.SetBounds(14, 28, pw - 82, 26);
-                btnBuscarProduto.SetBounds(pw - 64, 28, 64, 26);
-                int x = 14;
-                lQtde.SetBounds(x, 60, 34, 18); x += 36;
-                numQtde.SetBounds(x, 57, 68, 26); x += 76;
-                lVal.SetBounds(x, 60, 36, 18); x += 38;
-                numUnitario.SetBounds(x, 57, 90, 26); x += 98;
-                lDsc.SetBounds(x, 60, 44, 18); x += 46;
-                numDescontoItem.SetBounds(x, 57, 68, 26); x += 76;
-                lblDesconto.SetBounds(x, 61, 120, 16);
-                btnAdd.SetBounds(pw - 110, 57, 124, 26);
-            };
-
-            // GRID
-            gridItens.Dock = DockStyle.Fill;
-            gridItens.ReadOnly = true; gridItens.AllowUserToAddRows = false;
-            gridItens.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-            gridItens.RowHeadersVisible = false; gridItens.MultiSelect = false;
-            gridItens.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
-            gridItens.BackgroundColor = cBg; gridItens.GridColor = cBorder;
-            gridItens.BorderStyle = BorderStyle.None;
-            gridItens.Font = new Font("Segoe UI", 9F);
-            gridItens.RowTemplate.Height = 32;
-            gridItens.CellBorderStyle = DataGridViewCellBorderStyle.SingleHorizontal;
-            gridItens.DefaultCellStyle.BackColor           = cBg;
-            gridItens.DefaultCellStyle.ForeColor           = cWhite;
-            gridItens.DefaultCellStyle.SelectionBackColor  = Color.FromArgb(30, 70, 120);
-            gridItens.DefaultCellStyle.SelectionForeColor  = cWhite;
-            gridItens.DefaultCellStyle.Padding             = new Padding(6, 0, 0, 0);
-            gridItens.AlternatingRowsDefaultCellStyle.BackColor = Color.FromArgb(14, 20, 45);
-            gridItens.ColumnHeadersDefaultCellStyle.BackColor   = cCard;
-            gridItens.ColumnHeadersDefaultCellStyle.ForeColor   = cLbl;
-            gridItens.ColumnHeadersDefaultCellStyle.Font        = new Font("Segoe UI", 8F, FontStyle.Bold);
-            gridItens.ColumnHeadersHeight = 30;
-            gridItens.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
-            gridItens.Columns.Add(new DataGridViewTextBoxColumn { Name = "Nome",     HeaderText = "Produto",  FillWeight = 45 });
-            gridItens.Columns.Add(new DataGridViewTextBoxColumn { Name = "Qtde",     HeaderText = "Qtde",     FillWeight = 8  });
-            gridItens.Columns.Add(new DataGridViewTextBoxColumn { Name = "Unitario", HeaderText = "Valor",    FillWeight = 12 });
-            gridItens.Columns.Add(new DataGridViewTextBoxColumn { Name = "Desconto", HeaderText = "Desc.",    FillWeight = 10 });
-            gridItens.Columns.Add(new DataGridViewTextBoxColumn { Name = "Subtotal", HeaderText = "Subtotal", FillWeight = 14 });
-            var colDel = new DataGridViewButtonColumn
-            {
-                Name = "Remover", HeaderText = "", Text = "\u2715",
-                UseColumnTextForButtonValue = true, FillWeight = 7, MinimumWidth = 42, FlatStyle = FlatStyle.Flat
-            };
-            gridItens.Columns.Add(colDel);
-            gridItens.CellClick += GridItens_CellClick;
-
-            rightArea.Controls.Add(gridItens);
-            rightArea.Controls.Add(pnlAddItem);
-
-            mainArea.Controls.Add(rightArea);
-            mainArea.Controls.Add(sideDiv);
-            mainArea.Controls.Add(sidebar);
-
-            Controls.Add(mainArea);
-            Controls.Add(topBar);
-            Controls.Add(pnlRodape);
-
-            AtualizarVisibilidade();
+            // Form
+            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.ClientSize = new System.Drawing.Size(1050, 680);
+            this.MinimumSize = new System.Drawing.Size(900, 560);
+            this.BackColor = System.Drawing.Color.FromArgb(11, 16, 36);
+            this.ForeColor = System.Drawing.Color.White;
+            this.Font = new System.Drawing.Font("Segoe UI", 9F);
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
+            this.Text = "Novo Pedido Manual";
+            this.Controls.Add(this.mainArea);
+            this.Controls.Add(this.topBar);
+            this.Controls.Add(this.pnlRodape);
+            this.ResumeLayout(false);
         }
 
-        private TextBox       txtNome;
-        private Button        btnSelecionarCliente;
-        private TextBox       txtTelefone;
-        private ComboBox      cmbEntrega;
-        private TextBox       txtEndereco;
-        private Label         lblEndereco;
-        private ComboBox      cmbPagamento;
-        private NumericUpDown numTroco;
-        private Label         lblTroco;
-        private Label         lblTrocoInfo;
-        private NumericUpDown numTaxa;
-        private Label         lblTaxa;
-        private TextBox       txtObs;
-        private TextBox       txtBuscaProduto;
-        private Button        btnBuscarProduto;
-        private Label         lblDesconto;
-        private NumericUpDown numQtde;
-        private NumericUpDown numUnitario;
-        private NumericUpDown numDescontoItem;
-        private DataGridView  gridItens;
-        private Label         lblTotal;
-        internal Button       btnSal;
-        internal Button       btnCanc;
-        internal Button       btnAdd;
+        private void PnlRodape_SizeChanged(object sender, System.EventArgs e)
+        {
+            int cx = (pnlRodape.Width - btnSal.Width - 8 - btnCanc.Width) / 2;
+            btnSal.Left = cx; btnCanc.Left = cx + btnSal.Width + 8;
+            lblTotal.Left = pnlRodape.Width - lblTotal.PreferredWidth - 20;
+            lblTotalTag.Left = lblTotal.Left - lblTotalTag.PreferredWidth - 6;
+        }
+
+        private void PnlAddItem_SizeChanged(object sender, System.EventArgs e)
+        {
+            int pw = pnlAddItem.Width - 14;
+            txtBuscaProduto.SetBounds(14, 28, pw - 82, 26);
+            btnBuscarProduto.SetBounds(pw - 64, 28, 64, 26);
+            int x = 14;
+            lQtde.SetBounds(x, 60, 34, 18); x += 36;
+            numQtde.SetBounds(x, 57, 68, 26); x += 76;
+            lVal.SetBounds(x, 60, 36, 18); x += 38;
+            numUnitario.SetBounds(x, 57, 90, 26); x += 98;
+            lDsc.SetBounds(x, 60, 44, 18); x += 46;
+            numDescontoItem.SetBounds(x, 57, 68, 26); x += 76;
+            lblDesconto.SetBounds(x, 61, 120, 16);
+            btnAdd.SetBounds(pw - 110, 57, 124, 26);
+        }
+
+        private void CmbEntrega_SelectedIndexChanged(object sender, System.EventArgs e) { AtualizarVisibilidade(); }
+        private void CmbPagamento_SelectedIndexChanged(object sender, System.EventArgs e) { AtualizarVisibilidade(); }
+        private void NumTroco_ValueChanged(object sender, System.EventArgs e) { AtualizarTrocoInfo(); }
+        private void NumTaxa_ValueChanged(object sender, System.EventArgs e) { AtualizarTotal(); }
+        private void BtnCanc_Click(object sender, System.EventArgs e) { Close(); }
+
+        private System.Windows.Forms.Panel         topBar;
+        private System.Windows.Forms.Panel         pnlRodape;
+        private System.Windows.Forms.Panel         mainArea;
+        private System.Windows.Forms.Panel         sidebar;
+        private System.Windows.Forms.Panel         sideContent;
+        private System.Windows.Forms.Panel         sideDiv;
+        private System.Windows.Forms.Panel         rightArea;
+        private System.Windows.Forms.Panel         pnlAddItem;
+        private System.Windows.Forms.Panel         pnlDiv1;
+        private System.Windows.Forms.Panel         pnlDiv2;
+        private System.Windows.Forms.Panel         pnlDiv3;
+        private System.Windows.Forms.Label         lblTituloPed;
+        private System.Windows.Forms.Label         lblTotalTag;
+        private System.Windows.Forms.Label         lblSecCliente;
+        private System.Windows.Forms.Label         lblSecEntrega;
+        private System.Windows.Forms.Label         lblSecPagamento;
+        private System.Windows.Forms.Label         lblSecObs;
+        private System.Windows.Forms.Label         lblSecAddItem;
+        private System.Windows.Forms.Label         lNome;
+        private System.Windows.Forms.Label         lTel;
+        private System.Windows.Forms.Label         lQtde;
+        private System.Windows.Forms.Label         lVal;
+        private System.Windows.Forms.Label         lDsc;
+        private System.Windows.Forms.TextBox       txtNome;
+        private System.Windows.Forms.Button        btnSelecionarCliente;
+        private System.Windows.Forms.TextBox       txtTelefone;
+        private System.Windows.Forms.ComboBox      cmbEntrega;
+        private System.Windows.Forms.TextBox       txtEndereco;
+        private System.Windows.Forms.Label         lblEndereco;
+        private System.Windows.Forms.ComboBox      cmbPagamento;
+        private System.Windows.Forms.NumericUpDown numTroco;
+        private System.Windows.Forms.Label         lblTroco;
+        private System.Windows.Forms.Label         lblTrocoInfo;
+        private System.Windows.Forms.NumericUpDown numTaxa;
+        private System.Windows.Forms.Label         lblTaxa;
+        private System.Windows.Forms.TextBox       txtObs;
+        private System.Windows.Forms.TextBox       txtBuscaProduto;
+        private System.Windows.Forms.Button        btnBuscarProduto;
+        private System.Windows.Forms.Label         lblDesconto;
+        private System.Windows.Forms.NumericUpDown numQtde;
+        private System.Windows.Forms.NumericUpDown numUnitario;
+        private System.Windows.Forms.NumericUpDown numDescontoItem;
+        private System.Windows.Forms.DataGridView  gridItens;
+        private System.Windows.Forms.Label         lblTotal;
+        internal System.Windows.Forms.Button       btnSal;
+        internal System.Windows.Forms.Button       btnCanc;
+        internal System.Windows.Forms.Button       btnAdd;
     }
 }

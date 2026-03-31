@@ -1,4 +1,4 @@
-using System.Drawing;
+﻿using System.Drawing;
 using System.Windows.Forms;
 
 namespace Pedeai.Forms
@@ -6,335 +6,248 @@ namespace Pedeai.Forms
     partial class frmEntradaMercadoria
     {
         private System.ComponentModel.IContainer components = null;
-
         protected override void Dispose(bool disposing)
         {
             if (disposing && components != null) components.Dispose();
             base.Dispose(disposing);
         }
-
         private void InitializeComponent()
         {
+            this.gridEntradas      = new System.Windows.Forms.DataGridView();
+            this.gridItens         = new System.Windows.Forms.DataGridView();
+            this.gridParcelas      = new System.Windows.Forms.DataGridView();
+            this.pnlNovaEntrada    = new System.Windows.Forms.Panel();
+            this.lblNovaEntradaTitulo = new System.Windows.Forms.Label();
+            this.lblTotal          = new System.Windows.Forms.Label();
+            this.numParcelas       = new System.Windows.Forms.NumericUpDown();
+            this.dtpPrimVencimento = new System.Windows.Forms.DateTimePicker();
+            this.btnGerarParcelas  = new System.Windows.Forms.Button();
+            this.dtpDe             = new System.Windows.Forms.DateTimePicker();
+            this.dtpAte            = new System.Windows.Forms.DateTimePicker();
+            this.btnFiltrar        = new System.Windows.Forms.Button();
+            this.btnLimparFiltro   = new System.Windows.Forms.Button();
+            this.btnNovaEntrada    = new System.Windows.Forms.Button();
+            this.btnCancelarSel    = new System.Windows.Forms.Button();
+            this.txtFornCod        = new System.Windows.Forms.TextBox();
+            this.txtFornNome       = new System.Windows.Forms.TextBox();
+            this.dtpData           = new System.Windows.Forms.DateTimePicker();
+            this.txtNumDoc         = new System.Windows.Forms.TextBox();
+            this.txtObservacoes    = new System.Windows.Forms.TextBox();
+            this.txtProdCod        = new System.Windows.Forms.TextBox();
+            this.txtProdNome       = new System.Windows.Forms.TextBox();
+            this.numQtde           = new System.Windows.Forms.NumericUpDown();
+            this.numCustoItem      = new System.Windows.Forms.NumericUpDown();
+            this.chkAtualizarCusto = new System.Windows.Forms.CheckBox();
+            this.btnAdicionarItem  = new System.Windows.Forms.Button();
+            this.btnRemoverItem    = new System.Windows.Forms.Button();
+            this.btnConfirmarEntrada = new System.Windows.Forms.Button();
+            this.btnFecharForm     = new System.Windows.Forms.Button();
+            this.pnlTop            = new System.Windows.Forms.Panel();
+            this.pnlFiltro         = new System.Windows.Forms.Panel();
+            this.pnlCabecalho      = new System.Windows.Forms.Panel();
+            this.pnlObs            = new System.Windows.Forms.Panel();
+            this.pnlAddItem        = new System.Windows.Forms.Panel();
+            this.pnlParcelasOuter  = new System.Windows.Forms.Panel();
+            this.pnlParcelasTop    = new System.Windows.Forms.Panel();
+            this.pnlRodape         = new System.Windows.Forms.Panel();
             this.SuspendLayout();
-
-            // ── Cores base ───────────────────────────────────────────────
-            var corFundo   = Color.FromArgb(15, 22, 45);
-            var corCard    = Color.FromArgb(28, 37, 65);
-            var corTopBar  = Color.FromArgb(36, 48, 82);
-            var corFiltro  = Color.FromArgb(22, 30, 55);
-            var corTexto   = Color.White;
-            var corAzul    = Color.FromArgb(52, 152, 219);
-            var corVerde   = Color.FromArgb(39, 174, 96);
-            var corVermelho= Color.FromArgb(192, 57, 43);
-            var corCinza   = Color.FromArgb(80, 95, 130);
-            var corGrid    = Color.FromArgb(20, 28, 55);
-
+            // gridEntradas
+            this.gridEntradas.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.gridEntradas.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
+            this.gridEntradas.ReadOnly = true; this.gridEntradas.AllowUserToAddRows = false;
+            this.gridEntradas.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
+            this.gridEntradas.RowHeadersVisible = false;
+            this.gridEntradas.BackgroundColor = System.Drawing.Color.FromArgb(20,28,55);
+            this.gridEntradas.DefaultCellStyle.BackColor = System.Drawing.Color.FromArgb(20,28,55);
+            this.gridEntradas.DefaultCellStyle.ForeColor = System.Drawing.Color.White;
+            this.gridEntradas.GridColor = System.Drawing.Color.FromArgb(40,55,90);
+            this.gridEntradas.Font = new System.Drawing.Font("Segoe UI",9F); this.gridEntradas.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.gridEntradas.ColumnHeadersDefaultCellStyle.BackColor = System.Drawing.Color.FromArgb(36,48,82);
+            this.gridEntradas.ColumnHeadersDefaultCellStyle.ForeColor = System.Drawing.Color.White;
+            this.gridEntradas.DataError += new System.Windows.Forms.DataGridViewDataErrorEventHandler(this.Grid_DataError);
+            // pnlTop
+            this.pnlTop.Dock = System.Windows.Forms.DockStyle.Top; this.pnlTop.Height = 48;
+            this.pnlTop.BackColor = System.Drawing.Color.FromArgb(36,48,82);
+            this.btnNovaEntrada.Text="+Nova Entrada"; this.btnNovaEntrada.Left=8; this.btnNovaEntrada.Top=10; this.btnNovaEntrada.Width=130; this.btnNovaEntrada.Height=28;
+            this.btnNovaEntrada.BackColor=System.Drawing.Color.FromArgb(39,174,96); this.btnNovaEntrada.ForeColor=System.Drawing.Color.White;
+            this.btnNovaEntrada.FlatStyle=System.Windows.Forms.FlatStyle.Flat; this.btnNovaEntrada.FlatAppearance.BorderSize=0;
+            this.btnCancelarSel.Text="\u274C Cancelar"; this.btnCancelarSel.Left=148; this.btnCancelarSel.Top=10; this.btnCancelarSel.Width=140; this.btnCancelarSel.Height=28;
+            this.btnCancelarSel.BackColor=System.Drawing.Color.FromArgb(192,57,43); this.btnCancelarSel.ForeColor=System.Drawing.Color.White;
+            this.btnCancelarSel.FlatStyle=System.Windows.Forms.FlatStyle.Flat; this.btnCancelarSel.FlatAppearance.BorderSize=0;
+            this.pnlTop.Controls.Add(this.btnNovaEntrada); this.pnlTop.Controls.Add(this.btnCancelarSel);
+            // pnlFiltro
+            this.pnlFiltro.Dock=System.Windows.Forms.DockStyle.Top; this.pnlFiltro.Height=42;
+            this.pnlFiltro.BackColor=System.Drawing.Color.FromArgb(22,30,55);
+            this.dtpDe.Left=32; this.dtpDe.Top=8; this.dtpDe.Width=120; this.dtpDe.Format=System.Windows.Forms.DateTimePickerFormat.Short;
+            this.dtpAte.Left=185; this.dtpAte.Top=8; this.dtpAte.Width=120; this.dtpAte.Format=System.Windows.Forms.DateTimePickerFormat.Short;
+            this.btnFiltrar.Text="Filtrar"; this.btnFiltrar.Left=314; this.btnFiltrar.Top=9; this.btnFiltrar.Width=80; this.btnFiltrar.Height=26;
+            this.btnFiltrar.BackColor=System.Drawing.Color.FromArgb(52,152,219);  this.btnFiltrar.ForeColor=System.Drawing.Color.White;
+            this.btnFiltrar.FlatStyle=System.Windows.Forms.FlatStyle.Flat; this.btnFiltrar.FlatAppearance.BorderSize=0;
+            this.btnLimparFiltro.Text="Limpar"; this.btnLimparFiltro.Left=401; this.btnLimparFiltro.Top=9; this.btnLimparFiltro.Width=80; this.btnLimparFiltro.Height=26;
+            this.btnLimparFiltro.BackColor=System.Drawing.Color.FromArgb(80,95,130); this.btnLimparFiltro.ForeColor=System.Drawing.Color.White;
+            this.btnLimparFiltro.FlatStyle=System.Windows.Forms.FlatStyle.Flat; this.btnLimparFiltro.FlatAppearance.BorderSize=0;
+            this.pnlFiltro.Controls.Add(this.dtpDe); this.pnlFiltro.Controls.Add(this.dtpAte);
+            this.pnlFiltro.Controls.Add(this.btnFiltrar); this.pnlFiltro.Controls.Add(this.btnLimparFiltro);
+            // pnlNovaEntrada
+            this.pnlNovaEntrada.Dock=System.Windows.Forms.DockStyle.Bottom; this.pnlNovaEntrada.Height=470;
+            this.pnlNovaEntrada.BackColor=System.Drawing.Color.FromArgb(28,37,65); this.pnlNovaEntrada.Visible=false;
+            // pnlCabecalho
+            this.pnlCabecalho.Dock=System.Windows.Forms.DockStyle.Top; this.pnlCabecalho.Height=36;
+            this.pnlCabecalho.BackColor=System.Drawing.Color.FromArgb(28,37,65);
+            this.txtFornCod.Left=87; this.txtFornCod.Top=7; this.txtFornCod.Width=55;
+            this.txtFornNome.Left=148; this.txtFornNome.Top=7; this.txtFornNome.Width=200; this.txtFornNome.ReadOnly=true;
+            this.dtpData.Left=396; this.dtpData.Top=7; this.dtpData.Width=120; this.dtpData.Format=System.Windows.Forms.DateTimePickerFormat.Short;
+            this.txtNumDoc.Left=625; this.txtNumDoc.Top=7; this.txtNumDoc.Width=120;
+            this.pnlCabecalho.Controls.Add(this.txtFornCod); this.pnlCabecalho.Controls.Add(this.txtFornNome);
+            this.pnlCabecalho.Controls.Add(this.dtpData);    this.pnlCabecalho.Controls.Add(this.txtNumDoc);
+            // pnlObs
+            this.pnlObs.Dock=System.Windows.Forms.DockStyle.Top; this.pnlObs.Height=32;
+            this.pnlObs.BackColor=System.Drawing.Color.FromArgb(28,37,65);
+            this.txtObservacoes.Left=90; this.txtObservacoes.Top=5; this.txtObservacoes.Width=660; this.txtObservacoes.Height=22;
+            this.pnlObs.Controls.Add(this.txtObservacoes);
+            // pnlAddItem
+            this.pnlAddItem.Dock=System.Windows.Forms.DockStyle.Top; this.pnlAddItem.Height=36;
+            this.pnlAddItem.BackColor=System.Drawing.Color.FromArgb(22,30,55);
+            this.txtProdCod.Left=65; this.txtProdCod.Top=7; this.txtProdCod.Width=55;
+            this.txtProdNome.Left=126; this.txtProdNome.Top=7; this.txtProdNome.Width=230;
+            this.numQtde.Left=395; this.numQtde.Top=7; this.numQtde.Width=75;
+            this.numQtde.DecimalPlaces=3; this.numQtde.Minimum=0.001m; this.numQtde.Maximum=99999; this.numQtde.Value=1;
+            this.numCustoItem.Left=538; this.numCustoItem.Top=7; this.numCustoItem.Width=90;
+            this.numCustoItem.DecimalPlaces=4; this.numCustoItem.Maximum=99999;
+            this.chkAtualizarCusto.Text="Atualizar custo"; this.chkAtualizarCusto.Left=636; this.chkAtualizarCusto.Top=9; this.chkAtualizarCusto.AutoSize=true;
+            this.chkAtualizarCusto.ForeColor=System.Drawing.Color.White; this.chkAtualizarCusto.Checked=true;
+            this.btnAdicionarItem.Text="+ Adicionar"; this.btnAdicionarItem.Left=750; this.btnAdicionarItem.Top=7; this.btnAdicionarItem.Width=95; this.btnAdicionarItem.Height=26;
+            this.btnAdicionarItem.BackColor=System.Drawing.Color.FromArgb(39,174,96); this.btnAdicionarItem.ForeColor=System.Drawing.Color.White;
+            this.btnAdicionarItem.FlatStyle=System.Windows.Forms.FlatStyle.Flat; this.btnAdicionarItem.FlatAppearance.BorderSize=0;
+            this.pnlAddItem.Controls.Add(this.txtProdCod); this.pnlAddItem.Controls.Add(this.txtProdNome);
+            this.pnlAddItem.Controls.Add(this.numQtde);    this.pnlAddItem.Controls.Add(this.numCustoItem);
+            this.pnlAddItem.Controls.Add(this.chkAtualizarCusto); this.pnlAddItem.Controls.Add(this.btnAdicionarItem);
+            // gridItens (fill)
+            this.gridItens.Dock=System.Windows.Forms.DockStyle.Fill;
+            this.gridItens.AutoSizeColumnsMode=System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
+            this.gridItens.ReadOnly=true; this.gridItens.AllowUserToAddRows=false;
+            this.gridItens.SelectionMode=System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
+            this.gridItens.RowHeadersVisible=false;
+            this.gridItens.BackgroundColor=System.Drawing.Color.FromArgb(20,28,55);
+            this.gridItens.DefaultCellStyle.BackColor=System.Drawing.Color.FromArgb(20,28,55);
+            this.gridItens.DefaultCellStyle.ForeColor=System.Drawing.Color.White;
+            this.gridItens.GridColor=System.Drawing.Color.FromArgb(40,55,90);
+            this.gridItens.Font=new System.Drawing.Font("Segoe UI",9F); this.gridItens.BorderStyle=System.Windows.Forms.BorderStyle.None;
+            this.gridItens.ColumnHeadersDefaultCellStyle.BackColor=System.Drawing.Color.FromArgb(36,48,82);
+            this.gridItens.ColumnHeadersDefaultCellStyle.ForeColor=System.Drawing.Color.White;
+            this.gridItens.DataError+=new System.Windows.Forms.DataGridViewDataErrorEventHandler(this.Grid_DataError);
+            // pnlParcelasOuter
+            this.pnlParcelasOuter.Dock=System.Windows.Forms.DockStyle.Bottom; this.pnlParcelasOuter.Height=100;
+            this.pnlParcelasOuter.BackColor=System.Drawing.Color.FromArgb(28,37,65);
+            // pnlParcelasTop
+            this.pnlParcelasTop.Dock=System.Windows.Forms.DockStyle.Top; this.pnlParcelasTop.Height=34;
+            this.pnlParcelasTop.BackColor=System.Drawing.Color.FromArgb(22,30,55);
+            this.numParcelas.Left=388; this.numParcelas.Top=6; this.numParcelas.Width=55;
+            this.numParcelas.Minimum=0; this.numParcelas.Maximum=36;
+            this.dtpPrimVencimento.Left=540; this.dtpPrimVencimento.Top=6; this.dtpPrimVencimento.Width=115;
+            this.dtpPrimVencimento.Format=System.Windows.Forms.DateTimePickerFormat.Short;
+            this.btnGerarParcelas.Text="\u21BB Gerar"; this.btnGerarParcelas.Left=665; this.btnGerarParcelas.Top=6; this.btnGerarParcelas.Width=75; this.btnGerarParcelas.Height=24;
+            this.btnGerarParcelas.BackColor=System.Drawing.Color.FromArgb(52,152,219); this.btnGerarParcelas.ForeColor=System.Drawing.Color.White;
+            this.btnGerarParcelas.FlatStyle=System.Windows.Forms.FlatStyle.Flat; this.btnGerarParcelas.FlatAppearance.BorderSize=0;
+            this.pnlParcelasTop.Controls.Add(this.numParcelas); this.pnlParcelasTop.Controls.Add(this.dtpPrimVencimento); this.pnlParcelasTop.Controls.Add(this.btnGerarParcelas);
+            // gridParcelas
+            this.gridParcelas.Dock=System.Windows.Forms.DockStyle.Fill;
+            this.gridParcelas.AutoSizeColumnsMode=System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
+            this.gridParcelas.AllowUserToAddRows=false;
+            this.gridParcelas.SelectionMode=System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
+            this.gridParcelas.RowHeadersVisible=false;
+            this.gridParcelas.BackgroundColor=System.Drawing.Color.FromArgb(20,28,55);
+            this.gridParcelas.DefaultCellStyle.BackColor=System.Drawing.Color.FromArgb(20,28,55);
+            this.gridParcelas.DefaultCellStyle.ForeColor=System.Drawing.Color.White;
+            this.gridParcelas.GridColor=System.Drawing.Color.FromArgb(40,55,90);
+            this.gridParcelas.Font=new System.Drawing.Font("Segoe UI",9F); this.gridParcelas.BorderStyle=System.Windows.Forms.BorderStyle.None;
+            this.gridParcelas.ColumnHeadersDefaultCellStyle.BackColor=System.Drawing.Color.FromArgb(36,48,82);
+            this.gridParcelas.ColumnHeadersDefaultCellStyle.ForeColor=System.Drawing.Color.White;
+            this.gridParcelas.DataError+=new System.Windows.Forms.DataGridViewDataErrorEventHandler(this.Grid_DataError);
+            this.pnlParcelasOuter.Controls.Add(this.gridParcelas);
+            this.pnlParcelasOuter.Controls.Add(this.pnlParcelasTop);
+            // pnlRodape
+            this.pnlRodape.Dock=System.Windows.Forms.DockStyle.Bottom; this.pnlRodape.Height=46;
+            this.pnlRodape.BackColor=System.Drawing.Color.FromArgb(28,37,65);
+            this.lblTotal.Text="Total: R$ 0,00"; this.lblTotal.Left=8; this.lblTotal.Top=12;
+            this.lblTotal.Font=new System.Drawing.Font("Segoe UI",11F,System.Drawing.FontStyle.Bold);
+            this.lblTotal.ForeColor=System.Drawing.Color.FromArgb(39,174,96); this.lblTotal.AutoSize=true;
+            this.lblNovaEntradaTitulo.Text="  Nova Entrada de Mercadorias";
+            this.lblNovaEntradaTitulo.Font=new System.Drawing.Font("Segoe UI",9.5F,System.Drawing.FontStyle.Bold);
+            this.lblNovaEntradaTitulo.ForeColor=System.Drawing.Color.White;
+            this.btnRemoverItem.Text="\u2212 Remover Item"; this.btnRemoverItem.Left=300; this.btnRemoverItem.Top=10; this.btnRemoverItem.Width=120; this.btnRemoverItem.Height=28;
+            this.btnRemoverItem.BackColor=System.Drawing.Color.FromArgb(192,57,43); this.btnRemoverItem.ForeColor=System.Drawing.Color.White;
+            this.btnRemoverItem.FlatStyle=System.Windows.Forms.FlatStyle.Flat; this.btnRemoverItem.FlatAppearance.BorderSize=0;
+            this.btnConfirmarEntrada.Text="\u2714 Confirmar"; this.btnConfirmarEntrada.Left=430; this.btnConfirmarEntrada.Top=10; this.btnConfirmarEntrada.Width=160; this.btnConfirmarEntrada.Height=28;
+            this.btnConfirmarEntrada.BackColor=System.Drawing.Color.FromArgb(39,174,96); this.btnConfirmarEntrada.ForeColor=System.Drawing.Color.White;
+            this.btnConfirmarEntrada.FlatStyle=System.Windows.Forms.FlatStyle.Flat; this.btnConfirmarEntrada.FlatAppearance.BorderSize=0;
+            this.btnFecharForm.Text="Cancelar"; this.btnFecharForm.Left=598; this.btnFecharForm.Top=10; this.btnFecharForm.Width=100; this.btnFecharForm.Height=28;
+            this.btnFecharForm.BackColor=System.Drawing.Color.FromArgb(80,95,130); this.btnFecharForm.ForeColor=System.Drawing.Color.White;
+            this.btnFecharForm.FlatStyle=System.Windows.Forms.FlatStyle.Flat; this.btnFecharForm.FlatAppearance.BorderSize=0;
+            this.pnlRodape.Controls.Add(this.lblTotal); this.pnlRodape.Controls.Add(this.btnRemoverItem);
+            this.pnlRodape.Controls.Add(this.btnConfirmarEntrada); this.pnlRodape.Controls.Add(this.btnFecharForm);
+            // assemble pnlNovaEntrada
+            this.pnlNovaEntrada.Controls.Add(this.gridItens);
+            this.pnlNovaEntrada.Controls.Add(this.pnlParcelasOuter);
+            this.pnlNovaEntrada.Controls.Add(this.pnlRodape);
+            this.pnlNovaEntrada.Controls.Add(this.pnlAddItem);
+            this.pnlNovaEntrada.Controls.Add(this.pnlObs);
+            this.pnlNovaEntrada.Controls.Add(this.pnlCabecalho);
+            // Form
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1050, 680);
             this.MinimumSize = new System.Drawing.Size(900, 580);
-            this.BackColor = corFundo;
-            this.ForeColor = corTexto;
-            this.Font = new Font("Segoe UI", 9F);
+            this.BackColor = System.Drawing.Color.FromArgb(15, 22, 45);
+            this.ForeColor = System.Drawing.Color.White;
+            this.Font = new System.Drawing.Font("Segoe UI", 9F);
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "Entrada de Mercadorias";
-
-            // ── Top bar ──────────────────────────────────────────────────
-            var pnlTop = new Panel { Dock = DockStyle.Top, Height = 48, BackColor = corTopBar };
-
-            btnNovaEntrada = new Button
-            {
-                Text = "+ Nova Entrada", Left = 8, Top = 10, Width = 130, Height = 28,
-                BackColor = corVerde, ForeColor = corTexto, FlatStyle = FlatStyle.Flat,
-                Font = new Font("Segoe UI", 9F, FontStyle.Bold), Cursor = Cursors.Hand
-            };
-            btnNovaEntrada.FlatAppearance.BorderSize = 0;
-
-            btnCancelarSel = new Button
-            {
-                Text = "\u274C Cancelar Entrada", Left = 148, Top = 10, Width = 140, Height = 28,
-                BackColor = corVermelho, ForeColor = corTexto, FlatStyle = FlatStyle.Flat,
-                Font = new Font("Segoe UI", 9F, FontStyle.Bold), Cursor = Cursors.Hand
-            };
-            btnCancelarSel.FlatAppearance.BorderSize = 0;
-
-            var lblTitulo = new Label
-            {
-                Text = "\U0001F4E6  Entrada de Mercadorias", AutoSize = true,
-                Top = 14, Font = new Font("Segoe UI", 11F, FontStyle.Bold), ForeColor = corTexto
-            };
-            pnlTop.Controls.AddRange(new Control[] { btnNovaEntrada, btnCancelarSel, lblTitulo });
-            pnlTop.SizeChanged += (_, __) => lblTitulo.Left = (pnlTop.Width - lblTitulo.Width) / 2;
-
-            // ── Barra de filtros ─────────────────────────────────────────
-            var pnlFiltro = new Panel { Dock = DockStyle.Top, Height = 42, BackColor = corFiltro };
-            var lblDe  = new Label { Text = "De:",  Left = 8,   Top = 12, AutoSize = true };
-            dtpDe  = new DateTimePicker { Left = 32,  Top = 8,  Width = 120, Format = DateTimePickerFormat.Short };
-            var lblAte = new Label { Text = "Até:", Left = 160, Top = 12, AutoSize = true };
-            dtpAte = new DateTimePicker { Left = 185, Top = 8,  Width = 120, Format = DateTimePickerFormat.Short };
-
-            btnFiltrar = new Button
-            {
-                Text = "Filtrar", Left = 314, Top = 9, Width = 80, Height = 26,
-                BackColor = corAzul, ForeColor = corTexto, FlatStyle = FlatStyle.Flat, Cursor = Cursors.Hand
-            };
-            btnFiltrar.FlatAppearance.BorderSize = 0;
-
-            btnLimparFiltro = new Button
-            {
-                Text = "Limpar", Left = 401, Top = 9, Width = 80, Height = 26,
-                BackColor = corCinza, ForeColor = corTexto, FlatStyle = FlatStyle.Flat, Cursor = Cursors.Hand
-            };
-            btnLimparFiltro.FlatAppearance.BorderSize = 0;
-
-            pnlFiltro.Controls.AddRange(new Control[] { lblDe, dtpDe, lblAte, dtpAte, btnFiltrar, btnLimparFiltro });
-
-            // ── Grid de entradas ─────────────────────────────────────────
-            gridEntradas = new DataGridView
-            {
-                Dock = DockStyle.Fill,
-                AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill,
-                ReadOnly = true, AllowUserToAddRows = false,
-                SelectionMode = DataGridViewSelectionMode.FullRowSelect,
-                RowHeadersVisible = false, BackgroundColor = corGrid,
-                DefaultCellStyle  = { BackColor = corGrid, ForeColor = corTexto },
-                GridColor = Color.FromArgb(40, 55, 90),
-                Font = new Font("Segoe UI", 9F), BorderStyle = BorderStyle.None,
-                ColumnHeadersDefaultCellStyle = { BackColor = corTopBar, ForeColor = corTexto },
-            };
-            gridEntradas.DataError += (_, e) => e.ThrowException = false;
-
-            // ── Painel Nova Entrada (Bottom) ──────────────────────────────
-            pnlNovaEntrada = new Panel
-            {
-                Dock = DockStyle.Bottom, Height = 470,
-                BackColor = corCard, Visible = false
-            };
-
-            // Título do painel
-            var pnlNovaTop = new Panel { Dock = DockStyle.Top, Height = 38, BackColor = corTopBar };
-            lblNovaEntradaTitulo = new Label
-            {
-                Text = "  Nova Entrada de Mercadorias", Dock = DockStyle.Left,
-                Font = new Font("Segoe UI", 9.5F, FontStyle.Bold), ForeColor = corTexto,
-                TextAlign = ContentAlignment.MiddleLeft
-            };
-            pnlNovaTop.Controls.Add(lblNovaEntradaTitulo);
-
-            // ── Campos cabeçalho ──────────────────────────────────────────
-            var pnlCabecalho = new Panel { Dock = DockStyle.Top, Height = 36 };
-            pnlCabecalho.BackColor = corCard;
-
-            var lblForn    = new Label { Text = "Fornecedor:",    Left = 8,   Top = 10, AutoSize = true, ForeColor = corTexto };
-            txtFornCod     = new TextBox { Left = 87, Top = 7, Width = 55, PlaceholderText = "Cód." };
-            txtFornNome    = new TextBox { Left = 148, Top = 7, Width = 200, ReadOnly = true, BackColor = Color.FromArgb(12, 18, 40), ForeColor = corTexto };
-
-            var lblData    = new Label { Text = "Data:",          Left = 360, Top = 10, AutoSize = true, ForeColor = corTexto };
-            dtpData        = new DateTimePicker { Left = 396, Top = 7, Width = 120, Format = DateTimePickerFormat.Short };
-
-            var lblNumDoc  = new Label { Text = "Nº Documento:",  Left = 526, Top = 10, AutoSize = true, ForeColor = corTexto };
-            txtNumDoc      = new TextBox { Left = 625, Top = 7, Width = 120 };
-
-            pnlCabecalho.Controls.AddRange(new Control[] { lblForn, txtFornCod, txtFornNome, lblData, dtpData, lblNumDoc, txtNumDoc });
-
-            var pnlObs = new Panel { Dock = DockStyle.Top, Height = 32 };
-            pnlObs.BackColor = corCard;
-            var lblObs = new Label { Text = "Observações:",      Left = 8,   Top = 8, AutoSize = true, ForeColor = corTexto };
-            txtObservacoes = new TextBox { Left = 90, Top = 5, Width = 660, Height = 22 };
-            pnlObs.Controls.AddRange(new Control[] { lblObs, txtObservacoes });
-
-            // ── Linha de adição de item ───────────────────────────────────
-            var pnlAddItem = new Panel { Dock = DockStyle.Top, Height = 36 };
-            pnlAddItem.BackColor = Color.FromArgb(22, 30, 55);
-
-            var lblProd    = new Label { Text = "Produto:",       Left = 8,   Top = 10, AutoSize = true, ForeColor = corTexto };
-            txtProdCod     = new TextBox { Left = 65,  Top = 7, Width = 55,  PlaceholderText = "Cód." };
-            txtProdNome    = new TextBox { Left = 126, Top = 7, Width = 230, PlaceholderText = "Nome do produto..." };
-
-            var lblQtde    = new Label { Text = "Qtde:",          Left = 364, Top = 10, AutoSize = true, ForeColor = corTexto };
-            numQtde        = new NumericUpDown { Left = 395, Top = 7, Width = 75, DecimalPlaces = 3, Minimum = 0.001m, Maximum = 99999, Value = 1 };
-
-            var lblCustoIt = new Label { Text = "Custo R$:",      Left = 478, Top = 10, AutoSize = true, ForeColor = corTexto };
-            numCustoItem   = new NumericUpDown { Left = 538, Top = 7, Width = 90, DecimalPlaces = 4, Minimum = 0, Maximum = 99999 };
-
-            chkAtualizarCusto = new CheckBox
-            {
-                Text = "Atualizar custo", Left = 636, Top = 9, AutoSize = true,
-                ForeColor = corTexto, Checked = true
-            };
-
-            btnAdicionarItem = new Button
-            {
-                Text = "+ Adicionar", Left = 750, Top = 7, Width = 95, Height = 26,
-                BackColor = corVerde, ForeColor = corTexto, FlatStyle = FlatStyle.Flat,
-                Font = new Font("Segoe UI", 9F, FontStyle.Bold), Cursor = Cursors.Hand
-            };
-            btnAdicionarItem.FlatAppearance.BorderSize = 0;
-
-            pnlAddItem.Controls.AddRange(new Control[] {
-                lblProd, txtProdCod, txtProdNome,
-                lblQtde, numQtde, lblCustoIt, numCustoItem,
-                chkAtualizarCusto, btnAdicionarItem
-            });
-
-            // ── Grid de itens ─────────────────────────────────────────────
-            gridItens = new DataGridView
-            {
-                Dock = DockStyle.Fill,
-                AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill,
-                ReadOnly = true, AllowUserToAddRows = false,
-                SelectionMode = DataGridViewSelectionMode.FullRowSelect,
-                RowHeadersVisible = false, BackgroundColor = corGrid,
-                DefaultCellStyle  = { BackColor = corGrid, ForeColor = corTexto },
-                GridColor = Color.FromArgb(40, 55, 90),
-                Font = new Font("Segoe UI", 9F), BorderStyle = BorderStyle.None,
-                ColumnHeadersDefaultCellStyle = { BackColor = corTopBar, ForeColor = corTexto },
-            };
-            gridItens.DataError += (_, e) => e.ThrowException = false;
-
-            // ── Painel de Parcelas ──────────────────────────────────────
-            var pnlParcelasOuter = new Panel { Dock = DockStyle.Bottom, Height = 100, BackColor = corCard };
-
-            var pnlParcelasTop = new Panel { Dock = DockStyle.Top, Height = 34, BackColor = Color.FromArgb(22, 30, 55) };
-            var lblParcTitulo = new Label
-            {
-                Text = "  🗓  Parcelas de Pagamento (opcional)",
-                Dock = DockStyle.Left, Width = 280,
-                Font = new Font("Segoe UI", 9F, FontStyle.Bold), ForeColor = Color.FromArgb(200, 220, 255),
-                TextAlign = ContentAlignment.MiddleLeft
-            };
-
-            var lblNumParc = new Label { Text = "Qtde parcelas:", Left = 290, Top = 9, AutoSize = true, ForeColor = corTexto };
-            numParcelas = new NumericUpDown { Left = 388, Top = 6, Width = 55, Minimum = 0, Maximum = 36, Value = 0 };
-
-            var lblPrimVcto = new Label { Text = "1º vencimento:", Left = 450, Top = 9, AutoSize = true, ForeColor = corTexto };
-            dtpPrimVencimento = new DateTimePicker { Left = 540, Top = 6, Width = 115, Format = DateTimePickerFormat.Short };
-
-            btnGerarParcelas = new Button
-            {
-                Text = "↻ Gerar", Left = 665, Top = 6, Width = 75, Height = 24,
-                BackColor = Color.FromArgb(52, 152, 219), ForeColor = corTexto, FlatStyle = FlatStyle.Flat,
-                Font = new Font("Segoe UI", 8.5F, FontStyle.Bold), Cursor = Cursors.Hand
-            };
-            btnGerarParcelas.FlatAppearance.BorderSize = 0;
-            pnlParcelasTop.Controls.Add(lblParcTitulo);
-            pnlParcelasTop.Controls.AddRange(new Control[] { lblNumParc, numParcelas, lblPrimVcto, dtpPrimVencimento, btnGerarParcelas });
-
-            gridParcelas = new DataGridView
-            {
-                Dock = DockStyle.Fill,
-                AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill,
-                AllowUserToAddRows = false,
-                SelectionMode = DataGridViewSelectionMode.FullRowSelect,
-                RowHeadersVisible = false, BackgroundColor = corGrid,
-                DefaultCellStyle  = { BackColor = corGrid, ForeColor = corTexto },
-                GridColor = Color.FromArgb(40, 55, 90),
-                Font = new Font("Segoe UI", 9F), BorderStyle = BorderStyle.None,
-                ColumnHeadersDefaultCellStyle = { BackColor = corTopBar, ForeColor = corTexto },
-            };
-            gridParcelas.DataError += (_, e) => e.ThrowException = false;
-
-            pnlParcelasOuter.Controls.Add(gridParcelas);
-            pnlParcelasOuter.Controls.Add(pnlParcelasTop);
-
-            // ── Rodapé do painel ─────────────────────────────────────────
-            var pnlRodape = new Panel { Dock = DockStyle.Bottom, Height = 46, BackColor = corCard };
-
-            lblTotal = new Label
-            {
-                Text = "Total: R$ 0,00", Left = 8, Top = 12,
-                Font = new Font("Segoe UI", 11F, FontStyle.Bold), ForeColor = Color.FromArgb(39, 174, 96),
-                AutoSize = true
-            };
-
-            btnRemoverItem = new Button
-            {
-                Text = "\u2212 Remover Item", Left = 300, Top = 10, Width = 120, Height = 28,
-                BackColor = corVermelho, ForeColor = corTexto, FlatStyle = FlatStyle.Flat,
-                Font = new Font("Segoe UI", 9F, FontStyle.Bold), Cursor = Cursors.Hand
-            };
-            btnRemoverItem.FlatAppearance.BorderSize = 0;
-
-            btnConfirmarEntrada = new Button
-            {
-                Text = "\u2714 Confirmar Entrada", Left = 0, Top = 10, Width = 160, Height = 28,
-                BackColor = corVerde, ForeColor = corTexto, FlatStyle = FlatStyle.Flat,
-                Font = new Font("Segoe UI", 9F, FontStyle.Bold), Cursor = Cursors.Hand
-            };
-            btnConfirmarEntrada.FlatAppearance.BorderSize = 0;
-
-            btnFecharForm = new Button
-            {
-                Text = "Cancelar", Left = 0, Top = 10, Width = 100, Height = 28,
-                BackColor = corCinza, ForeColor = corTexto, FlatStyle = FlatStyle.Flat,
-                Font = new Font("Segoe UI", 9F, FontStyle.Bold), Cursor = Cursors.Hand
-            };
-            btnFecharForm.FlatAppearance.BorderSize = 0;
-
-            void AlinhaBotoesRodape()
-            {
-                btnFecharForm.Left       = pnlRodape.Width - btnFecharForm.Width - 10;
-                btnConfirmarEntrada.Left = btnFecharForm.Left - btnConfirmarEntrada.Width - 8;
-                btnRemoverItem.Left      = btnConfirmarEntrada.Left - btnRemoverItem.Width - 20;
-            }
-            pnlRodape.SizeChanged += (_, __) => AlinhaBotoesRodape();
-            pnlRodape.Controls.AddRange(new Control[] { lblTotal, btnRemoverItem, btnConfirmarEntrada, btnFecharForm });
-
-            // ── Montar pnlNovaEntrada ─────────────────────────────────────
-            pnlNovaEntrada.Controls.Add(gridItens);            pnlNovaEntrada.Controls.Add(pnlParcelasOuter);            pnlNovaEntrada.Controls.Add(pnlRodape);
-            pnlNovaEntrada.Controls.Add(pnlAddItem);
-            pnlNovaEntrada.Controls.Add(pnlObs);
-            pnlNovaEntrada.Controls.Add(pnlCabecalho);
-            pnlNovaEntrada.Controls.Add(pnlNovaTop);
-
-            // ── Montar form ───────────────────────────────────────────────
-            Controls.Add(gridEntradas);
-            Controls.Add(pnlFiltro);
-            Controls.Add(pnlTop);
-            Controls.Add(pnlNovaEntrada);
-
+            this.Controls.Add(this.gridEntradas);
+            this.Controls.Add(this.pnlFiltro);
+            this.Controls.Add(this.pnlTop);
+            this.Controls.Add(this.pnlNovaEntrada);
             this.ResumeLayout(false);
         }
 
-        // ── Controls ─────────────────────────────────────────────────────
-        internal DataGridView    gridEntradas;
-        internal DataGridView    gridItens;
-        internal DataGridView    gridParcelas;
-        internal Panel           pnlNovaEntrada;
-        internal Label           lblNovaEntradaTitulo;
-        internal Label           lblTotal;
-        internal NumericUpDown   numParcelas;
-        internal DateTimePicker  dtpPrimVencimento;
-        internal Button          btnGerarParcelas;
+        internal System.Windows.Forms.DataGridView   gridEntradas;
+        internal System.Windows.Forms.DataGridView   gridItens;
+        internal System.Windows.Forms.DataGridView   gridParcelas;
+        internal System.Windows.Forms.Panel          pnlNovaEntrada;
+        internal System.Windows.Forms.Label          lblNovaEntradaTitulo;
+        internal System.Windows.Forms.Label          lblTotal;
+        internal System.Windows.Forms.NumericUpDown  numParcelas;
+        internal System.Windows.Forms.DateTimePicker dtpPrimVencimento;
+        internal System.Windows.Forms.Button         btnGerarParcelas;
+        internal System.Windows.Forms.DateTimePicker dtpDe;
+        internal System.Windows.Forms.DateTimePicker dtpAte;
+        internal System.Windows.Forms.Button         btnFiltrar;
+        internal System.Windows.Forms.Button         btnLimparFiltro;
+        internal System.Windows.Forms.Button         btnNovaEntrada;
+        internal System.Windows.Forms.Button         btnCancelarSel;
+        internal System.Windows.Forms.TextBox        txtFornCod;
+        internal System.Windows.Forms.TextBox        txtFornNome;
+        internal System.Windows.Forms.DateTimePicker dtpData;
+        internal System.Windows.Forms.TextBox        txtNumDoc;
+        internal System.Windows.Forms.TextBox        txtObservacoes;
+        internal System.Windows.Forms.TextBox        txtProdCod;
+        internal System.Windows.Forms.TextBox        txtProdNome;
+        internal System.Windows.Forms.NumericUpDown  numQtde;
+        internal System.Windows.Forms.NumericUpDown  numCustoItem;
+        internal System.Windows.Forms.CheckBox       chkAtualizarCusto;
+        internal System.Windows.Forms.Button         btnAdicionarItem;
+        internal System.Windows.Forms.Button         btnRemoverItem;
+        internal System.Windows.Forms.Button         btnConfirmarEntrada;
+        internal System.Windows.Forms.Button         btnFecharForm;
+        private  System.Windows.Forms.Panel          pnlTop;
+        private  System.Windows.Forms.Panel          pnlFiltro;
+        private  System.Windows.Forms.Panel          pnlCabecalho;
+        private  System.Windows.Forms.Panel          pnlObs;
+        private  System.Windows.Forms.Panel          pnlAddItem;
+        private  System.Windows.Forms.Panel          pnlParcelasOuter;
+        private  System.Windows.Forms.Panel          pnlParcelasTop;
+        private  System.Windows.Forms.Panel          pnlRodape;
 
-        // filtros
-        internal DateTimePicker  dtpDe;
-        internal DateTimePicker  dtpAte;
-        internal Button          btnFiltrar;
-        internal Button          btnLimparFiltro;
-
-        // header buttons
-        internal Button          btnNovaEntrada;
-        internal Button          btnCancelarSel;
-
-        // cabeçalho nova entrada
-        internal TextBox         txtFornCod;
-        internal TextBox         txtFornNome;
-        internal DateTimePicker  dtpData;
-        internal TextBox         txtNumDoc;
-        internal TextBox         txtObservacoes;
-
-        // item
-        internal TextBox         txtProdCod;
-        internal TextBox         txtProdNome;
-        internal NumericUpDown   numQtde;
-        internal NumericUpDown   numCustoItem;
-        internal CheckBox        chkAtualizarCusto;
-        internal Button          btnAdicionarItem;
-        internal Button          btnRemoverItem;
-
-        // confirmar
-        internal Button          btnConfirmarEntrada;
-        internal Button          btnFecharForm;
+        private void Grid_DataError(object s, System.Windows.Forms.DataGridViewDataErrorEventArgs e) { e.ThrowException = false; }
     }
 }

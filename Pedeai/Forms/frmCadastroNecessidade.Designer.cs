@@ -1,5 +1,4 @@
-using System;
-using System.Drawing;
+﻿using System.Drawing;
 using System.Windows.Forms;
 
 namespace Pedeai.Forms
@@ -16,73 +15,116 @@ namespace Pedeai.Forms
 
         private void InitializeComponent()
         {
+            this.dtpData      = new System.Windows.Forms.DateTimePicker();
+            this.cmbCategoria = new System.Windows.Forms.ComboBox();
+            this.txtDescricao = new System.Windows.Forms.TextBox();
+            this.numValor     = new System.Windows.Forms.NumericUpDown();
+            this.btnSal       = new System.Windows.Forms.Button();
+            this.btnCanc      = new System.Windows.Forms.Button();
+            this.lblData      = new System.Windows.Forms.Label();
+            this.lblCat       = new System.Windows.Forms.Label();
+            this.lblDesc      = new System.Windows.Forms.Label();
+            this.lblVal       = new System.Windows.Forms.Label();
             this.SuspendLayout();
-            dtpData      = new DateTimePicker();
-            cmbCategoria = new ComboBox();
-            txtDescricao = new TextBox();
-            numValor     = new NumericUpDown();
-
-            BackColor       = Color.FromArgb(36, 48, 82);
-            ForeColor       = Color.White;
-            Font            = new Font("Segoe UI", 9F);
-            ClientSize      = new Size(420, 208);
-            StartPosition   = FormStartPosition.CenterParent;
-            FormBorderStyle = FormBorderStyle.FixedDialog;
-            MaximizeBox     = MinimizeBox = false;
-            Text            = "Lancar Necessidade da Empresa";
-
-            var lblData = new Label { Text = "Data:", Left = 12, Top = 16, AutoSize = true };
-            dtpData.Left = 90; dtpData.Top = 12; dtpData.Width = 120;
-            dtpData.Format = DateTimePickerFormat.Short;
-            dtpData.Value  = DateTime.Today;
-
-            var lblCat = new Label { Text = "Categoria:", Left = 12, Top = 52, AutoSize = true };
-            cmbCategoria.Left = 90; cmbCategoria.Top = 48; cmbCategoria.Width = 200;
-            cmbCategoria.DropDownStyle = ComboBoxStyle.DropDownList;
-            cmbCategoria.Items.AddRange(new object[]
+            // lblData
+            this.lblData.Text = "Data:";
+            this.lblData.Left = 12;
+            this.lblData.Top  = 16;
+            this.lblData.AutoSize = true;
+            // dtpData
+            this.dtpData.Left = 90;
+            this.dtpData.Top  = 12;
+            this.dtpData.Width = 120;
+            this.dtpData.Format = System.Windows.Forms.DateTimePickerFormat.Short;
+            // lblCat
+            this.lblCat.Text = "Categoria:";
+            this.lblCat.Left = 12;
+            this.lblCat.Top  = 52;
+            this.lblCat.AutoSize = true;
+            // cmbCategoria
+            this.cmbCategoria.Left = 90;
+            this.cmbCategoria.Top  = 48;
+            this.cmbCategoria.Width = 200;
+            this.cmbCategoria.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cmbCategoria.Items.AddRange(new object[]
                 { "Aluguel", "Agua", "Energia", "Internet", "Telefone", "Salario", "Manutencao", "Outro" });
-            cmbCategoria.SelectedIndex = 0;
-
-            var lblDesc = new Label { Text = "Descricao:", Left = 12, Top = 88, AutoSize = true };
-            txtDescricao.Left = 90; txtDescricao.Top = 84; txtDescricao.Width = 306;
-            txtDescricao.BackColor = Color.FromArgb(50, 65, 100);
-            txtDescricao.ForeColor = Color.White;
-
-            var lblVal = new Label { Text = "Valor R$:", Left = 12, Top = 124, AutoSize = true };
-            numValor.Left = 90; numValor.Top = 120; numValor.Width = 130;
-            numValor.DecimalPlaces = 2; numValor.Maximum = 9999999;
-            numValor.BackColor = Color.FromArgb(50, 65, 100);
-            numValor.ForeColor = Color.White;
-
-            btnSal = new Button
-            {
-                Text = "Salvar", Left = 110, Top = 162, Width = 110, Height = 30,
-                BackColor = Color.FromArgb(52, 152, 219), ForeColor = Color.White,
-                FlatStyle = FlatStyle.Flat, Font = new Font("Segoe UI", 9F, FontStyle.Bold)
-            };
-            btnSal.FlatAppearance.BorderSize = 0;
-            btnSal.Click += BtnSalvar_Click;
-
-            btnCanc = new Button
-            {
-                Text = "Cancelar", Left = 232, Top = 162, Width = 110, Height = 30,
-                BackColor = Color.FromArgb(108, 117, 125), ForeColor = Color.White,
-                FlatStyle = FlatStyle.Flat, Font = new Font("Segoe UI", 9F, FontStyle.Bold)
-            };
-            btnCanc.FlatAppearance.BorderSize = 0;
-            btnCanc.Click += (_, __) => Close();
-
-            Controls.AddRange(new Control[]
-                { lblData, dtpData, lblCat, cmbCategoria, lblDesc, txtDescricao,
-                  lblVal, numValor, btnSal, btnCanc });
+            this.cmbCategoria.SelectedIndex = 0;
+            // lblDesc
+            this.lblDesc.Text = "Descricao:";
+            this.lblDesc.Left = 12;
+            this.lblDesc.Top  = 88;
+            this.lblDesc.AutoSize = true;
+            // txtDescricao
+            this.txtDescricao.Left = 90;
+            this.txtDescricao.Top  = 84;
+            this.txtDescricao.Width = 306;
+            this.txtDescricao.BackColor = System.Drawing.Color.FromArgb(50, 65, 100);
+            this.txtDescricao.ForeColor = System.Drawing.Color.White;
+            // lblVal
+            this.lblVal.Text = "Valor R$:";
+            this.lblVal.Left = 12;
+            this.lblVal.Top  = 124;
+            this.lblVal.AutoSize = true;
+            // numValor
+            this.numValor.Left = 90;
+            this.numValor.Top  = 120;
+            this.numValor.Width = 130;
+            this.numValor.DecimalPlaces = 2;
+            this.numValor.Maximum = 9999999;
+            this.numValor.BackColor = System.Drawing.Color.FromArgb(50, 65, 100);
+            this.numValor.ForeColor = System.Drawing.Color.White;
+            // btnSal
+            this.btnSal.Text = "Salvar";
+            this.btnSal.Left = 110;
+            this.btnSal.Top  = 162;
+            this.btnSal.Width  = 110;
+            this.btnSal.Height = 30;
+            this.btnSal.BackColor = System.Drawing.Color.FromArgb(52, 152, 219);
+            this.btnSal.ForeColor = System.Drawing.Color.White;
+            this.btnSal.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnSal.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
+            this.btnSal.FlatAppearance.BorderSize = 0;
+            this.btnSal.Click += new System.EventHandler(this.BtnSalvar_Click);
+            // btnCanc
+            this.btnCanc.Text = "Cancelar";
+            this.btnCanc.Left = 232;
+            this.btnCanc.Top  = 162;
+            this.btnCanc.Width  = 110;
+            this.btnCanc.Height = 30;
+            this.btnCanc.BackColor = System.Drawing.Color.FromArgb(108, 117, 125);
+            this.btnCanc.ForeColor = System.Drawing.Color.White;
+            this.btnCanc.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnCanc.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
+            this.btnCanc.FlatAppearance.BorderSize = 0;
+            this.btnCanc.Click += new System.EventHandler(this.BtnCanc_Click);
+            // Form
+            this.BackColor       = System.Drawing.Color.FromArgb(36, 48, 82);
+            this.ForeColor       = System.Drawing.Color.White;
+            this.Font            = new System.Drawing.Font("Segoe UI", 9F);
+            this.ClientSize      = new System.Drawing.Size(420, 208);
+            this.StartPosition   = System.Windows.Forms.FormStartPosition.CenterParent;
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
+            this.MaximizeBox     = false;
+            this.MinimizeBox     = false;
+            this.Text            = "Lancar Necessidade da Empresa";
+            this.Controls.AddRange(new System.Windows.Forms.Control[]
+                { this.lblData, this.dtpData, this.lblCat, this.cmbCategoria,
+                  this.lblDesc, this.txtDescricao, this.lblVal, this.numValor,
+                  this.btnSal, this.btnCanc });
             this.ResumeLayout(false);
         }
 
-        private DateTimePicker dtpData;
-        private ComboBox       cmbCategoria;
-        private TextBox        txtDescricao;
-        private NumericUpDown  numValor;
-        internal Button        btnSal;
-        internal Button        btnCanc;
+        private System.Windows.Forms.DateTimePicker dtpData;
+        private System.Windows.Forms.ComboBox       cmbCategoria;
+        private System.Windows.Forms.TextBox        txtDescricao;
+        private System.Windows.Forms.NumericUpDown  numValor;
+        internal System.Windows.Forms.Button        btnSal;
+        internal System.Windows.Forms.Button        btnCanc;
+        private System.Windows.Forms.Label          lblData;
+        private System.Windows.Forms.Label          lblCat;
+        private System.Windows.Forms.Label          lblDesc;
+        private System.Windows.Forms.Label          lblVal;
+
+        private void BtnCanc_Click(object s, System.EventArgs e) { Close(); }
     }
 }

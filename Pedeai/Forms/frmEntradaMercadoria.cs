@@ -28,6 +28,7 @@ namespace Pedeai.Forms
         public frmEntradaMercadoria()
         {
             InitializeComponent();
+            if (System.ComponentModel.LicenseManager.UsageMode == System.ComponentModel.LicenseUsageMode.Designtime) return;
             Load += OnLoad;
         }
 

@@ -1,4 +1,4 @@
-using System.Drawing;
+﻿using System.Drawing;
 using System.Windows.Forms;
 
 namespace Pedeai.Forms
@@ -6,326 +6,180 @@ namespace Pedeai.Forms
     partial class frmLogin
     {
         private System.ComponentModel.IContainer components = null;
-
         protected override void Dispose(bool disposing)
         {
             if (disposing && components != null) components.Dispose();
             base.Dispose(disposing);
         }
-
         private void InitializeComponent()
         {
-            // ── Cores da paleta principal ────────────────────────────────────
-            var clrBg      = Color.FromArgb(15,  22,  45);   // fundo geral
-            var clrSide    = Color.FromArgb(28,  37,  65);   // painel lateral
-            var clrCard    = Color.FromArgb(36,  48,  82);   // card / top bar
-            var clrInput   = Color.FromArgb(20,  30,  58);   // fundo dos inputs
-            var clrAccent  = Color.FromArgb(52,  152, 219);  // azul accent
-            var clrSuccess = Color.FromArgb(39,  174,  96);  // verde (nome encontrado)
-            var clrMuted   = Color.FromArgb(160, 175, 210);  // labels secundários
-            var clrDanger  = Color.FromArgb(231,  76,  60);  // vermelho erro
-
-            // ── Form ─────────────────────────────────────────────────────────
+            this.txtLogin       = new System.Windows.Forms.TextBox();
+            this.txtSenha       = new System.Windows.Forms.TextBox();
+            this.lblMensagem    = new System.Windows.Forms.Label();
+            this.lblNomeUsuario = new System.Windows.Forms.Label();
+            this.btnFechar      = new System.Windows.Forms.Button();
+            this.btnEntrar      = new System.Windows.Forms.Button();
+            this.pnlLeft        = new System.Windows.Forms.Panel();
+            this.pnlRight       = new System.Windows.Forms.Panel();
+            this.lblIco         = new System.Windows.Forms.Label();
+            this.lblBrand       = new System.Windows.Forms.Label();
+            this.lblTagline     = new System.Windows.Forms.Label();
+            this.lblLoginTitle  = new System.Windows.Forms.Label();
+            this.pnlLoginCard   = new System.Windows.Forms.Panel();
+            this.lblSenhaTitle  = new System.Windows.Forms.Label();
+            this.pnlSenhaCard   = new System.Windows.Forms.Panel();
+            this.SuspendLayout();
+            // pnlLeft
+            this.pnlLeft.SetBounds(0, 0, 290, 520);
+            this.pnlLeft.BackColor = System.Drawing.Color.FromArgb(28, 37, 65);
+            this.pnlLeft.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Bottom;
+            this.pnlLeft.MouseDown += new System.Windows.Forms.MouseEventHandler(this.FormDrag_MouseDown);
+            // lblIco
+            this.lblIco.Text = "\U0001F355";
+            this.lblIco.Font = new System.Drawing.Font("Segoe UI Emoji", 52F);
+            this.lblIco.AutoSize = false;
+            this.lblIco.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.lblIco.SetBounds(0, 80, 290, 80);
+            this.lblIco.BackColor = System.Drawing.Color.Transparent;
+            // lblBrand
+            this.lblBrand.Text = "PEDEAI";
+            this.lblBrand.Font = new System.Drawing.Font("Segoe UI", 30F, System.Drawing.FontStyle.Bold);
+            this.lblBrand.ForeColor = System.Drawing.Color.FromArgb(52, 152, 219);
+            this.lblBrand.AutoSize = false;
+            this.lblBrand.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.lblBrand.SetBounds(0, 168, 290, 50);
+            this.lblBrand.BackColor = System.Drawing.Color.Transparent;
+            // lblTagline
+            this.lblTagline.Text = "Sistema de Gestao\nde Pedidos";
+            this.lblTagline.Font = new System.Drawing.Font("Segoe UI", 11F);
+            this.lblTagline.ForeColor = System.Drawing.Color.FromArgb(160, 175, 210);
+            this.lblTagline.AutoSize = false;
+            this.lblTagline.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.lblTagline.SetBounds(0, 222, 290, 56);
+            this.lblTagline.BackColor = System.Drawing.Color.Transparent;
+            this.pnlLeft.Controls.Add(this.lblIco);
+            this.pnlLeft.Controls.Add(this.lblBrand);
+            this.pnlLeft.Controls.Add(this.lblTagline);
+            // pnlRight
+            this.pnlRight.SetBounds(290, 0, 490, 520);
+            this.pnlRight.BackColor = System.Drawing.Color.FromArgb(15, 22, 45);
+            this.pnlRight.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right;
+            this.pnlRight.MouseDown += new System.Windows.Forms.MouseEventHandler(this.FormDrag_MouseDown);
+            // btnFechar
+            this.btnFechar.Text = "\u2715";
+            this.btnFechar.SetBounds(448, 8, 30, 24);
+            this.btnFechar.BackColor = System.Drawing.Color.Transparent;
+            this.btnFechar.ForeColor = System.Drawing.Color.FromArgb(160, 175, 210);
+            this.btnFechar.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnFechar.Font = new System.Drawing.Font("Segoe UI", 10F);
+            this.btnFechar.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.btnFechar.DialogResult = System.Windows.Forms.DialogResult.Cancel;
+            this.btnFechar.FlatAppearance.BorderSize = 0;
+            this.btnFechar.Click += new System.EventHandler(this.BtnFechar_Click);
+            // lblLoginTitle
+            this.lblLoginTitle.Text = "USU\u00c1RIO (LOGIN OU NOME)";
+            this.lblLoginTitle.Font = new System.Drawing.Font("Segoe UI", 8F, System.Drawing.FontStyle.Bold);
+            this.lblLoginTitle.ForeColor = System.Drawing.Color.FromArgb(160, 175, 210);
+            this.lblLoginTitle.AutoSize = true;
+            this.lblLoginTitle.SetBounds(50, 154, 300, 16);
+            this.lblLoginTitle.BackColor = System.Drawing.Color.Transparent;
+            // pnlLoginCard
+            this.pnlLoginCard.SetBounds(50, 174, 370, 46);
+            this.pnlLoginCard.BackColor = System.Drawing.Color.FromArgb(20, 30, 58);
+            // txtLogin
+            this.txtLogin.SetBounds(50, 10, 310, 26);
+            this.txtLogin.BackColor = System.Drawing.Color.FromArgb(20, 30, 58);
+            this.txtLogin.ForeColor = System.Drawing.Color.White;
+            this.txtLogin.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.txtLogin.Font = new System.Drawing.Font("Segoe UI", 11F);
+            this.txtLogin.KeyDown += new System.Windows.Forms.KeyEventHandler(this.TxtLogin_KeyDown);
+            this.txtLogin.Leave += new System.EventHandler(this.TxtLogin_Leave);
+            this.pnlLoginCard.Controls.Add(this.txtLogin);
+            // lblNomeUsuario
+            this.lblNomeUsuario.Text = "";
+            this.lblNomeUsuario.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Italic);
+            this.lblNomeUsuario.ForeColor = System.Drawing.Color.FromArgb(39, 174, 96);
+            this.lblNomeUsuario.AutoSize = false;
+            this.lblNomeUsuario.SetBounds(50, 226, 370, 18);
+            this.lblNomeUsuario.BackColor = System.Drawing.Color.Transparent;
+            // lblSenhaTitle
+            this.lblSenhaTitle.Text = "SENHA";
+            this.lblSenhaTitle.Font = new System.Drawing.Font("Segoe UI", 8F, System.Drawing.FontStyle.Bold);
+            this.lblSenhaTitle.ForeColor = System.Drawing.Color.FromArgb(160, 175, 210);
+            this.lblSenhaTitle.AutoSize = true;
+            this.lblSenhaTitle.SetBounds(50, 256, 100, 16);
+            this.lblSenhaTitle.BackColor = System.Drawing.Color.Transparent;
+            // pnlSenhaCard
+            this.pnlSenhaCard.SetBounds(50, 276, 370, 46);
+            this.pnlSenhaCard.BackColor = System.Drawing.Color.FromArgb(20, 30, 58);
+            // txtSenha
+            this.txtSenha.SetBounds(50, 10, 310, 26);
+            this.txtSenha.BackColor = System.Drawing.Color.FromArgb(20, 30, 58);
+            this.txtSenha.ForeColor = System.Drawing.Color.White;
+            this.txtSenha.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.txtSenha.Font = new System.Drawing.Font("Segoe UI", 11F);
+            this.txtSenha.PasswordChar = '\u2022';
+            this.txtSenha.KeyDown += new System.Windows.Forms.KeyEventHandler(this.TxtSenha_KeyDown);
+            this.pnlSenhaCard.Controls.Add(this.txtSenha);
+            // lblMensagem
+            this.lblMensagem.Text = "";
+            this.lblMensagem.ForeColor = System.Drawing.Color.FromArgb(231, 76, 60);
+            this.lblMensagem.AutoSize = false;
+            this.lblMensagem.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.lblMensagem.Font = new System.Drawing.Font("Segoe UI", 9F);
+            this.lblMensagem.SetBounds(50, 330, 370, 20);
+            this.lblMensagem.BackColor = System.Drawing.Color.Transparent;
+            // btnEntrar
+            this.btnEntrar.Text = "Entrar";
+            this.btnEntrar.SetBounds(50, 362, 370, 44);
+            this.btnEntrar.BackColor = System.Drawing.Color.FromArgb(52, 152, 219);
+            this.btnEntrar.ForeColor = System.Drawing.Color.White;
+            this.btnEntrar.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnEntrar.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold);
+            this.btnEntrar.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.btnEntrar.FlatAppearance.BorderSize = 0;
+            this.btnEntrar.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(41, 128, 185);
+            this.btnEntrar.Click += new System.EventHandler(this.BtnEntrar_Click);
+            this.pnlRight.Controls.Add(this.btnFechar);
+            this.pnlRight.Controls.Add(this.lblLoginTitle);
+            this.pnlRight.Controls.Add(this.pnlLoginCard);
+            this.pnlRight.Controls.Add(this.lblNomeUsuario);
+            this.pnlRight.Controls.Add(this.lblSenhaTitle);
+            this.pnlRight.Controls.Add(this.pnlSenhaCard);
+            this.pnlRight.Controls.Add(this.lblMensagem);
+            this.pnlRight.Controls.Add(this.btnEntrar);
+            // Form
+            this.AcceptButton    = this.btnEntrar;
             this.Text            = "Pedeai \u2014 Login";
-            this.StartPosition   = FormStartPosition.CenterScreen;
-            this.FormBorderStyle = FormBorderStyle.None;   // sem borda = visual moderno
+            this.StartPosition   = System.Windows.Forms.FormStartPosition.CenterScreen;
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
             this.MaximizeBox     = false;
             this.MinimizeBox     = false;
-            this.BackColor       = clrBg;
-            this.ForeColor       = Color.White;
-            this.Font            = new Font("Segoe UI", 10F);
-            this.ClientSize      = new Size(780, 520);
-
-            // ── Painel esquerdo (branding) ────────────────────────────────────
-            var pnlLeft = new Panel
-            {
-                Bounds    = new System.Drawing.Rectangle(0, 0, 290, 520),
-                BackColor = clrSide
-            };
-
-            // Faixa accent no topo do painel esquerdo
-            var topAccent = new Panel
-            {
-                Bounds    = new System.Drawing.Rectangle(0, 0, 290, 5),
-                BackColor = clrAccent
-            };
-
-            var lblIco = new Label
-            {
-                Text      = "\U0001F355",   // 🍕
-                Font      = new Font("Segoe UI Emoji", 52F),
-                AutoSize  = false,
-                TextAlign = ContentAlignment.MiddleCenter,
-                Bounds    = new System.Drawing.Rectangle(0, 80, 290, 80),
-                BackColor = Color.Transparent
-            };
-
-            var lblBrand = new Label
-            {
-                Text      = "PEDEAI",
-                Font      = new Font("Segoe UI", 30F, FontStyle.Bold),
-                ForeColor = clrAccent,
-                AutoSize  = false,
-                TextAlign = ContentAlignment.MiddleCenter,
-                Bounds    = new System.Drawing.Rectangle(0, 168, 290, 50),
-                BackColor = Color.Transparent
-            };
-
-            var lblTagline = new Label
-            {
-                Text      = "Sistema de Gestao\nde Pedidos",
-                Font      = new Font("Segoe UI", 11F),
-                ForeColor = clrMuted,
-                AutoSize  = false,
-                TextAlign = ContentAlignment.MiddleCenter,
-                Bounds    = new System.Drawing.Rectangle(0, 222, 290, 56),
-                BackColor = Color.Transparent
-            };
-
-            // Linha decorativa
-            var sepLeft = new Panel
-            {
-                Bounds    = new System.Drawing.Rectangle(60, 298, 170, 1),
-                BackColor = Color.FromArgb(60, 75, 115)
-            };
-
-            var lblVer = new Label
-            {
-                Text      = "v2.0",
-                Font      = new Font("Segoe UI", 8F),
-                ForeColor = Color.FromArgb(90, 110, 155),
-                AutoSize  = false,
-                TextAlign = ContentAlignment.MiddleCenter,
-                Bounds    = new System.Drawing.Rectangle(0, 308, 290, 20),
-                BackColor = Color.Transparent
-            };
-
-            pnlLeft.Controls.AddRange(new Control[] { topAccent, lblIco, lblBrand, lblTagline, sepLeft, lblVer });
-
-            // ── Painel direito (formulário) ───────────────────────────────────
-            var pnlRight = new Panel
-            {
-                Bounds    = new System.Drawing.Rectangle(290, 0, 490, 520),
-                BackColor = clrBg
-            };
-
-            // Faixa accent topo direito
-            var topAccentR = new Panel
-            {
-                Bounds    = new System.Drawing.Rectangle(0, 0, 490, 5),
-                BackColor = clrAccent
-            };
-
-            // Botão fechar (X) no canto
-            btnFechar = new Button
-            {
-                Text         = "\u2715",
-                Bounds       = new System.Drawing.Rectangle(448, 8, 30, 24),
-                BackColor    = Color.Transparent,
-                ForeColor    = clrMuted,
-                FlatStyle    = FlatStyle.Flat,
-                Font         = new Font("Segoe UI", 10F),
-                Cursor       = Cursors.Hand,
-                DialogResult = DialogResult.Cancel
-            };
-            btnFechar.FlatAppearance.BorderSize   = 0;
-            btnFechar.FlatAppearance.MouseOverBackColor = Color.FromArgb(192, 57, 43);
-            btnFechar.Click += (_, __) => { DialogResult = DialogResult.Cancel; Close(); };
-
-            var lblWelcome = new Label
-            {
-                Text      = "Bem-vindo",
-                Font      = new Font("Segoe UI", 20F, FontStyle.Bold),
-                ForeColor = Color.White,
-                AutoSize  = false,
-                TextAlign = ContentAlignment.MiddleCenter,
-                Bounds    = new System.Drawing.Rectangle(0, 56, 490, 44),
-                BackColor = Color.Transparent
-            };
-
-            var lblSubWelcome = new Label
-            {
-                Text      = "Identifique-se para continuar",
-                Font      = new Font("Segoe UI", 10F),
-                ForeColor = clrMuted,
-                AutoSize  = false,
-                TextAlign = ContentAlignment.MiddleCenter,
-                Bounds    = new System.Drawing.Rectangle(0, 100, 490, 22),
-                BackColor = Color.Transparent
-            };
-
-            var sepTop = new Panel
-            {
-                Bounds    = new System.Drawing.Rectangle(50, 132, 370, 1),
-                BackColor = Color.FromArgb(45, 60, 100)
-            };
-
-            // ── Campo: Usuário (login ou nome) ────────────────────────────────
-            var lblLoginTitle = new Label
-            {
-                Text      = "USUÁRIO (LOGIN OU NOME)",
-                Font      = new Font("Segoe UI", 8F, FontStyle.Bold),
-                ForeColor = clrMuted,
-                AutoSize  = true,
-                Bounds    = new System.Drawing.Rectangle(50, 154, 300, 16),
-                BackColor = Color.Transparent
-            };
-
-            // Card container do campo login
-            var pnlLoginCard = new Panel
-            {
-                Bounds    = new System.Drawing.Rectangle(50, 174, 370, 46),
-                BackColor = clrInput
-            };
-            // Ícone no card
-            var lblLoginIcon = new Label
-            {
-                Text      = "\uD83D\uDC64",  // 👤
-                Font      = new Font("Segoe UI Emoji", 13F),
-                AutoSize  = false,
-                TextAlign = ContentAlignment.MiddleCenter,
-                Bounds    = new System.Drawing.Rectangle(0, 0, 46, 46),
-                BackColor = Color.Transparent,
-                ForeColor = clrAccent
-            };
-            txtLogin = new TextBox
-            {
-                Bounds        = new System.Drawing.Rectangle(50, 10, 310, 26),
-                BackColor     = clrInput,
-                ForeColor     = Color.White,
-                BorderStyle   = BorderStyle.None,
-                Font          = new Font("Segoe UI", 11F)
-            };
-            txtLogin.KeyDown += TxtLogin_KeyDown;
-            txtLogin.Leave   += TxtLogin_Leave;
-            pnlLoginCard.Controls.AddRange(new Control[] { lblLoginIcon, txtLogin });
-
-            // Borda inferior accent no card (muda cor ao focar)
-            var brdLogin = new Panel
-            {
-                Bounds    = new System.Drawing.Rectangle(50, 220, 370, 2),
-                BackColor = clrAccent
-            };
-
-            // Nome identificado
-            lblNomeUsuario = new Label
-            {
-                Text      = "",
-                Font      = new Font("Segoe UI", 9F, FontStyle.Italic),
-                ForeColor = clrSuccess,
-                AutoSize  = false,
-                Bounds    = new System.Drawing.Rectangle(50, 226, 370, 18),
-                BackColor = Color.Transparent
-            };
-
-            // ── Campo: Senha ──────────────────────────────────────────────────
-            var lblSenhaTitle = new Label
-            {
-                Text      = "SENHA",
-                Font      = new Font("Segoe UI", 8F, FontStyle.Bold),
-                ForeColor = clrMuted,
-                AutoSize  = true,
-                Bounds    = new System.Drawing.Rectangle(50, 256, 100, 16),
-                BackColor = Color.Transparent
-            };
-
-            var pnlSenhaCard = new Panel
-            {
-                Bounds    = new System.Drawing.Rectangle(50, 276, 370, 46),
-                BackColor = clrInput
-            };
-            var lblSenhaIcon = new Label
-            {
-                Text      = "\uD83D\uDD12",  // 🔒
-                Font      = new Font("Segoe UI Emoji", 13F),
-                AutoSize  = false,
-                TextAlign = ContentAlignment.MiddleCenter,
-                Bounds    = new System.Drawing.Rectangle(0, 0, 46, 46),
-                BackColor = Color.Transparent,
-                ForeColor = clrAccent
-            };
-            txtSenha = new TextBox
-            {
-                Bounds        = new System.Drawing.Rectangle(50, 10, 310, 26),
-                BackColor     = clrInput,
-                ForeColor     = Color.White,
-                BorderStyle   = BorderStyle.None,
-                Font          = new Font("Segoe UI", 11F),
-                PasswordChar  = '\u2022'
-            };
-            txtSenha.KeyDown += TxtSenha_KeyDown;
-            pnlSenhaCard.Controls.AddRange(new Control[] { lblSenhaIcon, txtSenha });
-
-            var brdSenha = new Panel
-            {
-                Bounds    = new System.Drawing.Rectangle(50, 322, 370, 2),
-                BackColor = clrAccent
-            };
-
-            // ── Mensagem de erro ──────────────────────────────────────────────
-            lblMensagem = new Label
-            {
-                Text      = "",
-                ForeColor = clrDanger,
-                AutoSize  = false,
-                TextAlign = ContentAlignment.MiddleLeft,
-                Font      = new Font("Segoe UI", 9F),
-                Bounds    = new System.Drawing.Rectangle(50, 330, 370, 20),
-                BackColor = Color.Transparent
-            };
-
-            // ── Botão Entrar ──────────────────────────────────────────────────
-            btnEntrar = new Button
-            {
-                Text      = "Entrar",
-                Bounds    = new System.Drawing.Rectangle(50, 362, 370, 44),
-                BackColor = clrAccent,
-                ForeColor = Color.White,
-                FlatStyle = FlatStyle.Flat,
-                Font      = new Font("Segoe UI", 12F, FontStyle.Bold),
-                Cursor    = Cursors.Hand
-            };
-            btnEntrar.FlatAppearance.BorderSize = 0;
-            btnEntrar.FlatAppearance.MouseOverBackColor = Color.FromArgb(41, 128, 185);
-            btnEntrar.Click += BtnEntrar_Click;
-            this.AcceptButton = btnEntrar;
-
-            var lblCopy = new Label
-            {
-                Text      = "\u00A9 Pedeai 2025",
-                Font      = new Font("Segoe UI", 8F),
-                ForeColor = Color.FromArgb(70, 88, 130),
-                AutoSize  = false,
-                TextAlign = ContentAlignment.MiddleCenter,
-                Bounds    = new System.Drawing.Rectangle(50, 476, 370, 18),
-                BackColor = Color.Transparent
-            };
-
-            pnlRight.Controls.AddRange(new Control[]
-            {
-                topAccentR, btnFechar,
-                lblWelcome, lblSubWelcome, sepTop,
-                lblLoginTitle, pnlLoginCard, brdLogin, lblNomeUsuario,
-                lblSenhaTitle, pnlSenhaCard, brdSenha,
-                lblMensagem, btnEntrar,
-                lblCopy
-            });
-
-            // ── Linha divisória vertical ──────────────────────────────────────
-            var divider = new Panel
-            {
-                Bounds    = new System.Drawing.Rectangle(289, 0, 1, 520),
-                BackColor = Color.FromArgb(45, 60, 100)
-            };
-
-            this.Controls.AddRange(new Control[] { pnlLeft, pnlRight, divider });
-
-            // Permite arrastar o form sem borda
-            pnlLeft.MouseDown  += FormDrag_MouseDown;
-            pnlRight.MouseDown += FormDrag_MouseDown;
+            this.BackColor       = System.Drawing.Color.FromArgb(15, 22, 45);
+            this.ForeColor       = System.Drawing.Color.White;
+            this.Font            = new System.Drawing.Font("Segoe UI", 10F);
+            this.ClientSize      = new System.Drawing.Size(780, 520);
+            this.Controls.Add(this.pnlLeft);
+            this.Controls.Add(this.pnlRight);
+            this.ResumeLayout(false);
         }
 
-        // Suporte a arrastar form sem borda
+        internal System.Windows.Forms.TextBox txtLogin;
+        internal System.Windows.Forms.TextBox txtSenha;
+        internal System.Windows.Forms.Label   lblMensagem;
+        internal System.Windows.Forms.Label   lblNomeUsuario;
+        internal System.Windows.Forms.Button  btnFechar;
+        internal System.Windows.Forms.Button  btnEntrar;
+        private  System.Windows.Forms.Panel   pnlLeft;
+        private  System.Windows.Forms.Panel   pnlRight;
+        private  System.Windows.Forms.Label   lblIco;
+        private  System.Windows.Forms.Label   lblBrand;
+        private  System.Windows.Forms.Label   lblTagline;
+        private  System.Windows.Forms.Label   lblLoginTitle;
+        private  System.Windows.Forms.Panel   pnlLoginCard;
+        private  System.Windows.Forms.Label   lblSenhaTitle;
+        private  System.Windows.Forms.Panel   pnlSenhaCard;
+
         private const int WM_NCLBUTTONDOWN = 0xA1;
         private const int HT_CAPTION       = 0x2;
         [System.Runtime.InteropServices.DllImport("user32.dll")]
@@ -333,20 +187,14 @@ namespace Pedeai.Forms
         [System.Runtime.InteropServices.DllImport("user32.dll")]
         private static extern bool ReleaseCapture();
 
-        private void FormDrag_MouseDown(object sender, MouseEventArgs e)
+        private void FormDrag_MouseDown(object sender, System.Windows.Forms.MouseEventArgs e)
         {
-            if (e.Button == MouseButtons.Left)
+            if (e.Button == System.Windows.Forms.MouseButtons.Left)
             {
                 ReleaseCapture();
                 SendMessage(Handle, WM_NCLBUTTONDOWN, HT_CAPTION, 0);
             }
         }
-
-        internal TextBox txtLogin;
-        internal TextBox txtSenha;
-        internal Label   lblMensagem;
-        internal Label   lblNomeUsuario;
-        internal Button  btnFechar;
-        internal Button  btnEntrar;
+        private void BtnFechar_Click(object s, System.EventArgs e) { DialogResult = System.Windows.Forms.DialogResult.Cancel; Close(); }
     }
 }

@@ -14,6 +14,7 @@ namespace Pedeai.Forms
         public frmCadastroCategoria()
         {
             InitializeComponent();
+            if (System.ComponentModel.LicenseManager.UsageMode == System.ComponentModel.LicenseUsageMode.Designtime) return;
             _bll = new GrupoMercadoriaBLL();
             Load += (_, __) => Carregar();
         }

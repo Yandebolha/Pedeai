@@ -1,4 +1,4 @@
-using System.Drawing;
+﻿using System.Drawing;
 using System.Windows.Forms;
 
 namespace Pedeai.Forms
@@ -6,700 +6,406 @@ namespace Pedeai.Forms
     partial class frmEmpresa
     {
         private System.ComponentModel.IContainer components = null;
-
         protected override void Dispose(bool disposing)
         {
             if (disposing && components != null) components.Dispose();
             base.Dispose(disposing);
         }
-
         private void InitializeComponent()
         {
-            this.Text            = "Empresa e Usuários";
-            this.StartPosition   = FormStartPosition.CenterParent;
-            this.FormBorderStyle = FormBorderStyle.Sizable;
-            this.BackColor       = Color.FromArgb(13, 19, 40);
-            this.ForeColor       = Color.White;
-            this.Font            = new Font("Segoe UI", 9.5F);
+            this.txtEmpNome          = new System.Windows.Forms.TextBox();
+            this.txtEmpFantasia      = new System.Windows.Forms.TextBox();
+            this.txtEmpCNPJ          = new System.Windows.Forms.TextBox();
+            this.txtEmpTel           = new System.Windows.Forms.TextBox();
+            this.txtEmpEmail         = new System.Windows.Forms.TextBox();
+            this.txtEmpEnd           = new System.Windows.Forms.TextBox();
+            this.txtUsrNome          = new System.Windows.Forms.TextBox();
+            this.txtUsrLogin         = new System.Windows.Forms.TextBox();
+            this.txtUsrSenha         = new System.Windows.Forms.TextBox();
+            this.txtUsrSenhaConf     = new System.Windows.Forms.TextBox();
+            this.cmbUsrNivel         = new System.Windows.Forms.ComboBox();
+            this.cmbUsrSit           = new System.Windows.Forms.ComboBox();
+            this.pnlBuscaUsuarios    = new System.Windows.Forms.Panel();
+            this.txtPesquisa         = new System.Windows.Forms.TextBox();
+            this.lstUsuarios         = new System.Windows.Forms.ListBox();
+            this.btnNovoUsr          = new System.Windows.Forms.Button();
+            this.btnPesquisarUsr     = new System.Windows.Forms.Button();
+            this.btnSalvUsr          = new System.Windows.Forms.Button();
+            this.btnCancelarUsr      = new System.Windows.Forms.Button();
+            this.chkModDashboard     = new System.Windows.Forms.CheckBox();
+            this.chkModPedidos       = new System.Windows.Forms.CheckBox();
+            this.chkModFinanceiro    = new System.Windows.Forms.CheckBox();
+            this.chkModProdutos      = new System.Windows.Forms.CheckBox();
+            this.chkModCategorias    = new System.Windows.Forms.CheckBox();
+            this.chkModClientes      = new System.Windows.Forms.CheckBox();
+            this.chkModFornecedores  = new System.Windows.Forms.CheckBox();
+            this.chkModCupons        = new System.Windows.Forms.CheckBox();
+            this.chkModEmpresa       = new System.Windows.Forms.CheckBox();
+            this.chkModCancelarPedidos   = new System.Windows.Forms.CheckBox();
+            this.chkModEntradaMercadoria = new System.Windows.Forms.CheckBox();
+            this.chkModAvisos        = new System.Windows.Forms.CheckBox();
+            this.txtImpNomeEmpresa   = new System.Windows.Forms.TextBox();
+            this.txtImpEndereco      = new System.Windows.Forms.TextBox();
+            this.txtImpTelefone      = new System.Windows.Forms.TextBox();
+            this.txtImpCNPJ          = new System.Windows.Forms.TextBox();
+            this.txtImpSeparador     = new System.Windows.Forms.TextBox();
+            this.txtImpAvisoFiscal   = new System.Windows.Forms.TextBox();
+            this.txtImpRodapeTexto   = new System.Windows.Forms.TextBox();
+            this.txtImpLblNumero     = new System.Windows.Forms.TextBox();
+            this.txtImpLblColItem    = new System.Windows.Forms.TextBox();
+            this.txtImpLblColTotal   = new System.Windows.Forms.TextBox();
+            this.txtImpLblSubtotal   = new System.Windows.Forms.TextBox();
+            this.txtImpLblTaxa       = new System.Windows.Forms.TextBox();
+            this.txtImpLblTotalPagar = new System.Windows.Forms.TextBox();
+            this.txtImpLblAtendente  = new System.Windows.Forms.TextBox();
+            this.cmbImpressora       = new System.Windows.Forms.ComboBox();
+            this.numLargura          = new System.Windows.Forms.NumericUpDown();
+            this.tabControl          = new System.Windows.Forms.TabControl();
+            this.tabEmp              = new System.Windows.Forms.TabPage();
+            this.tabUsr              = new System.Windows.Forms.TabPage();
+            this.tabImp              = new System.Windows.Forms.TabPage();
+            this.btnSalvEmp          = new System.Windows.Forms.Button();
+            this.btnSalvImp          = new System.Windows.Forms.Button();
+            this.btnTesteImp         = new System.Windows.Forms.Button();
+            this.SuspendLayout();
+            //
+            // tabControl
+            //
+            this.tabControl.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tabControl.Font = new System.Drawing.Font("Segoe UI", 10F);
+            this.tabControl.Padding = new System.Drawing.Point(14, 5);
+            this.tabControl.TabPages.Add(this.tabEmp);
+            this.tabControl.TabPages.Add(this.tabUsr);
+            this.tabControl.TabPages.Add(this.tabImp);
+            //
+            // tabEmp - Dados da Empresa
+            //
+            this.tabEmp.Text = "  Dados da Empresa  ";
+            this.tabEmp.BackColor = System.Drawing.Color.FromArgb(13, 19, 40);
+            this.tabEmp.ForeColor = System.Drawing.Color.White;
+            // Empresa fields
+            this.txtEmpNome.SetBounds(168, 86, 360, 27);
+            this.txtEmpNome.BackColor = System.Drawing.Color.FromArgb(18, 26, 50);
+            this.txtEmpNome.ForeColor = System.Drawing.Color.White;
+            this.txtEmpNome.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.txtEmpFantasia.SetBounds(168, 117, 360, 27);
+            this.txtEmpFantasia.BackColor = System.Drawing.Color.FromArgb(18, 26, 50);
+            this.txtEmpFantasia.ForeColor = System.Drawing.Color.White;
+            this.txtEmpFantasia.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.txtEmpCNPJ.SetBounds(168, 148, 360, 27);
+            this.txtEmpCNPJ.BackColor = System.Drawing.Color.FromArgb(18, 26, 50);
+            this.txtEmpCNPJ.ForeColor = System.Drawing.Color.White;
+            this.txtEmpCNPJ.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.txtEmpTel.SetBounds(168, 179, 360, 27);
+            this.txtEmpTel.BackColor = System.Drawing.Color.FromArgb(18, 26, 50);
+            this.txtEmpTel.ForeColor = System.Drawing.Color.White;
+            this.txtEmpTel.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.txtEmpEmail.SetBounds(168, 210, 360, 27);
+            this.txtEmpEmail.BackColor = System.Drawing.Color.FromArgb(18, 26, 50);
+            this.txtEmpEmail.ForeColor = System.Drawing.Color.White;
+            this.txtEmpEmail.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.txtEmpEnd.SetBounds(168, 241, 360, 27);
+            this.txtEmpEnd.BackColor = System.Drawing.Color.FromArgb(18, 26, 50);
+            this.txtEmpEnd.ForeColor = System.Drawing.Color.White;
+            this.txtEmpEnd.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.btnSalvEmp.Text = "\u2713  Salvar Empresa";
+            this.btnSalvEmp.SetBounds(168, 282, 160, 32);
+            this.btnSalvEmp.BackColor = System.Drawing.Color.FromArgb(39, 174, 96);
+            this.btnSalvEmp.ForeColor = System.Drawing.Color.White;
+            this.btnSalvEmp.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnSalvEmp.Font = new System.Drawing.Font("Segoe UI", 9.5F, System.Drawing.FontStyle.Bold);
+            this.btnSalvEmp.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.btnSalvEmp.FlatAppearance.BorderSize = 0;
+            this.btnSalvEmp.Click += new System.EventHandler(this.BtnSalvarEmpresa_Click);
+            this.tabEmp.Controls.Add(this.lblEmpNome);
+            this.tabEmp.Controls.Add(this.txtEmpNome);
+            this.tabEmp.Controls.Add(this.lblEmpFantasia);
+            this.tabEmp.Controls.Add(this.txtEmpFantasia);
+            this.tabEmp.Controls.Add(this.lblEmpCNPJ);
+            this.tabEmp.Controls.Add(this.txtEmpCNPJ);
+            this.tabEmp.Controls.Add(this.lblEmpTel);
+            this.tabEmp.Controls.Add(this.txtEmpTel);
+            this.tabEmp.Controls.Add(this.lblEmpEmail);
+            this.tabEmp.Controls.Add(this.txtEmpEmail);
+            this.tabEmp.Controls.Add(this.lblEmpEnd);
+            this.tabEmp.Controls.Add(this.txtEmpEnd);
+            this.tabEmp.Controls.Add(this.btnSalvEmp);
+            //
+            // tabUsr - Usuarios
+            //
+            this.tabUsr.Text = "  Usu\u00e1rios  ";
+            this.tabUsr.BackColor = System.Drawing.Color.FromArgb(13, 19, 40);
+            this.tabUsr.ForeColor = System.Drawing.Color.White;
+            // user fields
+            this.txtUsrNome.SetBounds(168, 20, 280, 26);
+            this.txtUsrNome.BackColor = System.Drawing.Color.FromArgb(18, 26, 50);
+            this.txtUsrNome.ForeColor = System.Drawing.Color.White;
+            this.txtUsrNome.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.txtUsrLogin.SetBounds(168, 60, 280, 26);
+            this.txtUsrLogin.BackColor = System.Drawing.Color.FromArgb(18, 26, 50);
+            this.txtUsrLogin.ForeColor = System.Drawing.Color.White;
+            this.txtUsrLogin.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.txtUsrSenha.SetBounds(168, 100, 280, 26);
+            this.txtUsrSenha.BackColor = System.Drawing.Color.FromArgb(18, 26, 50);
+            this.txtUsrSenha.ForeColor = System.Drawing.Color.White;
+            this.txtUsrSenha.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.txtUsrSenha.PasswordChar = '\u25CF';
+            this.txtUsrSenhaConf.SetBounds(168, 140, 280, 26);
+            this.txtUsrSenhaConf.BackColor = System.Drawing.Color.FromArgb(18, 26, 50);
+            this.txtUsrSenhaConf.ForeColor = System.Drawing.Color.White;
+            this.txtUsrSenhaConf.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.txtUsrSenhaConf.PasswordChar = '\u25CF';
+            this.cmbUsrNivel.SetBounds(168, 180, 280, 26);
+            this.cmbUsrNivel.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cmbUsrNivel.BackColor = System.Drawing.Color.FromArgb(18, 26, 50);
+            this.cmbUsrNivel.ForeColor = System.Drawing.Color.White;
+            this.cmbUsrNivel.Items.AddRange(new object[] { "Operador", "Gerente", "Admin" });
+            this.cmbUsrNivel.SelectedIndex = 0;
+            this.cmbUsrSit.SetBounds(168, 220, 280, 26);
+            this.cmbUsrSit.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cmbUsrSit.BackColor = System.Drawing.Color.FromArgb(18, 26, 50);
+            this.cmbUsrSit.ForeColor = System.Drawing.Color.White;
+            this.cmbUsrSit.Items.AddRange(new object[] { "Ativo", "Inativo" });
+            this.cmbUsrSit.SelectedIndex = 0;
+            // checkboxes
+            this.chkModDashboard.Text         = "Dashboard";       this.chkModDashboard.SetBounds(168, 260, 102, 22);
+            this.chkModPedidos.Text           = "Pedidos";         this.chkModPedidos.SetBounds(274, 260, 102, 22);
+            this.chkModFinanceiro.Text        = "Financeiro";      this.chkModFinanceiro.SetBounds(380, 260, 102, 22);
+            this.chkModProdutos.Text          = "Produtos";        this.chkModProdutos.SetBounds(168, 286, 102, 22);
+            this.chkModCategorias.Text        = "Categorias";      this.chkModCategorias.SetBounds(274, 286, 102, 22);
+            this.chkModClientes.Text          = "Clientes";        this.chkModClientes.SetBounds(380, 286, 102, 22);
+            this.chkModFornecedores.Text      = "Fornecedores";    this.chkModFornecedores.SetBounds(168, 312, 102, 22);
+            this.chkModCupons.Text            = "Cupons";          this.chkModCupons.SetBounds(274, 312, 102, 22);
+            this.chkModEmpresa.Text           = "Empresa";         this.chkModEmpresa.SetBounds(380, 312, 102, 22);
+            this.chkModCancelarPedidos.Text   = "Cancelar Pedidos"; this.chkModCancelarPedidos.SetBounds(168, 338, 102, 22);
+            this.chkModEntradaMercadoria.Text = "Ent. Mercadoria"; this.chkModEntradaMercadoria.SetBounds(274, 338, 102, 22);
+            this.chkModAvisos.Text            = "Avisos";          this.chkModAvisos.SetBounds(380, 338, 102, 22);
+            // buttons
+            this.btnNovoUsr.Text = "+ Novo"; this.btnNovoUsr.SetBounds(168, 374, 128, 32);
+            this.btnNovoUsr.BackColor = System.Drawing.Color.FromArgb(52,73,94); this.btnNovoUsr.ForeColor = System.Drawing.Color.White;
+            this.btnNovoUsr.FlatStyle = System.Windows.Forms.FlatStyle.Flat; this.btnNovoUsr.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.btnNovoUsr.FlatAppearance.BorderSize = 0; this.btnNovoUsr.Click += new System.EventHandler(this.BtnNovoUsuario_Click);
+            this.btnPesquisarUsr.Text = "Pesquisar"; this.btnPesquisarUsr.SetBounds(304, 374, 128, 32);
+            this.btnPesquisarUsr.BackColor = System.Drawing.Color.FromArgb(52,152,219); this.btnPesquisarUsr.ForeColor = System.Drawing.Color.White;
+            this.btnPesquisarUsr.FlatStyle = System.Windows.Forms.FlatStyle.Flat; this.btnPesquisarUsr.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.btnPesquisarUsr.FlatAppearance.BorderSize = 0; this.btnPesquisarUsr.Click += new System.EventHandler(this.BtnPesquisarUsuario_Click);
+            this.btnSalvUsr.Text = "\u2713  Salvar"; this.btnSalvUsr.SetBounds(168, 374, 128, 32);
+            this.btnSalvUsr.BackColor = System.Drawing.Color.FromArgb(39,174,96); this.btnSalvUsr.ForeColor = System.Drawing.Color.White;
+            this.btnSalvUsr.FlatStyle = System.Windows.Forms.FlatStyle.Flat; this.btnSalvUsr.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.btnSalvUsr.FlatAppearance.BorderSize = 0; this.btnSalvUsr.Visible = false;
+            this.btnSalvUsr.Click += new System.EventHandler(this.BtnSalvarUsuario_Click);
+            this.btnCancelarUsr.Text = "Cancelar"; this.btnCancelarUsr.SetBounds(304, 374, 128, 32);
+            this.btnCancelarUsr.BackColor = System.Drawing.Color.FromArgb(108,117,125); this.btnCancelarUsr.ForeColor = System.Drawing.Color.White;
+            this.btnCancelarUsr.FlatStyle = System.Windows.Forms.FlatStyle.Flat; this.btnCancelarUsr.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.btnCancelarUsr.FlatAppearance.BorderSize = 0; this.btnCancelarUsr.Visible = false;
+            this.btnCancelarUsr.Click += new System.EventHandler(this.BtnCancelarUsuario_Click);
+            // pnlBuscaUsuarios
+            this.pnlBuscaUsuarios.SetBounds(0, 0, 460, 200);
+            this.pnlBuscaUsuarios.BackColor = System.Drawing.Color.FromArgb(22, 31, 58);
+            this.pnlBuscaUsuarios.Visible = false;
+            this.txtPesquisa.Dock = System.Windows.Forms.DockStyle.Top;
+            this.txtPesquisa.BackColor = System.Drawing.Color.FromArgb(18, 26, 50);
+            this.txtPesquisa.ForeColor = System.Drawing.Color.White;
+            this.txtPesquisa.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.txtPesquisa.TextChanged += new System.EventHandler(this.TxtPesquisa_TextChanged);
+            this.lstUsuarios.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.lstUsuarios.BackColor = System.Drawing.Color.FromArgb(18, 26, 50);
+            this.lstUsuarios.ForeColor = System.Drawing.Color.White;
+            this.lstUsuarios.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.lstUsuarios.DoubleClick += new System.EventHandler(this.LstUsuarios_DoubleClick);
+            this.pnlBuscaUsuarios.Controls.Add(this.lstUsuarios);
+            this.pnlBuscaUsuarios.Controls.Add(this.txtPesquisa);
+            this.tabUsr.Controls.Add(this.lblUsrNome);
+            this.tabUsr.Controls.Add(this.txtUsrNome);
+            this.tabUsr.Controls.Add(this.lblUsrLogin);
+            this.tabUsr.Controls.Add(this.txtUsrLogin);
+            this.tabUsr.Controls.Add(this.lblUsrSenha);
+            this.tabUsr.Controls.Add(this.txtUsrSenha);
+            this.tabUsr.Controls.Add(this.lblUsrSenhaConf);
+            this.tabUsr.Controls.Add(this.txtUsrSenhaConf);
+            this.tabUsr.Controls.Add(this.lblUsrNivel);
+            this.tabUsr.Controls.Add(this.cmbUsrNivel);
+            this.tabUsr.Controls.Add(this.lblUsrSit);
+            this.tabUsr.Controls.Add(this.cmbUsrSit);
+            this.tabUsr.Controls.Add(this.chkModDashboard);
+            this.tabUsr.Controls.Add(this.chkModPedidos);
+            this.tabUsr.Controls.Add(this.chkModFinanceiro);
+            this.tabUsr.Controls.Add(this.chkModProdutos);
+            this.tabUsr.Controls.Add(this.chkModCategorias);
+            this.tabUsr.Controls.Add(this.chkModClientes);
+            this.tabUsr.Controls.Add(this.chkModFornecedores);
+            this.tabUsr.Controls.Add(this.chkModCupons);
+            this.tabUsr.Controls.Add(this.chkModEmpresa);
+            this.tabUsr.Controls.Add(this.chkModCancelarPedidos);
+            this.tabUsr.Controls.Add(this.chkModEntradaMercadoria);
+            this.tabUsr.Controls.Add(this.chkModAvisos);
+            this.tabUsr.Controls.Add(this.btnNovoUsr);
+            this.tabUsr.Controls.Add(this.btnPesquisarUsr);
+            this.tabUsr.Controls.Add(this.btnSalvUsr);
+            this.tabUsr.Controls.Add(this.btnCancelarUsr);
+            this.tabUsr.Controls.Add(this.pnlBuscaUsuarios);
+            //
+            // tabImp - Impressao
+            //
+            this.tabImp.Text = "  Impress\u00e3o  ";
+            this.tabImp.BackColor = System.Drawing.Color.FromArgb(13, 19, 40);
+            this.tabImp.ForeColor = System.Drawing.Color.White;
+            // imp fields
+            this.txtImpNomeEmpresa.SetBounds(208, 30, 400, 26); this.txtImpNomeEmpresa.BackColor = System.Drawing.Color.FromArgb(18,26,50); this.txtImpNomeEmpresa.ForeColor = System.Drawing.Color.White; this.txtImpNomeEmpresa.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.txtImpEndereco.SetBounds(208, 62, 400, 26);    this.txtImpEndereco.BackColor = System.Drawing.Color.FromArgb(18,26,50);    this.txtImpEndereco.ForeColor = System.Drawing.Color.White;    this.txtImpEndereco.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.txtImpTelefone.SetBounds(208, 94, 400, 26);    this.txtImpTelefone.BackColor = System.Drawing.Color.FromArgb(18,26,50);    this.txtImpTelefone.ForeColor = System.Drawing.Color.White;    this.txtImpTelefone.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.txtImpCNPJ.SetBounds(208, 126, 400, 26);       this.txtImpCNPJ.BackColor = System.Drawing.Color.FromArgb(18,26,50);       this.txtImpCNPJ.ForeColor = System.Drawing.Color.White;       this.txtImpCNPJ.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.txtImpSeparador.SetBounds(208, 158, 400, 26);  this.txtImpSeparador.BackColor = System.Drawing.Color.FromArgb(18,26,50);  this.txtImpSeparador.ForeColor = System.Drawing.Color.White;  this.txtImpSeparador.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.txtImpAvisoFiscal.SetBounds(208, 190, 400, 26);this.txtImpAvisoFiscal.BackColor = System.Drawing.Color.FromArgb(18,26,50);this.txtImpAvisoFiscal.ForeColor = System.Drawing.Color.White;this.txtImpAvisoFiscal.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.txtImpRodapeTexto.SetBounds(208, 222, 400, 64);this.txtImpRodapeTexto.BackColor = System.Drawing.Color.FromArgb(18,26,50);this.txtImpRodapeTexto.ForeColor = System.Drawing.Color.White;this.txtImpRodapeTexto.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.txtImpRodapeTexto.Multiline = true;
+            this.txtImpLblNumero.SetBounds(208, 300, 200, 26);        this.txtImpLblNumero.BackColor = System.Drawing.Color.FromArgb(18,26,50);     this.txtImpLblNumero.ForeColor = System.Drawing.Color.White;     this.txtImpLblNumero.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.txtImpLblColItem.SetBounds(208, 332, 200, 26);       this.txtImpLblColItem.BackColor = System.Drawing.Color.FromArgb(18,26,50);    this.txtImpLblColItem.ForeColor = System.Drawing.Color.White;    this.txtImpLblColItem.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.txtImpLblColTotal.SetBounds(208, 364, 200, 26);      this.txtImpLblColTotal.BackColor = System.Drawing.Color.FromArgb(18,26,50);   this.txtImpLblColTotal.ForeColor = System.Drawing.Color.White;   this.txtImpLblColTotal.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.txtImpLblSubtotal.SetBounds(208, 396, 200, 26);      this.txtImpLblSubtotal.BackColor = System.Drawing.Color.FromArgb(18,26,50);   this.txtImpLblSubtotal.ForeColor = System.Drawing.Color.White;   this.txtImpLblSubtotal.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.txtImpLblTaxa.SetBounds(208, 428, 200, 26);          this.txtImpLblTaxa.BackColor = System.Drawing.Color.FromArgb(18,26,50);       this.txtImpLblTaxa.ForeColor = System.Drawing.Color.White;       this.txtImpLblTaxa.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.txtImpLblTotalPagar.SetBounds(208, 460, 200, 26);    this.txtImpLblTotalPagar.BackColor = System.Drawing.Color.FromArgb(18,26,50); this.txtImpLblTotalPagar.ForeColor = System.Drawing.Color.White; this.txtImpLblTotalPagar.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.txtImpLblAtendente.SetBounds(208, 492, 200, 26);     this.txtImpLblAtendente.BackColor = System.Drawing.Color.FromArgb(18,26,50);  this.txtImpLblAtendente.ForeColor = System.Drawing.Color.White;  this.txtImpLblAtendente.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.cmbImpressora.SetBounds(208, 530, 400, 26);
+            this.cmbImpressora.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cmbImpressora.BackColor = System.Drawing.Color.FromArgb(18,26,50);
+            this.cmbImpressora.ForeColor = System.Drawing.Color.White;
+            this.cmbImpressora.Items.Add("(Impressora padr\u00e3o do sistema)");
+            this.cmbImpressora.SelectedIndex = 0;
+            this.numLargura.SetBounds(208, 562, 80, 26);
+            this.numLargura.Minimum = 20; this.numLargura.Maximum = 120; this.numLargura.Value = 42;
+            this.numLargura.BackColor = System.Drawing.Color.FromArgb(18,26,50);
+            this.numLargura.ForeColor = System.Drawing.Color.White;
+            this.btnSalvImp.Text = "\u2713  Salvar Configura\u00e7\u00e3o";
+            this.btnSalvImp.SetBounds(208, 600, 200, 32);
+            this.btnSalvImp.BackColor = System.Drawing.Color.FromArgb(39,174,96); this.btnSalvImp.ForeColor = System.Drawing.Color.White;
+            this.btnSalvImp.FlatStyle = System.Windows.Forms.FlatStyle.Flat; this.btnSalvImp.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.btnSalvImp.FlatAppearance.BorderSize = 0; this.btnSalvImp.Click += new System.EventHandler(this.BtnSalvarImpressao_Click);
+            this.btnTesteImp.Text = "Imprimir Teste";
+            this.btnTesteImp.SetBounds(416, 600, 140, 32);
+            this.btnTesteImp.BackColor = System.Drawing.Color.FromArgb(52,152,219); this.btnTesteImp.ForeColor = System.Drawing.Color.White;
+            this.btnTesteImp.FlatStyle = System.Windows.Forms.FlatStyle.Flat; this.btnTesteImp.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.btnTesteImp.FlatAppearance.BorderSize = 0; this.btnTesteImp.Click += new System.EventHandler(this.BtnImprimirTeste_Click);
+            this.tabImp.Controls.Add(this.lblImpNome);      this.tabImp.Controls.Add(this.txtImpNomeEmpresa);
+            this.tabImp.Controls.Add(this.lblImpEnd);       this.tabImp.Controls.Add(this.txtImpEndereco);
+            this.tabImp.Controls.Add(this.lblImpTel);       this.tabImp.Controls.Add(this.txtImpTelefone);
+            this.tabImp.Controls.Add(this.lblImpCNPJ);      this.tabImp.Controls.Add(this.txtImpCNPJ);
+            this.tabImp.Controls.Add(this.lblImpSep);       this.tabImp.Controls.Add(this.txtImpSeparador);
+            this.tabImp.Controls.Add(this.lblImpAviso);     this.tabImp.Controls.Add(this.txtImpAvisoFiscal);
+            this.tabImp.Controls.Add(this.lblImpRodape);    this.tabImp.Controls.Add(this.txtImpRodapeTexto);
+            this.tabImp.Controls.Add(this.lblImpNum);       this.tabImp.Controls.Add(this.txtImpLblNumero);
+            this.tabImp.Controls.Add(this.lblImpColItem);   this.tabImp.Controls.Add(this.txtImpLblColItem);
+            this.tabImp.Controls.Add(this.lblImpColTotal);  this.tabImp.Controls.Add(this.txtImpLblColTotal);
+            this.tabImp.Controls.Add(this.lblImpSubtotal);  this.tabImp.Controls.Add(this.txtImpLblSubtotal);
+            this.tabImp.Controls.Add(this.lblImpTaxa);      this.tabImp.Controls.Add(this.txtImpLblTaxa);
+            this.tabImp.Controls.Add(this.lblImpTotalPagar);this.tabImp.Controls.Add(this.txtImpLblTotalPagar);
+            this.tabImp.Controls.Add(this.lblImpAtendente); this.tabImp.Controls.Add(this.txtImpLblAtendente);
+            this.tabImp.Controls.Add(this.lblImpressora);   this.tabImp.Controls.Add(this.cmbImpressora);
+            this.tabImp.Controls.Add(this.lblLargura);      this.tabImp.Controls.Add(this.numLargura);
+            this.tabImp.Controls.Add(this.btnSalvImp);
+            this.tabImp.Controls.Add(this.btnTesteImp);
+            // Form
+            this.Text            = "Empresa e Usu\u00e1rios";
+            this.StartPosition   = System.Windows.Forms.FormStartPosition.CenterParent;
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.Sizable;
+            this.BackColor       = System.Drawing.Color.FromArgb(13, 19, 40);
+            this.ForeColor       = System.Drawing.Color.White;
+            this.Font            = new System.Drawing.Font("Segoe UI", 9.5F);
             this.MinimumSize     = new System.Drawing.Size(960, 620);
             this.Size            = new System.Drawing.Size(1020, 680);
-
-            // â”€â”€ paleta â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-            var cBg      = Color.FromArgb(13,  19,  40);
-            var cCard    = Color.FromArgb(22,  31,  58);
-            var cPanel   = Color.FromArgb(28,  39,  70);
-            var cAccent  = Color.FromArgb(52, 152, 219);
-            var cGreen   = Color.FromArgb(39, 174,  96);
-            var cInput   = Color.FromArgb(18,  26,  50);
-            var cBorder  = Color.FromArgb(44,  57,  95);
-            var cLbl     = Color.FromArgb(160, 175, 210);
-            var cWhite   = Color.White;
-            var fntLbl   = new Font("Segoe UI", 9F);
-            var fntInput = new Font("Segoe UI", 9.5F);
-            var fntHead  = new Font("Segoe UI", 10.5F, FontStyle.Bold);
-            var fntSmall = new Font("Segoe UI", 8F);
-
-            // helpers
-            TextBox MakeTxt(bool password = false)
-            {
-                var t = new TextBox
-                {
-                    BackColor   = cInput,
-                    ForeColor   = cWhite,
-                    BorderStyle = BorderStyle.FixedSingle,
-                    Font        = fntInput,
-                    Height      = 26
-                };
-                if (password) t.PasswordChar = '\u25CF';
-                return t;
-            }
-            Label MakeLbl(string text, bool small = false) => new Label
-            {
-                Text      = text,
-                ForeColor = small ? Color.FromArgb(100, 115, 155) : cLbl,
-                AutoSize  = true,
-                Font      = small ? fntSmall : fntLbl
-            };
-            Panel MakeSeparator() => new Panel
-            {
-                Height    = 1,
-                Dock      = DockStyle.Top,
-                BackColor = cBorder
-            };
-            Label MakeSectionHead(string text) => new Label
-            {
-                Text      = text,
-                ForeColor = cAccent,
-                Font      = fntHead,
-                AutoSize  = true
-            };
-
-            // â”€â”€ TabControl â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-            var tab = new TabControl
-            {
-                Dock      = DockStyle.Fill,
-                Font      = new Font("Segoe UI", 10F),
-                BackColor = cBg,
-                Padding   = new System.Drawing.Point(14, 5)
-            };
-
-            // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-            //  ABA EMPRESA
-            // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-            var tabEmp = new TabPage("  Dados da Empresa  ")
-            {
-                BackColor = cBg,
-                ForeColor = cWhite,
-                Padding   = new Padding(0)
-            };
-
-            // cabeçalho decorativo
-            var empHeader = new Panel
-            {
-                Dock      = DockStyle.Top,
-                Height    = 52,
-                BackColor = Color.FromArgb(36, 52, 95)
-            };
-            var empHeaderTitle = new Label
-            {
-                Text      = "🏢  Dados da Empresa",
-                ForeColor = cWhite,
-                Font      = new Font("Segoe UI", 12F, FontStyle.Bold),
-                AutoSize  = true,
-                Left      = 18,
-                Top       = 14
-            };
-            var empHeaderSub = new Label
-            {
-                Text      = "Configure as informações da sua empresa",
-                ForeColor = Color.FromArgb(140, 165, 210),
-                Font      = fntSmall,
-                AutoSize  = true,
-                Left      = 18,
-                Top       = 34
-            };
-            empHeader.Controls.Add(empHeaderTitle);
-            empHeader.Controls.Add(empHeaderSub);
-
-            // card empresa
-            var empCard = new Panel
-            {
-                Left      = 30,
-                Top       = 68,
-                Width     = 620,
-                Height    = 340,
-                BackColor = cCard
-            };
-            empCard.Anchor = System.Windows.Forms.AnchorStyles.Top |
-                             System.Windows.Forms.AnchorStyles.Left;
-
-            // Borda esquerda colorida
-            var empAccentBar = new Panel
-            {
-                Dock      = DockStyle.Left,
-                Width     = 4,
-                BackColor = cAccent
-            };
-            empCard.Controls.Add(empAccentBar);
-
-            int ex = 16, lw = 130, tw = 360, th = 27, gy = 16;
-
-            txtEmpNome     = MakeTxt();
-            txtEmpFantasia = MakeTxt();
-            txtEmpCNPJ     = MakeTxt();
-            txtEmpTel      = MakeTxt();
-            txtEmpEmail    = MakeTxt();
-            txtEmpEnd      = MakeTxt();
-
-            var empFieldDefs = new[]
-            {
-                ("Razão Social:",   (System.Windows.Forms.Control)txtEmpNome,     "Nome legal da empresa"),
-                ("Nome Fantasia:",  txtEmpFantasia,  "Como é conhecida no mercado"),
-                ("CNPJ:",           txtEmpCNPJ,      "Somente números ou com pontuação"),
-                ("Telefone:",       txtEmpTel,       ""),
-                ("E-mail:",         txtEmpEmail,     ""),
-                ("Endereço:",       txtEmpEnd,       "")
-            };
-
-            int ey = 18;
-            foreach (var (label, ctrl, hint) in empFieldDefs)
-            {
-                var lbl = MakeLbl(label);
-                lbl.SetBounds(ex + 8, ey + 5, lw, 18);
-                ctrl.SetBounds(ex + lw + 14, ey, tw, th);
-                empCard.Controls.Add(lbl);
-                empCard.Controls.Add(ctrl);
-                ey += th + gy;
-            }
-
-            var btnSalvEmp = new Button
-            {
-                Text      = "✓  Salvar Empresa",
-                Left      = ex + lw + 14,
-                Top       = ey + 8,
-                Width     = 160,
-                Height    = 32,
-                BackColor = cGreen,
-                ForeColor = cWhite,
-                FlatStyle = FlatStyle.Flat,
-                Font      = new Font("Segoe UI", 9.5F, FontStyle.Bold),
-                Cursor    = Cursors.Hand
-            };
-            btnSalvEmp.FlatAppearance.BorderSize = 0;
-            btnSalvEmp.Click += BtnSalvarEmpresa_Click;
-            empCard.Controls.Add(btnSalvEmp);
-
-            tabEmp.Controls.Add(empCard);
-            tabEmp.Controls.Add(empHeader);
-
-            // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-            //  ABA USUÁRIOS
-            // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-            var tabUsr = new TabPage("  Usuários  ")
-            {
-                BackColor = cBg,
-                ForeColor = cWhite,
-                Padding   = new Padding(0)
-            };
-
-            // cabeçalho decorativo
-            var usrHeader = new Panel
-            {
-                Dock      = DockStyle.Top,
-                Height    = 52,
-                BackColor = Color.FromArgb(36, 52, 95)
-            };
-            var usrHeaderTitle = new Label
-            {
-                Text      = "👥  Usuários do Sistema",
-                ForeColor = cWhite,
-                Font      = new Font("Segoe UI", 12F, FontStyle.Bold),
-                AutoSize  = true,
-                Left      = 18,
-                Top       = 14
-            };
-            var usrHeaderSub = new Label
-            {
-                Text      = "Gerencie os usuários e seus acessos",
-                ForeColor = Color.FromArgb(140, 165, 210),
-                Font      = fntSmall,
-                AutoSize  = true,
-                Left      = 18,
-                Top       = 34
-            };
-            usrHeader.Controls.Add(usrHeaderTitle);
-            usrHeader.Controls.Add(usrHeaderSub);
-
-            // container principal (abaixo do header)
-            var usrBody = new Panel { Dock = DockStyle.Fill, BackColor = cBg, Padding = new Padding(0) };
-
-            // â”€â”€ Grid (esquerda) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-                        // -- Formulario centralizado -----------------------------------------
-            var pnlUsrForm = new Panel { Dock = DockStyle.Fill, BackColor = cBg };
-
-            var pnlFormHead = new Panel { Dock = DockStyle.Top, Height = 36, BackColor = Color.FromArgb(30, 42, 78) };
-            pnlFormHead.Controls.Add(new Label { Text = "Dados do Usu\u00e1rio", ForeColor = cLbl,
-                Font = new Font("Segoe UI", 9F, FontStyle.Bold), AutoSize = true, Left = 14, Top = 9 });
-
-            // Painel de busca (oculto por padrao)
-            pnlBuscaUsuarios = new Panel { Dock = DockStyle.Top, Height = 200, BackColor = cCard,
-                Visible = false, Padding = new Padding(10, 6, 10, 6) };
-            var pnlSrchHead = new Panel { Dock = DockStyle.Top, Height = 28, BackColor = cCard };
-            pnlSrchHead.Controls.Add(new Label { Text = "Pesquisar usu\u00e1rio:", ForeColor = cLbl,
-                Font = fntLbl, AutoSize = true, Left = 0, Top = 5 });
-            var btnFch = new Button { Text = "\u2715", Top = 0, Width = 26, Height = 26,
-                BackColor = Color.FromArgb(70, 80, 110), ForeColor = cWhite, FlatStyle = FlatStyle.Flat,
-                Font = fntLbl, Cursor = Cursors.Hand, Anchor = AnchorStyles.Top | AnchorStyles.Right };
-            btnFch.FlatAppearance.BorderSize = 0;
-            btnFch.Click += (_, __) => pnlBuscaUsuarios.Visible = false;
-            pnlSrchHead.SizeChanged += (_, __) => btnFch.Left = pnlSrchHead.Width - btnFch.Width - 2;
-            pnlSrchHead.Controls.Add(btnFch);
-
-            txtPesquisa = new TextBox { Dock = DockStyle.Top, Height = 28, BackColor = cInput,
-                ForeColor = cWhite, Font = fntInput, BorderStyle = BorderStyle.FixedSingle };
-            txtPesquisa.PlaceholderText = "Digite nome ou login...";
-            txtPesquisa.TextChanged += TxtPesquisa_TextChanged;
-
-            lstUsuarios = new ListBox { Dock = DockStyle.Fill, BackColor = cInput, ForeColor = cWhite,
-                Font = fntLbl, BorderStyle = BorderStyle.None };
-            lstUsuarios.DoubleClick += LstUsuarios_DoubleClick;
-
-            pnlBuscaUsuarios.Controls.Add(lstUsuarios);
-            pnlBuscaUsuarios.Controls.Add(txtPesquisa);
-            pnlBuscaUsuarios.Controls.Add(pnlSrchHead);
-
-            // Area que centraliza o card
-            var pnlCardArea = new Panel { Dock = DockStyle.Fill, BackColor = cBg };
-
-            // Card do formulario
-            var frmCard = new Panel { Width = 500, BackColor = cCard };
-            frmCard.Controls.Add(new Panel { Dock = DockStyle.Left, Width = 4, BackColor = Color.FromArgb(155, 89, 182) });
-
-            int uf = 14, ulw = 138, utw = 280, uth = 26, ugy = 14, uy = 16;
-
-            txtUsrNome      = MakeTxt();
-            txtUsrLogin     = MakeTxt();
-            txtUsrSenha     = MakeTxt(true);
-            txtUsrSenhaConf = MakeTxt(true);
-            cmbUsrNivel = new ComboBox { DropDownStyle = ComboBoxStyle.DropDownList, BackColor = cInput,
-                ForeColor = cWhite, Font = fntInput, FlatStyle = FlatStyle.Flat };
-            cmbUsrNivel.Items.AddRange(new object[] { "Operador", "Gerente", "Admin" });
-            cmbUsrNivel.SelectedIndex = 0;
-            cmbUsrSit = new ComboBox { DropDownStyle = ComboBoxStyle.DropDownList, BackColor = cInput,
-                ForeColor = cWhite, Font = fntInput, FlatStyle = FlatStyle.Flat };
-            cmbUsrSit.Items.AddRange(new object[] { "Ativo", "Inativo" });
-            cmbUsrSit.SelectedIndex = 0;
-
-            // Campos Nome, Login, Senha, Confirmar Senha
-            var usrFieldDefs = new[]
-            {
-                ("Nome:",            (System.Windows.Forms.Control)txtUsrNome),
-                ("Login:",           txtUsrLogin),
-                ("Senha:",           txtUsrSenha),
-                ("Confirmar Senha:", txtUsrSenhaConf),
-            };
-            foreach (var (label, ctrl) in usrFieldDefs)
-            {
-                var lbl = MakeLbl(label);
-                lbl.SetBounds(uf + 8, uy + 5, ulw, 18);
-                ctrl.SetBounds(uf + ulw + 14, uy, utw, uth);
-                frmCard.Controls.Add(lbl);
-                frmCard.Controls.Add(ctrl);
-                uy += uth + ugy;
-            }
-            // Hint de senha logo abaixo de "Confirmar Senha"
-            var lblHintSenha = MakeLbl("(deixe em branco para n\u00e3o alterar)", true);
-            lblHintSenha.SetBounds(uf + ulw + 14, uy - 8, utw, 16);
-            frmCard.Controls.Add(lblHintSenha);
-            uy += 6;
-
-            // Campos N\u00edvel e Situa\u00e7\u00e3o
-            var usrFieldDefs2 = new[]
-            {
-                ("N\u00edvel:",    (System.Windows.Forms.Control)cmbUsrNivel),
-                ("Situa\u00e7\u00e3o:", cmbUsrSit),
-            };
-            foreach (var (label, ctrl) in usrFieldDefs2)
-            {
-                var lbl = MakeLbl(label);
-                lbl.SetBounds(uf + 8, uy + 5, ulw, 18);
-                ctrl.SetBounds(uf + ulw + 14, uy, utw, uth);
-                frmCard.Controls.Add(lbl);
-                frmCard.Controls.Add(ctrl);
-                uy += uth + ugy;
-            }
-
-            var lblModTit = MakeSectionHead("M\u00f3dulos de Acesso");
-            lblModTit.SetBounds(uf + 8, uy + 4, 250, 20);
-            frmCard.Controls.Add(lblModTit);
-            uy += 28;
-
-            var modNames  = new[] { "Dashboard", "Pedidos", "Financeiro", "Produtos", "Categorias", "Clientes", "Fornecedores", "Cupons", "Empresa", "Cancelar Pedidos", "Ent. Mercadoria", "Avisos" };
-            var modFields = new CheckBox[12];
-            int cbColW = 106, cbRowH = 26, cbX0 = uf + ulw + 14;
-            for (int i = 0; i < modNames.Length; i++)
-            {
-                var chk = new CheckBox { Text = modNames[i], ForeColor = cLbl, BackColor = cCard,
-                    Font = fntLbl, AutoSize = false, Width = 102, Height = 22 };
-                chk.SetBounds(cbX0 + (i % 3) * cbColW, uy + (i / 3) * cbRowH, 102, 22);
-                frmCard.Controls.Add(chk);
-                modFields[i] = chk;
-            }
-            chkModDashboard         = modFields[0];
-            chkModPedidos           = modFields[1];
-            chkModFinanceiro        = modFields[2];
-            chkModProdutos          = modFields[3];
-            chkModCategorias        = modFields[4];
-            chkModClientes          = modFields[5];
-            chkModFornecedores      = modFields[6];
-            chkModCupons            = modFields[7];
-            chkModEmpresa           = modFields[8];
-            chkModCancelarPedidos   = modFields[9];
-            chkModEntradaMercadoria = modFields[10];
-            chkModAvisos            = modFields[11];
-
-            uy += 4 * cbRowH + 12;
-
-            int bw = 128, bh = 32;
-            var pnlBtns = new Panel { Left = uf + 8, Top = uy + 6, Width = bw * 2 + 8, Height = bh, BackColor = cCard };
-
-            btnNovoUsr = new Button { Text = "+ Novo", Left = 0, Top = 0, Width = bw, Height = bh,
-                BackColor = Color.FromArgb(52, 73, 94), ForeColor = cWhite, FlatStyle = FlatStyle.Flat,
-                Font = new Font("Segoe UI", 9.5F, FontStyle.Bold), Cursor = Cursors.Hand };
-            btnNovoUsr.FlatAppearance.BorderSize = 0;
-            btnNovoUsr.Click += BtnNovoUsuario_Click;
-
-            btnPesquisarUsr = new Button { Text = "Pesquisar", Left = bw + 8, Top = 0, Width = bw, Height = bh,
-                BackColor = Color.FromArgb(52, 152, 219), ForeColor = cWhite, FlatStyle = FlatStyle.Flat,
-                Font = new Font("Segoe UI", 9.5F, FontStyle.Bold), Cursor = Cursors.Hand };
-            btnPesquisarUsr.FlatAppearance.BorderSize = 0;
-            btnPesquisarUsr.Click += BtnPesquisarUsuario_Click;
-
-            btnSalvUsr = new Button { Text = "\u2713  Salvar", Left = 0, Top = 0, Width = bw, Height = bh,
-                BackColor = cGreen, ForeColor = cWhite, FlatStyle = FlatStyle.Flat,
-                Font = new Font("Segoe UI", 9.5F, FontStyle.Bold), Cursor = Cursors.Hand, Visible = false };
-            btnSalvUsr.FlatAppearance.BorderSize = 0;
-            btnSalvUsr.Click += BtnSalvarUsuario_Click;
-
-            btnCancelarUsr = new Button { Text = "Cancelar", Left = bw + 8, Top = 0, Width = bw, Height = bh,
-                BackColor = Color.FromArgb(108, 117, 125), ForeColor = cWhite, FlatStyle = FlatStyle.Flat,
-                Font = new Font("Segoe UI", 9.5F, FontStyle.Bold), Cursor = Cursors.Hand, Visible = false };
-            btnCancelarUsr.FlatAppearance.BorderSize = 0;
-            btnCancelarUsr.Click += BtnCancelarUsuario_Click;
-
-            pnlBtns.Controls.AddRange(new Control[] { btnNovoUsr, btnPesquisarUsr, btnSalvUsr, btnCancelarUsr });
-            frmCard.Controls.Add(pnlBtns);
-            frmCard.Height = uy + 6 + bh + 10;
-
-            pnlCardArea.SizeChanged += (_, __) =>
-            {
-                frmCard.Left = System.Math.Max(14, (pnlCardArea.Width  - frmCard.Width)  / 2);
-                frmCard.Top  = System.Math.Max(14, (pnlCardArea.Height - frmCard.Height) / 2);
-            };
-            pnlCardArea.Controls.Add(frmCard);
-
-            pnlUsrForm.Controls.Add(pnlCardArea);
-            pnlUsrForm.Controls.Add(pnlBuscaUsuarios);
-            pnlUsrForm.Controls.Add(pnlFormHead);
-            usrBody.Controls.Add(pnlUsrForm);
-
-            tabUsr.Controls.Add(usrBody);
-            tabUsr.Controls.Add(usrHeader);
-
-            // ══════════════════════════════════════════════════════════════
-            //  ABA CONFIGURACAO DE IMPRESSAO
-            // ══════════════════════════════════════════════════════════════
-            var tabImp = new TabPage("  Impressão  ")
-            {
-                BackColor = cBg,
-                ForeColor = cWhite,
-                Padding   = new Padding(0)
-            };
-
-            var impHeader = new Panel
-            {
-                Dock      = DockStyle.Top,
-                Height    = 52,
-                BackColor = Color.FromArgb(36, 52, 95)
-            };
-            impHeader.Controls.Add(new Label
-            {
-                Text      = "🖨  Configuração de Impressão",
-                ForeColor = cWhite,
-                Font      = new Font("Segoe UI", 12F, FontStyle.Bold),
-                AutoSize  = true,
-                Left      = 18,
-                Top       = 14
-            });
-            impHeader.Controls.Add(new Label
-            {
-                Text      = "Customize o cupom impresso a cada confirmação de pedido",
-                ForeColor = Color.FromArgb(140, 165, 210),
-                Font      = fntSmall,
-                AutoSize  = true,
-                Left      = 18,
-                Top       = 34
-            });
-
-            var impScroll = new Panel { Dock = DockStyle.Fill, AutoScroll = true, BackColor = cBg };
-
-            // card de conteudo
-            var impCard = new Panel
-            {
-                Left      = 30,
-                Top       = 14,
-                Width     = 700,
-                BackColor = cCard
-            };
-            impCard.Controls.Add(new Panel { Dock = DockStyle.Left, Width = 4, BackColor = Color.FromArgb(230, 126, 34) });
-
-            int ix = 16, ilw = 180, itw = 400, ith = 26, igy = 12, iy = 16;
-
-            Label ImpLbl(string t) => new Label { Text = t, ForeColor = cLbl, Font = fntLbl, AutoSize = true };
-            TextBox ImpTxt(bool ml = false)
-            {
-                var t = new TextBox { BackColor = cInput, ForeColor = cWhite, BorderStyle = BorderStyle.FixedSingle, Font = fntInput };
-                if (ml) { t.Multiline = true; t.ScrollBars = ScrollBars.Vertical; t.Height = 64; }
-                return t;
-            }
-
-            // Secao: Cabecalho
-            var lblSecCab = MakeSectionHead("Cabeçalho");
-            lblSecCab.SetBounds(ix + 8, iy, 300, 22);
-            impCard.Controls.Add(lblSecCab);
-            iy += 28;
-
-            impCard.Controls.Add(MakeSeparator());
-
-            var impDefs = new (string label, string hint)[]
-            {
-                ("Nome da Empresa (cabe.):",    "Deixe em branco para usar dados da aba Empresa"),
-                ("Endereço (cabe.):",            ""),
-                ("Telefone (cabe.):",            ""),
-                ("CNPJ (cabe.):",               ""),
-                ("Char separador:",             "Ex: - ou = (um caractere repetido)"),
-                ("Aviso fiscal:",               "Ex: *** NAO E DOCUMENTO FISCAL ***"),
-            };
-            var impTxts = new TextBox[impDefs.Length];
-            for (int i = 0; i < impDefs.Length; i++)
-            {
-                var lbl  = ImpLbl(impDefs[i].label);
-                lbl.SetBounds(ix + 8, iy + 5, ilw, 18);
-                impCard.Controls.Add(lbl);
-
-                impTxts[i] = ImpTxt();
-                impTxts[i].SetBounds(ix + ilw + 14, iy, itw, ith);
-                impCard.Controls.Add(impTxts[i]);
-
-                if (!string.IsNullOrEmpty(impDefs[i].hint))
-                {
-                    var h = ImpLbl(impDefs[i].hint);
-                    h.ForeColor = Color.FromArgb(90, 110, 150);
-                    h.Font      = fntSmall;
-                    h.SetBounds(ix + ilw + 14, iy + ith + 1, itw, 14);
-                    impCard.Controls.Add(h);
-                    iy += 14;
-                }
-                iy += ith + igy;
-            }
-
-            txtImpNomeEmpresa    = impTxts[0];
-            txtImpEndereco       = impTxts[1];
-            txtImpTelefone       = impTxts[2];
-            txtImpCNPJ           = impTxts[3];
-            txtImpSeparador      = impTxts[4];
-            txtImpAvisoFiscal    = impTxts[5];
-
-            // Rodape livre (multiline)
-            var lblRodape = ImpLbl("Rodapé livre:");
-            lblRodape.SetBounds(ix + 8, iy + 5, ilw, 18);
-            impCard.Controls.Add(lblRodape);
-            txtImpRodapeTexto = ImpTxt(true);
-            txtImpRodapeTexto.SetBounds(ix + ilw + 14, iy, itw, 64);
-            impCard.Controls.Add(txtImpRodapeTexto);
-            iy += 64 + igy;
-
-            // Secao: Etiquetas do cupom
-            iy += 8;
-            var lblSecEtiq = MakeSectionHead("Etiquetas do Cupom");
-            lblSecEtiq.SetBounds(ix + 8, iy, 300, 22);
-            impCard.Controls.Add(lblSecEtiq);
-            iy += 28;
-
-            var etiqDefs = new string[]
-            {
-                "Nº Pedido label:", "Coluna Item label:", "Coluna Total label:",
-                "Subtotal label:", "Taxa Entrega label:", "Total a Pagar label:", "Atendente label:"
-            };
-            var etiqTxts = new TextBox[etiqDefs.Length];
-            for (int i = 0; i < etiqDefs.Length; i++)
-            {
-                var lbl = ImpLbl(etiqDefs[i]);
-                lbl.SetBounds(ix + 8, iy + 5, ilw, 18);
-                impCard.Controls.Add(lbl);
-                etiqTxts[i] = ImpTxt();
-                etiqTxts[i].SetBounds(ix + ilw + 14, iy, 200, ith);
-                impCard.Controls.Add(etiqTxts[i]);
-                iy += ith + igy;
-            }
-            txtImpLblNumero       = etiqTxts[0];
-            txtImpLblColItem      = etiqTxts[1];
-            txtImpLblColTotal     = etiqTxts[2];
-            txtImpLblSubtotal     = etiqTxts[3];
-            txtImpLblTaxa         = etiqTxts[4];
-            txtImpLblTotalPagar   = etiqTxts[5];
-            txtImpLblAtendente    = etiqTxts[6];
-
-            // Secao: Impressora
-            iy += 8;
-            var lblSecImpr = MakeSectionHead("Impressora");
-            lblSecImpr.SetBounds(ix + 8, iy, 300, 22);
-            impCard.Controls.Add(lblSecImpr);
-            iy += 28;
-
-            var lblImpr = ImpLbl("Impressora:");
-            lblImpr.SetBounds(ix + 8, iy + 5, ilw, 18);
-            impCard.Controls.Add(lblImpr);
-            cmbImpressora = new ComboBox
-            {
-                DropDownStyle = ComboBoxStyle.DropDownList,
-                BackColor     = cInput,
-                ForeColor     = cWhite,
-                Font          = fntInput,
-                FlatStyle     = FlatStyle.Flat
-            };
-            cmbImpressora.SetBounds(ix + ilw + 14, iy, itw, ith);
-            // Preenche com impressoras instaladas
-            cmbImpressora.Items.Add("(Impressora padrão do sistema)");
-            foreach (string prt in System.Drawing.Printing.PrinterSettings.InstalledPrinters)
-                cmbImpressora.Items.Add(prt);
-            cmbImpressora.SelectedIndex = 0;
-            impCard.Controls.Add(cmbImpressora);
-            iy += ith + igy;
-
-            var lblLarg = ImpLbl("Largura (chars):");
-            lblLarg.SetBounds(ix + 8, iy + 5, ilw, 18);
-            impCard.Controls.Add(lblLarg);
-            numLargura = new NumericUpDown
-            {
-                Minimum    = 20,
-                Maximum    = 120,
-                Value      = 42,
-                BackColor  = cInput,
-                ForeColor  = cWhite,
-                Font       = fntInput
-            };
-            numLargura.SetBounds(ix + ilw + 14, iy, 80, ith);
-            impCard.Controls.Add(numLargura);
-            iy += ith + igy + 8;
-
-            // Botoes
-            var btnSalvImp = new Button
-            {
-                Text      = "\u2713  Salvar Configuração",
-                Left      = ix + ilw + 14,
-                Top       = iy,
-                Width     = 200,
-                Height    = 32,
-                BackColor = cGreen,
-                ForeColor = cWhite,
-                FlatStyle = FlatStyle.Flat,
-                Font      = new Font("Segoe UI", 9.5F, FontStyle.Bold),
-                Cursor    = Cursors.Hand
-            };
-            btnSalvImp.FlatAppearance.BorderSize = 0;
-            btnSalvImp.Click += BtnSalvarImpressao_Click;
-            impCard.Controls.Add(btnSalvImp);
-
-            var btnTesteImp = new Button
-            {
-                Text      = "Imprimir Teste",
-                Left      = ix + ilw + 14 + 208,
-                Top       = iy,
-                Width     = 140,
-                Height    = 32,
-                BackColor = Color.FromArgb(52, 152, 219),
-                ForeColor = cWhite,
-                FlatStyle = FlatStyle.Flat,
-                Font      = new Font("Segoe UI", 9.5F, FontStyle.Bold),
-                Cursor    = Cursors.Hand
-            };
-            btnTesteImp.FlatAppearance.BorderSize = 0;
-            btnTesteImp.Click += BtnImprimirTeste_Click;
-            impCard.Controls.Add(btnTesteImp);
-
-            iy += 32 + 16;
-            impCard.Height = iy;
-
-            impScroll.Controls.Add(impCard);
-            impScroll.SizeChanged += (_, __) =>
-            {
-                impCard.Left  = System.Math.Max(14, (impScroll.Width - impCard.Width) / 2);
-                impCard.Top   = 14;
-            };
-
-            tabImp.Controls.Add(impScroll);
-            tabImp.Controls.Add(impHeader);
-
-            tab.TabPages.Add(tabEmp);
-            tab.TabPages.Add(tabUsr);
-            tab.TabPages.Add(tabImp);
-            this.Controls.Add(tab);
+            this.Controls.Add(this.tabControl);
+            this.ResumeLayout(false);
         }
 
-        // â”€â”€ Empresa fields â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-        internal TextBox txtEmpNome;
-        internal TextBox txtEmpFantasia;
-        internal TextBox txtEmpCNPJ;
-        internal TextBox txtEmpTel;
-        internal TextBox txtEmpEmail;
-        internal TextBox txtEmpEnd;
-
-        // â”€â”€ Usuario fields â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-        internal TextBox txtUsrNome;
-        internal TextBox txtUsrLogin;
-        internal TextBox txtUsrSenha;
-        internal TextBox txtUsrSenhaConf;
-        internal ComboBox cmbUsrNivel;
-        internal ComboBox cmbUsrSit;
-        internal Panel    pnlBuscaUsuarios;
-        internal TextBox  txtPesquisa;
-        internal ListBox  lstUsuarios;
-        internal Button   btnNovoUsr;
-        internal Button   btnPesquisarUsr;
-        internal Button   btnSalvUsr;
-        internal Button   btnCancelarUsr;
-
-        // ── Module checkboxes ────────────────────────────────────────────────
-        internal CheckBox chkModDashboard;
-        internal CheckBox chkModPedidos;
-        internal CheckBox chkModFinanceiro;
-        internal CheckBox chkModProdutos;
-        internal CheckBox chkModCategorias;
-        internal CheckBox chkModClientes;
-        internal CheckBox chkModFornecedores;
-        internal CheckBox chkModCupons;
-        internal CheckBox chkModEmpresa;
-        internal CheckBox chkModCancelarPedidos;
-        internal CheckBox chkModEntradaMercadoria;
-        internal CheckBox chkModAvisos;
-
-        // ── Impressao fields ─────────────────────────────────────────────────
-        internal TextBox        txtImpNomeEmpresa;
-        internal TextBox        txtImpEndereco;
-        internal TextBox        txtImpTelefone;
-        internal TextBox        txtImpCNPJ;
-        internal TextBox        txtImpSeparador;
-        internal TextBox        txtImpAvisoFiscal;
-        internal TextBox        txtImpRodapeTexto;
-        internal TextBox        txtImpLblNumero;
-        internal TextBox        txtImpLblColItem;
-        internal TextBox        txtImpLblColTotal;
-        internal TextBox        txtImpLblSubtotal;
-        internal TextBox        txtImpLblTaxa;
-        internal TextBox        txtImpLblTotalPagar;
-        internal TextBox        txtImpLblAtendente;
-        internal ComboBox       cmbImpressora;
-        internal NumericUpDown  numLargura;
+        // Empresa
+        internal System.Windows.Forms.TextBox txtEmpNome;
+        internal System.Windows.Forms.TextBox txtEmpFantasia;
+        internal System.Windows.Forms.TextBox txtEmpCNPJ;
+        internal System.Windows.Forms.TextBox txtEmpTel;
+        internal System.Windows.Forms.TextBox txtEmpEmail;
+        internal System.Windows.Forms.TextBox txtEmpEnd;
+        // Usuario
+        internal System.Windows.Forms.TextBox    txtUsrNome;
+        internal System.Windows.Forms.TextBox    txtUsrLogin;
+        internal System.Windows.Forms.TextBox    txtUsrSenha;
+        internal System.Windows.Forms.TextBox    txtUsrSenhaConf;
+        internal System.Windows.Forms.ComboBox   cmbUsrNivel;
+        internal System.Windows.Forms.ComboBox   cmbUsrSit;
+        internal System.Windows.Forms.Panel      pnlBuscaUsuarios;
+        internal System.Windows.Forms.TextBox    txtPesquisa;
+        internal System.Windows.Forms.ListBox    lstUsuarios;
+        internal System.Windows.Forms.Button     btnNovoUsr;
+        internal System.Windows.Forms.Button     btnPesquisarUsr;
+        internal System.Windows.Forms.Button     btnSalvUsr;
+        internal System.Windows.Forms.Button     btnCancelarUsr;
+        // Checkboxes
+        internal System.Windows.Forms.CheckBox chkModDashboard;
+        internal System.Windows.Forms.CheckBox chkModPedidos;
+        internal System.Windows.Forms.CheckBox chkModFinanceiro;
+        internal System.Windows.Forms.CheckBox chkModProdutos;
+        internal System.Windows.Forms.CheckBox chkModCategorias;
+        internal System.Windows.Forms.CheckBox chkModClientes;
+        internal System.Windows.Forms.CheckBox chkModFornecedores;
+        internal System.Windows.Forms.CheckBox chkModCupons;
+        internal System.Windows.Forms.CheckBox chkModEmpresa;
+        internal System.Windows.Forms.CheckBox chkModCancelarPedidos;
+        internal System.Windows.Forms.CheckBox chkModEntradaMercadoria;
+        internal System.Windows.Forms.CheckBox chkModAvisos;
+        // Impressao
+        internal System.Windows.Forms.TextBox        txtImpNomeEmpresa;
+        internal System.Windows.Forms.TextBox        txtImpEndereco;
+        internal System.Windows.Forms.TextBox        txtImpTelefone;
+        internal System.Windows.Forms.TextBox        txtImpCNPJ;
+        internal System.Windows.Forms.TextBox        txtImpSeparador;
+        internal System.Windows.Forms.TextBox        txtImpAvisoFiscal;
+        internal System.Windows.Forms.TextBox        txtImpRodapeTexto;
+        internal System.Windows.Forms.TextBox        txtImpLblNumero;
+        internal System.Windows.Forms.TextBox        txtImpLblColItem;
+        internal System.Windows.Forms.TextBox        txtImpLblColTotal;
+        internal System.Windows.Forms.TextBox        txtImpLblSubtotal;
+        internal System.Windows.Forms.TextBox        txtImpLblTaxa;
+        internal System.Windows.Forms.TextBox        txtImpLblTotalPagar;
+        internal System.Windows.Forms.TextBox        txtImpLblAtendente;
+        internal System.Windows.Forms.ComboBox       cmbImpressora;
+        internal System.Windows.Forms.NumericUpDown  numLargura;
+        // Private helpers
+        private System.Windows.Forms.TabControl     tabControl;
+        private System.Windows.Forms.TabPage        tabEmp;
+        private System.Windows.Forms.TabPage        tabUsr;
+        private System.Windows.Forms.TabPage        tabImp;
+        private System.Windows.Forms.Button         btnSalvEmp;
+        private System.Windows.Forms.Button         btnSalvImp;
+        private System.Windows.Forms.Button         btnTesteImp;
+        // labels empresa
+        private System.Windows.Forms.Label lblEmpNome     = new System.Windows.Forms.Label { Text = "Raz\u00e3o Social:",  AutoSize = true, Left = 22, Top = 92,  ForeColor = System.Drawing.Color.FromArgb(160,175,210) };
+        private System.Windows.Forms.Label lblEmpFantasia = new System.Windows.Forms.Label { Text = "Nome Fantasia:",     AutoSize = true, Left = 22, Top = 123, ForeColor = System.Drawing.Color.FromArgb(160,175,210) };
+        private System.Windows.Forms.Label lblEmpCNPJ     = new System.Windows.Forms.Label { Text = "CNPJ:",             AutoSize = true, Left = 22, Top = 154, ForeColor = System.Drawing.Color.FromArgb(160,175,210) };
+        private System.Windows.Forms.Label lblEmpTel      = new System.Windows.Forms.Label { Text = "Telefone:",         AutoSize = true, Left = 22, Top = 185, ForeColor = System.Drawing.Color.FromArgb(160,175,210) };
+        private System.Windows.Forms.Label lblEmpEmail    = new System.Windows.Forms.Label { Text = "E-mail:",           AutoSize = true, Left = 22, Top = 216, ForeColor = System.Drawing.Color.FromArgb(160,175,210) };
+        private System.Windows.Forms.Label lblEmpEnd      = new System.Windows.Forms.Label { Text = "Endere\u00e7o:",    AutoSize = true, Left = 22, Top = 247, ForeColor = System.Drawing.Color.FromArgb(160,175,210) };
+        // labels usuario
+        private System.Windows.Forms.Label lblUsrNome     = new System.Windows.Forms.Label { Text = "Nome:",            AutoSize = true, Left = 22, Top = 25,  ForeColor = System.Drawing.Color.FromArgb(160,175,210) };
+        private System.Windows.Forms.Label lblUsrLogin    = new System.Windows.Forms.Label { Text = "Login:",           AutoSize = true, Left = 22, Top = 65,  ForeColor = System.Drawing.Color.FromArgb(160,175,210) };
+        private System.Windows.Forms.Label lblUsrSenha    = new System.Windows.Forms.Label { Text = "Senha:",           AutoSize = true, Left = 22, Top = 105, ForeColor = System.Drawing.Color.FromArgb(160,175,210) };
+        private System.Windows.Forms.Label lblUsrSenhaConf= new System.Windows.Forms.Label { Text = "Confirmar:",       AutoSize = true, Left = 22, Top = 145, ForeColor = System.Drawing.Color.FromArgb(160,175,210) };
+        private System.Windows.Forms.Label lblUsrNivel    = new System.Windows.Forms.Label { Text = "N\u00edvel:",      AutoSize = true, Left = 22, Top = 185, ForeColor = System.Drawing.Color.FromArgb(160,175,210) };
+        private System.Windows.Forms.Label lblUsrSit      = new System.Windows.Forms.Label { Text = "Situa\u00e7\u00e3o:", AutoSize = true, Left = 22, Top = 225, ForeColor = System.Drawing.Color.FromArgb(160,175,210) };
+        // labels impressao
+        private System.Windows.Forms.Label lblImpNome      = new System.Windows.Forms.Label { Text = "Nome (cab.):",    AutoSize = true, Left = 22, Top = 36,  ForeColor = System.Drawing.Color.FromArgb(160,175,210) };
+        private System.Windows.Forms.Label lblImpEnd       = new System.Windows.Forms.Label { Text = "Endere\u00e7o:", AutoSize = true, Left = 22, Top = 68,  ForeColor = System.Drawing.Color.FromArgb(160,175,210) };
+        private System.Windows.Forms.Label lblImpTel       = new System.Windows.Forms.Label { Text = "Telefone:",      AutoSize = true, Left = 22, Top = 100, ForeColor = System.Drawing.Color.FromArgb(160,175,210) };
+        private System.Windows.Forms.Label lblImpCNPJ      = new System.Windows.Forms.Label { Text = "CNPJ:",          AutoSize = true, Left = 22, Top = 132, ForeColor = System.Drawing.Color.FromArgb(160,175,210) };
+        private System.Windows.Forms.Label lblImpSep       = new System.Windows.Forms.Label { Text = "Separador:",     AutoSize = true, Left = 22, Top = 164, ForeColor = System.Drawing.Color.FromArgb(160,175,210) };
+        private System.Windows.Forms.Label lblImpAviso     = new System.Windows.Forms.Label { Text = "Aviso fiscal:",  AutoSize = true, Left = 22, Top = 196, ForeColor = System.Drawing.Color.FromArgb(160,175,210) };
+        private System.Windows.Forms.Label lblImpRodape    = new System.Windows.Forms.Label { Text = "Rodap\u00e9:",   AutoSize = true, Left = 22, Top = 228, ForeColor = System.Drawing.Color.FromArgb(160,175,210) };
+        private System.Windows.Forms.Label lblImpNum       = new System.Windows.Forms.Label { Text = "N\u00ba Pedido:",AutoSize = true, Left = 22, Top = 306, ForeColor = System.Drawing.Color.FromArgb(160,175,210) };
+        private System.Windows.Forms.Label lblImpColItem   = new System.Windows.Forms.Label { Text = "Col. Item:",     AutoSize = true, Left = 22, Top = 338, ForeColor = System.Drawing.Color.FromArgb(160,175,210) };
+        private System.Windows.Forms.Label lblImpColTotal  = new System.Windows.Forms.Label { Text = "Col. Total:",    AutoSize = true, Left = 22, Top = 370, ForeColor = System.Drawing.Color.FromArgb(160,175,210) };
+        private System.Windows.Forms.Label lblImpSubtotal  = new System.Windows.Forms.Label { Text = "Subtotal:",      AutoSize = true, Left = 22, Top = 402, ForeColor = System.Drawing.Color.FromArgb(160,175,210) };
+        private System.Windows.Forms.Label lblImpTaxa      = new System.Windows.Forms.Label { Text = "Taxa:",          AutoSize = true, Left = 22, Top = 434, ForeColor = System.Drawing.Color.FromArgb(160,175,210) };
+        private System.Windows.Forms.Label lblImpTotalPagar= new System.Windows.Forms.Label { Text = "Total a Pagar:", AutoSize = true, Left = 22, Top = 466, ForeColor = System.Drawing.Color.FromArgb(160,175,210) };
+        private System.Windows.Forms.Label lblImpAtendente = new System.Windows.Forms.Label { Text = "Atendente:",     AutoSize = true, Left = 22, Top = 498, ForeColor = System.Drawing.Color.FromArgb(160,175,210) };
+        private System.Windows.Forms.Label lblImpressora   = new System.Windows.Forms.Label { Text = "Impressora:",    AutoSize = true, Left = 22, Top = 536, ForeColor = System.Drawing.Color.FromArgb(160,175,210) };
+        private System.Windows.Forms.Label lblLargura      = new System.Windows.Forms.Label { Text = "Largura:",       AutoSize = true, Left = 22, Top = 568, ForeColor = System.Drawing.Color.FromArgb(160,175,210) };
     }
 }

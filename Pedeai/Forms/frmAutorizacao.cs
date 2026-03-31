@@ -20,6 +20,7 @@ namespace Pedeai.Forms
         public frmAutorizacao()
         {
             InitializeComponent();
+            if (System.ComponentModel.LicenseManager.UsageMode == System.ComponentModel.LicenseUsageMode.Designtime) return;
             _bll = new UsuarioBLL();
         }
 

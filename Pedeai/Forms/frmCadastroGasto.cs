@@ -13,6 +13,7 @@ namespace Pedeai.Forms
         public frmCadastroGasto()
         {
             InitializeComponent();
+            if (System.ComponentModel.LicenseManager.UsageMode == System.ComponentModel.LicenseUsageMode.Designtime) return;
             _bll = new GastoMaterialBLL();
             dtpData.Value = DateTime.Today;
         }

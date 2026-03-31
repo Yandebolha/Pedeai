@@ -12,6 +12,7 @@ namespace Pedeai.Forms
         public frmLogin()
         {
             InitializeComponent();
+            if (System.ComponentModel.LicenseManager.UsageMode == System.ComponentModel.LicenseUsageMode.Designtime) return;
             _bll = new UsuarioBLL();
         }
 

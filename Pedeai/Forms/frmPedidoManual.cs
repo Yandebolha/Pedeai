@@ -20,6 +20,7 @@ namespace Pedeai.Forms
         public frmPedidoManual()
         {
             InitializeComponent();
+            if (System.ComponentModel.LicenseManager.UsageMode == System.ComponentModel.LicenseUsageMode.Designtime) return;
             _pedidoBLL = new PedidoBLL(); _mercBLL = new MercadoriaBLL(); _clienteBLL = new ClienteBLL();
             Load += (_, __) => CarregarProdutos();
         }

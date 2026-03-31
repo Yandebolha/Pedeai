@@ -18,6 +18,7 @@ namespace Pedeai.Forms
         public frmCadastroCliente()
         {
             InitializeComponent();
+            if (System.ComponentModel.LicenseManager.UsageMode == System.ComponentModel.LicenseUsageMode.Designtime) return;
             _bll = new ClienteBLL();
             Load += (_, __) => CarregarGrid();
         }
