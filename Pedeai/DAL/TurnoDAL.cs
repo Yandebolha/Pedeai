@@ -72,6 +72,28 @@ namespace Pedeai.DAL
             return dt;
         }
 
+        /// <summary>Retorna os pedidos finalizados durante o período de um turno.</summary>
+        public DataTable GetPedidosTurno(DateTime abertura, DateTime fechamento)
+        {
+            var dt = new DataTable();
+            using var conn = AbrirConexao();
+            var sql = @"SELECT p.Codigo, p.pediNome_Cliente, p.pediSituacao,
+                               p.pediForma_Pagamento, p.pediTipo_Entrega,
+                               p.pediSubtotal, p.pediTaxa_Entrega, p.pediDesconto, p.pediValor_Total,
+                               p.pediPago_Dinheiro, p.pediPago_Cartao, p.pediPago_Pix,
+                               p.pediValor_Pago, p.pediData_Lancamento, p.pediData_Atualizacao
+                        FROM pedido_web p
+                        WHERE p.pediData_Lancamento >= @de
+                          AND p.pediData_Lancamento <= @ate
+                          AND p.pediSituacao != 6
+                        ORDER BY p.Codigo";
+            using var cmd = new MySqlCommand(sql, conn);
+            cmd.Parameters.AddWithValue("@de",  abertura);
+            cmd.Parameters.AddWithValue("@ate", fechamento);
+            new MySqlDataAdapter(cmd).Fill(dt);
+            return dt;
+        }
+
         private static Turno Mapear(MySqlDataReader r)
         {
             return new Turno

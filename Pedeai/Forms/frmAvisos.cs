@@ -54,17 +54,17 @@ namespace Pedeai.Forms
 
             var show = new System.Collections.Generic.Dictionary<string, string>
             {
-                ["Codigo"]        = "CÃ³d.",
+                ["Codigo"]        = "C\u00f3d.",
                 ["CodEntrada"]    = "Entrada #",
                 ["Fornecedor"]    = "Fornecedor",
-                ["Documento"]     = "NÂº Doc",
+                ["Documento"]     = "N\u00ba Doc",
                 ["DataEntrada"]   = "Data Nota",
                 ["Parcela"]       = "Parcela",
                 ["TotalParcelas"] = "Total",
                 ["Vencimento"]    = "Vencimento",
                 ["Valor"]         = "Valor R$",
-                ["Observacao"]    = "ObservaÃ§Ã£o",
-                ["Situacao"]      = "SituaÃ§Ã£o",
+                ["Observacao"]    = "Observa\u00e7\u00e3o",
+                ["Situacao"]      = "Situa\u00e7\u00e3o",
                 ["DataPagamento"] = "Dt. Pagamento",
             };
             foreach (var kv in show)

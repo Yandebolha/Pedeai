@@ -14,6 +14,14 @@ namespace Pedeai.Forms
             InitializeComponent();
             if (System.ComponentModel.LicenseManager.UsageMode == System.ComponentModel.LicenseUsageMode.Designtime) return;
             _bll = new UsuarioBLL();
+            // Tenta carregar o logo do sistema (RanGoFood.png na pasta do executável)
+            try
+            {
+                string imgPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "RanGoFood.png");
+                if (System.IO.File.Exists(imgPath))
+                    picLogo.Image = Image.FromFile(imgPath);
+            }
+            catch { /* sem imagem, exibe em branco */ }
         }
 
         private void BtnEntrar_Click(object sender, EventArgs e)

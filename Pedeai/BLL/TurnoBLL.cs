@@ -49,5 +49,8 @@ namespace Pedeai.BLL
         public Turno GetAtivo() => _dal.GetAtivo();
 
         public DataTable Listar(DateTime de, DateTime ate) => _dal.Listar(de, ate);
+
+        public DataTable GetPedidosTurno(DateTime abertura, DateTime fechamento)
+            => _dal.GetPedidosTurno(abertura, fechamento);
     }
 }

@@ -84,8 +84,8 @@ namespace Pedeai.Forms
                 if (grid.Columns.Contains(name)) grid.Columns[name].Visible = true;
             var caps = new System.Collections.Generic.Dictionary<string, string>
             {
-                ["Preco"]      = "Pre�o",
-                ["Promocional"] = "Pre�o Promo.",
+                ["Preco"]       = "Pre\u00e7o",
+                ["Promocional"] = "Pre\u00e7o Promo.",
             };
             foreach (var kv in caps)
                 if (grid.Columns.Contains(kv.Key)) grid.Columns[kv.Key].HeaderText = kv.Value;

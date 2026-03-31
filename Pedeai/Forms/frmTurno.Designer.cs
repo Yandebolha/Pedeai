@@ -37,6 +37,7 @@ namespace Pedeai.Forms
             this.dtpAte         = new System.Windows.Forms.DateTimePicker();
             this.btnFiltrar     = new System.Windows.Forms.Button();
             this.gridHistorico  = new System.Windows.Forms.DataGridView();
+            this.btnRelatorio   = new System.Windows.Forms.Button();
 
             // pnlAbrir
             this.pnlAbrir.SuspendLayout();
@@ -231,7 +232,19 @@ namespace Pedeai.Forms
             this.gridHistorico.RowHeadersVisible      = false;
             this.gridHistorico.EnableHeadersVisualStyles = false;
 
+            // ── btnRelatorio ─────────────────────────────────────────────
+            this.btnRelatorio.Dock      = System.Windows.Forms.DockStyle.Bottom;
+            this.btnRelatorio.Height    = 32;
+            this.btnRelatorio.Text      = "\U0001F4CA Ver Movimenta\u00e7\u00f5es do Turno";
+            this.btnRelatorio.BackColor = System.Drawing.Color.FromArgb(41, 128, 185);
+            this.btnRelatorio.ForeColor = System.Drawing.Color.White;
+            this.btnRelatorio.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnRelatorio.Cursor    = System.Windows.Forms.Cursors.Hand;
+            this.btnRelatorio.Click    += new System.EventHandler(this.BtnRelatorio_Click);
+            this.btnRelatorio.FlatAppearance.BorderSize = 0;
+
             this.pnlHistorico.Controls.Add(this.gridHistorico);
+            this.pnlHistorico.Controls.Add(this.btnRelatorio);
             this.pnlHistorico.Controls.Add(this.pnlFiltro);
             this.pnlHistorico.Controls.Add(this.lblHist);
 
@@ -290,5 +303,6 @@ namespace Pedeai.Forms
         private System.Windows.Forms.DateTimePicker   dtpAte;
         private System.Windows.Forms.Button           btnFiltrar;
         private System.Windows.Forms.DataGridView     gridHistorico;
+        private System.Windows.Forms.Button           btnRelatorio;
     }
 }

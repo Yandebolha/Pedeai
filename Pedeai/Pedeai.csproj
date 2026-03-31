@@ -125,6 +125,12 @@
     <Compile Update="Forms\frmTurno.Designer.cs">
       <DependentUpon>frmTurno.cs</DependentUpon>
     </Compile>
+    <Compile Update="Forms\frmRelatorioTurno.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Forms\frmRelatorioTurno.Designer.cs">
+      <DependentUpon>frmRelatorioTurno.cs</DependentUpon>
+    </Compile>
     <Compile Update="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>

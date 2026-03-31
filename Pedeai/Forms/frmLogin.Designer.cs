@@ -21,7 +21,7 @@ namespace Pedeai.Forms
             this.btnEntrar      = new System.Windows.Forms.Button();
             this.pnlLeft        = new System.Windows.Forms.Panel();
             this.pnlRight       = new System.Windows.Forms.Panel();
-            this.lblIco         = new System.Windows.Forms.Label();
+            this.picLogo        = new System.Windows.Forms.PictureBox();
             this.lblBrand       = new System.Windows.Forms.Label();
             this.lblTagline     = new System.Windows.Forms.Label();
             this.lblLoginTitle  = new System.Windows.Forms.Label();
@@ -34,30 +34,29 @@ namespace Pedeai.Forms
             this.pnlLeft.BackColor = System.Drawing.Color.FromArgb(28, 37, 65);
             this.pnlLeft.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Bottom;
             this.pnlLeft.MouseDown += new System.Windows.Forms.MouseEventHandler(this.FormDrag_MouseDown);
-            // lblIco
-            this.lblIco.Text = "\U0001F374";
-            this.lblIco.Font = new System.Drawing.Font("Segoe UI Emoji", 52F);
-            this.lblIco.AutoSize = false;
-            this.lblIco.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            this.lblIco.SetBounds(0, 80, 290, 80);
-            this.lblIco.BackColor = System.Drawing.Color.Transparent;
+            // picLogo
+            ((System.ComponentModel.ISupportInitialize)(this.picLogo)).BeginInit();
+            this.picLogo.SetBounds(45, 60, 200, 200);
+            this.picLogo.SizeMode     = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+            this.picLogo.BackColor    = System.Drawing.Color.Transparent;
+            ((System.ComponentModel.ISupportInitialize)(this.picLogo)).EndInit();
             // lblBrand
             this.lblBrand.Text = "RANGOFOOD";
-            this.lblBrand.Font = new System.Drawing.Font("Segoe UI", 30F, System.Drawing.FontStyle.Bold);
+            this.lblBrand.Font = new System.Drawing.Font("Segoe UI", 26F, System.Drawing.FontStyle.Bold);
             this.lblBrand.ForeColor = System.Drawing.Color.FromArgb(52, 152, 219);
             this.lblBrand.AutoSize = false;
             this.lblBrand.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            this.lblBrand.SetBounds(0, 168, 290, 50);
+            this.lblBrand.SetBounds(0, 266, 290, 46);
             this.lblBrand.BackColor = System.Drawing.Color.Transparent;
             // lblTagline
-            this.lblTagline.Text = "Sistema de Gestao\nde Pedidos";
+            this.lblTagline.Text = "Sistema de Gest\u00e3o\nde Pedidos";
             this.lblTagline.Font = new System.Drawing.Font("Segoe UI", 11F);
             this.lblTagline.ForeColor = System.Drawing.Color.FromArgb(160, 175, 210);
             this.lblTagline.AutoSize = false;
             this.lblTagline.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            this.lblTagline.SetBounds(0, 222, 290, 56);
+            this.lblTagline.SetBounds(0, 316, 290, 56);
             this.lblTagline.BackColor = System.Drawing.Color.Transparent;
-            this.pnlLeft.Controls.Add(this.lblIco);
+            this.pnlLeft.Controls.Add(this.picLogo);
             this.pnlLeft.Controls.Add(this.lblBrand);
             this.pnlLeft.Controls.Add(this.lblTagline);
             // pnlRight
@@ -77,7 +76,7 @@ namespace Pedeai.Forms
             this.btnFechar.FlatAppearance.BorderSize = 0;
             this.btnFechar.Click += new System.EventHandler(this.BtnFechar_Click);
             // lblLoginTitle
-            this.lblLoginTitle.Text = "USU\u00c1RIO (LOGIN OU NOME)";
+            this.lblLoginTitle.Text = "\U0001F464  USU\u00c1RIO (LOGIN OU NOME)";
             this.lblLoginTitle.Font = new System.Drawing.Font("Segoe UI", 8F, System.Drawing.FontStyle.Bold);
             this.lblLoginTitle.ForeColor = System.Drawing.Color.FromArgb(160, 175, 210);
             this.lblLoginTitle.AutoSize = true;
@@ -103,7 +102,7 @@ namespace Pedeai.Forms
             this.lblNomeUsuario.SetBounds(50, 226, 370, 18);
             this.lblNomeUsuario.BackColor = System.Drawing.Color.Transparent;
             // lblSenhaTitle
-            this.lblSenhaTitle.Text = "SENHA";
+            this.lblSenhaTitle.Text = "\U0001F512  SENHA";
             this.lblSenhaTitle.Font = new System.Drawing.Font("Segoe UI", 8F, System.Drawing.FontStyle.Bold);
             this.lblSenhaTitle.ForeColor = System.Drawing.Color.FromArgb(160, 175, 210);
             this.lblSenhaTitle.AutoSize = true;
@@ -172,7 +171,7 @@ namespace Pedeai.Forms
         internal System.Windows.Forms.Button  btnEntrar;
         private  System.Windows.Forms.Panel   pnlLeft;
         private  System.Windows.Forms.Panel   pnlRight;
-        private  System.Windows.Forms.Label   lblIco;
+        private  System.Windows.Forms.PictureBox picLogo;
         private  System.Windows.Forms.Label   lblBrand;
         private  System.Windows.Forms.Label   lblTagline;
         private  System.Windows.Forms.Label   lblLoginTitle;

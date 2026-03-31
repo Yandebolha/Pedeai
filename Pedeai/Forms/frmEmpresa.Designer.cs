@@ -210,9 +210,9 @@ namespace Pedeai.Forms
             this.pnlBuscaUsuarios.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(22)))), ((int)(((byte)(31)))), ((int)(((byte)(58)))));
             this.pnlBuscaUsuarios.Controls.Add(this.lstUsuarios);
             this.pnlBuscaUsuarios.Controls.Add(this.txtPesquisa);
-            this.pnlBuscaUsuarios.Location = new System.Drawing.Point(0, 0);
+            this.pnlBuscaUsuarios.Location = new System.Drawing.Point(0, 430);
             this.pnlBuscaUsuarios.Name = "pnlBuscaUsuarios";
-            this.pnlBuscaUsuarios.Size = new System.Drawing.Size(460, 200);
+            this.pnlBuscaUsuarios.Size = new System.Drawing.Size(600, 170);
             this.pnlBuscaUsuarios.TabIndex = 22;
             this.pnlBuscaUsuarios.Visible = false;
             // 
@@ -225,7 +225,7 @@ namespace Pedeai.Forms
             this.lstUsuarios.ItemHeight = 17;
             this.lstUsuarios.Location = new System.Drawing.Point(0, 25);
             this.lstUsuarios.Name = "lstUsuarios";
-            this.lstUsuarios.Size = new System.Drawing.Size(460, 175);
+            this.lstUsuarios.Size = new System.Drawing.Size(600, 145);
             this.lstUsuarios.TabIndex = 0;
             this.lstUsuarios.DoubleClick += new System.EventHandler(this.LstUsuarios_DoubleClick);
             // 

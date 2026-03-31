@@ -90,6 +90,44 @@ namespace Pedeai.Forms
             AtualizarEstado();
         }
 
+        private void BtnRelatorio_Click(object sender, EventArgs e)
+        {
+            if (gridHistorico.SelectedRows.Count == 0)
+            {
+                MessageBox.Show("Selecione um turno na lista para ver as movimenta\u00e7\u00f5es.",
+                                "Turno", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+            var row = gridHistorico.SelectedRows[0].DataBoundItem as System.Data.DataRowView;
+            if (row == null) return;
+            int cod = Convert.ToInt32(row.Row["Codigo"]);
+
+            // Recarrega o modelo completo para o relatório
+            var todos = _bll.Listar(new DateTime(2000, 1, 1), DateTime.Today.AddDays(1));
+            Modelo.Turno turno = null;
+            foreach (System.Data.DataRow r in todos.Rows)
+            {
+                if (Convert.ToInt32(r["Codigo"]) == cod)
+                {
+                    turno = new Modelo.Turno
+                    {
+                        Codigo          = cod,
+                        turAbertura     = Convert.ToDateTime(r["turAbertura"]),
+                        turFechamento   = r["turFechamento"] == DBNull.Value ? (DateTime?)null : Convert.ToDateTime(r["turFechamento"]),
+                        turUsuario      = r["turUsuario"]?.ToString() ?? "",
+                        turCaixa_Inicial = Convert.ToDecimal(r["turCaixa_Inicial"]),
+                        turCaixa_Final  = r["turCaixa_Final"] == DBNull.Value ? (decimal?)null : Convert.ToDecimal(r["turCaixa_Final"]),
+                        turObservacao   = r["turObservacao"]?.ToString() ?? "",
+                        turSituacao     = r["turSituacao"]?.ToString()?[0] ?? 'F'
+                    };
+                    break;
+                }
+            }
+            if (turno == null) return;
+            using var frm = new frmRelatorioTurno(turno);
+            frm.ShowDialog(this);
+        }
+
         private void BtnFiltrar_Click(object sender, EventArgs e)
         {
             CarregarHistorico();
