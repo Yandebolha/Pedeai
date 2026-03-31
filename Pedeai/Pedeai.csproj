@@ -65,6 +65,54 @@
     <Compile Update="Forms\frmPedidoManual.Designer.cs">
       <DependentUpon>frmPedidoManual.cs</DependentUpon>
     </Compile>
+    <Compile Update="Forms\frmAvisos.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Forms\frmAvisos.Designer.cs">
+      <DependentUpon>frmAvisos.cs</DependentUpon>
+    </Compile>
+    <Compile Update="Forms\frmMovimentacoesDia.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Forms\frmMovimentacoesDia.Designer.cs">
+      <DependentUpon>frmMovimentacoesDia.cs</DependentUpon>
+    </Compile>
+    <Compile Update="Forms\frmAutorizacao.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Forms\frmAutorizacao.Designer.cs">
+      <DependentUpon>frmAutorizacao.cs</DependentUpon>
+    </Compile>
+    <Compile Update="Forms\frmCadastroGasto.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Forms\frmCadastroGasto.Designer.cs">
+      <DependentUpon>frmCadastroGasto.cs</DependentUpon>
+    </Compile>
+    <Compile Update="Forms\frmCadastroNecessidade.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Forms\frmCadastroNecessidade.Designer.cs">
+      <DependentUpon>frmCadastroNecessidade.cs</DependentUpon>
+    </Compile>
+    <Compile Update="Forms\frmEmpresa.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Forms\frmEmpresa.Designer.cs">
+      <DependentUpon>frmEmpresa.cs</DependentUpon>
+    </Compile>
+    <Compile Update="Forms\frmEntradaMercadoria.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Forms\frmEntradaMercadoria.Designer.cs">
+      <DependentUpon>frmEntradaMercadoria.cs</DependentUpon>
+    </Compile>
+    <Compile Update="Forms\frmLogin.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Forms\frmLogin.Designer.cs">
+      <DependentUpon>frmLogin.cs</DependentUpon>
+    </Compile>
     <Compile Update="Forms\frmSelecionarCliente.cs">
       <SubType>Form</SubType>
     </Compile>

@@ -252,7 +252,6 @@ namespace Pedeai
             KeyPreview = true;
             KeyDown += (_, ke) => { if (ke.KeyCode == Keys.Home) { ke.Handled = true; BtnLogoff_Click(this, EventArgs.Empty); } };
 
-            Load += (_, __) => { CarregarTudo(); NavIniciarPrimeiro(); _timer.Start(); };
         }
 
         private Panel      pnlTopBar;

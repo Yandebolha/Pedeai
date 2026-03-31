@@ -1,38 +1,26 @@
-using System;
+﻿using System;
 using System.Data;
 using System.Drawing;
 using System.Windows.Forms;
 
 namespace Pedeai.Forms
 {
-    public class frmMovimentacoesDia : Form
+    public partial class frmMovimentacoesDia : Form
     {
+        // Parameterless constructor required by the WinForms Designer
+        public frmMovimentacoesDia()
+        {
+            InitializeComponent();
+        }
+
         public frmMovimentacoesDia(DateTime dia, DataTable dt, Func<int, DataTable> getItens = null)
         {
-            var corFundo  = Color.FromArgb(15, 22, 45);
-            var corCard   = Color.FromArgb(28, 37, 65);
-            var corTopBar = Color.FromArgb(36, 48, 82);
-            var corGrid   = Color.FromArgb(20, 28, 55);
+            InitializeComponent();
 
-            Text         = $"Movimentações — {dia:dd/MM/yyyy}";
-            BackColor    = corFundo;
-            ForeColor    = Color.White;
-            Font         = new Font("Segoe UI", 9F);
-            ClientSize   = new Size(900, 520);
-            MinimumSize  = new Size(700, 400);
-            StartPosition= FormStartPosition.CenterParent;
+            Text      = $"Movimenta\u00e7\u00f5es \u2014 {dia:dd/MM/yyyy}";
+            lblTit.Text = $"\U0001F4CB  Movimenta\u00e7\u00f5es do dia {dia:dd/MM/yyyy}";
 
-            // ── Top bar ─────────────────────────────────────────────────
-            var pnlTop = new Panel { Dock = DockStyle.Top, Height = 48, BackColor = corTopBar };
-            var lblTit = new Label
-            {
-                Text = $"📋  Movimentações do dia {dia:dd/MM/yyyy}", AutoSize = true, Top = 14,
-                Font = new Font("Segoe UI", 11F, FontStyle.Bold), ForeColor = Color.White
-            };
-            pnlTop.SizeChanged += (_, __) => lblTit.Left = (pnlTop.Width - lblTit.Width) / 2;
-            pnlTop.Controls.Add(lblTit);
-
-            // ── Resumo ───────────────────────────────────────────────────
+            // Resumo
             decimal totalVendas = 0, totalCompras = 0;
             if (dt != null)
                 foreach (DataRow r in dt.Rows)
@@ -45,52 +33,8 @@ namespace Pedeai.Forms
                     }
                 }
             decimal saldo = totalVendas - totalCompras;
-
-            var pnlRes = new Panel { Dock = DockStyle.Top, Height = 38, BackColor = corCard };
-            var lblRes = new Label
-            {
-                Dock    = DockStyle.Fill, TextAlign = ContentAlignment.MiddleLeft,
-                Padding = new Padding(12, 0, 0, 0),
-                Font    = new Font("Segoe UI", 9F, FontStyle.Bold),
-                ForeColor = Color.FromArgb(200, 225, 255),
-                Text    = $"  Vendas: R$ {totalVendas:N2}   |   Compras: R$ {totalCompras:N2}   |   " +
-                          $"Saldo do dia: R$ {saldo:N2}"
-            };
-            pnlRes.Controls.Add(lblRes);
-
-            // ── Grid ────────────────────────────────────────────────────
-            var grid = new DataGridView
-            {
-                Dock = DockStyle.Fill,
-                AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill,
-                ReadOnly = true, AllowUserToAddRows = false,
-                SelectionMode = DataGridViewSelectionMode.FullRowSelect,
-                RowHeadersVisible = false, BackgroundColor = corGrid,
-                DefaultCellStyle  = { BackColor = corGrid, ForeColor = Color.White },
-                GridColor = Color.FromArgb(40, 55, 90), BorderStyle = BorderStyle.None,
-                ColumnHeadersDefaultCellStyle = { BackColor = corTopBar, ForeColor = Color.White },
-                Font = new Font("Segoe UI", 9F),
-            };
-            grid.DataError += (_, e) => e.ThrowException = false;
-            grid.RowPrePaint += Grid_RowColor;
-
-            // ── Footer ──────────────────────────────────────────────────
-            var pnlFoot = new Panel { Dock = DockStyle.Bottom, Height = 40, BackColor = corCard };
-            var btnFech = new Button
-            {
-                Text = "Fechar", Left = 0, Top = 8, Width = 100, Height = 26,
-                BackColor = Color.FromArgb(80, 95, 130), ForeColor = Color.White,
-                FlatStyle = FlatStyle.Flat, Cursor = Cursors.Hand
-            };
-            btnFech.FlatAppearance.BorderSize = 0;
-            btnFech.Click += (_, __) => Close();
-            pnlFoot.SizeChanged += (_, __) => btnFech.Left = (pnlFoot.Width - btnFech.Width) / 2;
-            pnlFoot.Controls.Add(btnFech);
-
-            Controls.Add(grid);
-            Controls.Add(pnlRes);
-            Controls.Add(pnlFoot);
-            Controls.Add(pnlTop);
+            lblRes.Text = $"  Vendas: R$ {totalVendas:N2}   |   Compras: R$ {totalCompras:N2}   |   " +
+                          $"Saldo do dia: R$ {saldo:N2}";
 
             // Bind data
             if (dt != null)
@@ -123,24 +67,43 @@ namespace Pedeai.Forms
             }
         }
 
-        private void ConfigurarColunas(DataGridView grid)
+        private void PnlTop_SizeChanged(object sender, EventArgs e)
         {
-            if (grid.Columns.Count == 0) return;
+            lblTit.Left = (pnlTop.Width - lblTit.Width) / 2;
+        }
+
+        private void PnlFoot_SizeChanged(object sender, EventArgs e)
+        {
+            btnFech.Left = (pnlFoot.Width - btnFech.Width) / 2;
+        }
+
+        private void BtnFech_Click(object sender, EventArgs e) => Close();
+
+        private void Grid_DataError(object sender, DataGridViewDataErrorEventArgs e)
+        {
+            e.ThrowException = false;
+        }
+
+        private void Grid_RowColor(object sender, DataGridViewRowPrePaintEventArgs e) { }
+
+        private void ConfigurarColunas(DataGridView g)
+        {
+            if (g.Columns.Count == 0) return;
             var show = new System.Collections.Generic.Dictionary<string, string>
             {
-                ["Horario"]    = "Horário",
+                ["Horario"]    = "Hor\u00e1rio",
                 ["Tipo"]       = "Tipo",
-                ["Referencia"] = "Referência",
-                ["Descricao"]  = "Descrição",
+                ["Referencia"] = "Refer\u00eancia",
+                ["Descricao"]  = "Descri\u00e7\u00e3o",
                 ["Valor"]      = "Valor R$",
                 ["Pagamento"]  = "Pagamento",
                 ["Status"]     = "Status",
             };
-            foreach (DataGridViewColumn col in grid.Columns)
+            foreach (DataGridViewColumn col in g.Columns)
                 col.Visible = show.ContainsKey(col.Name);
             foreach (var kv in show)
-                if (grid.Columns.Contains(kv.Key))
-                    grid.Columns[kv.Key].HeaderText = kv.Value;
+                if (g.Columns.Contains(kv.Key))
+                    g.Columns[kv.Key].HeaderText = kv.Value;
         }
 
         private static void MostrarItensDialog(string numPedido, string cliente, DataTable dtItens)
@@ -150,7 +113,7 @@ namespace Pedeai.Forms
             var corTopBar = Color.FromArgb(36, 48, 82);
 
             using var frm = new Form();
-            frm.Text             = $"Itens — Pedido {numPedido}";
+            frm.Text             = $"Itens \u2014 Pedido {numPedido}";
             frm.BackColor        = corFundo;
             frm.ForeColor        = Color.White;
             frm.Font             = new Font("Segoe UI", 9F);
@@ -159,15 +122,15 @@ namespace Pedeai.Forms
             frm.FormBorderStyle  = FormBorderStyle.FixedDialog;
             frm.MaximizeBox      = frm.MinimizeBox = false;
 
-            var pnlTop = new Panel { Dock = DockStyle.Top, Height = 44, BackColor = corTopBar };
-            var lblTit = new Label
+            var pnlTop2 = new Panel { Dock = DockStyle.Top, Height = 44, BackColor = corTopBar };
+            var lblTit2 = new Label
             {
                 Text      = $"Pedido {numPedido}  |  Cliente: {cliente}",
                 AutoSize  = true, Top = 12, Left = 12,
                 Font      = new Font("Segoe UI", 10F, FontStyle.Bold),
                 ForeColor = Color.White
             };
-            pnlTop.Controls.Add(lblTit);
+            pnlTop2.Controls.Add(lblTit2);
 
             var grid2 = new DataGridView
             {
@@ -192,21 +155,21 @@ namespace Pedeai.Forms
             };
             grid2.DataError += (_, e) => e.ThrowException = false;
 
-            var pnlFoot = new Panel { Dock = DockStyle.Bottom, Height = 42, BackColor = corCard };
-            var btnFech = new Button
+            var pnlFoot2 = new Panel { Dock = DockStyle.Bottom, Height = 42, BackColor = corCard };
+            var btnFech2 = new Button
             {
                 Text      = "Fechar", Width = 100, Height = 28, Top = 7,
                 BackColor = Color.FromArgb(80, 95, 130), ForeColor = Color.White,
                 FlatStyle = FlatStyle.Flat, Cursor = Cursors.Hand
             };
-            btnFech.FlatAppearance.BorderSize = 0;
-            btnFech.Click += (_, __) => frm.Close();
-            pnlFoot.SizeChanged += (_, __) => btnFech.Left = (pnlFoot.Width - btnFech.Width) / 2;
-            pnlFoot.Controls.Add(btnFech);
+            btnFech2.FlatAppearance.BorderSize = 0;
+            btnFech2.Click += (_, __) => frm.Close();
+            pnlFoot2.SizeChanged += (_, __) => btnFech2.Left = (pnlFoot2.Width - btnFech2.Width) / 2;
+            pnlFoot2.Controls.Add(btnFech2);
 
             frm.Controls.Add(grid2);
-            frm.Controls.Add(pnlFoot);
-            frm.Controls.Add(pnlTop);
+            frm.Controls.Add(pnlFoot2);
+            frm.Controls.Add(pnlTop2);
 
             if (dtItens != null)
             {
@@ -215,9 +178,9 @@ namespace Pedeai.Forms
                 {
                     ["Produto"]  = "Produto",
                     ["Qtde"]     = "Qtde",
-                    ["Unitario"] = "Unitário (R$)",
+                    ["Unitario"] = "Unit\u00e1rio (R$)",
                     ["Subtotal"] = "Subtotal (R$)",
-                    ["Obs"]      = "Observações",
+                    ["Obs"]      = "Observa\u00e7\u00f5es",
                 };
                 foreach (var kv in captions)
                     if (grid2.Columns.Contains(kv.Key))
@@ -227,9 +190,9 @@ namespace Pedeai.Forms
             frm.ShowDialog();
         }
 
-        private void ColorirLinhas(DataGridView grid)
+        private void ColorirLinhas(DataGridView g)
         {
-            foreach (DataGridViewRow row in grid.Rows)
+            foreach (DataGridViewRow row in g.Rows)
             {
                 if (row.DataBoundItem == null) continue;
                 var dr   = ((DataRowView)row.DataBoundItem).Row;
@@ -240,7 +203,5 @@ namespace Pedeai.Forms
                     row.DefaultCellStyle.BackColor = Color.FromArgb(15, 40, 25);
             }
         }
-
-        private void Grid_RowColor(object sender, DataGridViewRowPrePaintEventArgs e) { }
     }
 }

@@ -39,6 +39,15 @@ namespace Pedeai
             BuildDashboard();
             BuildPedidos();
             BuildFinanceiro();
+            if (System.ComponentModel.LicenseManager.UsageMode != System.ComponentModel.LicenseUsageMode.Designtime)
+                Load += Form1_Load;
+        }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+            CarregarTudo();
+            NavIniciarPrimeiro();
+            _timer.Start();
         }
 
         private Button BotaoNav(string texto, int y, Action onClick)
