@@ -35,14 +35,14 @@ namespace Pedeai.Forms
             this.pnlLeft.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Bottom;
             this.pnlLeft.MouseDown += new System.Windows.Forms.MouseEventHandler(this.FormDrag_MouseDown);
             // lblIco
-            this.lblIco.Text = "\U0001F355";
+            this.lblIco.Text = "\U0001F374";
             this.lblIco.Font = new System.Drawing.Font("Segoe UI Emoji", 52F);
             this.lblIco.AutoSize = false;
             this.lblIco.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.lblIco.SetBounds(0, 80, 290, 80);
             this.lblIco.BackColor = System.Drawing.Color.Transparent;
             // lblBrand
-            this.lblBrand.Text = "PEDEAI";
+            this.lblBrand.Text = "RANGOFOOD";
             this.lblBrand.Font = new System.Drawing.Font("Segoe UI", 30F, System.Drawing.FontStyle.Bold);
             this.lblBrand.ForeColor = System.Drawing.Color.FromArgb(52, 152, 219);
             this.lblBrand.AutoSize = false;
@@ -150,7 +150,7 @@ namespace Pedeai.Forms
             this.pnlRight.Controls.Add(this.btnEntrar);
             // Form
             this.AcceptButton    = this.btnEntrar;
-            this.Text            = "Pedeai \u2014 Login";
+            this.Text            = "RanGoFood \u2014 Login";
             this.StartPosition   = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
             this.MaximizeBox     = false;

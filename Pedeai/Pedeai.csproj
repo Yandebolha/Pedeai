@@ -7,7 +7,7 @@
     <LangVersion>latest</LangVersion>
     <Nullable>disable</Nullable>
     <ImplicitUsings>disable</ImplicitUsings>
-    <AssemblyName>Pedeai</AssemblyName>
+    <AssemblyName>RanGoFood</AssemblyName>
     <RootNamespace>Pedeai</RootNamespace>
     <Deterministic>true</Deterministic>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>

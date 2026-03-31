@@ -909,7 +909,7 @@ namespace Pedeai
             // Nomes de exibição
             var nomes = new System.Collections.Generic.Dictionary<string, string>
             {
-                ["Numero"]   = "Nº Pedido",
+                ["Numero"]   = "N\u00ba Pedido",
                 ["Cliente"]  = "Cliente",
                 ["Telefone"] = "Telefone",
                 ["Status"]   = "Status",
@@ -1355,9 +1355,9 @@ namespace Pedeai
                 ["TaxaEntrega"]  = "Taxa Entrega",
                 ["TotalBruto"]   = "Total Bruto",
                 ["Pix"]          = "Pix",
-                ["Cartao"]       = "Cartão",
+                ["Cartao"]       = "Cart\u00e3o",
                 ["CustoMercadorias"] = "Custo Merc.",
-                ["TotalLiquido"] = "Total Líquido",
+                ["TotalLiquido"] = "Total L\u00edquido",
             };
             foreach (var kv in captions)
                 if (gridFinanceiro.Columns.Contains(kv.Key))

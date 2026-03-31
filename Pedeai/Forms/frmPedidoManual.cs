@@ -113,7 +113,7 @@ namespace Pedeai.Forms
                 MultiSelect = false
             };
             grid.Columns.Add(new DataGridViewTextBoxColumn { Name = "Nome",  HeaderText = "Produto",   FillWeight = 60 });
-            grid.Columns.Add(new DataGridViewTextBoxColumn { Name = "Preco", HeaderText = "Preço R$",  FillWeight = 30 });
+            grid.Columns.Add(new DataGridViewTextBoxColumn { Name = "Preco", HeaderText = "Pre\u00e7o R$",  FillWeight = 30 });
 
             void Preencher(string filtro)
             {

@@ -68,7 +68,7 @@ namespace Pedeai
             pnlTopBar.Controls.Add(lblTitulo);
 
             // ── lblLogoTopBar ──────────────────────────────────────────────
-            lblLogoTopBar.Text      = "\U0001F355 PedeAi";
+            lblLogoTopBar.Text      = "\U0001F374 RanGoFood";
             lblLogoTopBar.ForeColor = System.Drawing.Color.White;
             lblLogoTopBar.Font      = new System.Drawing.Font("Segoe UI", 17F, System.Drawing.FontStyle.Bold);
             lblLogoTopBar.AutoSize  = true;
@@ -216,7 +216,7 @@ namespace Pedeai
             KeyPreview          = true;
             MinimumSize         = new System.Drawing.Size(920, 560);
             StartPosition       = System.Windows.Forms.FormStartPosition.CenterScreen;
-            Text                = "PedeAi \u2014 Painel de Controle";
+            Text                = "RanGoFood \u2014 Painel de Controle";
             WindowState         = System.Windows.Forms.FormWindowState.Maximized;
             KeyDown += new System.Windows.Forms.KeyEventHandler(this.Form1_KeyDown);
         }

@@ -77,7 +77,7 @@ namespace Pedeai.Forms
         private void ConfigurarGridItens()
         {
             gridItens.Columns.Clear();
-            gridItens.Columns.Add(new DataGridViewTextBoxColumn { Name = "Codigo",     HeaderText = "Cód.",      Width = 55,  ReadOnly = true });
+            gridItens.Columns.Add(new DataGridViewTextBoxColumn { Name = "Codigo",     HeaderText = "C\u00f3d.",      Width = 55,  ReadOnly = true });
             gridItens.Columns.Add(new DataGridViewTextBoxColumn { Name = "Nome",        HeaderText = "Produto",   FillWeight = 100, ReadOnly = true });
             gridItens.Columns.Add(new DataGridViewTextBoxColumn { Name = "Qtde",        HeaderText = "Qtde",      Width = 80,  ReadOnly = true });
             gridItens.Columns.Add(new DataGridViewTextBoxColumn { Name = "Custo",       HeaderText = "Custo R$",  Width = 100, ReadOnly = true });
@@ -92,7 +92,7 @@ namespace Pedeai.Forms
             gridParcelas.Columns.Add(new DataGridViewTextBoxColumn { Name = "Num",        HeaderText = "#",           Width = 35, ReadOnly = true });
             gridParcelas.Columns.Add(new DataGridViewTextBoxColumn { Name = "Vencimento", HeaderText = "Vencimento",  Width = 110, ReadOnly = true });
             gridParcelas.Columns.Add(new DataGridViewTextBoxColumn { Name = "Valor",      HeaderText = "Valor R$",    FillWeight = 100, ReadOnly = false });
-            gridParcelas.Columns.Add(new DataGridViewTextBoxColumn { Name = "Obs",        HeaderText = "Observação",  FillWeight = 100, ReadOnly = false });
+            gridParcelas.Columns.Add(new DataGridViewTextBoxColumn { Name = "Obs",        HeaderText = "Observa\u00e7\u00e3o",  FillWeight = 100, ReadOnly = false });
             gridParcelas.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
         }
 
@@ -170,13 +170,13 @@ namespace Pedeai.Forms
             var visivel = new[] { "Codigo", "entData", "Fornecedor", "Documento", "Itens", "Total", "Lancamento" };
             var cabecalhos = new System.Collections.Generic.Dictionary<string, string>
             {
-                ["Codigo"]    = "Cód.",
+                ["Codigo"]    = "C\u00f3d.",
                 ["entData"]   = "Data",
                 ["Fornecedor"]= "Fornecedor",
-                ["Documento"] = "Nº Doc",
+                ["Documento"] = "N\u00ba Doc",
                 ["Itens"]     = "Itens",
                 ["Total"]     = "Total R$",
-                ["Lancamento"]= "Lançamento",
+                ["Lancamento"]= "Lan\u00e7amento",
             };
             foreach (var name in visivel)
                 if (gridEntradas.Columns.Contains(name))
