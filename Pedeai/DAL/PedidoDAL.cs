@@ -266,19 +266,26 @@ namespace Pedeai.DAL
         }
 
         /// <summary>Finaliza pedido gravando valor pago e código de transação.</summary>
-        public void FinalizarPedido(int codigo, int novaSituacao, decimal valorPago, string transacao)
+        public void FinalizarPedido(int codigo, int novaSituacao, decimal valorPago, string transacao,
+                                    decimal pagoDinheiro = 0, decimal pagoCartao = 0, decimal pagoPix = 0)
         {
             using var conn = AbrirConexao();
             var sql = @"UPDATE pedido_web
                         SET pediSituacao          = @sit,
                             pediValor_Pago        = @pago,
                             pediCodigo_Transacao  = @trans,
+                            pediPago_Dinheiro     = @din,
+                            pediPago_Cartao       = @car,
+                            pediPago_Pix          = @pix,
                             pediData_Atualizacao  = NOW()
                         WHERE Codigo = @cod";
             using var cmd = new MySqlCommand(sql, conn);
             cmd.Parameters.AddWithValue("@sit",   novaSituacao);
             cmd.Parameters.AddWithValue("@pago",  valorPago);
             cmd.Parameters.AddWithValue("@trans", transacao ?? "");
+            cmd.Parameters.AddWithValue("@din",   pagoDinheiro);
+            cmd.Parameters.AddWithValue("@car",   pagoCartao);
+            cmd.Parameters.AddWithValue("@pix",   pagoPix);
             cmd.Parameters.AddWithValue("@cod",   codigo);
             cmd.ExecuteNonQuery();
         }

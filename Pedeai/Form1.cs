@@ -49,6 +49,7 @@ namespace Pedeai
             CarregarTudo();
             NavIniciarPrimeiro();
             _timer.Start();
+            Logger.Log("Login", $"Usu\u00e1rio: {UsuarioSessao.NomeAtual}");
         }
 
         private Button BotaoNav(string texto, int y, Action onClick)
@@ -1014,7 +1015,11 @@ namespace Pedeai
                 string canceladoPor = dlgAuth.UsuarioAutorizador.usuNome;
                 var eA = _pedidoBLL.AtualizarSituacao(cod, 6, canceladoPor);
                 if (!string.IsNullOrEmpty(eA)) MessageBox.Show("Erro: " + eA);
-                else CarregarPedidos();
+                else
+                {
+                    Logger.Log("Pedido cancelado", $"#{cod} | Autorizado por: {canceladoPor}");
+                    CarregarPedidos();
+                }
                 return;
             }
 
@@ -1032,11 +1037,17 @@ namespace Pedeai
                 bool finaliza = (novaSit == 3 && retirada) || (novaSit == 5 && !retirada);
                 if (finaliza)
                 {
-                    if (MostrarDialogPagamento(pedido, out decimal vPago, out string trans))
+                    if (MostrarDialogPagamento(pedido, out decimal vPago, out string trans,
+                                               out decimal din, out decimal car, out decimal pix))
                     {
-                        var eF = _pedidoBLL.FinalizarPedido(cod, novaSit, vPago, trans);
+                        var eF = _pedidoBLL.FinalizarPedido(cod, novaSit, vPago, trans, din, car, pix);
                         if (!string.IsNullOrEmpty(eF)) MessageBox.Show("Erro: " + eF);
-                        else CarregarPedidos();
+                        else
+                        {
+                            Logger.Log("Pedido finalizado",
+                                $"#{cod} | Sit={novaSit} | Total={pedido.pediValor_Total:N2} | Pago={vPago:N2} | Din={din:N2} Car={car:N2} Pix={pix:N2}");
+                            CarregarPedidos();
+                        }
                     }
                     return;
                 }
@@ -1091,60 +1102,114 @@ namespace Pedeai
             }
         }
 
-        private bool MostrarDialogPagamento(PedidoWeb pedido, out decimal valorPago, out string transacao)
+        private bool MostrarDialogPagamento(PedidoWeb pedido,
+                                             out decimal valorPago, out string transacao,
+                                             out decimal pagoDinheiro, out decimal pagoCartao, out decimal pagoPix)
         {
-            valorPago = pedido.pediValor_Total;
-            transacao  = "";
-            bool needsTrans = pedido.pediForma_Pagamento > 0; // Cartao ou Pix
+            valorPago    = pedido.pediValor_Total;
+            transacao    = "";
+            pagoDinheiro = 0m;
+            pagoCartao   = 0m;
+            pagoPix      = 0m;
+
+            decimal total = pedido.pediValor_Total;
 
             using var frm = new Form();
-            frm.Text             = "Finalizar Pedido - Pagamento";
-            frm.StartPosition    = FormStartPosition.CenterParent;
-            frm.FormBorderStyle  = FormBorderStyle.FixedDialog;
-            frm.MaximizeBox      = frm.MinimizeBox = false;
-            frm.BackColor        = Color.FromArgb(36, 48, 82);
-            frm.ForeColor        = Color.White;
-            frm.Font             = new Font("Segoe UI", 9F);
-            frm.ClientSize       = new Size(390, needsTrans ? 158 : 110);
+            frm.Text            = "Finalizar Pedido \u2014 Pagamento";
+            frm.StartPosition   = FormStartPosition.CenterParent;
+            frm.FormBorderStyle = FormBorderStyle.FixedDialog;
+            frm.MaximizeBox     = frm.MinimizeBox = false;
+            frm.BackColor       = Color.FromArgb(36, 48, 82);
+            frm.ForeColor       = Color.White;
+            frm.Font            = new Font("Segoe UI", 9F);
+            frm.ClientSize      = new Size(420, 280);
 
-            var lblV = new Label { Text = "Valor pago (R$):", Left = 12, Top = 18, AutoSize = true, ForeColor = Color.White };
-            var numV = new NumericUpDown { Left = 150, Top = 14, Width = 130, DecimalPlaces = 2, Maximum = 99999M, Value = pedido.pediValor_Total };
-
-            string lblTrans = pedido.pediForma_Pagamento == 2 ? "Codigo Pix:" : "Cod. Transacao:";
-            var lblT = new Label { Text = lblTrans, Left = 12, Top = 56, AutoSize = true, ForeColor = Color.White, Visible = needsTrans };
-            var txtT = new TextBox { Left = 150, Top = 52, Width = 220, Visible = needsTrans };
-
-            int btnTop = needsTrans ? 108 : 64;
-            var btnOk  = new Button { Text = "\u2714 Confirmar", Left = 100, Top = btnTop, Width = 130, Height = 28, DialogResult = DialogResult.OK,  BackColor = Color.FromArgb(39, 174, 96),   ForeColor = Color.White, FlatStyle = FlatStyle.Flat };
-            var btnCan = new Button { Text = "Cancelar",     Left = 242, Top = btnTop, Width = 90,  Height = 28, DialogResult = DialogResult.Cancel, BackColor = Color.FromArgb(108,117,125), ForeColor = Color.White, FlatStyle = FlatStyle.Flat };
-            btnOk.FlatAppearance.BorderSize = btnCan.FlatAppearance.BorderSize = 0;
-
-            frm.Controls.AddRange(new Control[] { lblV, numV, lblT, txtT, btnOk, btnCan });
-            frm.AcceptButton = btnOk; frm.CancelButton = btnCan;
-
-            if (frm.ShowDialog(this) == DialogResult.OK)
+            void Lbl(string t, int x, int y)
             {
-                valorPago = numV.Value;
-                transacao  = txtT.Text.Trim();
-
-                // Desconto detectado: requer autorização de usuário com permissão
-                if (valorPago < pedido.pediValor_Total)
+                frm.Controls.Add(new Label
                 {
-                    decimal desconto = pedido.pediValor_Total - valorPago;
-                    MessageBox.Show(
-                        $"Valor pago (R$ {valorPago:N2}) é menor que o total (R$ {pedido.pediValor_Total:N2}).\n" +
-                        $"Desconto de R$ {desconto:N2} requer autorização.",
-                        "Autorização Necessária",
-                        MessageBoxButtons.OK, MessageBoxIcon.Warning);
-
-                    using var dlgAuth = new Forms.frmAutorizacao();
-                    if (dlgAuth.ShowDialog(this) != DialogResult.OK)
-                        return false; // autorização negada ou cancelada
-                }
-
-                return true;
+                    Text      = t, Left = x, Top = y,
+                    AutoSize  = true, ForeColor = Color.White
+                });
             }
-            return false;
+
+            Lbl($"Total do pedido: R$ {total:N2}", 12, 14);
+            Lbl("Divida o pagamento por forma (deixe 0 se n\u00e3o usar):", 12, 36);
+
+            Lbl("Dinheiro (R$):", 12, 68);
+            var numDin = new NumericUpDown { Left = 160, Top = 64, Width = 120, DecimalPlaces = 2, Maximum = 99999M, Value = 0M };
+
+            Lbl("Cart\u00e3o (R$):", 12, 104);
+            var numCar = new NumericUpDown { Left = 160, Top = 100, Width = 120, DecimalPlaces = 2, Maximum = 99999M, Value = 0M };
+
+            Lbl("Pix (R$):", 12, 140);
+            var numPix = new NumericUpDown { Left = 160, Top = 136, Width = 120, DecimalPlaces = 2, Maximum = 99999M, Value = 0M };
+
+            // Preenche o campo correspondente à forma original do pedido com o total
+            if (pedido.pediForma_Pagamento == 1) numCar.Value = total;
+            else if (pedido.pediForma_Pagamento == 2) numPix.Value = total;
+            else numDin.Value = total;
+
+            Lbl("C\u00f3d. Transa\u00e7\u00e3o (cart\u00e3o/Pix):", 12, 176);
+            var txtTrans = new TextBox { Left = 240, Top = 172, Width = 164 };
+
+            var lblSoma = new Label
+            {
+                Left = 12, Top = 210, Width = 280,
+                ForeColor = Color.FromArgb(243, 156, 18),
+                Font = new Font("Segoe UI", 9F, FontStyle.Bold),
+                Text = ""
+            };
+            frm.Controls.Add(lblSoma);
+
+            void AtualizarSoma()
+            {
+                decimal soma = numDin.Value + numCar.Value + numPix.Value;
+                decimal diff = soma - total;
+                string sinal = diff >= 0 ? "Troco: R$ " + diff.ToString("N2") : "Falta: R$ " + (-diff).ToString("N2");
+                lblSoma.Text = $"Soma: R$ {soma:N2}  |  {sinal}";
+                lblSoma.ForeColor = diff >= 0 ? Color.FromArgb(39, 174, 96) : Color.FromArgb(231, 76, 60);
+            }
+
+            numDin.ValueChanged += (_, __) => AtualizarSoma();
+            numCar.ValueChanged += (_, __) => AtualizarSoma();
+            numPix.ValueChanged += (_, __) => AtualizarSoma();
+            AtualizarSoma();
+
+            frm.Controls.AddRange(new Control[] { numDin, numCar, numPix, txtTrans });
+
+            var btnOk  = new Button { Text = "\u2714 Confirmar", Left = 100, Top = 238, Width = 130, Height = 28, DialogResult = DialogResult.OK,  BackColor = Color.FromArgb(39, 174, 96),   ForeColor = Color.White, FlatStyle = FlatStyle.Flat };
+            var btnCan = new Button { Text = "Cancelar",     Left = 246, Top = 238, Width = 90,  Height = 28, DialogResult = DialogResult.Cancel, BackColor = Color.FromArgb(108,117,125), ForeColor = Color.White, FlatStyle = FlatStyle.Flat };
+            btnOk.FlatAppearance.BorderSize = btnCan.FlatAppearance.BorderSize = 0;
+            frm.Controls.AddRange(new Control[] { btnOk, btnCan });
+            frm.AcceptButton = btnOk;
+            frm.CancelButton = btnCan;
+
+            if (frm.ShowDialog(this) != DialogResult.OK)
+                return false;
+
+            pagoDinheiro = numDin.Value;
+            pagoCartao   = numCar.Value;
+            pagoPix      = numPix.Value;
+            valorPago    = pagoDinheiro + pagoCartao + pagoPix;
+            transacao    = txtTrans.Text.Trim();
+
+            // Se soma menor que total, exige autorização
+            if (valorPago < total)
+            {
+                decimal desconto = total - valorPago;
+                MessageBox.Show(
+                    $"Total pago (R$ {valorPago:N2}) \u00e9 menor que o total (R$ {total:N2}).\n" +
+                    $"Desconto de R$ {desconto:N2} requer autoriza\u00e7\u00e3o.",
+                    "Autoriza\u00e7\u00e3o Necess\u00e1ria",
+                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
+
+                using var dlgAuth = new Forms.frmAutorizacao();
+                if (dlgAuth.ShowDialog(this) != DialogResult.OK)
+                    return false;
+            }
+
+            return true;
         }
 
         // ────────────────────────────────────────────────────────────────────
@@ -1297,13 +1362,17 @@ namespace Pedeai
 
                 // ── Totais de vendas ──
                 decimal pedidos = 0, taxaEnt = 0, totalBruto = 0, custoMerc = 0;
+                decimal totalDinheiro = 0, totalCartao = 0, totalPix = 0;
                 foreach (DataRow r in dt.Rows)
                 {
                     decimal V(string col) => r[col] == DBNull.Value ? 0 : Convert.ToDecimal(r[col]);
-                    pedidos    += V("Pedidos");
-                    taxaEnt    += V("TaxaEntrega");
-                    totalBruto += V("TotalBruto");
-                    custoMerc  += V("CustoMercadorias");
+                    pedidos       += V("Pedidos");
+                    taxaEnt       += V("TaxaEntrega");
+                    totalBruto    += V("TotalBruto");
+                    custoMerc     += V("CustoMercadorias");
+                    totalDinheiro += V("Dinheiro");
+                    totalCartao   += V("Cartao");
+                    totalPix      += V("Pix");
                 }
 
                 // ── Totais de compras (entradas de mercadoria) ──
@@ -1317,7 +1386,7 @@ namespace Pedeai
                 decimal gastosMaterial = _gastosBLL.TotalPeriodo(de, ate);
                 decimal lucroFinal     = totalBruto - totalCompras - gastosMaterial;
 
-                // ── 6 cards ──
+                // ── 9 cards ──
                 _pnlFinCards.Controls.Clear();
                 CriarCardFin("Total de Pedidos",    pedidos.ToString("N0"),    Color.FromArgb(41,  128, 185));
                 CriarCardFin("Vendas",              totalBruto.ToString("C"),  Color.FromArgb(39,  174,  96));
@@ -1326,6 +1395,10 @@ namespace Pedeai
                 CriarCardFin("Taxa de Entrega",     taxaEnt.ToString("C"),     Color.FromArgb(22,  160, 133));
                 CriarCardFin("Lucro Estimado",      lucroFinal.ToString("C"),
                     lucroFinal >= 0 ? Color.FromArgb(52, 152, 219) : Color.FromArgb(192, 57, 43));
+                // Conciliação por forma de pagamento
+                CriarCardFin("Dinheiro",            totalDinheiro.ToString("C"), Color.FromArgb(39, 174, 96));
+                CriarCardFin("Cart\u00e3o",         totalCartao.ToString("C"),   Color.FromArgb(41, 128, 185));
+                CriarCardFin("Pix",                 totalPix.ToString("C"),      Color.FromArgb(142, 68, 173));
 
                 // ── Gastos material grid ──
                 _gridGastos.DataSource = _gastosBLL.Listar(de, ate);
@@ -1344,7 +1417,7 @@ namespace Pedeai
         private void ConfigurarColunasFinanceiro()
         {
             if (gridFinanceiro.Columns.Count == 0) return;
-            var hide = new[] { "Subtotal", "Descontos", "ValorEntrega", "ValorRetirada", "Dinheiro" };
+            var hide = new[] { "Subtotal", "Descontos", "ValorEntrega", "ValorRetirada" };
             foreach (var col in hide)
                 if (gridFinanceiro.Columns.Contains(col))
                     gridFinanceiro.Columns[col].Visible = false;
@@ -1354,6 +1427,7 @@ namespace Pedeai
                 ["Pedidos"]      = "Pedidos",
                 ["TaxaEntrega"]  = "Taxa Entrega",
                 ["TotalBruto"]   = "Total Bruto",
+                ["Dinheiro"]     = "Dinheiro",
                 ["Pix"]          = "Pix",
                 ["Cartao"]       = "Cart\u00e3o",
                 ["CustoMercadorias"] = "Custo Merc.",
@@ -1384,6 +1458,7 @@ namespace Pedeai
         // -- Autenticação ---------------------------------------------------- 
         private void BtnLogoff_Click(object sender, EventArgs e)
         {
+            Logger.Log("Logoff");
             UsuarioSessao.Encerrar();
             Application.Restart();
         }
@@ -1405,6 +1480,7 @@ namespace Pedeai
             NavSe("Dashboard",    "\U0001F3E0  Dashboard",    MostrarDashboard);
             NavSe("Pedidos",      "\U0001F4CB  Pedidos",      MostrarPedidos);
             NavSe("Financeiro",   "\U0001F4B0  Financeiro",   MostrarFinanceiro);
+            NavSe("Turno",        "\U0001F551  Turno de Caixa", () => AbrirForm(new Forms.frmTurno()));
             NavSe("Produtos",     "\U0001F6D2  Produtos",     () => AbrirForm(new frmCadastroProduto()));
             NavSe("Categorias",   "\U0001F5C2  Categorias",   () => AbrirForm(new frmCadastroCategoria()));
             NavSe("Clientes",     "\U0001F464  Clientes",     () => AbrirForm(new frmCadastroCliente()));

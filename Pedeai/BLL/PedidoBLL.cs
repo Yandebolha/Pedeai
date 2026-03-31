@@ -63,10 +63,11 @@ namespace Pedeai.BLL
             catch (Exception ex) { return ex.Message; }
         }
 
-        public string FinalizarPedido(int codigo, int novaSituacao, decimal valorPago, string transacao)
+        public string FinalizarPedido(int codigo, int novaSituacao, decimal valorPago, string transacao,
+                                      decimal pagoDinheiro = 0, decimal pagoCartao = 0, decimal pagoPix = 0)
         {
             if (codigo <= 0) return "Código de pedido inválido.";
-            try { _dal.FinalizarPedido(codigo, novaSituacao, valorPago, transacao); return ""; }
+            try { _dal.FinalizarPedido(codigo, novaSituacao, valorPago, transacao, pagoDinheiro, pagoCartao, pagoPix); return ""; }
             catch (Exception ex) { return ex.Message; }
         }
 

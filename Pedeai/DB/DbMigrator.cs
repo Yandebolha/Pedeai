@@ -79,6 +79,14 @@ namespace Pedeai.DB
                 AddColumnIfNotExists(conn, db, "pedido_web", "Codigo_Cliente",
                     "INT NULL DEFAULT NULL");
 
+                // Colunas de pagamento fracionado (multiplas formas no mesmo pedido)
+                AddColumnIfNotExists(conn, db, "pedido_web", "pediPago_Dinheiro",
+                    "DECIMAL(10,2) NOT NULL DEFAULT 0");
+                AddColumnIfNotExists(conn, db, "pedido_web", "pediPago_Cartao",
+                    "DECIMAL(10,2) NOT NULL DEFAULT 0");
+                AddColumnIfNotExists(conn, db, "pedido_web", "pediPago_Pix",
+                    "DECIMAL(10,2) NOT NULL DEFAULT 0");
+
                 // ── 4b. Colunas em grupo_mercadoria ─────────────────────────────
                 AddColumnIfNotExists(conn, db, "grupo_mercadoria", "grmeData_Cadastro",
                     "DATETIME NULL DEFAULT NULL");
@@ -174,6 +182,20 @@ namespace Pedeai.DB
                         parObservacao   VARCHAR(250)  NOT NULL DEFAULT '',
                         Situacao        CHAR(1)       NOT NULL DEFAULT 'A',
                         parData_Pagamento DATE        NULL
+                    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+
+                // ── 9. Tabela: turno (abertura / fechamento de caixa) ──────────
+                Exec(conn, @"
+                    CREATE TABLE IF NOT EXISTS turno (
+                        auxCodigo        INT           NOT NULL DEFAULT 1,
+                        Codigo           INT           NOT NULL AUTO_INCREMENT PRIMARY KEY,
+                        turAbertura      DATETIME      NOT NULL,
+                        turFechamento    DATETIME      NULL,
+                        turUsuario       VARCHAR(100)  NOT NULL DEFAULT '',
+                        turCaixa_Inicial DECIMAL(10,2) NOT NULL DEFAULT 0,
+                        turCaixa_Final   DECIMAL(10,2) NULL,
+                        turObservacao    VARCHAR(500)  NOT NULL DEFAULT '',
+                        turSituacao      CHAR(1)       NOT NULL DEFAULT 'A'
                     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
 
                 return true;
