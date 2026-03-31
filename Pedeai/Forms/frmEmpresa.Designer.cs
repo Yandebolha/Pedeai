@@ -44,6 +44,7 @@ namespace Pedeai.Forms
             this.chkModCancelarPedidos = new System.Windows.Forms.CheckBox();
             this.chkModEntradaMercadoria = new System.Windows.Forms.CheckBox();
             this.chkModAvisos = new System.Windows.Forms.CheckBox();
+            this.chkModTurno = new System.Windows.Forms.CheckBox();
             this.txtImpNomeEmpresa = new System.Windows.Forms.TextBox();
             this.txtImpEndereco = new System.Windows.Forms.TextBox();
             this.txtImpTelefone = new System.Windows.Forms.TextBox();
@@ -247,7 +248,7 @@ namespace Pedeai.Forms
             this.btnNovoUsr.FlatAppearance.BorderSize = 0;
             this.btnNovoUsr.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnNovoUsr.ForeColor = System.Drawing.Color.White;
-            this.btnNovoUsr.Location = new System.Drawing.Point(168, 374);
+            this.btnNovoUsr.Location = new System.Drawing.Point(168, 396);
             this.btnNovoUsr.Name = "btnNovoUsr";
             this.btnNovoUsr.Size = new System.Drawing.Size(128, 32);
             this.btnNovoUsr.TabIndex = 18;
@@ -262,7 +263,7 @@ namespace Pedeai.Forms
             this.btnPesquisarUsr.FlatAppearance.BorderSize = 0;
             this.btnPesquisarUsr.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnPesquisarUsr.ForeColor = System.Drawing.Color.White;
-            this.btnPesquisarUsr.Location = new System.Drawing.Point(304, 374);
+            this.btnPesquisarUsr.Location = new System.Drawing.Point(304, 396);
             this.btnPesquisarUsr.Name = "btnPesquisarUsr";
             this.btnPesquisarUsr.Size = new System.Drawing.Size(128, 32);
             this.btnPesquisarUsr.TabIndex = 19;
@@ -277,7 +278,7 @@ namespace Pedeai.Forms
             this.btnSalvUsr.FlatAppearance.BorderSize = 0;
             this.btnSalvUsr.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnSalvUsr.ForeColor = System.Drawing.Color.White;
-            this.btnSalvUsr.Location = new System.Drawing.Point(168, 374);
+            this.btnSalvUsr.Location = new System.Drawing.Point(168, 396);
             this.btnSalvUsr.Name = "btnSalvUsr";
             this.btnSalvUsr.Size = new System.Drawing.Size(128, 32);
             this.btnSalvUsr.TabIndex = 20;
@@ -293,7 +294,7 @@ namespace Pedeai.Forms
             this.btnCancelarUsr.FlatAppearance.BorderSize = 0;
             this.btnCancelarUsr.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnCancelarUsr.ForeColor = System.Drawing.Color.White;
-            this.btnCancelarUsr.Location = new System.Drawing.Point(304, 374);
+            this.btnCancelarUsr.Location = new System.Drawing.Point(304, 396);
             this.btnCancelarUsr.Name = "btnCancelarUsr";
             this.btnCancelarUsr.Size = new System.Drawing.Size(128, 32);
             this.btnCancelarUsr.TabIndex = 21;
@@ -397,6 +398,15 @@ namespace Pedeai.Forms
             this.chkModAvisos.Size = new System.Drawing.Size(102, 22);
             this.chkModAvisos.TabIndex = 17;
             this.chkModAvisos.Text = "Avisos";
+            // 
+            // chkModTurno
+            // 
+            this.chkModTurno.Location = new System.Drawing.Point(168, 364);
+            this.chkModTurno.Name = "chkModTurno";
+            this.chkModTurno.Size = new System.Drawing.Size(140, 22);
+            this.chkModTurno.TabIndex = 24;
+            this.chkModTurno.Text = "Turno de Caixa";
+            this.chkModTurno.ForeColor = System.Drawing.Color.White;
             // 
             // txtImpNomeEmpresa
             // 
@@ -599,6 +609,13 @@ namespace Pedeai.Forms
             this.tabEmp.Controls.Add(this.txtEmpEmail);
             this.tabEmp.Controls.Add(this.txtEmpEnd);
             this.tabEmp.Controls.Add(this.btnSalvEmp);
+            this.tabEmp.Controls.Add(this.lblEmpNome);
+            this.tabEmp.Controls.Add(this.lblEmpFantasia);
+            this.tabEmp.Controls.Add(this.lblEmpCNPJ);
+            this.tabEmp.Controls.Add(this.lblEmpTel);
+            this.tabEmp.Controls.Add(this.lblEmpEmail);
+            this.tabEmp.Controls.Add(this.lblEmpEnd);
+            this.tabEmp.Controls.Add(this.lblEmpTitle);
             this.tabEmp.ForeColor = System.Drawing.Color.White;
             this.tabEmp.Location = new System.Drawing.Point(4, 30);
             this.tabEmp.Name = "tabEmp";
@@ -643,11 +660,19 @@ namespace Pedeai.Forms
             this.tabUsr.Controls.Add(this.chkModCancelarPedidos);
             this.tabUsr.Controls.Add(this.chkModEntradaMercadoria);
             this.tabUsr.Controls.Add(this.chkModAvisos);
+            this.tabUsr.Controls.Add(this.chkModTurno);
             this.tabUsr.Controls.Add(this.btnNovoUsr);
             this.tabUsr.Controls.Add(this.btnPesquisarUsr);
             this.tabUsr.Controls.Add(this.btnSalvUsr);
             this.tabUsr.Controls.Add(this.btnCancelarUsr);
             this.tabUsr.Controls.Add(this.pnlBuscaUsuarios);
+            this.tabUsr.Controls.Add(this.lblUsrNome);
+            this.tabUsr.Controls.Add(this.lblUsrLogin);
+            this.tabUsr.Controls.Add(this.lblUsrSenha);
+            this.tabUsr.Controls.Add(this.lblUsrSenhaConf);
+            this.tabUsr.Controls.Add(this.lblUsrNivel);
+            this.tabUsr.Controls.Add(this.lblUsrSit);
+            this.tabUsr.Controls.Add(this.lblUsrModulos);
             this.tabUsr.ForeColor = System.Drawing.Color.White;
             this.tabUsr.Location = new System.Drawing.Point(4, 30);
             this.tabUsr.Name = "tabUsr";
@@ -676,6 +701,24 @@ namespace Pedeai.Forms
             this.tabImp.Controls.Add(this.numLargura);
             this.tabImp.Controls.Add(this.btnSalvImp);
             this.tabImp.Controls.Add(this.btnTesteImp);
+            this.tabImp.Controls.Add(this.lblImpNome);
+            this.tabImp.Controls.Add(this.lblImpEnd);
+            this.tabImp.Controls.Add(this.lblImpTel);
+            this.tabImp.Controls.Add(this.lblImpCNPJ);
+            this.tabImp.Controls.Add(this.lblImpSep);
+            this.tabImp.Controls.Add(this.lblImpAviso);
+            this.tabImp.Controls.Add(this.lblImpRodape);
+            this.tabImp.Controls.Add(this.lblImpNum);
+            this.tabImp.Controls.Add(this.lblImpColItem);
+            this.tabImp.Controls.Add(this.lblImpColTotal);
+            this.tabImp.Controls.Add(this.lblImpSubtotal);
+            this.tabImp.Controls.Add(this.lblImpTaxa);
+            this.tabImp.Controls.Add(this.lblImpTotalPagar);
+            this.tabImp.Controls.Add(this.lblImpAtendente);
+            this.tabImp.Controls.Add(this.lblImpressora);
+            this.tabImp.Controls.Add(this.lblLargura);
+            this.tabImp.Controls.Add(this.lblImpTitle);
+            this.tabImp.Controls.Add(this.lblImpRotulos);
             this.tabImp.ForeColor = System.Drawing.Color.White;
             this.tabImp.Location = new System.Drawing.Point(4, 30);
             this.tabImp.Name = "tabImp";
@@ -772,6 +815,7 @@ namespace Pedeai.Forms
         internal System.Windows.Forms.CheckBox chkModCancelarPedidos;
         internal System.Windows.Forms.CheckBox chkModEntradaMercadoria;
         internal System.Windows.Forms.CheckBox chkModAvisos;
+        internal System.Windows.Forms.CheckBox chkModTurno;
         // Impressao
         internal System.Windows.Forms.TextBox        txtImpNomeEmpresa;
         internal System.Windows.Forms.TextBox        txtImpEndereco;
@@ -798,35 +842,39 @@ namespace Pedeai.Forms
         private System.Windows.Forms.Button         btnSalvImp;
         private System.Windows.Forms.Button         btnTesteImp;
         // labels empresa
+        private System.Windows.Forms.Label lblEmpTitle    = new System.Windows.Forms.Label { Text = "Dados da Empresa", AutoSize = true, Left = 22, Top = 18, Font = new System.Drawing.Font("Segoe UI", 11F, System.Drawing.FontStyle.Bold), ForeColor = System.Drawing.Color.FromArgb(243,156,18) };
         private System.Windows.Forms.Label lblEmpNome     = new System.Windows.Forms.Label { Text = "Raz\u00e3o Social:",  AutoSize = true, Left = 22, Top = 92,  ForeColor = System.Drawing.Color.FromArgb(160,175,210) };
-        private System.Windows.Forms.Label lblEmpFantasia = new System.Windows.Forms.Label { Text = "Nome Fantasia:",     AutoSize = true, Left = 22, Top = 123, ForeColor = System.Drawing.Color.FromArgb(160,175,210) };
-        private System.Windows.Forms.Label lblEmpCNPJ     = new System.Windows.Forms.Label { Text = "CNPJ:",             AutoSize = true, Left = 22, Top = 154, ForeColor = System.Drawing.Color.FromArgb(160,175,210) };
-        private System.Windows.Forms.Label lblEmpTel      = new System.Windows.Forms.Label { Text = "Telefone:",         AutoSize = true, Left = 22, Top = 185, ForeColor = System.Drawing.Color.FromArgb(160,175,210) };
-        private System.Windows.Forms.Label lblEmpEmail    = new System.Windows.Forms.Label { Text = "E-mail:",           AutoSize = true, Left = 22, Top = 216, ForeColor = System.Drawing.Color.FromArgb(160,175,210) };
-        private System.Windows.Forms.Label lblEmpEnd      = new System.Windows.Forms.Label { Text = "Endere\u00e7o:",    AutoSize = true, Left = 22, Top = 247, ForeColor = System.Drawing.Color.FromArgb(160,175,210) };
+        private System.Windows.Forms.Label lblEmpFantasia = new System.Windows.Forms.Label { Text = "Nome Fantasia:",  AutoSize = true, Left = 22, Top = 123, ForeColor = System.Drawing.Color.FromArgb(160,175,210) };
+        private System.Windows.Forms.Label lblEmpCNPJ     = new System.Windows.Forms.Label { Text = "CNPJ:",          AutoSize = true, Left = 22, Top = 154, ForeColor = System.Drawing.Color.FromArgb(160,175,210) };
+        private System.Windows.Forms.Label lblEmpTel      = new System.Windows.Forms.Label { Text = "Telefone:",      AutoSize = true, Left = 22, Top = 185, ForeColor = System.Drawing.Color.FromArgb(160,175,210) };
+        private System.Windows.Forms.Label lblEmpEmail    = new System.Windows.Forms.Label { Text = "E-mail:",        AutoSize = true, Left = 22, Top = 216, ForeColor = System.Drawing.Color.FromArgb(160,175,210) };
+        private System.Windows.Forms.Label lblEmpEnd      = new System.Windows.Forms.Label { Text = "Endere\u00e7o:", AutoSize = true, Left = 22, Top = 247, ForeColor = System.Drawing.Color.FromArgb(160,175,210) };
         // labels usuario
-        private System.Windows.Forms.Label lblUsrNome     = new System.Windows.Forms.Label { Text = "Nome:",            AutoSize = true, Left = 22, Top = 25,  ForeColor = System.Drawing.Color.FromArgb(160,175,210) };
-        private System.Windows.Forms.Label lblUsrLogin    = new System.Windows.Forms.Label { Text = "Login:",           AutoSize = true, Left = 22, Top = 65,  ForeColor = System.Drawing.Color.FromArgb(160,175,210) };
-        private System.Windows.Forms.Label lblUsrSenha    = new System.Windows.Forms.Label { Text = "Senha:",           AutoSize = true, Left = 22, Top = 105, ForeColor = System.Drawing.Color.FromArgb(160,175,210) };
-        private System.Windows.Forms.Label lblUsrSenhaConf= new System.Windows.Forms.Label { Text = "Confirmar:",       AutoSize = true, Left = 22, Top = 145, ForeColor = System.Drawing.Color.FromArgb(160,175,210) };
-        private System.Windows.Forms.Label lblUsrNivel    = new System.Windows.Forms.Label { Text = "N\u00edvel:",      AutoSize = true, Left = 22, Top = 185, ForeColor = System.Drawing.Color.FromArgb(160,175,210) };
-        private System.Windows.Forms.Label lblUsrSit      = new System.Windows.Forms.Label { Text = "Situa\u00e7\u00e3o:", AutoSize = true, Left = 22, Top = 225, ForeColor = System.Drawing.Color.FromArgb(160,175,210) };
+        private System.Windows.Forms.Label lblUsrNome      = new System.Windows.Forms.Label { Text = "Nome:",              AutoSize = true, Left = 22, Top = 25,  ForeColor = System.Drawing.Color.FromArgb(160,175,210) };
+        private System.Windows.Forms.Label lblUsrLogin     = new System.Windows.Forms.Label { Text = "Login:",             AutoSize = true, Left = 22, Top = 65,  ForeColor = System.Drawing.Color.FromArgb(160,175,210) };
+        private System.Windows.Forms.Label lblUsrSenha     = new System.Windows.Forms.Label { Text = "Senha:",             AutoSize = true, Left = 22, Top = 105, ForeColor = System.Drawing.Color.FromArgb(160,175,210) };
+        private System.Windows.Forms.Label lblUsrSenhaConf = new System.Windows.Forms.Label { Text = "Confirmar:",         AutoSize = true, Left = 22, Top = 145, ForeColor = System.Drawing.Color.FromArgb(160,175,210) };
+        private System.Windows.Forms.Label lblUsrNivel     = new System.Windows.Forms.Label { Text = "N\u00edvel:",        AutoSize = true, Left = 22, Top = 185, ForeColor = System.Drawing.Color.FromArgb(160,175,210) };
+        private System.Windows.Forms.Label lblUsrSit       = new System.Windows.Forms.Label { Text = "Situa\u00e7\u00e3o:", AutoSize = true, Left = 22, Top = 225, ForeColor = System.Drawing.Color.FromArgb(160,175,210) };
+        private System.Windows.Forms.Label lblUsrModulos   = new System.Windows.Forms.Label { Text = "M\u00f3dulos Liberados:", AutoSize = true, Left = 22, Top = 248, Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold), ForeColor = System.Drawing.Color.FromArgb(243,156,18) };
         // labels impressao
-        private System.Windows.Forms.Label lblImpNome      = new System.Windows.Forms.Label { Text = "Nome (cab.):",    AutoSize = true, Left = 22, Top = 36,  ForeColor = System.Drawing.Color.FromArgb(160,175,210) };
-        private System.Windows.Forms.Label lblImpEnd       = new System.Windows.Forms.Label { Text = "Endere\u00e7o:", AutoSize = true, Left = 22, Top = 68,  ForeColor = System.Drawing.Color.FromArgb(160,175,210) };
-        private System.Windows.Forms.Label lblImpTel       = new System.Windows.Forms.Label { Text = "Telefone:",      AutoSize = true, Left = 22, Top = 100, ForeColor = System.Drawing.Color.FromArgb(160,175,210) };
-        private System.Windows.Forms.Label lblImpCNPJ      = new System.Windows.Forms.Label { Text = "CNPJ:",          AutoSize = true, Left = 22, Top = 132, ForeColor = System.Drawing.Color.FromArgb(160,175,210) };
-        private System.Windows.Forms.Label lblImpSep       = new System.Windows.Forms.Label { Text = "Separador:",     AutoSize = true, Left = 22, Top = 164, ForeColor = System.Drawing.Color.FromArgb(160,175,210) };
-        private System.Windows.Forms.Label lblImpAviso     = new System.Windows.Forms.Label { Text = "Aviso fiscal:",  AutoSize = true, Left = 22, Top = 196, ForeColor = System.Drawing.Color.FromArgb(160,175,210) };
-        private System.Windows.Forms.Label lblImpRodape    = new System.Windows.Forms.Label { Text = "Rodap\u00e9:",   AutoSize = true, Left = 22, Top = 228, ForeColor = System.Drawing.Color.FromArgb(160,175,210) };
-        private System.Windows.Forms.Label lblImpNum       = new System.Windows.Forms.Label { Text = "N\u00ba Pedido:",AutoSize = true, Left = 22, Top = 306, ForeColor = System.Drawing.Color.FromArgb(160,175,210) };
-        private System.Windows.Forms.Label lblImpColItem   = new System.Windows.Forms.Label { Text = "Col. Item:",     AutoSize = true, Left = 22, Top = 338, ForeColor = System.Drawing.Color.FromArgb(160,175,210) };
-        private System.Windows.Forms.Label lblImpColTotal  = new System.Windows.Forms.Label { Text = "Col. Total:",    AutoSize = true, Left = 22, Top = 370, ForeColor = System.Drawing.Color.FromArgb(160,175,210) };
-        private System.Windows.Forms.Label lblImpSubtotal  = new System.Windows.Forms.Label { Text = "Subtotal:",      AutoSize = true, Left = 22, Top = 402, ForeColor = System.Drawing.Color.FromArgb(160,175,210) };
-        private System.Windows.Forms.Label lblImpTaxa      = new System.Windows.Forms.Label { Text = "Taxa:",          AutoSize = true, Left = 22, Top = 434, ForeColor = System.Drawing.Color.FromArgb(160,175,210) };
-        private System.Windows.Forms.Label lblImpTotalPagar= new System.Windows.Forms.Label { Text = "Total a Pagar:", AutoSize = true, Left = 22, Top = 466, ForeColor = System.Drawing.Color.FromArgb(160,175,210) };
-        private System.Windows.Forms.Label lblImpAtendente = new System.Windows.Forms.Label { Text = "Atendente:",     AutoSize = true, Left = 22, Top = 498, ForeColor = System.Drawing.Color.FromArgb(160,175,210) };
-        private System.Windows.Forms.Label lblImpressora   = new System.Windows.Forms.Label { Text = "Impressora:",    AutoSize = true, Left = 22, Top = 536, ForeColor = System.Drawing.Color.FromArgb(160,175,210) };
-        private System.Windows.Forms.Label lblLargura      = new System.Windows.Forms.Label { Text = "Largura:",       AutoSize = true, Left = 22, Top = 568, ForeColor = System.Drawing.Color.FromArgb(160,175,210) };
+        private System.Windows.Forms.Label lblImpTitle    = new System.Windows.Forms.Label { Text = "Configura\u00e7\u00e3o de Impress\u00e3o", AutoSize = true, Left = 22, Top = 6, Font = new System.Drawing.Font("Segoe UI", 11F, System.Drawing.FontStyle.Bold), ForeColor = System.Drawing.Color.FromArgb(243,156,18) };
+        private System.Windows.Forms.Label lblImpRotulos  = new System.Windows.Forms.Label { Text = "R\u00f3tulos do Cupom:", AutoSize = true, Left = 22, Top = 290, Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold), ForeColor = System.Drawing.Color.FromArgb(243,156,18) };
+        private System.Windows.Forms.Label lblImpNome      = new System.Windows.Forms.Label { Text = "Nome (cabe\u00e7alho):", AutoSize = true, Left = 22, Top = 36,  ForeColor = System.Drawing.Color.FromArgb(160,175,210) };
+        private System.Windows.Forms.Label lblImpEnd       = new System.Windows.Forms.Label { Text = "Endere\u00e7o:",       AutoSize = true, Left = 22, Top = 68,  ForeColor = System.Drawing.Color.FromArgb(160,175,210) };
+        private System.Windows.Forms.Label lblImpTel       = new System.Windows.Forms.Label { Text = "Telefone:",           AutoSize = true, Left = 22, Top = 100, ForeColor = System.Drawing.Color.FromArgb(160,175,210) };
+        private System.Windows.Forms.Label lblImpCNPJ      = new System.Windows.Forms.Label { Text = "CNPJ:",               AutoSize = true, Left = 22, Top = 132, ForeColor = System.Drawing.Color.FromArgb(160,175,210) };
+        private System.Windows.Forms.Label lblImpSep       = new System.Windows.Forms.Label { Text = "Separador:",          AutoSize = true, Left = 22, Top = 164, ForeColor = System.Drawing.Color.FromArgb(160,175,210) };
+        private System.Windows.Forms.Label lblImpAviso     = new System.Windows.Forms.Label { Text = "Aviso fiscal:",       AutoSize = true, Left = 22, Top = 196, ForeColor = System.Drawing.Color.FromArgb(160,175,210) };
+        private System.Windows.Forms.Label lblImpRodape    = new System.Windows.Forms.Label { Text = "Rodap\u00e9:",        AutoSize = true, Left = 22, Top = 228, ForeColor = System.Drawing.Color.FromArgb(160,175,210) };
+        private System.Windows.Forms.Label lblImpNum       = new System.Windows.Forms.Label { Text = "N\u00ba Pedido:",     AutoSize = true, Left = 22, Top = 306, ForeColor = System.Drawing.Color.FromArgb(160,175,210) };
+        private System.Windows.Forms.Label lblImpColItem   = new System.Windows.Forms.Label { Text = "Col. Item:",          AutoSize = true, Left = 22, Top = 338, ForeColor = System.Drawing.Color.FromArgb(160,175,210) };
+        private System.Windows.Forms.Label lblImpColTotal  = new System.Windows.Forms.Label { Text = "Col. Total:",         AutoSize = true, Left = 22, Top = 370, ForeColor = System.Drawing.Color.FromArgb(160,175,210) };
+        private System.Windows.Forms.Label lblImpSubtotal  = new System.Windows.Forms.Label { Text = "Subtotal:",           AutoSize = true, Left = 22, Top = 402, ForeColor = System.Drawing.Color.FromArgb(160,175,210) };
+        private System.Windows.Forms.Label lblImpTaxa      = new System.Windows.Forms.Label { Text = "Taxa entrega:",       AutoSize = true, Left = 22, Top = 434, ForeColor = System.Drawing.Color.FromArgb(160,175,210) };
+        private System.Windows.Forms.Label lblImpTotalPagar= new System.Windows.Forms.Label { Text = "Total a pagar:",      AutoSize = true, Left = 22, Top = 466, ForeColor = System.Drawing.Color.FromArgb(160,175,210) };
+        private System.Windows.Forms.Label lblImpAtendente = new System.Windows.Forms.Label { Text = "Atendente:",          AutoSize = true, Left = 22, Top = 498, ForeColor = System.Drawing.Color.FromArgb(160,175,210) };
+        private System.Windows.Forms.Label lblImpressora   = new System.Windows.Forms.Label { Text = "Impressora:",         AutoSize = true, Left = 22, Top = 536, ForeColor = System.Drawing.Color.FromArgb(160,175,210) };
+        private System.Windows.Forms.Label lblLargura      = new System.Windows.Forms.Label { Text = "Largura (chars):",    AutoSize = true, Left = 22, Top = 568, ForeColor = System.Drawing.Color.FromArgb(160,175,210) };
     }
 }

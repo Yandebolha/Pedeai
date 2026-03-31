@@ -188,7 +188,7 @@ namespace Pedeai.Forms
             this.dtpDe.Format = System.Windows.Forms.DateTimePickerFormat.Short;
             this.dtpDe.Value  = System.DateTime.Today.AddDays(-30);
 
-            this.lblAte.Text      = "Até:";
+            this.lblAte.Text      = "At\u00e9:";
             this.lblAte.ForeColor = System.Drawing.Color.White;
             this.lblAte.Left = 152; this.lblAte.Top = 12; this.lblAte.AutoSize = true;
 
