@@ -45,6 +45,7 @@ namespace Pedeai
 
         private void Form1_Load(object sender, EventArgs e)
         {
+            ReconstruirSidebar();
             CarregarTudo();
             NavIniciarPrimeiro();
             _timer.Start();

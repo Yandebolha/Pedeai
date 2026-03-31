@@ -57,6 +57,12 @@ namespace Pedeai.Forms
             this.numUnitario          = new System.Windows.Forms.NumericUpDown();
             this.numDescontoItem      = new System.Windows.Forms.NumericUpDown();
             this.gridItens            = new System.Windows.Forms.DataGridView();
+            this.colNome              = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colQtde              = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colUnitario          = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colDesconto          = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colSubtotal          = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colRemover           = new System.Windows.Forms.DataGridViewButtonColumn();
             this.lblTotal             = new System.Windows.Forms.Label();
             this.btnSal               = new System.Windows.Forms.Button();
             this.btnCanc              = new System.Windows.Forms.Button();
@@ -358,12 +364,30 @@ namespace Pedeai.Forms
             this.gridItens.ColumnHeadersDefaultCellStyle.Font = new System.Drawing.Font("Segoe UI", 8F, System.Drawing.FontStyle.Bold);
             this.gridItens.ColumnHeadersHeight = 30;
             this.gridItens.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
-            this.gridItens.Columns.Add(new System.Windows.Forms.DataGridViewTextBoxColumn { Name = "Nome",     HeaderText = "Produto",  FillWeight = 45 });
-            this.gridItens.Columns.Add(new System.Windows.Forms.DataGridViewTextBoxColumn { Name = "Qtde",     HeaderText = "Qtde",     FillWeight = 8  });
-            this.gridItens.Columns.Add(new System.Windows.Forms.DataGridViewTextBoxColumn { Name = "Unitario", HeaderText = "Valor",    FillWeight = 12 });
-            this.gridItens.Columns.Add(new System.Windows.Forms.DataGridViewTextBoxColumn { Name = "Desconto", HeaderText = "Desc.",    FillWeight = 10 });
-            this.gridItens.Columns.Add(new System.Windows.Forms.DataGridViewTextBoxColumn { Name = "Subtotal", HeaderText = "Subtotal", FillWeight = 14 });
-            this.gridItens.Columns.Add(new System.Windows.Forms.DataGridViewButtonColumn { Name = "Remover", HeaderText = "", Text = "\u2715", UseColumnTextForButtonValue = true, FillWeight = 7, MinimumWidth = 42, FlatStyle = System.Windows.Forms.FlatStyle.Flat });
+            this.colNome.Name        = "Nome";
+            this.colNome.HeaderText  = "Produto";
+            this.colNome.FillWeight  = 45;
+            this.colQtde.Name        = "Qtde";
+            this.colQtde.HeaderText  = "Qtde";
+            this.colQtde.FillWeight  = 8;
+            this.colUnitario.Name        = "Unitario";
+            this.colUnitario.HeaderText  = "Valor";
+            this.colUnitario.FillWeight  = 12;
+            this.colDesconto.Name        = "Desconto";
+            this.colDesconto.HeaderText  = "Desc.";
+            this.colDesconto.FillWeight  = 10;
+            this.colSubtotal.Name        = "Subtotal";
+            this.colSubtotal.HeaderText  = "Subtotal";
+            this.colSubtotal.FillWeight  = 14;
+            this.colRemover.Name                       = "Remover";
+            this.colRemover.HeaderText                 = "";
+            this.colRemover.Text                       = "\u2715";
+            this.colRemover.UseColumnTextForButtonValue = true;
+            this.colRemover.FillWeight                 = 7;
+            this.colRemover.MinimumWidth               = 42;
+            this.colRemover.FlatStyle                  = System.Windows.Forms.FlatStyle.Flat;
+            this.gridItens.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
+                this.colNome, this.colQtde, this.colUnitario, this.colDesconto, this.colSubtotal, this.colRemover });
             this.gridItens.CellClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.GridItens_CellClick);
 
             // rightArea
@@ -469,8 +493,14 @@ namespace Pedeai.Forms
         private System.Windows.Forms.NumericUpDown numDescontoItem;
         private System.Windows.Forms.DataGridView  gridItens;
         private System.Windows.Forms.Label         lblTotal;
-        internal System.Windows.Forms.Button       btnSal;
-        internal System.Windows.Forms.Button       btnCanc;
-        internal System.Windows.Forms.Button       btnAdd;
+        internal System.Windows.Forms.Button                         btnSal;
+        internal System.Windows.Forms.Button                         btnCanc;
+        internal System.Windows.Forms.Button                         btnAdd;
+        private System.Windows.Forms.DataGridViewTextBoxColumn        colNome;
+        private System.Windows.Forms.DataGridViewTextBoxColumn        colQtde;
+        private System.Windows.Forms.DataGridViewTextBoxColumn        colUnitario;
+        private System.Windows.Forms.DataGridViewTextBoxColumn        colDesconto;
+        private System.Windows.Forms.DataGridViewTextBoxColumn        colSubtotal;
+        private System.Windows.Forms.DataGridViewButtonColumn         colRemover;
     }
 }
