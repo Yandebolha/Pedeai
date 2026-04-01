@@ -14,12 +14,30 @@ namespace Pedeai.Forms
             InitializeComponent();
             if (System.ComponentModel.LicenseManager.UsageMode == System.ComponentModel.LicenseUsageMode.Designtime) return;
             _bll = new UsuarioBLL();
-            // Tenta carregar o logo do sistema (RanGoFood.png na pasta do executável)
+            // Carrega o logo recortando o círculo central e removendo os cantos brancos
             try
             {
                 string imgPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "RanGoFood.png");
                 if (System.IO.File.Exists(imgPath))
-                    picLogo.Image = Image.FromFile(imgPath);
+                {
+                    using var original = Image.FromFile(imgPath);
+                    // Corte quadrado centralizado
+                    int size = original.Height;
+                    int x    = (original.Width - size) / 2;
+                    // Bitmap ARGB para suportar transparência nos cantos
+                    var circled = new Bitmap(size, size, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+                    using var g = System.Drawing.Graphics.FromImage(circled);
+                    g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+                    // Clip circular – tudo fora da elipse fica transparente
+                    using var path = new System.Drawing.Drawing2D.GraphicsPath();
+                    path.AddEllipse(0, 0, size, size);
+                    g.SetClip(path);
+                    g.DrawImage(original,
+                        new System.Drawing.Rectangle(0, 0, size, size),
+                        new System.Drawing.Rectangle(x, 0, size, size),
+                        System.Drawing.GraphicsUnit.Pixel);
+                    picLogo.Image = circled;
+                }
             }
             catch { /* sem imagem, exibe em branco */ }
         }

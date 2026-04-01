@@ -67,6 +67,10 @@ namespace Pedeai.DB
                         Info             VARCHAR(255)   NOT NULL DEFAULT ''
                     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
 
+                // ── 3b. Colunas em usuario (retrocompatibilidade) ─────────────────
+                AddColumnIfNotExists(conn, db, "usuario", "Info",
+                    "VARCHAR(255) NOT NULL DEFAULT ''");
+
                 // ── 4. Colunas em pedido_web ─────────────────────────────────────────
                 AddColumnIfNotExists(conn, db, "pedido_web", "pediCancelado_Por",
                     "VARCHAR(100) NULL DEFAULT NULL");

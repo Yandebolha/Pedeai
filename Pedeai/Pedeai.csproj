@@ -21,6 +21,14 @@
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
   </ItemGroup>
 
+  <!-- Logo do sistema: copiada automaticamente para o diretório de saída -->
+  <ItemGroup>
+    <Content Include="..\RanGoFood.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <Link>RanGoFood.png</Link>
+    </Content>
+  </ItemGroup>
+
   <!-- Metadados dos arquivos Designer para o VS exibir corretamente -->
   <ItemGroup>
     <Compile Update="Form1.cs">
