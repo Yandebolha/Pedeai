@@ -1470,25 +1470,81 @@ namespace Pedeai
             while (pnlSidebar.Controls.Count > 1)
                 pnlSidebar.Controls.RemoveAt(1);
 
-            int navY = 8;
+            int navY = 10;
+
+            void Secao(string titulo)
+            {
+                if (navY > 10) navY += 4;
+                var lbl = new Label
+                {
+                    Text      = titulo,
+                    ForeColor = Color.FromArgb(80, 110, 160),
+                    Font      = new Font("Segoe UI", 7.5F, FontStyle.Bold),
+                    AutoSize  = false,
+                    Left      = 14,
+                    Top       = navY,
+                    Width     = 186,
+                    Height    = 20,
+                    TextAlign = ContentAlignment.MiddleLeft
+                };
+                pnlSidebar.Controls.Add(lbl);
+                navY += 20;
+                var sep = new Panel
+                {
+                    Left      = 14,
+                    Top       = navY,
+                    Width     = 182,
+                    Height    = 1,
+                    BackColor = Color.FromArgb(45, 60, 105)
+                };
+                pnlSidebar.Controls.Add(sep);
+                navY += 5;
+            }
+
             void NavSe(string modulo, string texto, Action acao)
             {
                 if (!UsuarioSessao.TemModulo(modulo)) return;
                 pnlSidebar.Controls.Add(BotaoNav(texto, navY, acao));
-                navY += 46;
+                navY += 44;
             }
-            NavSe("Dashboard",    "\U0001F3E0  Dashboard",    MostrarDashboard);
-            NavSe("Pedidos",      "\U0001F4CB  Pedidos",      MostrarPedidos);
-            NavSe("Financeiro",   "\U0001F4B0  Financeiro",   MostrarFinanceiro);
-            NavSe("Turno",        "\U0001F551  Turno de Caixa", () => AbrirForm(new Forms.frmTurno()));
-            NavSe("Produtos",     "\U0001F6D2  Produtos",     () => AbrirForm(new frmCadastroProduto()));
-            NavSe("Categorias",   "\U0001F5C2  Categorias",   () => AbrirForm(new frmCadastroCategoria()));
-            NavSe("Clientes",     "\U0001F464  Clientes",     () => AbrirForm(new frmCadastroCliente()));
-            NavSe("Fornecedores",    "\U0001F3ED  Fornecedores",    () => AbrirForm(new frmCadastroFornecedor()));
-            NavSe("Cupons",          "\U0001F3F7  Cupons",          () => AbrirForm(new frmCadastroCupom()));
-            NavSe("EntradaMercadoria", "\U0001F4E6  Entrada Mercad.", () => AbrirForm(new frmEntradaMercadoria()));
-            NavSe("Avisos",           "\U0001F514  Avisos",          () => AbrirForm(new frmAvisos()));
-            NavSe("Empresa",         "\U0001F3E2  Empresa",         MostrarEmpresa);
+
+            bool temOperacional = UsuarioSessao.TemModulo("Dashboard")
+                               || UsuarioSessao.TemModulo("Pedidos")
+                               || UsuarioSessao.TemModulo("Financeiro")
+                               || UsuarioSessao.TemModulo("Turno");
+            if (temOperacional)
+            {
+                Secao("OPERACIONAL");
+                NavSe("Dashboard",  "\U0001F3E0  Dashboard",     MostrarDashboard);
+                NavSe("Pedidos",    "\U0001F4CB  Pedidos",        MostrarPedidos);
+                NavSe("Financeiro", "\U0001F4B0  Financeiro",     MostrarFinanceiro);
+                NavSe("Turno",      "\U0001F551  Turno de Caixa", () => AbrirForm(new Forms.frmTurno()));
+            }
+
+            bool temCadastros = UsuarioSessao.TemModulo("Produtos")
+                             || UsuarioSessao.TemModulo("Categorias")
+                             || UsuarioSessao.TemModulo("Clientes")
+                             || UsuarioSessao.TemModulo("Fornecedores")
+                             || UsuarioSessao.TemModulo("Cupons")
+                             || UsuarioSessao.TemModulo("EntradaMercadoria")
+                             || UsuarioSessao.TemModulo("Avisos");
+            if (temCadastros)
+            {
+                Secao("CADASTROS");
+                NavSe("Produtos",          "\U0001F6D2  Produtos",         () => AbrirForm(new frmCadastroProduto()));
+                NavSe("Categorias",        "\U0001F5C2  Categorias",       () => AbrirForm(new frmCadastroCategoria()));
+                NavSe("Clientes",          "\U0001F464  Clientes",         () => AbrirForm(new frmCadastroCliente()));
+                NavSe("Fornecedores",      "\U0001F3ED  Fornecedores",     () => AbrirForm(new frmCadastroFornecedor()));
+                NavSe("Cupons",            "\U0001F3F7  Cupons",           () => AbrirForm(new frmCadastroCupom()));
+                NavSe("EntradaMercadoria", "\U0001F4E6  Entrada Mercad.",  () => AbrirForm(new frmEntradaMercadoria()));
+                NavSe("Avisos",            "\U0001F514  Avisos",           () => AbrirForm(new frmAvisos()));
+            }
+
+            if (UsuarioSessao.TemModulo("Empresa"))
+            {
+                Secao("CONFIGURA\u00C7\u00D5ES");
+                NavSe("Empresa", "\U0001F3E2  Empresa", MostrarEmpresa);
+            }
         }
 
         private void NavIniciarPrimeiro()
