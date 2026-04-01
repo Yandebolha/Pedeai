@@ -49,7 +49,7 @@ namespace Pedeai
             // ── pnlTopBar ──────────────────────────────────────────────────
             pnlTopBar.Dock      = System.Windows.Forms.DockStyle.Top;
             pnlTopBar.Height    = 52;
-            pnlTopBar.BackColor = System.Drawing.Color.FromArgb(36, 48, 82);
+            pnlTopBar.BackColor = System.Drawing.Color.FromArgb(45, 22, 10);
             pnlTopBar.SizeChanged += new System.EventHandler(this.PnlTopBar_SizeChanged);
             pnlTopBar.MouseDown   += new System.Windows.Forms.MouseEventHandler(this.TopBar_MouseDown);
             pnlTopBar.MouseMove   += new System.Windows.Forms.MouseEventHandler(this.TopBar_MouseMove);
@@ -83,7 +83,7 @@ namespace Pedeai
             btnAtualizar.Width     = 110;
             btnAtualizar.Height    = 30;
             btnAtualizar.Anchor    = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
-            btnAtualizar.BackColor = System.Drawing.Color.FromArgb(52, 152, 219);
+            btnAtualizar.BackColor = System.Drawing.Color.FromArgb(200, 70, 20);
             btnAtualizar.ForeColor = System.Drawing.Color.White;
             btnAtualizar.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             btnAtualizar.Font      = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
@@ -96,8 +96,8 @@ namespace Pedeai
             btnSair.Text      = "Sair";
             btnSair.Width     = 72;
             btnSair.Height    = 30;
-            btnSair.BackColor = System.Drawing.Color.FromArgb(80, 40, 35);
-            btnSair.ForeColor = System.Drawing.Color.FromArgb(200, 130, 120);
+            btnSair.BackColor = System.Drawing.Color.FromArgb(80, 40, 20);
+            btnSair.ForeColor = System.Drawing.Color.FromArgb(195, 158, 120);
             btnSair.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             btnSair.Font      = new System.Drawing.Font("Segoe UI", 9F);
             btnSair.Cursor    = System.Windows.Forms.Cursors.Hand;
@@ -109,13 +109,13 @@ namespace Pedeai
             btnLogoff.Text      = "\u21AA Trocar Usu\u00E1rio";
             btnLogoff.Width     = 140;
             btnLogoff.Height    = 30;
-            btnLogoff.BackColor = System.Drawing.Color.FromArgb(36, 52, 88);
-            btnLogoff.ForeColor = System.Drawing.Color.FromArgb(150, 185, 230);
+            btnLogoff.BackColor = System.Drawing.Color.FromArgb(45, 22, 10);
+            btnLogoff.ForeColor = System.Drawing.Color.FromArgb(195, 158, 120);
             btnLogoff.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             btnLogoff.Font      = new System.Drawing.Font("Segoe UI", 8.5F);
             btnLogoff.Cursor    = System.Windows.Forms.Cursors.Hand;
             btnLogoff.FlatAppearance.BorderSize  = 1;
-            btnLogoff.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(55, 75, 120);
+            btnLogoff.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(180, 140, 100);
             btnLogoff.Click += new System.EventHandler(this.BtnLogoff_Click);
             pnlTopBar.Controls.Add(btnLogoff);
 
@@ -123,7 +123,7 @@ namespace Pedeai
             btnClose.Text      = "\u2715";
             btnClose.Width     = 40;
             btnClose.Height    = 52;
-            btnClose.BackColor = System.Drawing.Color.FromArgb(192, 57, 43);
+            btnClose.BackColor = System.Drawing.Color.FromArgb(178, 38, 20);
             btnClose.ForeColor = System.Drawing.Color.White;
             btnClose.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             btnClose.Font      = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
@@ -136,7 +136,7 @@ namespace Pedeai
             btnMaximize.Text      = "\u25A1";
             btnMaximize.Width     = 36;
             btnMaximize.Height    = 52;
-            btnMaximize.BackColor = System.Drawing.Color.FromArgb(52, 68, 105);
+            btnMaximize.BackColor = System.Drawing.Color.FromArgb(45, 22, 10);
             btnMaximize.ForeColor = System.Drawing.Color.White;
             btnMaximize.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             btnMaximize.Font      = new System.Drawing.Font("Segoe UI", 10F);
@@ -149,7 +149,7 @@ namespace Pedeai
             btnMinimize.Text      = "\u2500";
             btnMinimize.Width     = 36;
             btnMinimize.Height    = 52;
-            btnMinimize.BackColor = System.Drawing.Color.FromArgb(52, 68, 105);
+            btnMinimize.BackColor = System.Drawing.Color.FromArgb(45, 22, 10);
             btnMinimize.ForeColor = System.Drawing.Color.White;
             btnMinimize.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             btnMinimize.Font      = new System.Drawing.Font("Segoe UI", 10F);
@@ -161,30 +161,30 @@ namespace Pedeai
             // ── pnlSidebar ─────────────────────────────────────────────────
             pnlSidebar.Dock      = System.Windows.Forms.DockStyle.Left;
             pnlSidebar.Width     = 210;
-            pnlSidebar.BackColor = System.Drawing.Color.FromArgb(28, 37, 65);
+            pnlSidebar.BackColor = System.Drawing.Color.FromArgb(55, 30, 12);
 
             pnlSidebarAccent.Left      = 0;
             pnlSidebarAccent.Top       = 0;
             pnlSidebarAccent.Width     = 210;
             pnlSidebarAccent.Height    = 4;
-            pnlSidebarAccent.BackColor = System.Drawing.Color.FromArgb(52, 152, 219);
+            pnlSidebarAccent.BackColor = System.Drawing.Color.FromArgb(200, 70, 20);
             pnlSidebar.Controls.Add(pnlSidebarAccent);
 
             // ── pnlFooter ──────────────────────────────────────────────────
             pnlFooter.Dock      = System.Windows.Forms.DockStyle.Bottom;
             pnlFooter.Height    = 28;
-            pnlFooter.BackColor = System.Drawing.Color.FromArgb(18, 25, 50);
+            pnlFooter.BackColor = System.Drawing.Color.FromArgb(252, 248, 244);
             pnlFooter.SizeChanged += new System.EventHandler(this.PnlFooter_SizeChanged);
 
             lblFooterEmpresa.Text      = "";
-            lblFooterEmpresa.ForeColor = System.Drawing.Color.FromArgb(90, 120, 170);
+            lblFooterEmpresa.ForeColor = System.Drawing.Color.FromArgb(160, 135, 110);
             lblFooterEmpresa.Font      = new System.Drawing.Font("Segoe UI", 8F);
             lblFooterEmpresa.AutoSize  = true;
             lblFooterEmpresa.Left      = 12;
             lblFooterEmpresa.Top       = 7;
 
             lblFooterUsuario.Text      = "\U0001F464  Sistema";
-            lblFooterUsuario.ForeColor = System.Drawing.Color.FromArgb(130, 165, 220);
+            lblFooterUsuario.ForeColor = System.Drawing.Color.FromArgb(195, 158, 120);
             lblFooterUsuario.Font      = new System.Drawing.Font("Segoe UI", 8F, System.Drawing.FontStyle.Bold);
             lblFooterUsuario.AutoSize  = true;
             lblFooterUsuario.Top       = 7;
@@ -194,7 +194,7 @@ namespace Pedeai
 
             // ── pnlContent ─────────────────────────────────────────────────
             pnlContent.Dock      = System.Windows.Forms.DockStyle.Fill;
-            pnlContent.BackColor = System.Drawing.Color.FromArgb(15, 22, 45);
+            pnlContent.BackColor = System.Drawing.Color.FromArgb(252, 248, 244);
             pnlContent.Padding   = new System.Windows.Forms.Padding(20);
 
             // ── _timer ─────────────────────────────────────────────────────
@@ -209,7 +209,7 @@ namespace Pedeai
 
             AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             AutoScaleMode       = System.Windows.Forms.AutoScaleMode.Font;
-            BackColor           = System.Drawing.Color.FromArgb(15, 22, 45);
+            BackColor           = System.Drawing.Color.FromArgb(252, 248, 244);
             ClientSize          = new System.Drawing.Size(1100, 660);
             Font                = new System.Drawing.Font("Segoe UI", 9F);
             FormBorderStyle     = System.Windows.Forms.FormBorderStyle.None;

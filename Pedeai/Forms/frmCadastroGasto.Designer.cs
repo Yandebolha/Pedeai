@@ -28,7 +28,7 @@ namespace Pedeai.Forms
             this.SuspendLayout();
             // lblData
             this.lblData.Text = "Data:";
-            this.lblData.ForeColor = System.Drawing.Color.FromArgb(180, 190, 220);
+            this.lblData.ForeColor = System.Drawing.Color.FromArgb(195, 158, 120);
             this.lblData.AutoSize = true;
             this.lblData.Font = new System.Drawing.Font("Segoe UI", 10F);
             this.lblData.SetBounds(20, 19, 100, 22);
@@ -37,42 +37,42 @@ namespace Pedeai.Forms
             this.dtpData.SetBounds(128, 16, 280, 26);
             // lblDesc
             this.lblDesc.Text = "Descricao:";
-            this.lblDesc.ForeColor = System.Drawing.Color.FromArgb(180, 190, 220);
+            this.lblDesc.ForeColor = System.Drawing.Color.FromArgb(195, 158, 120);
             this.lblDesc.AutoSize = true;
             this.lblDesc.Font = new System.Drawing.Font("Segoe UI", 10F);
             this.lblDesc.SetBounds(20, 63, 100, 22);
             // txtDescricao
-            this.txtDescricao.BackColor = System.Drawing.Color.FromArgb(15, 22, 45);
-            this.txtDescricao.ForeColor = System.Drawing.Color.White;
+            this.txtDescricao.BackColor = System.Drawing.Color.FromArgb(252, 248, 244);
+            this.txtDescricao.ForeColor = System.Drawing.Color.FromArgb(42, 20, 8);
             this.txtDescricao.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.txtDescricao.SetBounds(128, 60, 280, 26);
             // lblVal
             this.lblVal.Text = "Valor (R$):";
-            this.lblVal.ForeColor = System.Drawing.Color.FromArgb(180, 190, 220);
+            this.lblVal.ForeColor = System.Drawing.Color.FromArgb(195, 158, 120);
             this.lblVal.AutoSize = true;
             this.lblVal.Font = new System.Drawing.Font("Segoe UI", 10F);
             this.lblVal.SetBounds(20, 107, 100, 22);
             // numValor
             this.numValor.DecimalPlaces = 2;
             this.numValor.Maximum = 999999M;
-            this.numValor.BackColor = System.Drawing.Color.FromArgb(15, 22, 45);
-            this.numValor.ForeColor = System.Drawing.Color.White;
+            this.numValor.BackColor = System.Drawing.Color.FromArgb(252, 248, 244);
+            this.numValor.ForeColor = System.Drawing.Color.FromArgb(42, 20, 8);
             this.numValor.SetBounds(128, 104, 140, 26);
             // lblObs
             this.lblObs.Text = "Obs:";
-            this.lblObs.ForeColor = System.Drawing.Color.FromArgb(180, 190, 220);
+            this.lblObs.ForeColor = System.Drawing.Color.FromArgb(195, 158, 120);
             this.lblObs.AutoSize = true;
             this.lblObs.Font = new System.Drawing.Font("Segoe UI", 10F);
             this.lblObs.SetBounds(20, 151, 100, 22);
             // txtObs
-            this.txtObs.BackColor = System.Drawing.Color.FromArgb(15, 22, 45);
-            this.txtObs.ForeColor = System.Drawing.Color.White;
+            this.txtObs.BackColor = System.Drawing.Color.FromArgb(252, 248, 244);
+            this.txtObs.ForeColor = System.Drawing.Color.FromArgb(42, 20, 8);
             this.txtObs.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.txtObs.SetBounds(128, 148, 280, 26);
             // btnSalvar
             this.btnSalvar.Text = "\u2714 Salvar";
             this.btnSalvar.SetBounds(128, 188, 130, 30);
-            this.btnSalvar.BackColor = System.Drawing.Color.FromArgb(39, 174, 96);
+            this.btnSalvar.BackColor = System.Drawing.Color.FromArgb(120, 80, 25);
             this.btnSalvar.ForeColor = System.Drawing.Color.White;
             this.btnSalvar.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnSalvar.Cursor = System.Windows.Forms.Cursors.Hand;
@@ -81,7 +81,7 @@ namespace Pedeai.Forms
             // btnCan
             this.btnCan.Text = "Cancelar";
             this.btnCan.SetBounds(268, 188, 130, 30);
-            this.btnCan.BackColor = System.Drawing.Color.FromArgb(108, 117, 125);
+            this.btnCan.BackColor = System.Drawing.Color.FromArgb(160, 135, 110);
             this.btnCan.ForeColor = System.Drawing.Color.White;
             this.btnCan.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnCan.Cursor = System.Windows.Forms.Cursors.Hand;
@@ -95,8 +95,8 @@ namespace Pedeai.Forms
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             this.MaximizeBox     = false;
             this.MinimizeBox     = false;
-            this.BackColor       = System.Drawing.Color.FromArgb(28, 37, 65);
-            this.ForeColor       = System.Drawing.Color.White;
+            this.BackColor       = System.Drawing.Color.FromArgb(55, 30, 12);
+            this.ForeColor       = System.Drawing.Color.FromArgb(42, 20, 8);
             this.Font            = new System.Drawing.Font("Segoe UI", 10F);
             this.ClientSize      = new System.Drawing.Size(420, 240);
             this.Controls.AddRange(new System.Windows.Forms.Control[]

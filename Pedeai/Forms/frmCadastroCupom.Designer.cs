@@ -46,16 +46,16 @@ namespace Pedeai.Forms
             this.grid.AllowUserToAddRows = false;
             this.grid.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
             this.grid.RowHeadersVisible = false;
-            this.grid.BackgroundColor = System.Drawing.Color.FromArgb(20, 28, 55);
-            this.grid.DefaultCellStyle.BackColor = System.Drawing.Color.FromArgb(20, 28, 55);
-            this.grid.DefaultCellStyle.ForeColor = System.Drawing.Color.White;
-            this.grid.DefaultCellStyle.SelectionBackColor = System.Drawing.Color.FromArgb(52, 152, 219);
+            this.grid.BackgroundColor = System.Drawing.Color.FromArgb(248, 242, 235);
+            this.grid.DefaultCellStyle.BackColor = System.Drawing.Color.FromArgb(248, 242, 235);
+            this.grid.DefaultCellStyle.ForeColor = System.Drawing.Color.FromArgb(42, 20, 8);
+            this.grid.DefaultCellStyle.SelectionBackColor = System.Drawing.Color.FromArgb(200, 70, 20);
             this.grid.DefaultCellStyle.SelectionForeColor = System.Drawing.Color.White;
-            this.grid.AlternatingRowsDefaultCellStyle.BackColor = System.Drawing.Color.FromArgb(28, 37, 65);
-            this.grid.GridColor = System.Drawing.Color.FromArgb(40, 55, 90);
+            this.grid.AlternatingRowsDefaultCellStyle.BackColor = System.Drawing.Color.FromArgb(243, 237, 229);
+            this.grid.GridColor = System.Drawing.Color.FromArgb(215, 198, 178);
             this.grid.Font = new System.Drawing.Font("Segoe UI", 9F);
             this.grid.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.grid.ColumnHeadersDefaultCellStyle.BackColor = System.Drawing.Color.FromArgb(36, 48, 82);
+            this.grid.ColumnHeadersDefaultCellStyle.BackColor = System.Drawing.Color.FromArgb(45, 22, 10);
             this.grid.ColumnHeadersDefaultCellStyle.ForeColor = System.Drawing.Color.White;
             this.grid.ColumnHeadersDefaultCellStyle.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
             this.grid.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
@@ -66,13 +66,13 @@ namespace Pedeai.Forms
             // topBar
             this.topBar.Dock = System.Windows.Forms.DockStyle.Top;
             this.topBar.Height = 44;
-            this.topBar.BackColor = System.Drawing.Color.FromArgb(36, 48, 82);
+            this.topBar.BackColor = System.Drawing.Color.FromArgb(45, 22, 10);
             this.topBar.Controls.Add(this.btnN);
             this.topBar.Controls.Add(this.btnR);
             // btnN
             this.btnN.Text = "+ Novo Cupom";
             this.btnN.Left = 8; this.btnN.Top = 8; this.btnN.Width = 110; this.btnN.Height = 28;
-            this.btnN.BackColor = System.Drawing.Color.FromArgb(39, 174, 96);
+            this.btnN.BackColor = System.Drawing.Color.FromArgb(120, 80, 25);
             this.btnN.ForeColor = System.Drawing.Color.White;
             this.btnN.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnN.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
@@ -81,7 +81,7 @@ namespace Pedeai.Forms
             // btnR
             this.btnR.Text = "Atualizar";
             this.btnR.Left = 128; this.btnR.Top = 8; this.btnR.Width = 100; this.btnR.Height = 28;
-            this.btnR.BackColor = System.Drawing.Color.FromArgb(52, 152, 219);
+            this.btnR.BackColor = System.Drawing.Color.FromArgb(200, 70, 20);
             this.btnR.ForeColor = System.Drawing.Color.White;
             this.btnR.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnR.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
@@ -90,7 +90,7 @@ namespace Pedeai.Forms
             // pnlForm
             this.pnlForm.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.pnlForm.Height = 150;
-            this.pnlForm.BackColor = System.Drawing.Color.FromArgb(28, 37, 65);
+            this.pnlForm.BackColor = System.Drawing.Color.FromArgb(55, 30, 12);
             this.pnlForm.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.pnlForm.Visible = false;
             this.pnlForm.Controls.Add(this.lblCod);    this.pnlForm.Controls.Add(this.txtCodigo);
@@ -133,24 +133,24 @@ namespace Pedeai.Forms
             // pnlBtns
             this.pnlBtns.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.pnlBtns.Height = 48;
-            this.pnlBtns.BackColor = System.Drawing.Color.FromArgb(28, 37, 65);
+            this.pnlBtns.BackColor = System.Drawing.Color.FromArgb(55, 30, 12);
             this.pnlBtns.Controls.Add(this.btnS);
             this.pnlBtns.Controls.Add(this.btnC);
             this.pnlBtns.Controls.Add(this.btnD);
             this.pnlBtns.SizeChanged += new System.EventHandler(this.PnlBtns_SizeChanged);
             // btnS
             this.btnS.Text = "Salvar"; this.btnS.Left = 10; this.btnS.Top = 10; this.btnS.Width = 110; this.btnS.Height = 28;
-            this.btnS.BackColor = System.Drawing.Color.FromArgb(52, 152, 219); this.btnS.ForeColor = System.Drawing.Color.White;
+            this.btnS.BackColor = System.Drawing.Color.FromArgb(200, 70, 20); this.btnS.ForeColor = System.Drawing.Color.White;
             this.btnS.FlatStyle = System.Windows.Forms.FlatStyle.Flat; this.btnS.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
             this.btnS.FlatAppearance.BorderSize = 0; this.btnS.Click += new System.EventHandler(this.BtnSalvar_Click);
             // btnC
             this.btnC.Text = "Cancelar"; this.btnC.Left = 130; this.btnC.Top = 10; this.btnC.Width = 110; this.btnC.Height = 28;
-            this.btnC.BackColor = System.Drawing.Color.FromArgb(80, 95, 130); this.btnC.ForeColor = System.Drawing.Color.White;
+            this.btnC.BackColor = System.Drawing.Color.FromArgb(150, 125, 100); this.btnC.ForeColor = System.Drawing.Color.White;
             this.btnC.FlatStyle = System.Windows.Forms.FlatStyle.Flat; this.btnC.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
             this.btnC.FlatAppearance.BorderSize = 0; this.btnC.Click += new System.EventHandler(this.BtnCancelarCupom_Click);
             // btnD
             this.btnD.Text = "Desativar"; this.btnD.Left = 250; this.btnD.Top = 10; this.btnD.Width = 110; this.btnD.Height = 28;
-            this.btnD.BackColor = System.Drawing.Color.FromArgb(192, 57, 43); this.btnD.ForeColor = System.Drawing.Color.White;
+            this.btnD.BackColor = System.Drawing.Color.FromArgb(178, 38, 20); this.btnD.ForeColor = System.Drawing.Color.White;
             this.btnD.FlatStyle = System.Windows.Forms.FlatStyle.Flat; this.btnD.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
             this.btnD.FlatAppearance.BorderSize = 0; this.btnD.Click += new System.EventHandler(this.BtnDesativar_Click);
             // Form
@@ -158,8 +158,8 @@ namespace Pedeai.Forms
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(834, 481);
             this.MinimumSize = new System.Drawing.Size(750, 450);
-            this.BackColor = System.Drawing.Color.FromArgb(15, 22, 45);
-            this.ForeColor = System.Drawing.Color.White;
+            this.BackColor = System.Drawing.Color.FromArgb(252, 248, 244);
+            this.ForeColor = System.Drawing.Color.FromArgb(42, 20, 8);
             this.Font = new System.Drawing.Font("Segoe UI", 9F);
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "Cadastro de Cupons";

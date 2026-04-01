@@ -1,4 +1,4 @@
-using System.Drawing;
+﻿using System.Drawing;
 using System.Windows.Forms;
 
 namespace Pedeai.Forms
@@ -26,7 +26,7 @@ namespace Pedeai.Forms
             // ── pnlTop ───────────────────────────────────────────────────
             pnlTop.Dock      = DockStyle.Top;
             pnlTop.Height    = 48;
-            pnlTop.BackColor = System.Drawing.Color.FromArgb(36, 48, 82);
+            pnlTop.BackColor = System.Drawing.Color.FromArgb(45, 22, 10);
             pnlTop.SizeChanged += PnlTop_SizeChanged;
 
             // ── lblTit ───────────────────────────────────────────────────
@@ -40,14 +40,14 @@ namespace Pedeai.Forms
             // ── pnlRes ───────────────────────────────────────────────────
             pnlRes.Dock      = DockStyle.Top;
             pnlRes.Height    = 38;
-            pnlRes.BackColor = System.Drawing.Color.FromArgb(28, 37, 65);
+            pnlRes.BackColor = System.Drawing.Color.FromArgb(55, 30, 12);
 
             // ── lblRes ───────────────────────────────────────────────────
             lblRes.Dock       = DockStyle.Fill;
             lblRes.TextAlign  = System.Drawing.ContentAlignment.MiddleLeft;
             lblRes.Padding    = new Padding(12, 0, 0, 0);
             lblRes.Font       = new Font("Segoe UI", 9F, FontStyle.Bold);
-            lblRes.ForeColor  = System.Drawing.Color.FromArgb(200, 225, 255);
+            lblRes.ForeColor  = System.Drawing.Color.FromArgb(195, 158, 120);
             pnlRes.Controls.Add(lblRes);
 
             // ── grid ─────────────────────────────────────────────────────
@@ -57,12 +57,12 @@ namespace Pedeai.Forms
             grid.AllowUserToAddRows              = false;
             grid.SelectionMode                   = DataGridViewSelectionMode.FullRowSelect;
             grid.RowHeadersVisible               = false;
-            grid.BackgroundColor                 = System.Drawing.Color.FromArgb(20, 28, 55);
-            grid.DefaultCellStyle.BackColor      = System.Drawing.Color.FromArgb(20, 28, 55);
-            grid.DefaultCellStyle.ForeColor      = System.Drawing.Color.White;
-            grid.GridColor                       = System.Drawing.Color.FromArgb(40, 55, 90);
+            grid.BackgroundColor                 = System.Drawing.Color.FromArgb(248, 242, 235);
+            grid.DefaultCellStyle.BackColor      = System.Drawing.Color.FromArgb(248, 242, 235);
+            grid.DefaultCellStyle.ForeColor = System.Drawing.Color.FromArgb(42, 20, 8);
+            grid.GridColor                       = System.Drawing.Color.FromArgb(215, 198, 178);
             grid.BorderStyle                     = BorderStyle.None;
-            grid.ColumnHeadersDefaultCellStyle.BackColor = System.Drawing.Color.FromArgb(36, 48, 82);
+            grid.ColumnHeadersDefaultCellStyle.BackColor = System.Drawing.Color.FromArgb(45, 22, 10);
             grid.ColumnHeadersDefaultCellStyle.ForeColor = System.Drawing.Color.White;
             grid.Font                            = new Font("Segoe UI", 9F);
             grid.DataError   += Grid_DataError;
@@ -71,7 +71,7 @@ namespace Pedeai.Forms
             // ── pnlFoot ──────────────────────────────────────────────────
             pnlFoot.Dock      = DockStyle.Bottom;
             pnlFoot.Height    = 40;
-            pnlFoot.BackColor = System.Drawing.Color.FromArgb(28, 37, 65);
+            pnlFoot.BackColor = System.Drawing.Color.FromArgb(55, 30, 12);
             pnlFoot.SizeChanged += PnlFoot_SizeChanged;
 
             // ── btnFech ──────────────────────────────────────────────────
@@ -80,7 +80,7 @@ namespace Pedeai.Forms
             btnFech.Top       = 8;
             btnFech.Width     = 100;
             btnFech.Height    = 26;
-            btnFech.BackColor = System.Drawing.Color.FromArgb(80, 95, 130);
+            btnFech.BackColor = System.Drawing.Color.FromArgb(150, 125, 100);
             btnFech.ForeColor = System.Drawing.Color.White;
             btnFech.FlatStyle = FlatStyle.Flat;
             btnFech.Cursor    = Cursors.Hand;
@@ -95,8 +95,8 @@ namespace Pedeai.Forms
             Controls.Add(pnlTop);
 
             Text          = "Movimenta\u00e7\u00f5es";
-            BackColor     = System.Drawing.Color.FromArgb(15, 22, 45);
-            ForeColor     = System.Drawing.Color.White;
+            BackColor     = System.Drawing.Color.FromArgb(252, 248, 244);
+            ForeColor     = System.Drawing.Color.FromArgb(42, 20, 8);
             Font          = new Font("Segoe UI", 9F);
             ClientSize    = new System.Drawing.Size(900, 520);
             MinimumSize   = new System.Drawing.Size(700, 400);

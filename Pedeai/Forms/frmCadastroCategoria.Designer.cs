@@ -35,16 +35,16 @@ namespace Pedeai.Forms
             this.grid.AllowUserToAddRows = false;
             this.grid.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
             this.grid.RowHeadersVisible = false;
-            this.grid.BackgroundColor = System.Drawing.Color.FromArgb(20, 28, 55);
-            this.grid.DefaultCellStyle.BackColor = System.Drawing.Color.FromArgb(20, 28, 55);
-            this.grid.DefaultCellStyle.ForeColor = System.Drawing.Color.White;
-            this.grid.DefaultCellStyle.SelectionBackColor = System.Drawing.Color.FromArgb(52, 152, 219);
+            this.grid.BackgroundColor = System.Drawing.Color.FromArgb(248, 242, 235);
+            this.grid.DefaultCellStyle.BackColor = System.Drawing.Color.FromArgb(248, 242, 235);
+            this.grid.DefaultCellStyle.ForeColor = System.Drawing.Color.FromArgb(42, 20, 8);
+            this.grid.DefaultCellStyle.SelectionBackColor = System.Drawing.Color.FromArgb(200, 70, 20);
             this.grid.DefaultCellStyle.SelectionForeColor = System.Drawing.Color.White;
-            this.grid.AlternatingRowsDefaultCellStyle.BackColor = System.Drawing.Color.FromArgb(28, 37, 65);
+            this.grid.AlternatingRowsDefaultCellStyle.BackColor = System.Drawing.Color.FromArgb(243, 237, 229);
             this.grid.Font = new System.Drawing.Font("Segoe UI", 9F);
             this.grid.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.grid.GridColor = System.Drawing.Color.FromArgb(40, 55, 90);
-            this.grid.ColumnHeadersDefaultCellStyle.BackColor = System.Drawing.Color.FromArgb(36, 48, 82);
+            this.grid.GridColor = System.Drawing.Color.FromArgb(215, 198, 178);
+            this.grid.ColumnHeadersDefaultCellStyle.BackColor = System.Drawing.Color.FromArgb(45, 22, 10);
             this.grid.ColumnHeadersDefaultCellStyle.ForeColor = System.Drawing.Color.White;
             this.grid.ColumnHeadersDefaultCellStyle.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
             this.grid.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
@@ -55,7 +55,7 @@ namespace Pedeai.Forms
             // topBar
             this.topBar.Dock = System.Windows.Forms.DockStyle.Top;
             this.topBar.Height = 44;
-            this.topBar.BackColor = System.Drawing.Color.FromArgb(36, 48, 82);
+            this.topBar.BackColor = System.Drawing.Color.FromArgb(45, 22, 10);
             this.topBar.Controls.Add(this.btnNovo);
             this.topBar.Controls.Add(this.btnEditar);
             // btnNovo
@@ -64,7 +64,7 @@ namespace Pedeai.Forms
             this.btnNovo.Top = 8;
             this.btnNovo.Width = 90;
             this.btnNovo.Height = 28;
-            this.btnNovo.BackColor = System.Drawing.Color.FromArgb(39, 174, 96);
+            this.btnNovo.BackColor = System.Drawing.Color.FromArgb(120, 80, 25);
             this.btnNovo.ForeColor = System.Drawing.Color.White;
             this.btnNovo.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnNovo.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
@@ -76,7 +76,7 @@ namespace Pedeai.Forms
             this.btnEditar.Top = 8;
             this.btnEditar.Width = 90;
             this.btnEditar.Height = 28;
-            this.btnEditar.BackColor = System.Drawing.Color.FromArgb(230, 126, 34);
+            this.btnEditar.BackColor = System.Drawing.Color.FromArgb(160, 100, 30);
             this.btnEditar.ForeColor = System.Drawing.Color.White;
             this.btnEditar.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnEditar.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
@@ -85,7 +85,7 @@ namespace Pedeai.Forms
             // pnlForm
             this.pnlForm.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.pnlForm.Height = 90;
-            this.pnlForm.BackColor = System.Drawing.Color.FromArgb(28, 37, 65);
+            this.pnlForm.BackColor = System.Drawing.Color.FromArgb(55, 30, 12);
             this.pnlForm.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.pnlForm.Visible = false;
             this.pnlForm.Controls.Add(this.lblNome);
@@ -95,7 +95,7 @@ namespace Pedeai.Forms
             // pnlBtns
             this.pnlBtns.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.pnlBtns.Height = 44;
-            this.pnlBtns.BackColor = System.Drawing.Color.FromArgb(28, 37, 65);
+            this.pnlBtns.BackColor = System.Drawing.Color.FromArgb(55, 30, 12);
             this.pnlBtns.Controls.Add(this.btnS);
             this.pnlBtns.Controls.Add(this.btnC);
             this.pnlBtns.Controls.Add(this.btnD);
@@ -106,7 +106,7 @@ namespace Pedeai.Forms
             this.btnS.Top = 10;
             this.btnS.Width = 110;
             this.btnS.Height = 28;
-            this.btnS.BackColor = System.Drawing.Color.FromArgb(52, 152, 219);
+            this.btnS.BackColor = System.Drawing.Color.FromArgb(200, 70, 20);
             this.btnS.ForeColor = System.Drawing.Color.White;
             this.btnS.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnS.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
@@ -118,7 +118,7 @@ namespace Pedeai.Forms
             this.btnC.Top = 10;
             this.btnC.Width = 110;
             this.btnC.Height = 28;
-            this.btnC.BackColor = System.Drawing.Color.FromArgb(80, 95, 130);
+            this.btnC.BackColor = System.Drawing.Color.FromArgb(150, 125, 100);
             this.btnC.ForeColor = System.Drawing.Color.White;
             this.btnC.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnC.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
@@ -130,7 +130,7 @@ namespace Pedeai.Forms
             this.btnD.Top = 10;
             this.btnD.Width = 110;
             this.btnD.Height = 28;
-            this.btnD.BackColor = System.Drawing.Color.FromArgb(192, 57, 43);
+            this.btnD.BackColor = System.Drawing.Color.FromArgb(178, 38, 20);
             this.btnD.ForeColor = System.Drawing.Color.White;
             this.btnD.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnD.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
@@ -138,7 +138,7 @@ namespace Pedeai.Forms
             this.btnD.Click += new System.EventHandler(this.BtnDesativar_Click);
             // lblNome
             this.lblNome.Text = "Nome:";
-            this.lblNome.ForeColor = System.Drawing.Color.FromArgb(180, 190, 220);
+            this.lblNome.ForeColor = System.Drawing.Color.FromArgb(195, 158, 120);
             this.lblNome.AutoSize = true;
             this.lblNome.Left = 20;
             this.lblNome.Top = 18;
@@ -146,8 +146,8 @@ namespace Pedeai.Forms
             this.txtNome.Left = 70;
             this.txtNome.Top = 14;
             this.txtNome.Width = 320;
-            this.txtNome.BackColor = System.Drawing.Color.FromArgb(20, 28, 55);
-            this.txtNome.ForeColor = System.Drawing.Color.White;
+            this.txtNome.BackColor = System.Drawing.Color.FromArgb(248, 242, 235);
+            this.txtNome.ForeColor = System.Drawing.Color.FromArgb(42, 20, 8);
             this.txtNome.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             // cmbSituacao
             this.cmbSituacao.Left = 400;
@@ -161,8 +161,8 @@ namespace Pedeai.Forms
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(500, 360);
             this.MinimumSize = new System.Drawing.Size(450, 320);
-            this.BackColor = System.Drawing.Color.FromArgb(15, 22, 45);
-            this.ForeColor = System.Drawing.Color.White;
+            this.BackColor = System.Drawing.Color.FromArgb(252, 248, 244);
+            this.ForeColor = System.Drawing.Color.FromArgb(42, 20, 8);
             this.Font = new System.Drawing.Font("Segoe UI", 9F);
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "Categorias de Produtos";

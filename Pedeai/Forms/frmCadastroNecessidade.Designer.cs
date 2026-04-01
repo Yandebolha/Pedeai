@@ -58,8 +58,8 @@ namespace Pedeai.Forms
             this.txtDescricao.Left = 90;
             this.txtDescricao.Top  = 84;
             this.txtDescricao.Width = 306;
-            this.txtDescricao.BackColor = System.Drawing.Color.FromArgb(50, 65, 100);
-            this.txtDescricao.ForeColor = System.Drawing.Color.White;
+            this.txtDescricao.BackColor = System.Drawing.Color.FromArgb(248, 242, 235);
+            this.txtDescricao.ForeColor = System.Drawing.Color.FromArgb(42, 20, 8);
             // lblVal
             this.lblVal.Text = "Valor R$:";
             this.lblVal.Left = 12;
@@ -71,15 +71,15 @@ namespace Pedeai.Forms
             this.numValor.Width = 130;
             this.numValor.DecimalPlaces = 2;
             this.numValor.Maximum = 9999999;
-            this.numValor.BackColor = System.Drawing.Color.FromArgb(50, 65, 100);
-            this.numValor.ForeColor = System.Drawing.Color.White;
+            this.numValor.BackColor = System.Drawing.Color.FromArgb(248, 242, 235);
+            this.numValor.ForeColor = System.Drawing.Color.FromArgb(42, 20, 8);
             // btnSal
             this.btnSal.Text = "Salvar";
             this.btnSal.Left = 110;
             this.btnSal.Top  = 162;
             this.btnSal.Width  = 110;
             this.btnSal.Height = 30;
-            this.btnSal.BackColor = System.Drawing.Color.FromArgb(52, 152, 219);
+            this.btnSal.BackColor = System.Drawing.Color.FromArgb(200, 70, 20);
             this.btnSal.ForeColor = System.Drawing.Color.White;
             this.btnSal.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnSal.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
@@ -91,15 +91,15 @@ namespace Pedeai.Forms
             this.btnCanc.Top  = 162;
             this.btnCanc.Width  = 110;
             this.btnCanc.Height = 30;
-            this.btnCanc.BackColor = System.Drawing.Color.FromArgb(108, 117, 125);
+            this.btnCanc.BackColor = System.Drawing.Color.FromArgb(160, 135, 110);
             this.btnCanc.ForeColor = System.Drawing.Color.White;
             this.btnCanc.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnCanc.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
             this.btnCanc.FlatAppearance.BorderSize = 0;
             this.btnCanc.Click += new System.EventHandler(this.BtnCanc_Click);
             // Form
-            this.BackColor       = System.Drawing.Color.FromArgb(36, 48, 82);
-            this.ForeColor       = System.Drawing.Color.White;
+            this.BackColor       = System.Drawing.Color.FromArgb(45, 22, 10);
+            this.ForeColor       = System.Drawing.Color.FromArgb(42, 20, 8);
             this.Font            = new System.Drawing.Font("Segoe UI", 9F);
             this.ClientSize      = new System.Drawing.Size(420, 208);
             this.StartPosition   = System.Windows.Forms.FormStartPosition.CenterParent;
