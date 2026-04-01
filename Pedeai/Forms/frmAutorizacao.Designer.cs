@@ -98,7 +98,7 @@ namespace Pedeai.Forms
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             this.MaximizeBox     = false;
             this.MinimizeBox     = false;
-            this.BackColor       = System.Drawing.Color.FromArgb(55, 30, 12);
+            this.BackColor       = System.Drawing.Color.FromArgb(252, 248, 244);
             this.ForeColor       = System.Drawing.Color.FromArgb(42, 20, 8);
             this.Font            = new System.Drawing.Font("Segoe UI", 10F);
             this.ClientSize      = new System.Drawing.Size(380, 276);

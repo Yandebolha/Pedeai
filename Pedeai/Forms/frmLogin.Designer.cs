@@ -43,7 +43,7 @@ namespace Pedeai.Forms
             this.picLogo.BackColor    = System.Drawing.Color.Transparent;
             ((System.ComponentModel.ISupportInitialize)(this.picLogo)).EndInit();
             // lblBrand
-            this.lblBrand.Text = "RANGOFOOD";
+            this.lblBrand.Text = "RanGoFood";
             this.lblBrand.Font = new System.Drawing.Font("Segoe UI", 26F, System.Drawing.FontStyle.Bold);
             this.lblBrand.ForeColor = System.Drawing.Color.FromArgb(220, 95, 25);
             this.lblBrand.AutoSize = false;

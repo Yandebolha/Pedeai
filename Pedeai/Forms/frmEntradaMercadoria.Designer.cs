@@ -90,10 +90,10 @@ namespace Pedeai.Forms
             this.pnlFiltro.Controls.Add(this.btnFiltrar); this.pnlFiltro.Controls.Add(this.btnLimparFiltro);
             // pnlNovaEntrada
             this.pnlNovaEntrada.Dock=System.Windows.Forms.DockStyle.Bottom; this.pnlNovaEntrada.Height=470;
-            this.pnlNovaEntrada.BackColor=System.Drawing.Color.FromArgb(55, 30, 12); this.pnlNovaEntrada.Visible=false;
+            this.pnlNovaEntrada.BackColor=System.Drawing.Color.FromArgb(252, 248, 244); this.pnlNovaEntrada.Visible=false;
             // pnlCabecalho
             this.pnlCabecalho.Dock=System.Windows.Forms.DockStyle.Top; this.pnlCabecalho.Height=36;
-            this.pnlCabecalho.BackColor=System.Drawing.Color.FromArgb(55, 30, 12);
+            this.pnlCabecalho.BackColor=System.Drawing.Color.FromArgb(252, 248, 244);
             this.txtFornCod.Left=87; this.txtFornCod.Top=7; this.txtFornCod.Width=55;
             this.txtFornNome.Left=148; this.txtFornNome.Top=7; this.txtFornNome.Width=200; this.txtFornNome.ReadOnly=true;
             this.dtpData.Left=396; this.dtpData.Top=7; this.dtpData.Width=120; this.dtpData.Format=System.Windows.Forms.DateTimePickerFormat.Short;
@@ -102,7 +102,7 @@ namespace Pedeai.Forms
             this.pnlCabecalho.Controls.Add(this.dtpData);    this.pnlCabecalho.Controls.Add(this.txtNumDoc);
             // pnlObs
             this.pnlObs.Dock=System.Windows.Forms.DockStyle.Top; this.pnlObs.Height=32;
-            this.pnlObs.BackColor=System.Drawing.Color.FromArgb(55, 30, 12);
+            this.pnlObs.BackColor=System.Drawing.Color.FromArgb(252, 248, 244);
             this.txtObservacoes.Left=90; this.txtObservacoes.Top=5; this.txtObservacoes.Width=660; this.txtObservacoes.Height=22;
             this.pnlObs.Controls.Add(this.txtObservacoes);
             // pnlAddItem
@@ -138,7 +138,7 @@ namespace Pedeai.Forms
             this.gridItens.DataError+=new System.Windows.Forms.DataGridViewDataErrorEventHandler(this.Grid_DataError);
             // pnlParcelasOuter
             this.pnlParcelasOuter.Dock=System.Windows.Forms.DockStyle.Bottom; this.pnlParcelasOuter.Height=100;
-            this.pnlParcelasOuter.BackColor=System.Drawing.Color.FromArgb(55, 30, 12);
+            this.pnlParcelasOuter.BackColor=System.Drawing.Color.FromArgb(252, 248, 244);
             // pnlParcelasTop
             this.pnlParcelasTop.Dock=System.Windows.Forms.DockStyle.Top; this.pnlParcelasTop.Height=34;
             this.pnlParcelasTop.BackColor=System.Drawing.Color.FromArgb(65, 35, 15);
@@ -168,7 +168,7 @@ namespace Pedeai.Forms
             this.pnlParcelasOuter.Controls.Add(this.pnlParcelasTop);
             // pnlRodape
             this.pnlRodape.Dock=System.Windows.Forms.DockStyle.Bottom; this.pnlRodape.Height=46;
-            this.pnlRodape.BackColor=System.Drawing.Color.FromArgb(55, 30, 12);
+            this.pnlRodape.BackColor=System.Drawing.Color.FromArgb(240, 233, 224);
             this.lblTotal.Text="Total: R$ 0,00"; this.lblTotal.Left=8; this.lblTotal.Top=12;
             this.lblTotal.Font=new System.Drawing.Font("Segoe UI",11F,System.Drawing.FontStyle.Bold);
             this.lblTotal.ForeColor=System.Drawing.Color.FromArgb(120, 80, 25); this.lblTotal.AutoSize=true;

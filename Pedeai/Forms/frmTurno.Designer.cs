@@ -67,16 +67,16 @@
             // ── lblCaixaIni ────────────────────────────────────────────────
             this.lblCaixaIni.Dock      = System.Windows.Forms.DockStyle.Top;
             this.lblCaixaIni.Height    = 24;
-            this.lblCaixaIni.ForeColor = System.Drawing.Color.FromArgb(195, 158, 120);
+            this.lblCaixaIni.ForeColor = System.Drawing.Color.FromArgb(125, 88, 65);
             this.lblCaixaIni.Font      = new System.Drawing.Font("Segoe UI", 9F);
             this.lblCaixaIni.Text      = "";
             this.lblCaixaIni.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            this.lblCaixaIni.BackColor = System.Drawing.Color.FromArgb(45, 22, 10);
+            this.lblCaixaIni.BackColor = System.Drawing.Color.FromArgb(240, 233, 224);
 
             // ── pnlAbrir ───────────────────────────────────────────────────
             this.pnlAbrir.Dock      = System.Windows.Forms.DockStyle.Top;
             this.pnlAbrir.Height    = 140;
-            this.pnlAbrir.BackColor = System.Drawing.Color.FromArgb(45, 22, 10);
+            this.pnlAbrir.BackColor = System.Drawing.Color.FromArgb(252, 248, 244);
             this.pnlAbrir.Padding   = new System.Windows.Forms.Padding(12, 8, 12, 8);
 
             this.lblAbrir.Text      = "Abrir Turno";
@@ -85,7 +85,7 @@
             this.lblAbrir.Left = 12; this.lblAbrir.Top = 8; this.lblAbrir.AutoSize = true;
 
             this.lblCaixaIniLabel.Text      = "Caixa inicial (R$):";
-            this.lblCaixaIniLabel.ForeColor = System.Drawing.Color.White;
+            this.lblCaixaIniLabel.ForeColor = System.Drawing.Color.FromArgb(42, 20, 8);
             this.lblCaixaIniLabel.Left = 12; this.lblCaixaIniLabel.Top = 36; this.lblCaixaIniLabel.AutoSize = true;
 
             this.numCaixaInicial.Left            = 160; this.numCaixaInicial.Top = 32;
@@ -95,7 +95,7 @@
             this.numCaixaInicial.Value           = 0;
 
             this.lblObsAbrir.Text      = "Observa\u00e7\u00e3o:";
-            this.lblObsAbrir.ForeColor = System.Drawing.Color.White;
+            this.lblObsAbrir.ForeColor = System.Drawing.Color.FromArgb(42, 20, 8);
             this.lblObsAbrir.Left = 12; this.lblObsAbrir.Top = 72; this.lblObsAbrir.AutoSize = true;
 
             this.txtObsAbrir.Left  = 160; this.txtObsAbrir.Top = 68;
@@ -121,7 +121,7 @@
             // ── pnlFechar ──────────────────────────────────────────────────
             this.pnlFechar.Dock      = System.Windows.Forms.DockStyle.Top;
             this.pnlFechar.Height    = 140;
-            this.pnlFechar.BackColor = System.Drawing.Color.FromArgb(45, 22, 10);
+            this.pnlFechar.BackColor = System.Drawing.Color.FromArgb(252, 248, 244);
             this.pnlFechar.Padding   = new System.Windows.Forms.Padding(12, 8, 12, 8);
             this.pnlFechar.Visible   = false;
 
@@ -131,7 +131,7 @@
             this.lblFechar.Left = 12; this.lblFechar.Top = 8; this.lblFechar.AutoSize = true;
 
             this.lblCaixaFinLabel.Text      = "Caixa final (R$):";
-            this.lblCaixaFinLabel.ForeColor = System.Drawing.Color.White;
+            this.lblCaixaFinLabel.ForeColor = System.Drawing.Color.FromArgb(42, 20, 8);
             this.lblCaixaFinLabel.Left = 12; this.lblCaixaFinLabel.Top = 36; this.lblCaixaFinLabel.AutoSize = true;
 
             this.numCaixaFinal.Left          = 160; this.numCaixaFinal.Top = 32;
@@ -141,7 +141,7 @@
             this.numCaixaFinal.Value         = 0;
 
             this.lblObsFechar.Text      = "Observa\u00e7\u00e3o:";
-            this.lblObsFechar.ForeColor = System.Drawing.Color.White;
+            this.lblObsFechar.ForeColor = System.Drawing.Color.FromArgb(42, 20, 8);
             this.lblObsFechar.Left = 12; this.lblObsFechar.Top = 72; this.lblObsFechar.AutoSize = true;
 
             this.txtObsFechar.Left  = 160; this.txtObsFechar.Top = 68;
@@ -166,7 +166,7 @@
 
             // ── pnlHistorico ───────────────────────────────────────────────
             this.pnlHistorico.Dock      = System.Windows.Forms.DockStyle.Fill;
-            this.pnlHistorico.BackColor = System.Drawing.Color.FromArgb(55, 30, 12);
+            this.pnlHistorico.BackColor = System.Drawing.Color.FromArgb(252, 248, 244);
 
             this.lblHist.Text      = "Hist\u00f3rico de Turnos";
             this.lblHist.Font      = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
@@ -182,7 +182,7 @@
             this.pnlFiltro.BackColor = System.Drawing.Color.Transparent;
 
             this.lblDe.Text      = "De:";
-            this.lblDe.ForeColor = System.Drawing.Color.White;
+            this.lblDe.ForeColor = System.Drawing.Color.FromArgb(42, 20, 8);
             this.lblDe.Left = 4; this.lblDe.Top = 12; this.lblDe.AutoSize = true;
 
             this.dtpDe.Left   = 30; this.dtpDe.Top = 8; this.dtpDe.Width = 110;
@@ -190,7 +190,7 @@
             this.dtpDe.Value  = System.DateTime.Today.AddDays(-30);
 
             this.lblAte.Text      = "At\u00e9:";
-            this.lblAte.ForeColor = System.Drawing.Color.White;
+            this.lblAte.ForeColor = System.Drawing.Color.FromArgb(42, 20, 8);
             this.lblAte.Left = 152; this.lblAte.Top = 12; this.lblAte.AutoSize = true;
 
             this.dtpAte.Left   = 182; this.dtpAte.Top = 8; this.dtpAte.Width = 110;
@@ -251,7 +251,7 @@
             // ── Form ──────────────────────────────────────────────────────
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode       = System.Windows.Forms.AutoScaleMode.Font;
-            this.BackColor           = System.Drawing.Color.FromArgb(55, 30, 12);
+            this.BackColor           = System.Drawing.Color.FromArgb(252, 248, 244);
             this.ClientSize          = new System.Drawing.Size(640, 560);
             this.Font                = new System.Drawing.Font("Segoe UI", 9F);
             this.MinimumSize         = new System.Drawing.Size(640, 500);

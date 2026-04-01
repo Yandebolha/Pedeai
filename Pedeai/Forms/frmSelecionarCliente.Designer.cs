@@ -87,7 +87,7 @@ namespace Pedeai.Forms
             this.btnSel.FlatAppearance.BorderSize = 0; this.btnSel.Click += new System.EventHandler(this.BtnSelecionar_Click);
             // pnlForm
             this.pnlForm.Dock = System.Windows.Forms.DockStyle.Bottom; this.pnlForm.Height = 110;
-            this.pnlForm.BackColor = System.Drawing.Color.FromArgb(55, 30, 12);
+            this.pnlForm.BackColor = System.Drawing.Color.FromArgb(252, 248, 244);
             this.pnlForm.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.pnlForm.Visible = false;
             this.pnlForm.Controls.Add(this.lblNome);    this.pnlForm.Controls.Add(this.txtNomeCad);

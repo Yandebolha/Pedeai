@@ -96,7 +96,7 @@ namespace Pedeai.Forms
             this.btnPesq.FlatAppearance.BorderSize=0; this.btnPesq.Click+=new System.EventHandler(this.BtnPesqProd_Click);
             // pnlForm
             this.pnlForm.Dock=System.Windows.Forms.DockStyle.Bottom; this.pnlForm.Height=225;
-            this.pnlForm.BackColor=System.Drawing.Color.FromArgb(55, 30, 12);
+            this.pnlForm.BackColor=System.Drawing.Color.FromArgb(252, 248, 244);
             this.pnlForm.BorderStyle=System.Windows.Forms.BorderStyle.FixedSingle; this.pnlForm.Visible=false;
             this.pnlForm.Controls.Add(this.lblCat);  this.pnlForm.Controls.Add(this.cmbCategoria);
             this.pnlForm.Controls.Add(this.lblNom);  this.pnlForm.Controls.Add(this.txtNome);
@@ -148,7 +148,7 @@ namespace Pedeai.Forms
             this.chkDestaque.Text="Destaque"; this.chkDestaque.Left=180; this.chkDestaque.Top=116; this.chkDestaque.AutoSize=true;
             // pnlBtns
             this.pnlBtns.Dock=System.Windows.Forms.DockStyle.Bottom; this.pnlBtns.Height=48;
-            this.pnlBtns.BackColor=System.Drawing.Color.FromArgb(55, 30, 12);
+            this.pnlBtns.BackColor=System.Drawing.Color.FromArgb(240, 233, 224);
             this.pnlBtns.Controls.Add(this.btnS); this.pnlBtns.Controls.Add(this.btnC); this.pnlBtns.Controls.Add(this.btnD);
             this.pnlBtns.SizeChanged+=new System.EventHandler(this.PnlBtns_SizeChanged);
             this.btnS.Text="Salvar"; this.btnS.Left=10; this.btnS.Top=10; this.btnS.Width=110; this.btnS.Height=28;

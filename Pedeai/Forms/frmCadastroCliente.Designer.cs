@@ -90,7 +90,7 @@ namespace Pedeai.Forms
             this.btnN.FlatAppearance.BorderSize=0; this.btnN.Click+=new System.EventHandler(this.BtnNovo_Click);
             // pnlForm
             this.pnlForm.Dock=System.Windows.Forms.DockStyle.Bottom; this.pnlForm.Height=210;
-            this.pnlForm.BackColor=System.Drawing.Color.FromArgb(55, 30, 12);
+            this.pnlForm.BackColor=System.Drawing.Color.FromArgb(252, 248, 244);
             this.pnlForm.BorderStyle=System.Windows.Forms.BorderStyle.FixedSingle; this.pnlForm.Visible=false;
             this.pnlForm.Controls.Add(this.lblNome); this.pnlForm.Controls.Add(this.txtNome);
             this.pnlForm.Controls.Add(this.lblCpf);  this.pnlForm.Controls.Add(this.txtCpf);
@@ -107,43 +107,43 @@ namespace Pedeai.Forms
             this.pnlForm.Controls.Add(this.lblUF);   this.pnlForm.Controls.Add(this.txtEstado);
             this.pnlForm.Controls.Add(this.pnlBtns);
             // row 1
-            this.lblNome.Text="Nome / Razao Social:"; this.lblNome.AutoSize=true; this.lblNome.Left=10; this.lblNome.Top=11; this.lblNome.ForeColor=System.Drawing.Color.FromArgb(195, 158, 120);
+            this.lblNome.Text="Nome / Razao Social:"; this.lblNome.AutoSize=true; this.lblNome.Left=10; this.lblNome.Top=11; this.lblNome.ForeColor=System.Drawing.Color.FromArgb(125, 88, 65);
             this.txtNome.Left=155; this.txtNome.Top=8; this.txtNome.Width=255; this.txtNome.BackColor=System.Drawing.Color.FromArgb(248, 242, 235); this.txtNome.ForeColor=System.Drawing.Color.FromArgb(42, 20, 8);
-            this.lblCpf.Text="CPF / CNPJ:"; this.lblCpf.AutoSize=true; this.lblCpf.Left=422; this.lblCpf.Top=11; this.lblCpf.ForeColor=System.Drawing.Color.FromArgb(195, 158, 120);
+            this.lblCpf.Text="CPF / CNPJ:"; this.lblCpf.AutoSize=true; this.lblCpf.Left=422; this.lblCpf.Top=11; this.lblCpf.ForeColor=System.Drawing.Color.FromArgb(125, 88, 65);
             this.txtCpf.Left=500; this.txtCpf.Top=8; this.txtCpf.Width=160; this.txtCpf.BackColor=System.Drawing.Color.FromArgb(248, 242, 235); this.txtCpf.ForeColor=System.Drawing.Color.FromArgb(42, 20, 8);
             this.txtCpf.TextChanged+=new System.EventHandler(this.TxtCpf_TextChanged);
-            this.lblSit.Text="Situacao:"; this.lblSit.AutoSize=true; this.lblSit.Left=672; this.lblSit.Top=11; this.lblSit.ForeColor=System.Drawing.Color.FromArgb(195, 158, 120);
+            this.lblSit.Text="Situacao:"; this.lblSit.AutoSize=true; this.lblSit.Left=672; this.lblSit.Top=11; this.lblSit.ForeColor=System.Drawing.Color.FromArgb(125, 88, 65);
             this.cmbSituacao.Left=730; this.cmbSituacao.Top=8; this.cmbSituacao.Width=95;
             this.cmbSituacao.DropDownStyle=System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cmbSituacao.BackColor=System.Drawing.Color.FromArgb(248, 242, 235); this.cmbSituacao.ForeColor=System.Drawing.Color.FromArgb(42, 20, 8);
             this.cmbSituacao.Items.AddRange(new object[]{"Ativo","Inativo"}); this.cmbSituacao.SelectedIndex=0;
             // row 2
-            this.lblTel.Text="Telefone:"; this.lblTel.AutoSize=true; this.lblTel.Left=10; this.lblTel.Top=47; this.lblTel.ForeColor=System.Drawing.Color.FromArgb(195, 158, 120);
+            this.lblTel.Text="Telefone:"; this.lblTel.AutoSize=true; this.lblTel.Left=10; this.lblTel.Top=47; this.lblTel.ForeColor=System.Drawing.Color.FromArgb(125, 88, 65);
             this.txtTelefone.Mask="(00) 0000-0000"; this.txtTelefone.Left=72; this.txtTelefone.Top=44; this.txtTelefone.Width=130; this.txtTelefone.BackColor=System.Drawing.Color.FromArgb(248, 242, 235); this.txtTelefone.ForeColor=System.Drawing.Color.FromArgb(42, 20, 8);
-            this.lblCel.Text="Celular:"; this.lblCel.AutoSize=true; this.lblCel.Left=216; this.lblCel.Top=47; this.lblCel.ForeColor=System.Drawing.Color.FromArgb(195, 158, 120);
+            this.lblCel.Text="Celular:"; this.lblCel.AutoSize=true; this.lblCel.Left=216; this.lblCel.Top=47; this.lblCel.ForeColor=System.Drawing.Color.FromArgb(125, 88, 65);
             this.txtCelular.Mask="(00) 00000-0000"; this.txtCelular.Left=268; this.txtCelular.Top=44; this.txtCelular.Width=140; this.txtCelular.BackColor=System.Drawing.Color.FromArgb(248, 242, 235); this.txtCelular.ForeColor=System.Drawing.Color.FromArgb(42, 20, 8);
-            this.lblEmail.Text="E-mail:"; this.lblEmail.AutoSize=true; this.lblEmail.Left=420; this.lblEmail.Top=47; this.lblEmail.ForeColor=System.Drawing.Color.FromArgb(195, 158, 120);
+            this.lblEmail.Text="E-mail:"; this.lblEmail.AutoSize=true; this.lblEmail.Left=420; this.lblEmail.Top=47; this.lblEmail.ForeColor=System.Drawing.Color.FromArgb(125, 88, 65);
             this.txtEmail.Left=462; this.txtEmail.Top=44; this.txtEmail.Width=265; this.txtEmail.BackColor=System.Drawing.Color.FromArgb(248, 242, 235); this.txtEmail.ForeColor=System.Drawing.Color.FromArgb(42, 20, 8);
             // row 3
-            this.lblCep.Text="CEP:"; this.lblCep.AutoSize=true; this.lblCep.Left=10; this.lblCep.Top=83; this.lblCep.ForeColor=System.Drawing.Color.FromArgb(195, 158, 120);
+            this.lblCep.Text="CEP:"; this.lblCep.AutoSize=true; this.lblCep.Left=10; this.lblCep.Top=83; this.lblCep.ForeColor=System.Drawing.Color.FromArgb(125, 88, 65);
             this.txtCep.Mask="00000-000"; this.txtCep.Left=44; this.txtCep.Top=80; this.txtCep.Width=95; this.txtCep.BackColor=System.Drawing.Color.FromArgb(248, 242, 235); this.txtCep.ForeColor=System.Drawing.Color.FromArgb(42, 20, 8);
             this.txtCep.Leave += new System.EventHandler(this.TxtCep_Leave);
-            this.lblEnd.Text="Endereco:"; this.lblEnd.AutoSize=true; this.lblEnd.Left=152; this.lblEnd.Top=83; this.lblEnd.ForeColor=System.Drawing.Color.FromArgb(195, 158, 120);
+            this.lblEnd.Text="Endereco:"; this.lblEnd.AutoSize=true; this.lblEnd.Left=152; this.lblEnd.Top=83; this.lblEnd.ForeColor=System.Drawing.Color.FromArgb(125, 88, 65);
             this.txtEndereco.Left=218; this.txtEndereco.Top=80; this.txtEndereco.Width=225; this.txtEndereco.BackColor=System.Drawing.Color.FromArgb(248, 242, 235); this.txtEndereco.ForeColor=System.Drawing.Color.FromArgb(42, 20, 8);
-            this.lblNum.Text="N\u00ba:"; this.lblNum.AutoSize=true; this.lblNum.Left=456; this.lblNum.Top=83; this.lblNum.ForeColor=System.Drawing.Color.FromArgb(195, 158, 120);
+            this.lblNum.Text="N\u00ba:"; this.lblNum.AutoSize=true; this.lblNum.Left=456; this.lblNum.Top=83; this.lblNum.ForeColor=System.Drawing.Color.FromArgb(125, 88, 65);
             this.txtNumero.Left=476; this.txtNumero.Top=80; this.txtNumero.Width=58; this.txtNumero.BackColor=System.Drawing.Color.FromArgb(248, 242, 235); this.txtNumero.ForeColor=System.Drawing.Color.FromArgb(42, 20, 8);
-            this.lblComp.Text="Compl.:"; this.lblComp.AutoSize=true; this.lblComp.Left=547; this.lblComp.Top=83; this.lblComp.ForeColor=System.Drawing.Color.FromArgb(195, 158, 120);
+            this.lblComp.Text="Compl.:"; this.lblComp.AutoSize=true; this.lblComp.Left=547; this.lblComp.Top=83; this.lblComp.ForeColor=System.Drawing.Color.FromArgb(125, 88, 65);
             this.txtComplemento.Left=594; this.txtComplemento.Top=80; this.txtComplemento.Width=130; this.txtComplemento.BackColor=System.Drawing.Color.FromArgb(248, 242, 235); this.txtComplemento.ForeColor=System.Drawing.Color.FromArgb(42, 20, 8);
             // row 4
-            this.lblBai.Text="Bairro:"; this.lblBai.AutoSize=true; this.lblBai.Left=10; this.lblBai.Top=119; this.lblBai.ForeColor=System.Drawing.Color.FromArgb(195, 158, 120);
+            this.lblBai.Text="Bairro:"; this.lblBai.AutoSize=true; this.lblBai.Left=10; this.lblBai.Top=119; this.lblBai.ForeColor=System.Drawing.Color.FromArgb(125, 88, 65);
             this.txtBairro.Left=58; this.txtBairro.Top=116; this.txtBairro.Width=188; this.txtBairro.BackColor=System.Drawing.Color.FromArgb(248, 242, 235); this.txtBairro.ForeColor=System.Drawing.Color.FromArgb(42, 20, 8);
-            this.lblCid.Text="Cidade:"; this.lblCid.AutoSize=true; this.lblCid.Left=260; this.lblCid.Top=119; this.lblCid.ForeColor=System.Drawing.Color.FromArgb(195, 158, 120);
+            this.lblCid.Text="Cidade:"; this.lblCid.AutoSize=true; this.lblCid.Left=260; this.lblCid.Top=119; this.lblCid.ForeColor=System.Drawing.Color.FromArgb(125, 88, 65);
             this.txtCidade.Left=308; this.txtCidade.Top=116; this.txtCidade.Width=188; this.txtCidade.BackColor=System.Drawing.Color.FromArgb(248, 242, 235); this.txtCidade.ForeColor=System.Drawing.Color.FromArgb(42, 20, 8);
-            this.lblUF.Text="UF:"; this.lblUF.AutoSize=true; this.lblUF.Left=508; this.lblUF.Top=119; this.lblUF.ForeColor=System.Drawing.Color.FromArgb(195, 158, 120);
+            this.lblUF.Text="UF:"; this.lblUF.AutoSize=true; this.lblUF.Left=508; this.lblUF.Top=119; this.lblUF.ForeColor=System.Drawing.Color.FromArgb(125, 88, 65);
             this.txtEstado.Left=528; this.txtEstado.Top=116; this.txtEstado.Width=50; this.txtEstado.BackColor=System.Drawing.Color.FromArgb(248, 242, 235); this.txtEstado.ForeColor=System.Drawing.Color.FromArgb(42, 20, 8);
             // pnlBtns
             this.pnlBtns.Dock=System.Windows.Forms.DockStyle.Bottom; this.pnlBtns.Height=48;
-            this.pnlBtns.BackColor=System.Drawing.Color.FromArgb(55, 30, 12);
+            this.pnlBtns.BackColor=System.Drawing.Color.FromArgb(240, 233, 224);
             this.pnlBtns.Controls.Add(this.btnS); this.pnlBtns.Controls.Add(this.btnC);
             this.pnlBtns.SizeChanged+=new System.EventHandler(this.PnlBtns_SizeChanged);
             this.btnS.Text="Salvar"; this.btnS.Left=10; this.btnS.Top=10; this.btnS.Width=110; this.btnS.Height=28;

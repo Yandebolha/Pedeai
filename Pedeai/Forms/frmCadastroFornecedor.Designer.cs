@@ -89,7 +89,7 @@ namespace Pedeai.Forms
             this.btnR.FlatAppearance.BorderSize = 0; this.btnR.Click += new System.EventHandler(this.BtnAtualizarForn_Click);
             // pnlForm
             this.pnlForm.Dock = System.Windows.Forms.DockStyle.Bottom; this.pnlForm.Height = 240;
-            this.pnlForm.BackColor = System.Drawing.Color.FromArgb(55, 30, 12);
+            this.pnlForm.BackColor = System.Drawing.Color.FromArgb(252, 248, 244);
             this.pnlForm.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.pnlForm.Visible = false;
             this.pnlForm.Controls.Add(this.lblRaz);    this.pnlForm.Controls.Add(this.txtRazao);
@@ -147,7 +147,7 @@ namespace Pedeai.Forms
             this.txtObs.Left=92; this.txtObs.Top=136; this.txtObs.Width=450;
             // pnlBtns
             this.pnlBtns.Dock = System.Windows.Forms.DockStyle.Bottom; this.pnlBtns.Height = 48;
-            this.pnlBtns.BackColor = System.Drawing.Color.FromArgb(55, 30, 12);
+            this.pnlBtns.BackColor = System.Drawing.Color.FromArgb(240, 233, 224);
             this.pnlBtns.Controls.Add(this.btnS); this.pnlBtns.Controls.Add(this.btnC);
             this.pnlBtns.SizeChanged += new System.EventHandler(this.PnlBtns_SizeChanged);
             // btnS

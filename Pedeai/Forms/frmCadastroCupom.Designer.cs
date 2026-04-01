@@ -90,7 +90,7 @@ namespace Pedeai.Forms
             // pnlForm
             this.pnlForm.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.pnlForm.Height = 150;
-            this.pnlForm.BackColor = System.Drawing.Color.FromArgb(55, 30, 12);
+            this.pnlForm.BackColor = System.Drawing.Color.FromArgb(252, 248, 244);
             this.pnlForm.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.pnlForm.Visible = false;
             this.pnlForm.Controls.Add(this.lblCod);    this.pnlForm.Controls.Add(this.txtCodigo);
@@ -133,7 +133,7 @@ namespace Pedeai.Forms
             // pnlBtns
             this.pnlBtns.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.pnlBtns.Height = 48;
-            this.pnlBtns.BackColor = System.Drawing.Color.FromArgb(55, 30, 12);
+            this.pnlBtns.BackColor = System.Drawing.Color.FromArgb(240, 233, 224);
             this.pnlBtns.Controls.Add(this.btnS);
             this.pnlBtns.Controls.Add(this.btnC);
             this.pnlBtns.Controls.Add(this.btnD);
