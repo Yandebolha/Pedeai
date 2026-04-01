@@ -48,6 +48,22 @@ namespace Pedeai.BLL
 
         public Turno GetAtivo() => _dal.GetAtivo();
 
+        /// <summary>Retorna o total movimentado (vendas) durante o período do turno.</summary>
+        public decimal GetTotalMovimentado(Turno t)
+        {
+            try
+            {
+                var fim = t.turFechamento ?? DateTime.Now;
+                var dt = _dal.GetPedidosTurno(t.turAbertura, fim);
+                decimal total = 0;
+                foreach (System.Data.DataRow r in dt.Rows)
+                    if (r["pediValor_Total"] != System.DBNull.Value)
+                        total += Convert.ToDecimal(r["pediValor_Total"]);
+                return total;
+            }
+            catch { return 0; }
+        }
+
         public DataTable Listar(DateTime de, DateTime ate) => _dal.Listar(de, ate);
 
         public DataTable GetPedidosTurno(DateTime abertura, DateTime fechamento)

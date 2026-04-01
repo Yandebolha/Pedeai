@@ -12,16 +12,19 @@ namespace Pedeai.Forms
         private PedidoBLL     _pedidoBLL;
         private MercadoriaBLL _mercBLL;
         private ClienteBLL    _clienteBLL;
+        private CupomBLL      _cupomBLL;
         private readonly List<ItemPedidoWeb> _itens = new List<ItemPedidoWeb>();
         private readonly List<ProdItem>      _produtos = new List<ProdItem>();
         private ProdItem _produtoSelecionado = null;
+        private Cupom    _cupomAplicado      = null;
+        private decimal  _descontoCupom      = 0m;
         private int _codigoCliente = 0;
 
         public frmPedidoManual()
         {
             InitializeComponent();
             if (System.ComponentModel.LicenseManager.UsageMode == System.ComponentModel.LicenseUsageMode.Designtime) return;
-            _pedidoBLL = new PedidoBLL(); _mercBLL = new MercadoriaBLL(); _clienteBLL = new ClienteBLL();
+            _pedidoBLL = new PedidoBLL(); _mercBLL = new MercadoriaBLL(); _clienteBLL = new ClienteBLL(); _cupomBLL = new CupomBLL();
             Load += (_, __) => CarregarProdutos();
         }
 
@@ -250,8 +253,20 @@ namespace Pedeai.Forms
             foreach (var i in _itens) sub += i.itpwSubtotal;
             bool    entrega = cmbEntrega.SelectedIndex == 1;
             decimal taxa    = entrega ? numTaxa.Value : 0;
-            decimal total   = sub + taxa;
-            lblTotal.Text   = "Total: R$ " + total.ToString("N2");
+            // Recalcula desconto do cupom sobre o subtotal atual
+            if (_cupomAplicado != null)
+            {
+                _descontoCupom = _cupomAplicado.cupomTipo == "PERCENTUAL"
+                    ? sub * _cupomAplicado.cupomValor / 100m
+                    : _cupomAplicado.cupomValor;
+                string tipoStr = _cupomAplicado.cupomTipo == "PERCENTUAL"
+                    ? $"{_cupomAplicado.cupomValor:0.#}%"
+                    : $"R$ {_cupomAplicado.cupomValor:N2}";
+                lblCupomInfo.Text = $"\u2714 {_cupomAplicado.cupomDescricao} ({tipoStr}) \u2212 R$ {_descontoCupom:N2}";
+            }
+            decimal total = sub + taxa - _descontoCupom;
+            if (total < 0) total = 0;
+            lblTotal.Text   = "R$ " + total.ToString("N2");
             AtualizarTrocoInfo();
         }
 
@@ -290,7 +305,7 @@ namespace Pedeai.Forms
             decimal sub = 0; foreach (var i in _itens) sub += i.itpwSubtotal;
             bool    ehEntrega = cmbEntrega.SelectedIndex == 1;
             decimal taxa      = ehEntrega ? numTaxa.Value : 0m;
-            decimal total     = sub + taxa;
+            decimal total     = Math.Max(0, sub + taxa - _descontoCupom);
 
             var pedido = new PedidoWeb
             {
@@ -301,6 +316,7 @@ namespace Pedeai.Forms
                 pediForma_Pagamento  = cmbPagamento.SelectedIndex,
                 pediSubtotal         = sub,
                 pediTaxa_Entrega     = taxa,
+                pediDesconto         = _descontoCupom,
                 pediValor_Total      = total,
                 pediTroco_Para       = cmbPagamento.SelectedIndex == 0 && numTroco.Value > 0 ? numTroco.Value : (decimal?)null,
                 pediEndereco_Entrega = ehEntrega ? txtEndereco.Text.Trim() : "",
@@ -318,6 +334,148 @@ namespace Pedeai.Forms
                 MessageBoxButtons.OK, MessageBoxIcon.Information);
             DialogResult = DialogResult.OK;
             Close();
+        }
+
+        // -- Cupom -----------------------------------------------------------
+        private void BtnAplicarCupom_Click(object sender, EventArgs e)
+        {
+            if (btnAplicarCupom.Text == "Remover") { RemoverCupom(); return; }
+
+            string codigo = txtCupom.Text.Trim();
+            if (string.IsNullOrWhiteSpace(codigo)) { RemoverCupom(); return; }
+
+            decimal subtotal = 0; foreach (var i in _itens) subtotal += i.itpwSubtotal;
+            var (cupom, erro) = _cupomBLL.ValidarEObter(codigo, subtotal);
+            if (!string.IsNullOrEmpty(erro))
+            {
+                lblCupomInfo.Text      = erro;
+                lblCupomInfo.ForeColor = Color.FromArgb(192, 57, 43);
+                return;
+            }
+
+            _cupomAplicado = cupom;
+            string tipoStr = cupom.cupomTipo == "PERCENTUAL"
+                ? $"{cupom.cupomValor:0.#}%"
+                : $"R$ {cupom.cupomValor:N2}";
+            lblCupomInfo.ForeColor    = Color.FromArgb(39, 174, 96);
+            btnAplicarCupom.Text      = "Remover";
+            btnAplicarCupom.BackColor = Color.FromArgb(80, 40, 35);
+            btnAplicarCupom.ForeColor = Color.FromArgb(200, 130, 120);
+            AtualizarTotal();
+        }
+
+        private void RemoverCupom()
+        {
+            _cupomAplicado  = null;
+            _descontoCupom  = 0m;
+            txtCupom.Text   = "";
+            lblCupomInfo.Text = "";
+            btnAplicarCupom.Text      = "Aplicar";
+            btnAplicarCupom.BackColor = Color.FromArgb(52, 73, 94);
+            btnAplicarCupom.ForeColor = Color.FromArgb(170, 200, 240);
+            AtualizarTotal();
+        }
+
+        // -- Meio a Meio -----------------------------------------------------
+        private void BtnMeioAMeio_Click(object sender, EventArgs e)
+        {
+            if (_produtos.Count == 0) { MessageBox.Show("Nenhum produto carregado."); return; }
+
+            using var dlg = new Form();
+            dlg.Text            = "Pizza \u00BD + \u00BD";
+            dlg.StartPosition   = FormStartPosition.CenterParent;
+            dlg.Size            = new Size(700, 430);
+            dlg.FormBorderStyle = FormBorderStyle.FixedDialog;
+            dlg.MaximizeBox     = dlg.MinimizeBox = false;
+            dlg.BackColor       = Color.FromArgb(28, 37, 65);
+
+            DataGridView MkGrid()
+            {
+                var g = new DataGridView
+                {
+                    Dock = DockStyle.Fill, ReadOnly = true, AllowUserToAddRows = false,
+                    SelectionMode = DataGridViewSelectionMode.FullRowSelect,
+                    RowHeadersVisible = false, AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill,
+                    BackgroundColor = Color.FromArgb(28, 37, 65), GridColor = Color.FromArgb(50, 60, 100),
+                    DefaultCellStyle = { BackColor = Color.FromArgb(28, 37, 65), ForeColor = Color.White,
+                        SelectionBackColor = Color.FromArgb(52, 152, 219) },
+                    ColumnHeadersDefaultCellStyle = { BackColor = Color.FromArgb(36, 48, 82), ForeColor = Color.White,
+                        Font = new Font("Segoe UI", 8.5F, FontStyle.Bold) },
+                    BorderStyle = BorderStyle.None, Font = new Font("Segoe UI", 9F), MultiSelect = false,
+                };
+                g.Columns.Add(new DataGridViewTextBoxColumn { Name = "Nome",  HeaderText = "Produto",   FillWeight = 70 });
+                g.Columns.Add(new DataGridViewTextBoxColumn { Name = "Preco", HeaderText = "Pre\u00e7o R$", FillWeight = 30 });
+                foreach (var p in _produtos) g.Rows.Add(p.Nome, p.Preco.ToString("N2"));
+                return g;
+            }
+
+            var pnlTop = new Panel { Dock = DockStyle.Top, Height = 36, BackColor = Color.FromArgb(36, 48, 82) };
+            var lblTit = new Label { Text = "Selecione os dois sabores da pizza:", Dock = DockStyle.Fill,
+                ForeColor = Color.FromArgb(170, 200, 240), Font = new Font("Segoe UI", 9.5F, FontStyle.Bold),
+                TextAlign = ContentAlignment.MiddleLeft, Padding = new Padding(10, 0, 0, 0) };
+            pnlTop.Controls.Add(lblTit);
+
+            var tbl = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 2, RowCount = 2, BackColor = Color.Transparent };
+            tbl.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50));
+            tbl.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50));
+            tbl.RowStyles.Add(new RowStyle(SizeType.Absolute, 26));
+            tbl.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
+
+            Label MkLbl(string t) => new Label { Text = t, Dock = DockStyle.Fill,
+                ForeColor = Color.FromArgb(110, 130, 175), Font = new Font("Segoe UI", 8.5F),
+                TextAlign = ContentAlignment.MiddleLeft, Padding = new Padding(6, 0, 0, 0) };
+
+            var grid1 = MkGrid();
+            var grid2 = MkGrid();
+            tbl.Controls.Add(MkLbl("1\u00ba Sabor"), 0, 0);
+            tbl.Controls.Add(MkLbl("2\u00ba Sabor"), 1, 0);
+            tbl.Controls.Add(grid1, 0, 1);
+            tbl.Controls.Add(grid2, 1, 1);
+
+            var btnOk = new Button { Text = "Adicionar \u00BD + \u00BD", Dock = DockStyle.Bottom, Height = 38,
+                BackColor = Color.FromArgb(106, 90, 205), ForeColor = Color.White,
+                FlatStyle = FlatStyle.Flat, Font = new Font("Segoe UI", 10F, FontStyle.Bold), Cursor = Cursors.Hand };
+            btnOk.FlatAppearance.BorderSize = 0;
+
+            ProdItem escolha1 = null, escolha2 = null;
+            btnOk.Click += (_, __) =>
+            {
+                if (grid1.CurrentRow == null || grid2.CurrentRow == null)
+                { MessageBox.Show("Selecione um sabor em cada coluna.", "Pizza \u00BD + \u00BD"); return; }
+                var n1 = grid1.CurrentRow.Cells["Nome"].Value?.ToString() ?? "";
+                var n2 = grid2.CurrentRow.Cells["Nome"].Value?.ToString() ?? "";
+                escolha1 = _produtos.Find(p => p.Nome == n1);
+                escolha2 = _produtos.Find(p => p.Nome == n2);
+                if (escolha1 == null || escolha2 == null) { MessageBox.Show("Produto n\u00e3o encontrado."); return; }
+                dlg.DialogResult = DialogResult.OK;
+            };
+
+            dlg.Controls.Add(tbl);
+            dlg.Controls.Add(btnOk);
+            dlg.Controls.Add(pnlTop);
+
+            if (dlg.ShowDialog(this) == DialogResult.OK && escolha1 != null && escolha2 != null)
+            {
+                decimal precoFinal = Math.Max(escolha1.Preco, escolha2.Preco);
+                decimal descPct    = numDescontoItem.Value;
+                decimal unitFinal  = precoFinal * (1m - descPct / 100m);
+                int     qty        = (int)numQtde.Value;
+                string  nome       = $"\u00BD {escolha1.Nome} + \u00BD {escolha2.Nome}";
+
+                var item = new ItemPedidoWeb
+                {
+                    Codigo_Mercadoria   = escolha1.Codigo,
+                    itpwNome_Mercadoria = nome,
+                    itpwQtde            = qty,
+                    itpwPreco_Unitario  = precoFinal,
+                    itpwSubtotal        = unitFinal * qty,
+                };
+                _itens.Add(item);
+                string descStr = descPct > 0 ? descPct.ToString("0.#") + "%" : "";
+                gridItens.Rows.Add(nome, qty, precoFinal.ToString("N2"), descStr, item.itpwSubtotal.ToString("N2"));
+                numQtde.Value = 1;
+                AtualizarTotal();
+            }
         }
 
         private class ProdItem

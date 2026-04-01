@@ -36,6 +36,17 @@ namespace Pedeai.DAL
             return MapearCupom(r);
         }
 
+        public Cupom BuscarPorTexto(string cupomCodigo)
+        {
+            using var conn = AbrirConexao();
+            using var cmd = new MySqlCommand(
+                "SELECT * FROM cupom WHERE cupomCodigo = @c AND Situacao = 'A' LIMIT 1", conn);
+            cmd.Parameters.AddWithValue("@c", cupomCodigo?.Trim() ?? "");
+            using var r = cmd.ExecuteReader();
+            if (!r.Read()) return null;
+            return MapearCupom(r);
+        }
+
         public string Incluir(Cupom obj)
         {
             try

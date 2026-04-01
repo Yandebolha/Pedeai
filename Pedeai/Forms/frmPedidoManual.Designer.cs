@@ -67,6 +67,12 @@ namespace Pedeai.Forms
             this.btnSal               = new System.Windows.Forms.Button();
             this.btnCanc              = new System.Windows.Forms.Button();
             this.btnAdd               = new System.Windows.Forms.Button();
+            this.pnlDiv4              = new System.Windows.Forms.Panel();
+            this.lblSecCupom          = new System.Windows.Forms.Label();
+            this.txtCupom             = new System.Windows.Forms.TextBox();
+            this.btnAplicarCupom      = new System.Windows.Forms.Button();
+            this.lblCupomInfo         = new System.Windows.Forms.Label();
+            this.btnMeioAMeio         = new System.Windows.Forms.Button();
             this.SuspendLayout();
 
             // topBar
@@ -229,8 +235,48 @@ namespace Pedeai.Forms
             this.txtObs.Font = new System.Drawing.Font("Segoe UI", 9.5F);
             this.txtObs.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.txtObs.SetBounds(14, 451, 282, 26);
+            // ── Seção CUPOM ──
+            this.pnlDiv4.BackColor = System.Drawing.Color.FromArgb(34, 46, 82);
+            this.pnlDiv4.SetBounds(0, 487, 310, 1);
+            this.lblSecCupom.Text = "CUPOM";
+            this.lblSecCupom.ForeColor = System.Drawing.Color.FromArgb(80, 105, 160);
+            this.lblSecCupom.AutoSize = true;
+            this.lblSecCupom.Font = new System.Drawing.Font("Segoe UI", 7.5F, System.Drawing.FontStyle.Bold);
+            this.lblSecCupom.SetBounds(14, 498, 282, 16);
+            this.txtCupom.BackColor = System.Drawing.Color.FromArgb(14, 21, 46);
+            this.txtCupom.ForeColor = System.Drawing.Color.White;
+            this.txtCupom.Font = new System.Drawing.Font("Segoe UI", 9.5F);
+            this.txtCupom.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.txtCupom.PlaceholderText = "C\u00f3digo do cupom";
+            this.txtCupom.CharacterCasing = System.Windows.Forms.CharacterCasing.Upper;
+            this.txtCupom.SetBounds(14, 518, 210, 26);
+            this.btnAplicarCupom.Text = "Aplicar";
+            this.btnAplicarCupom.BackColor = System.Drawing.Color.FromArgb(52, 73, 94);
+            this.btnAplicarCupom.ForeColor = System.Drawing.Color.FromArgb(170, 200, 240);
+            this.btnAplicarCupom.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnAplicarCupom.Font = new System.Drawing.Font("Segoe UI", 8.5F);
+            this.btnAplicarCupom.Height = 26;
+            this.btnAplicarCupom.FlatAppearance.BorderSize = 0;
+            this.btnAplicarCupom.SetBounds(228, 518, 68, 26);
+            this.btnAplicarCupom.Click += new System.EventHandler(this.BtnAplicarCupom_Click);
+            this.lblCupomInfo.Text = "";
+            this.lblCupomInfo.AutoSize = true;
+            this.lblCupomInfo.Font = new System.Drawing.Font("Segoe UI", 8.5F, System.Drawing.FontStyle.Bold);
+            this.lblCupomInfo.ForeColor = System.Drawing.Color.FromArgb(39, 174, 96);
+            this.lblCupomInfo.SetBounds(14, 550, 282, 18);
+            // ── Botão Meio a Meio ──
+            this.btnMeioAMeio.Text      = "\u00BD + \u00BD  Pizza";
+            this.btnMeioAMeio.Height    = 26; this.btnMeioAMeio.Width = 152;
+            this.btnMeioAMeio.BackColor = System.Drawing.Color.FromArgb(106, 90, 205);
+            this.btnMeioAMeio.ForeColor = System.Drawing.Color.White;
+            this.btnMeioAMeio.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnMeioAMeio.Font      = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
+            this.btnMeioAMeio.FlatAppearance.BorderSize = 0;
+            this.btnMeioAMeio.Anchor    = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
+            this.btnMeioAMeio.Click    += new System.EventHandler(this.BtnMeioAMeio_Click);
             this.sideContent.Dock = System.Windows.Forms.DockStyle.Fill;
             this.sideContent.BackColor = System.Drawing.Color.FromArgb(17, 24, 50);
+            this.sideContent.AutoScroll = true;
             this.sideContent.Controls.Add(this.lblSecCliente);
             this.sideContent.Controls.Add(this.lNome);
             this.sideContent.Controls.Add(this.txtNome);
@@ -253,6 +299,11 @@ namespace Pedeai.Forms
             this.sideContent.Controls.Add(this.pnlDiv3);
             this.sideContent.Controls.Add(this.lblSecObs);
             this.sideContent.Controls.Add(this.txtObs);
+            this.sideContent.Controls.Add(this.pnlDiv4);
+            this.sideContent.Controls.Add(this.lblSecCupom);
+            this.sideContent.Controls.Add(this.txtCupom);
+            this.sideContent.Controls.Add(this.btnAplicarCupom);
+            this.sideContent.Controls.Add(this.lblCupomInfo);
             this.sidebar.Dock = System.Windows.Forms.DockStyle.Left;
             this.sidebar.Width = 310;
             this.sidebar.BackColor = System.Drawing.Color.FromArgb(17, 24, 50);
@@ -339,6 +390,7 @@ namespace Pedeai.Forms
             this.pnlAddItem.Controls.Add(this.lDsc);
             this.pnlAddItem.Controls.Add(this.numDescontoItem);
             this.pnlAddItem.Controls.Add(this.lblDesconto);
+            this.pnlAddItem.Controls.Add(this.btnMeioAMeio);
             this.pnlAddItem.Controls.Add(this.btnAdd);
 
             // gridItens
@@ -440,6 +492,7 @@ namespace Pedeai.Forms
             lDsc.SetBounds(x, 60, 44, 18); x += 46;
             numDescontoItem.SetBounds(x, 57, 68, 26); x += 76;
             lblDesconto.SetBounds(x, 61, 120, 16);
+            btnMeioAMeio.SetBounds(pw - 270, 57, 152, 26);
             btnAdd.SetBounds(pw - 110, 57, 124, 26);
         }
 
@@ -496,6 +549,12 @@ namespace Pedeai.Forms
         internal System.Windows.Forms.Button                         btnSal;
         internal System.Windows.Forms.Button                         btnCanc;
         internal System.Windows.Forms.Button                         btnAdd;
+        private System.Windows.Forms.Panel         pnlDiv4;
+        private System.Windows.Forms.Label         lblSecCupom;
+        private System.Windows.Forms.TextBox       txtCupom;
+        private System.Windows.Forms.Button        btnAplicarCupom;
+        private System.Windows.Forms.Label         lblCupomInfo;
+        private System.Windows.Forms.Button        btnMeioAMeio;
         private System.Windows.Forms.DataGridViewTextBoxColumn        colNome;
         private System.Windows.Forms.DataGridViewTextBoxColumn        colQtde;
         private System.Windows.Forms.DataGridViewTextBoxColumn        colUnitario;
