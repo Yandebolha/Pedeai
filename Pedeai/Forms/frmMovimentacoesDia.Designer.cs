@@ -26,7 +26,7 @@ namespace Pedeai.Forms
             // ── pnlTop ───────────────────────────────────────────────────
             pnlTop.Dock      = DockStyle.Top;
             pnlTop.Height    = 48;
-            pnlTop.BackColor = System.Drawing.Color.FromArgb(36, 48, 82);
+            pnlTop.BackColor = System.Drawing.Color.FromArgb(176, 110, 42);
             pnlTop.SizeChanged += PnlTop_SizeChanged;
 
             // ── lblTit ───────────────────────────────────────────────────
@@ -40,7 +40,7 @@ namespace Pedeai.Forms
             // ── pnlRes ───────────────────────────────────────────────────
             pnlRes.Dock      = DockStyle.Top;
             pnlRes.Height    = 38;
-            pnlRes.BackColor = System.Drawing.Color.FromArgb(28, 37, 65);
+            pnlRes.BackColor = System.Drawing.Color.FromArgb(245, 237, 216);
 
             // ── lblRes ───────────────────────────────────────────────────
             lblRes.Dock       = DockStyle.Fill;
@@ -57,13 +57,13 @@ namespace Pedeai.Forms
             grid.AllowUserToAddRows              = false;
             grid.SelectionMode                   = DataGridViewSelectionMode.FullRowSelect;
             grid.RowHeadersVisible               = false;
-            grid.BackgroundColor                 = System.Drawing.Color.FromArgb(20, 28, 55);
-            grid.DefaultCellStyle.BackColor      = System.Drawing.Color.FromArgb(20, 28, 55);
+            grid.BackgroundColor                 = System.Drawing.Color.White;
+            grid.DefaultCellStyle.BackColor      = System.Drawing.Color.White;
             grid.DefaultCellStyle.ForeColor      = System.Drawing.Color.White;
-            grid.GridColor                       = System.Drawing.Color.FromArgb(40, 55, 90);
+            grid.GridColor                       = System.Drawing.Color.FromArgb(200, 185, 160);
             grid.BorderStyle                     = BorderStyle.None;
-            grid.ColumnHeadersDefaultCellStyle.BackColor = System.Drawing.Color.FromArgb(36, 48, 82);
-            grid.ColumnHeadersDefaultCellStyle.ForeColor = System.Drawing.Color.White;
+            grid.ColumnHeadersDefaultCellStyle.BackColor = System.Drawing.Color.FromArgb(240, 230, 202);
+            grid.ColumnHeadersDefaultCellStyle.ForeColor = System.Drawing.Color.FromArgb(60, 60, 60);
             grid.Font                            = new Font("Segoe UI", 9F);
             grid.DataError   += Grid_DataError;
             grid.RowPrePaint += Grid_RowColor;
@@ -71,7 +71,7 @@ namespace Pedeai.Forms
             // ── pnlFoot ──────────────────────────────────────────────────
             pnlFoot.Dock      = DockStyle.Bottom;
             pnlFoot.Height    = 40;
-            pnlFoot.BackColor = System.Drawing.Color.FromArgb(28, 37, 65);
+            pnlFoot.BackColor = System.Drawing.Color.FromArgb(245, 237, 216);
             pnlFoot.SizeChanged += PnlFoot_SizeChanged;
 
             // ── btnFech ──────────────────────────────────────────────────
@@ -80,7 +80,7 @@ namespace Pedeai.Forms
             btnFech.Top       = 8;
             btnFech.Width     = 100;
             btnFech.Height    = 26;
-            btnFech.BackColor = System.Drawing.Color.FromArgb(80, 95, 130);
+            btnFech.BackColor = System.Drawing.Color.FromArgb(224, 113, 42);
             btnFech.ForeColor = System.Drawing.Color.White;
             btnFech.FlatStyle = FlatStyle.Flat;
             btnFech.Cursor    = Cursors.Hand;
@@ -95,7 +95,7 @@ namespace Pedeai.Forms
             Controls.Add(pnlTop);
 
             Text          = "Movimenta\u00e7\u00f5es";
-            BackColor     = System.Drawing.Color.FromArgb(15, 22, 45);
+            BackColor     = System.Drawing.Color.FromArgb(245, 237, 216);
             ForeColor     = System.Drawing.Color.White;
             Font          = new Font("Segoe UI", 9F);
             ClientSize    = new System.Drawing.Size(900, 520);

@@ -1,4 +1,4 @@
-﻿using System.Drawing;
+using System.Drawing;
 using System.Windows.Forms;
 
 namespace Pedeai.Forms
@@ -35,34 +35,34 @@ namespace Pedeai.Forms
             this.lblTitulo.SetBounds(10, 14, 360, 28);
             // lblSub
             this.lblSub.Text      = "Informe as credenciais de um usuario autorizado:";
-            this.lblSub.ForeColor = System.Drawing.Color.FromArgb(180, 190, 220);
+            this.lblSub.ForeColor = System.Drawing.Color.FromArgb(70, 70, 70);
             this.lblSub.AutoSize  = false;
             this.lblSub.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.lblSub.SetBounds(10, 44, 360, 22);
             // lblLogin
             this.lblLogin.Text      = "Login:";
-            this.lblLogin.ForeColor = System.Drawing.Color.FromArgb(180, 190, 220);
+            this.lblLogin.ForeColor = System.Drawing.Color.FromArgb(70, 70, 70);
             this.lblLogin.SetBounds(40, 76, 60, 22);
             // txtLogin
             this.txtLogin.SetBounds(40, 98, 300, 28);
-            this.txtLogin.BackColor   = System.Drawing.Color.FromArgb(15, 22, 45);
-            this.txtLogin.ForeColor   = System.Drawing.Color.White;
+            this.txtLogin.BackColor   = System.Drawing.Color.White;
+            this.txtLogin.ForeColor   = System.Drawing.Color.FromArgb(50, 50, 50);
             this.txtLogin.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.txtLogin.Leave      += new System.EventHandler(this.TxtLogin_Leave);
             this.txtLogin.KeyDown    += new System.Windows.Forms.KeyEventHandler(this.TxtLogin_KeyDown);
             // lblNomeUsuario
             this.lblNomeUsuario.Text      = "";
-            this.lblNomeUsuario.ForeColor = System.Drawing.Color.FromArgb(39, 174, 96);
+            this.lblNomeUsuario.ForeColor = System.Drawing.Color.FromArgb(87, 120, 38);
             this.lblNomeUsuario.AutoSize  = false;
             this.lblNomeUsuario.SetBounds(40, 128, 300, 18);
             // lblSenha
             this.lblSenha.Text      = "Senha:";
-            this.lblSenha.ForeColor = System.Drawing.Color.FromArgb(180, 190, 220);
+            this.lblSenha.ForeColor = System.Drawing.Color.FromArgb(70, 70, 70);
             this.lblSenha.SetBounds(40, 150, 60, 22);
             // txtSenha
             this.txtSenha.SetBounds(40, 172, 300, 28);
-            this.txtSenha.BackColor    = System.Drawing.Color.FromArgb(15, 22, 45);
-            this.txtSenha.ForeColor    = System.Drawing.Color.White;
+            this.txtSenha.BackColor    = System.Drawing.Color.White;
+            this.txtSenha.ForeColor    = System.Drawing.Color.FromArgb(50, 50, 50);
             this.txtSenha.BorderStyle  = System.Windows.Forms.BorderStyle.FixedSingle;
             this.txtSenha.PasswordChar = '\u2022';
             this.txtSenha.KeyDown     += new System.Windows.Forms.KeyEventHandler(this.TxtSenha_KeyDown);
@@ -75,7 +75,7 @@ namespace Pedeai.Forms
             // btnOk
             this.btnOk.Text      = "\u2714 Autorizar";
             this.btnOk.SetBounds(40, 232, 140, 30);
-            this.btnOk.BackColor = System.Drawing.Color.FromArgb(39, 174, 96);
+            this.btnOk.BackColor = System.Drawing.Color.FromArgb(87, 120, 38);
             this.btnOk.ForeColor = System.Drawing.Color.White;
             this.btnOk.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnOk.Cursor    = System.Windows.Forms.Cursors.Hand;
@@ -98,7 +98,7 @@ namespace Pedeai.Forms
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             this.MaximizeBox     = false;
             this.MinimizeBox     = false;
-            this.BackColor       = System.Drawing.Color.FromArgb(28, 37, 65);
+            this.BackColor       = System.Drawing.Color.FromArgb(245, 237, 216);
             this.ForeColor       = System.Drawing.Color.White;
             this.Font            = new System.Drawing.Font("Segoe UI", 10F);
             this.ClientSize      = new System.Drawing.Size(380, 276);

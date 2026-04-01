@@ -27,7 +27,7 @@ namespace Pedeai.Forms
             // ── pnlInfo (cabeçalho) ────────────────────────────────────────
             this.pnlInfo.Dock      = System.Windows.Forms.DockStyle.Top;
             this.pnlInfo.Height    = 90;
-            this.pnlInfo.BackColor = System.Drawing.Color.FromArgb(28, 37, 65);
+            this.pnlInfo.BackColor = System.Drawing.Color.FromArgb(245, 237, 216);
 
             this.lblCabecalho.Dock      = System.Windows.Forms.DockStyle.Top;
             this.lblCabecalho.Height    = 32;
@@ -39,17 +39,17 @@ namespace Pedeai.Forms
 
             this.lblCaixaInicial.Left = 12; this.lblCaixaInicial.Top = 38;
             this.lblCaixaInicial.AutoSize  = true;
-            this.lblCaixaInicial.ForeColor = System.Drawing.Color.FromArgb(200, 220, 255);
+            this.lblCaixaInicial.ForeColor = System.Drawing.Color.FromArgb(70, 70, 70);
             this.lblCaixaInicial.Font      = new System.Drawing.Font("Segoe UI", 9F);
 
             this.lblFechamento.Left = 220; this.lblFechamento.Top = 38;
             this.lblFechamento.AutoSize  = true;
-            this.lblFechamento.ForeColor = System.Drawing.Color.FromArgb(200, 220, 255);
+            this.lblFechamento.ForeColor = System.Drawing.Color.FromArgb(70, 70, 70);
             this.lblFechamento.Font      = new System.Drawing.Font("Segoe UI", 9F);
 
             this.lblCaixaFinal.Left = 440; this.lblCaixaFinal.Top = 38;
             this.lblCaixaFinal.AutoSize  = true;
-            this.lblCaixaFinal.ForeColor = System.Drawing.Color.FromArgb(200, 220, 255);
+            this.lblCaixaFinal.ForeColor = System.Drawing.Color.FromArgb(70, 70, 70);
             this.lblCaixaFinal.Font      = new System.Drawing.Font("Segoe UI", 9F);
 
             this.pnlInfo.Controls.Add(this.lblCaixaInicial);
@@ -59,15 +59,15 @@ namespace Pedeai.Forms
 
             // ── gridPedidos ────────────────────────────────────────────────
             this.gridPedidos.Dock                  = System.Windows.Forms.DockStyle.Fill;
-            this.gridPedidos.BackgroundColor        = System.Drawing.Color.FromArgb(22, 30, 55);
+            this.gridPedidos.BackgroundColor        = System.Drawing.Color.FromArgb(235, 226, 208);
             this.gridPedidos.ForeColor              = System.Drawing.Color.White;
             this.gridPedidos.GridColor              = System.Drawing.Color.FromArgb(50, 60, 100);
             this.gridPedidos.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.gridPedidos.ColumnHeadersDefaultCellStyle.BackColor = System.Drawing.Color.FromArgb(28, 37, 65);
+            this.gridPedidos.ColumnHeadersDefaultCellStyle.BackColor = System.Drawing.Color.FromArgb(245, 237, 216);
             this.gridPedidos.ColumnHeadersDefaultCellStyle.ForeColor = System.Drawing.Color.FromArgb(200, 210, 240);
             this.gridPedidos.DefaultCellStyle.BackColor  = System.Drawing.Color.FromArgb(30, 40, 70);
             this.gridPedidos.DefaultCellStyle.ForeColor  = System.Drawing.Color.White;
-            this.gridPedidos.DefaultCellStyle.SelectionBackColor = System.Drawing.Color.FromArgb(52, 152, 219);
+            this.gridPedidos.DefaultCellStyle.SelectionBackColor = System.Drawing.Color.FromArgb(224, 113, 42);
             this.gridPedidos.AutoSizeColumnsMode    = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
             this.gridPedidos.ReadOnly               = true;
             this.gridPedidos.SelectionMode          = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
@@ -79,7 +79,7 @@ namespace Pedeai.Forms
             // ── lblResumo ──────────────────────────────────────────────────
             this.lblResumo.Dock      = System.Windows.Forms.DockStyle.Bottom;
             this.lblResumo.Height    = 28;
-            this.lblResumo.BackColor = System.Drawing.Color.FromArgb(22, 30, 55);
+            this.lblResumo.BackColor = System.Drawing.Color.FromArgb(235, 226, 208);
             this.lblResumo.ForeColor = System.Drawing.Color.FromArgb(243, 156, 18);
             this.lblResumo.Font      = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
             this.lblResumo.Padding   = new System.Windows.Forms.Padding(6, 6, 0, 0);
@@ -89,7 +89,7 @@ namespace Pedeai.Forms
             this.btnImprimir.Dock      = System.Windows.Forms.DockStyle.Bottom;
             this.btnImprimir.Height    = 32;
             this.btnImprimir.Text      = "\U0001F5A8 Imprimir Relat\u00f3rio";
-            this.btnImprimir.BackColor = System.Drawing.Color.FromArgb(52, 152, 219);
+            this.btnImprimir.BackColor = System.Drawing.Color.FromArgb(224, 113, 42);
             this.btnImprimir.ForeColor = System.Drawing.Color.White;
             this.btnImprimir.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnImprimir.Cursor    = System.Windows.Forms.Cursors.Hand;
@@ -99,7 +99,7 @@ namespace Pedeai.Forms
             // ── Form ──────────────────────────────────────────────────────
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode       = System.Windows.Forms.AutoScaleMode.Font;
-            this.BackColor           = System.Drawing.Color.FromArgb(15, 22, 45);
+            this.BackColor           = System.Drawing.Color.FromArgb(245, 237, 216);
             this.ClientSize          = new System.Drawing.Size(860, 580);
             this.Font                = new System.Drawing.Font("Segoe UI", 9F);
             this.MinimumSize         = new System.Drawing.Size(700, 480);

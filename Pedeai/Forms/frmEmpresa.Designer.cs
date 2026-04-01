@@ -1,4 +1,4 @@
-﻿using System.Drawing;
+using System.Drawing;
 using System.Windows.Forms;
 
 namespace Pedeai.Forms
@@ -78,9 +78,9 @@ namespace Pedeai.Forms
             // 
             // txtEmpNome
             // 
-            this.txtEmpNome.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(18)))), ((int)(((byte)(26)))), ((int)(((byte)(50)))));
+            this.txtEmpNome.BackColor = System.Drawing.Color.White;
             this.txtEmpNome.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.txtEmpNome.ForeColor = System.Drawing.Color.White;
+            this.txtEmpNome.ForeColor = System.Drawing.Color.FromArgb(50, 50, 50);
             this.txtEmpNome.Location = new System.Drawing.Point(168, 86);
             this.txtEmpNome.Name = "txtEmpNome";
             this.txtEmpNome.Size = new System.Drawing.Size(360, 25);
@@ -88,9 +88,9 @@ namespace Pedeai.Forms
             // 
             // txtEmpFantasia
             // 
-            this.txtEmpFantasia.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(18)))), ((int)(((byte)(26)))), ((int)(((byte)(50)))));
+            this.txtEmpFantasia.BackColor = System.Drawing.Color.White;
             this.txtEmpFantasia.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.txtEmpFantasia.ForeColor = System.Drawing.Color.White;
+            this.txtEmpFantasia.ForeColor = System.Drawing.Color.FromArgb(50, 50, 50);
             this.txtEmpFantasia.Location = new System.Drawing.Point(168, 117);
             this.txtEmpFantasia.Name = "txtEmpFantasia";
             this.txtEmpFantasia.Size = new System.Drawing.Size(360, 25);
@@ -98,9 +98,9 @@ namespace Pedeai.Forms
             // 
             // txtEmpCNPJ
             // 
-            this.txtEmpCNPJ.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(18)))), ((int)(((byte)(26)))), ((int)(((byte)(50)))));
+            this.txtEmpCNPJ.BackColor = System.Drawing.Color.White;
             this.txtEmpCNPJ.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.txtEmpCNPJ.ForeColor = System.Drawing.Color.White;
+            this.txtEmpCNPJ.ForeColor = System.Drawing.Color.FromArgb(50, 50, 50);
             this.txtEmpCNPJ.Location = new System.Drawing.Point(168, 148);
             this.txtEmpCNPJ.Name = "txtEmpCNPJ";
             this.txtEmpCNPJ.Size = new System.Drawing.Size(360, 25);
@@ -108,9 +108,9 @@ namespace Pedeai.Forms
             // 
             // txtEmpTel
             // 
-            this.txtEmpTel.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(18)))), ((int)(((byte)(26)))), ((int)(((byte)(50)))));
+            this.txtEmpTel.BackColor = System.Drawing.Color.White;
             this.txtEmpTel.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.txtEmpTel.ForeColor = System.Drawing.Color.White;
+            this.txtEmpTel.ForeColor = System.Drawing.Color.FromArgb(50, 50, 50);
             this.txtEmpTel.Location = new System.Drawing.Point(168, 179);
             this.txtEmpTel.Name = "txtEmpTel";
             this.txtEmpTel.Size = new System.Drawing.Size(360, 25);
@@ -118,9 +118,9 @@ namespace Pedeai.Forms
             // 
             // txtEmpEmail
             // 
-            this.txtEmpEmail.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(18)))), ((int)(((byte)(26)))), ((int)(((byte)(50)))));
+            this.txtEmpEmail.BackColor = System.Drawing.Color.White;
             this.txtEmpEmail.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.txtEmpEmail.ForeColor = System.Drawing.Color.White;
+            this.txtEmpEmail.ForeColor = System.Drawing.Color.FromArgb(50, 50, 50);
             this.txtEmpEmail.Location = new System.Drawing.Point(168, 210);
             this.txtEmpEmail.Name = "txtEmpEmail";
             this.txtEmpEmail.Size = new System.Drawing.Size(360, 25);
@@ -128,9 +128,9 @@ namespace Pedeai.Forms
             // 
             // txtEmpEnd
             // 
-            this.txtEmpEnd.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(18)))), ((int)(((byte)(26)))), ((int)(((byte)(50)))));
+            this.txtEmpEnd.BackColor = System.Drawing.Color.White;
             this.txtEmpEnd.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.txtEmpEnd.ForeColor = System.Drawing.Color.White;
+            this.txtEmpEnd.ForeColor = System.Drawing.Color.FromArgb(50, 50, 50);
             this.txtEmpEnd.Location = new System.Drawing.Point(168, 241);
             this.txtEmpEnd.Name = "txtEmpEnd";
             this.txtEmpEnd.Size = new System.Drawing.Size(360, 25);
@@ -138,9 +138,9 @@ namespace Pedeai.Forms
             // 
             // txtUsrNome
             // 
-            this.txtUsrNome.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(18)))), ((int)(((byte)(26)))), ((int)(((byte)(50)))));
+            this.txtUsrNome.BackColor = System.Drawing.Color.White;
             this.txtUsrNome.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.txtUsrNome.ForeColor = System.Drawing.Color.White;
+            this.txtUsrNome.ForeColor = System.Drawing.Color.FromArgb(50, 50, 50);
             this.txtUsrNome.Location = new System.Drawing.Point(168, 20);
             this.txtUsrNome.Name = "txtUsrNome";
             this.txtUsrNome.Size = new System.Drawing.Size(280, 25);
@@ -148,9 +148,9 @@ namespace Pedeai.Forms
             // 
             // txtUsrLogin
             // 
-            this.txtUsrLogin.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(18)))), ((int)(((byte)(26)))), ((int)(((byte)(50)))));
+            this.txtUsrLogin.BackColor = System.Drawing.Color.White;
             this.txtUsrLogin.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.txtUsrLogin.ForeColor = System.Drawing.Color.White;
+            this.txtUsrLogin.ForeColor = System.Drawing.Color.FromArgb(50, 50, 50);
             this.txtUsrLogin.Location = new System.Drawing.Point(168, 60);
             this.txtUsrLogin.Name = "txtUsrLogin";
             this.txtUsrLogin.Size = new System.Drawing.Size(280, 25);
@@ -158,29 +158,29 @@ namespace Pedeai.Forms
             // 
             // txtUsrSenha
             // 
-            this.txtUsrSenha.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(18)))), ((int)(((byte)(26)))), ((int)(((byte)(50)))));
+            this.txtUsrSenha.BackColor = System.Drawing.Color.White;
             this.txtUsrSenha.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.txtUsrSenha.ForeColor = System.Drawing.Color.White;
+            this.txtUsrSenha.ForeColor = System.Drawing.Color.FromArgb(50, 50, 50);
             this.txtUsrSenha.Location = new System.Drawing.Point(168, 100);
             this.txtUsrSenha.Name = "txtUsrSenha";
-            this.txtUsrSenha.PasswordChar = '●';
+            this.txtUsrSenha.PasswordChar = '?';
             this.txtUsrSenha.Size = new System.Drawing.Size(280, 25);
             this.txtUsrSenha.TabIndex = 2;
             // 
             // txtUsrSenhaConf
             // 
-            this.txtUsrSenhaConf.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(18)))), ((int)(((byte)(26)))), ((int)(((byte)(50)))));
+            this.txtUsrSenhaConf.BackColor = System.Drawing.Color.White;
             this.txtUsrSenhaConf.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.txtUsrSenhaConf.ForeColor = System.Drawing.Color.White;
+            this.txtUsrSenhaConf.ForeColor = System.Drawing.Color.FromArgb(50, 50, 50);
             this.txtUsrSenhaConf.Location = new System.Drawing.Point(168, 140);
             this.txtUsrSenhaConf.Name = "txtUsrSenhaConf";
-            this.txtUsrSenhaConf.PasswordChar = '●';
+            this.txtUsrSenhaConf.PasswordChar = '?';
             this.txtUsrSenhaConf.Size = new System.Drawing.Size(280, 25);
             this.txtUsrSenhaConf.TabIndex = 3;
             // 
             // cmbUsrNivel
             // 
-            this.cmbUsrNivel.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(18)))), ((int)(((byte)(26)))), ((int)(((byte)(50)))));
+            this.cmbUsrNivel.BackColor = System.Drawing.Color.White;
             this.cmbUsrNivel.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cmbUsrNivel.ForeColor = System.Drawing.Color.White;
             this.cmbUsrNivel.Items.AddRange(new object[] {
@@ -194,7 +194,7 @@ namespace Pedeai.Forms
             // 
             // cmbUsrSit
             // 
-            this.cmbUsrSit.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(18)))), ((int)(((byte)(26)))), ((int)(((byte)(50)))));
+            this.cmbUsrSit.BackColor = System.Drawing.Color.White;
             this.cmbUsrSit.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cmbUsrSit.ForeColor = System.Drawing.Color.White;
             this.cmbUsrSit.Items.AddRange(new object[] {
@@ -218,7 +218,7 @@ namespace Pedeai.Forms
             // 
             // lstUsuarios
             // 
-            this.lstUsuarios.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(18)))), ((int)(((byte)(26)))), ((int)(((byte)(50)))));
+            this.lstUsuarios.BackColor = System.Drawing.Color.White;
             this.lstUsuarios.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.lstUsuarios.Dock = System.Windows.Forms.DockStyle.Fill;
             this.lstUsuarios.ForeColor = System.Drawing.Color.White;
@@ -231,10 +231,10 @@ namespace Pedeai.Forms
             // 
             // txtPesquisa
             // 
-            this.txtPesquisa.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(18)))), ((int)(((byte)(26)))), ((int)(((byte)(50)))));
+            this.txtPesquisa.BackColor = System.Drawing.Color.White;
             this.txtPesquisa.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.txtPesquisa.Dock = System.Windows.Forms.DockStyle.Top;
-            this.txtPesquisa.ForeColor = System.Drawing.Color.White;
+            this.txtPesquisa.ForeColor = System.Drawing.Color.FromArgb(50, 50, 50);
             this.txtPesquisa.Location = new System.Drawing.Point(0, 0);
             this.txtPesquisa.Name = "txtPesquisa";
             this.txtPesquisa.Size = new System.Drawing.Size(460, 25);
@@ -258,7 +258,7 @@ namespace Pedeai.Forms
             // 
             // btnPesquisarUsr
             // 
-            this.btnPesquisarUsr.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(52)))), ((int)(((byte)(152)))), ((int)(((byte)(219)))));
+            this.btnPesquisarUsr.BackColor = System.Drawing.Color.FromArgb(224, 113, 42);
             this.btnPesquisarUsr.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnPesquisarUsr.FlatAppearance.BorderSize = 0;
             this.btnPesquisarUsr.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
@@ -273,7 +273,7 @@ namespace Pedeai.Forms
             // 
             // btnSalvUsr
             // 
-            this.btnSalvUsr.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(39)))), ((int)(((byte)(174)))), ((int)(((byte)(96)))));
+            this.btnSalvUsr.BackColor = System.Drawing.Color.FromArgb(87, 120, 38);
             this.btnSalvUsr.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnSalvUsr.FlatAppearance.BorderSize = 0;
             this.btnSalvUsr.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
@@ -282,7 +282,7 @@ namespace Pedeai.Forms
             this.btnSalvUsr.Name = "btnSalvUsr";
             this.btnSalvUsr.Size = new System.Drawing.Size(128, 32);
             this.btnSalvUsr.TabIndex = 20;
-            this.btnSalvUsr.Text = "✓  Salvar";
+            this.btnSalvUsr.Text = "?  Salvar";
             this.btnSalvUsr.UseVisualStyleBackColor = false;
             this.btnSalvUsr.Visible = false;
             this.btnSalvUsr.Click += new System.EventHandler(this.BtnSalvarUsuario_Click);
@@ -410,9 +410,9 @@ namespace Pedeai.Forms
             // 
             // txtImpNomeEmpresa
             // 
-            this.txtImpNomeEmpresa.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(18)))), ((int)(((byte)(26)))), ((int)(((byte)(50)))));
+            this.txtImpNomeEmpresa.BackColor = System.Drawing.Color.White;
             this.txtImpNomeEmpresa.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.txtImpNomeEmpresa.ForeColor = System.Drawing.Color.White;
+            this.txtImpNomeEmpresa.ForeColor = System.Drawing.Color.FromArgb(50, 50, 50);
             this.txtImpNomeEmpresa.Location = new System.Drawing.Point(208, 30);
             this.txtImpNomeEmpresa.Name = "txtImpNomeEmpresa";
             this.txtImpNomeEmpresa.Size = new System.Drawing.Size(400, 25);
@@ -420,9 +420,9 @@ namespace Pedeai.Forms
             // 
             // txtImpEndereco
             // 
-            this.txtImpEndereco.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(18)))), ((int)(((byte)(26)))), ((int)(((byte)(50)))));
+            this.txtImpEndereco.BackColor = System.Drawing.Color.White;
             this.txtImpEndereco.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.txtImpEndereco.ForeColor = System.Drawing.Color.White;
+            this.txtImpEndereco.ForeColor = System.Drawing.Color.FromArgb(50, 50, 50);
             this.txtImpEndereco.Location = new System.Drawing.Point(208, 62);
             this.txtImpEndereco.Name = "txtImpEndereco";
             this.txtImpEndereco.Size = new System.Drawing.Size(400, 25);
@@ -430,9 +430,9 @@ namespace Pedeai.Forms
             // 
             // txtImpTelefone
             // 
-            this.txtImpTelefone.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(18)))), ((int)(((byte)(26)))), ((int)(((byte)(50)))));
+            this.txtImpTelefone.BackColor = System.Drawing.Color.White;
             this.txtImpTelefone.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.txtImpTelefone.ForeColor = System.Drawing.Color.White;
+            this.txtImpTelefone.ForeColor = System.Drawing.Color.FromArgb(50, 50, 50);
             this.txtImpTelefone.Location = new System.Drawing.Point(208, 94);
             this.txtImpTelefone.Name = "txtImpTelefone";
             this.txtImpTelefone.Size = new System.Drawing.Size(400, 25);
@@ -440,9 +440,9 @@ namespace Pedeai.Forms
             // 
             // txtImpCNPJ
             // 
-            this.txtImpCNPJ.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(18)))), ((int)(((byte)(26)))), ((int)(((byte)(50)))));
+            this.txtImpCNPJ.BackColor = System.Drawing.Color.White;
             this.txtImpCNPJ.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.txtImpCNPJ.ForeColor = System.Drawing.Color.White;
+            this.txtImpCNPJ.ForeColor = System.Drawing.Color.FromArgb(50, 50, 50);
             this.txtImpCNPJ.Location = new System.Drawing.Point(208, 126);
             this.txtImpCNPJ.Name = "txtImpCNPJ";
             this.txtImpCNPJ.Size = new System.Drawing.Size(400, 25);
@@ -450,9 +450,9 @@ namespace Pedeai.Forms
             // 
             // txtImpSeparador
             // 
-            this.txtImpSeparador.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(18)))), ((int)(((byte)(26)))), ((int)(((byte)(50)))));
+            this.txtImpSeparador.BackColor = System.Drawing.Color.White;
             this.txtImpSeparador.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.txtImpSeparador.ForeColor = System.Drawing.Color.White;
+            this.txtImpSeparador.ForeColor = System.Drawing.Color.FromArgb(50, 50, 50);
             this.txtImpSeparador.Location = new System.Drawing.Point(208, 158);
             this.txtImpSeparador.Name = "txtImpSeparador";
             this.txtImpSeparador.Size = new System.Drawing.Size(400, 25);
@@ -460,9 +460,9 @@ namespace Pedeai.Forms
             // 
             // txtImpAvisoFiscal
             // 
-            this.txtImpAvisoFiscal.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(18)))), ((int)(((byte)(26)))), ((int)(((byte)(50)))));
+            this.txtImpAvisoFiscal.BackColor = System.Drawing.Color.White;
             this.txtImpAvisoFiscal.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.txtImpAvisoFiscal.ForeColor = System.Drawing.Color.White;
+            this.txtImpAvisoFiscal.ForeColor = System.Drawing.Color.FromArgb(50, 50, 50);
             this.txtImpAvisoFiscal.Location = new System.Drawing.Point(208, 190);
             this.txtImpAvisoFiscal.Name = "txtImpAvisoFiscal";
             this.txtImpAvisoFiscal.Size = new System.Drawing.Size(400, 25);
@@ -470,9 +470,9 @@ namespace Pedeai.Forms
             // 
             // txtImpRodapeTexto
             // 
-            this.txtImpRodapeTexto.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(18)))), ((int)(((byte)(26)))), ((int)(((byte)(50)))));
+            this.txtImpRodapeTexto.BackColor = System.Drawing.Color.White;
             this.txtImpRodapeTexto.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.txtImpRodapeTexto.ForeColor = System.Drawing.Color.White;
+            this.txtImpRodapeTexto.ForeColor = System.Drawing.Color.FromArgb(50, 50, 50);
             this.txtImpRodapeTexto.Location = new System.Drawing.Point(208, 222);
             this.txtImpRodapeTexto.Multiline = true;
             this.txtImpRodapeTexto.Name = "txtImpRodapeTexto";
@@ -481,9 +481,9 @@ namespace Pedeai.Forms
             // 
             // txtImpLblNumero
             // 
-            this.txtImpLblNumero.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(18)))), ((int)(((byte)(26)))), ((int)(((byte)(50)))));
+            this.txtImpLblNumero.BackColor = System.Drawing.Color.White;
             this.txtImpLblNumero.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.txtImpLblNumero.ForeColor = System.Drawing.Color.White;
+            this.txtImpLblNumero.ForeColor = System.Drawing.Color.FromArgb(50, 50, 50);
             this.txtImpLblNumero.Location = new System.Drawing.Point(208, 300);
             this.txtImpLblNumero.Name = "txtImpLblNumero";
             this.txtImpLblNumero.Size = new System.Drawing.Size(200, 25);
@@ -491,9 +491,9 @@ namespace Pedeai.Forms
             // 
             // txtImpLblColItem
             // 
-            this.txtImpLblColItem.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(18)))), ((int)(((byte)(26)))), ((int)(((byte)(50)))));
+            this.txtImpLblColItem.BackColor = System.Drawing.Color.White;
             this.txtImpLblColItem.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.txtImpLblColItem.ForeColor = System.Drawing.Color.White;
+            this.txtImpLblColItem.ForeColor = System.Drawing.Color.FromArgb(50, 50, 50);
             this.txtImpLblColItem.Location = new System.Drawing.Point(208, 332);
             this.txtImpLblColItem.Name = "txtImpLblColItem";
             this.txtImpLblColItem.Size = new System.Drawing.Size(200, 25);
@@ -501,9 +501,9 @@ namespace Pedeai.Forms
             // 
             // txtImpLblColTotal
             // 
-            this.txtImpLblColTotal.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(18)))), ((int)(((byte)(26)))), ((int)(((byte)(50)))));
+            this.txtImpLblColTotal.BackColor = System.Drawing.Color.White;
             this.txtImpLblColTotal.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.txtImpLblColTotal.ForeColor = System.Drawing.Color.White;
+            this.txtImpLblColTotal.ForeColor = System.Drawing.Color.FromArgb(50, 50, 50);
             this.txtImpLblColTotal.Location = new System.Drawing.Point(208, 364);
             this.txtImpLblColTotal.Name = "txtImpLblColTotal";
             this.txtImpLblColTotal.Size = new System.Drawing.Size(200, 25);
@@ -511,9 +511,9 @@ namespace Pedeai.Forms
             // 
             // txtImpLblSubtotal
             // 
-            this.txtImpLblSubtotal.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(18)))), ((int)(((byte)(26)))), ((int)(((byte)(50)))));
+            this.txtImpLblSubtotal.BackColor = System.Drawing.Color.White;
             this.txtImpLblSubtotal.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.txtImpLblSubtotal.ForeColor = System.Drawing.Color.White;
+            this.txtImpLblSubtotal.ForeColor = System.Drawing.Color.FromArgb(50, 50, 50);
             this.txtImpLblSubtotal.Location = new System.Drawing.Point(208, 396);
             this.txtImpLblSubtotal.Name = "txtImpLblSubtotal";
             this.txtImpLblSubtotal.Size = new System.Drawing.Size(200, 25);
@@ -521,9 +521,9 @@ namespace Pedeai.Forms
             // 
             // txtImpLblTaxa
             // 
-            this.txtImpLblTaxa.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(18)))), ((int)(((byte)(26)))), ((int)(((byte)(50)))));
+            this.txtImpLblTaxa.BackColor = System.Drawing.Color.White;
             this.txtImpLblTaxa.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.txtImpLblTaxa.ForeColor = System.Drawing.Color.White;
+            this.txtImpLblTaxa.ForeColor = System.Drawing.Color.FromArgb(50, 50, 50);
             this.txtImpLblTaxa.Location = new System.Drawing.Point(208, 428);
             this.txtImpLblTaxa.Name = "txtImpLblTaxa";
             this.txtImpLblTaxa.Size = new System.Drawing.Size(200, 25);
@@ -531,9 +531,9 @@ namespace Pedeai.Forms
             // 
             // txtImpLblTotalPagar
             // 
-            this.txtImpLblTotalPagar.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(18)))), ((int)(((byte)(26)))), ((int)(((byte)(50)))));
+            this.txtImpLblTotalPagar.BackColor = System.Drawing.Color.White;
             this.txtImpLblTotalPagar.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.txtImpLblTotalPagar.ForeColor = System.Drawing.Color.White;
+            this.txtImpLblTotalPagar.ForeColor = System.Drawing.Color.FromArgb(50, 50, 50);
             this.txtImpLblTotalPagar.Location = new System.Drawing.Point(208, 460);
             this.txtImpLblTotalPagar.Name = "txtImpLblTotalPagar";
             this.txtImpLblTotalPagar.Size = new System.Drawing.Size(200, 25);
@@ -541,9 +541,9 @@ namespace Pedeai.Forms
             // 
             // txtImpLblAtendente
             // 
-            this.txtImpLblAtendente.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(18)))), ((int)(((byte)(26)))), ((int)(((byte)(50)))));
+            this.txtImpLblAtendente.BackColor = System.Drawing.Color.White;
             this.txtImpLblAtendente.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.txtImpLblAtendente.ForeColor = System.Drawing.Color.White;
+            this.txtImpLblAtendente.ForeColor = System.Drawing.Color.FromArgb(50, 50, 50);
             this.txtImpLblAtendente.Location = new System.Drawing.Point(208, 492);
             this.txtImpLblAtendente.Name = "txtImpLblAtendente";
             this.txtImpLblAtendente.Size = new System.Drawing.Size(200, 25);
@@ -551,11 +551,11 @@ namespace Pedeai.Forms
             // 
             // cmbImpressora
             // 
-            this.cmbImpressora.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(18)))), ((int)(((byte)(26)))), ((int)(((byte)(50)))));
+            this.cmbImpressora.BackColor = System.Drawing.Color.White;
             this.cmbImpressora.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cmbImpressora.ForeColor = System.Drawing.Color.White;
             this.cmbImpressora.Items.AddRange(new object[] {
-            "(Impressora padrão do sistema)"});
+            "(Impressora padr�o do sistema)"});
             this.cmbImpressora.Location = new System.Drawing.Point(208, 530);
             this.cmbImpressora.Name = "cmbImpressora";
             this.cmbImpressora.Size = new System.Drawing.Size(400, 25);
@@ -563,8 +563,8 @@ namespace Pedeai.Forms
             // 
             // numLargura
             // 
-            this.numLargura.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(18)))), ((int)(((byte)(26)))), ((int)(((byte)(50)))));
-            this.numLargura.ForeColor = System.Drawing.Color.White;
+            this.numLargura.BackColor = System.Drawing.Color.White;
+            this.numLargura.ForeColor = System.Drawing.Color.FromArgb(50, 50, 50);
             this.numLargura.Location = new System.Drawing.Point(208, 562);
             this.numLargura.Maximum = new decimal(new int[] {
             120,
@@ -601,7 +601,7 @@ namespace Pedeai.Forms
             // 
             // tabEmp
             // 
-            this.tabEmp.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(13)))), ((int)(((byte)(19)))), ((int)(((byte)(40)))));
+            this.tabEmp.BackColor = System.Drawing.Color.FromArgb(245, 237, 216);
             this.tabEmp.Controls.Add(this.txtEmpNome);
             this.tabEmp.Controls.Add(this.txtEmpFantasia);
             this.tabEmp.Controls.Add(this.txtEmpCNPJ);
@@ -625,7 +625,7 @@ namespace Pedeai.Forms
             // 
             // btnSalvEmp
             // 
-            this.btnSalvEmp.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(39)))), ((int)(((byte)(174)))), ((int)(((byte)(96)))));
+            this.btnSalvEmp.BackColor = System.Drawing.Color.FromArgb(87, 120, 38);
             this.btnSalvEmp.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnSalvEmp.FlatAppearance.BorderSize = 0;
             this.btnSalvEmp.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
@@ -635,13 +635,13 @@ namespace Pedeai.Forms
             this.btnSalvEmp.Name = "btnSalvEmp";
             this.btnSalvEmp.Size = new System.Drawing.Size(160, 32);
             this.btnSalvEmp.TabIndex = 6;
-            this.btnSalvEmp.Text = "✓  Salvar Empresa";
+            this.btnSalvEmp.Text = "?  Salvar Empresa";
             this.btnSalvEmp.UseVisualStyleBackColor = false;
             this.btnSalvEmp.Click += new System.EventHandler(this.BtnSalvarEmpresa_Click);
             // 
             // tabUsr
             // 
-            this.tabUsr.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(13)))), ((int)(((byte)(19)))), ((int)(((byte)(40)))));
+            this.tabUsr.BackColor = System.Drawing.Color.FromArgb(245, 237, 216);
             this.tabUsr.Controls.Add(this.txtUsrNome);
             this.tabUsr.Controls.Add(this.txtUsrLogin);
             this.tabUsr.Controls.Add(this.txtUsrSenha);
@@ -678,11 +678,11 @@ namespace Pedeai.Forms
             this.tabUsr.Name = "tabUsr";
             this.tabUsr.Size = new System.Drawing.Size(996, 607);
             this.tabUsr.TabIndex = 1;
-            this.tabUsr.Text = "  Usuários  ";
+            this.tabUsr.Text = "  Usu�rios  ";
             // 
             // tabImp
             // 
-            this.tabImp.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(13)))), ((int)(((byte)(19)))), ((int)(((byte)(40)))));
+            this.tabImp.BackColor = System.Drawing.Color.FromArgb(245, 237, 216);
             this.tabImp.Controls.Add(this.txtImpNomeEmpresa);
             this.tabImp.Controls.Add(this.txtImpEndereco);
             this.tabImp.Controls.Add(this.txtImpTelefone);
@@ -724,11 +724,11 @@ namespace Pedeai.Forms
             this.tabImp.Name = "tabImp";
             this.tabImp.Size = new System.Drawing.Size(996, 642);
             this.tabImp.TabIndex = 2;
-            this.tabImp.Text = "  Impressão  ";
+            this.tabImp.Text = "  Impress�o  ";
             // 
             // btnSalvImp
             // 
-            this.btnSalvImp.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(39)))), ((int)(((byte)(174)))), ((int)(((byte)(96)))));
+            this.btnSalvImp.BackColor = System.Drawing.Color.FromArgb(87, 120, 38);
             this.btnSalvImp.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnSalvImp.FlatAppearance.BorderSize = 0;
             this.btnSalvImp.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
@@ -737,13 +737,13 @@ namespace Pedeai.Forms
             this.btnSalvImp.Name = "btnSalvImp";
             this.btnSalvImp.Size = new System.Drawing.Size(200, 32);
             this.btnSalvImp.TabIndex = 16;
-            this.btnSalvImp.Text = "✓  Salvar Configuração";
+            this.btnSalvImp.Text = "?  Salvar Configura��o";
             this.btnSalvImp.UseVisualStyleBackColor = false;
             this.btnSalvImp.Click += new System.EventHandler(this.BtnSalvarImpressao_Click);
             // 
             // btnTesteImp
             // 
-            this.btnTesteImp.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(52)))), ((int)(((byte)(152)))), ((int)(((byte)(219)))));
+            this.btnTesteImp.BackColor = System.Drawing.Color.FromArgb(224, 113, 42);
             this.btnTesteImp.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnTesteImp.FlatAppearance.BorderSize = 0;
             this.btnTesteImp.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
@@ -762,11 +762,11 @@ namespace Pedeai.Forms
             this.ClientSize = new System.Drawing.Size(1004, 676);
             this.Controls.Add(this.tabControl);
             this.Font = new System.Drawing.Font("Segoe UI", 9.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.ForeColor = System.Drawing.Color.White;
+            this.ForeColor = System.Drawing.Color.FromArgb(60, 60, 60);
             this.MinimumSize = new System.Drawing.Size(960, 620);
             this.Name = "frmEmpresa";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
-            this.Text = "Empresa e Usuários";
+            this.Text = "Empresa e Usu�rios";
             this.pnlBuscaUsuarios.ResumeLayout(false);
             this.pnlBuscaUsuarios.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numLargura)).EndInit();
@@ -842,39 +842,39 @@ namespace Pedeai.Forms
         private System.Windows.Forms.Button         btnSalvImp;
         private System.Windows.Forms.Button         btnTesteImp;
         // labels empresa
-        private System.Windows.Forms.Label lblEmpTitle    = new System.Windows.Forms.Label { Text = "Dados da Empresa", AutoSize = true, Left = 22, Top = 18, Font = new System.Drawing.Font("Segoe UI", 11F, System.Drawing.FontStyle.Bold), ForeColor = System.Drawing.Color.FromArgb(243,156,18) };
-        private System.Windows.Forms.Label lblEmpNome     = new System.Windows.Forms.Label { Text = "Raz\u00e3o Social:",  AutoSize = true, Left = 22, Top = 92,  ForeColor = System.Drawing.Color.FromArgb(160,175,210) };
-        private System.Windows.Forms.Label lblEmpFantasia = new System.Windows.Forms.Label { Text = "Nome Fantasia:",  AutoSize = true, Left = 22, Top = 123, ForeColor = System.Drawing.Color.FromArgb(160,175,210) };
-        private System.Windows.Forms.Label lblEmpCNPJ     = new System.Windows.Forms.Label { Text = "CNPJ:",          AutoSize = true, Left = 22, Top = 154, ForeColor = System.Drawing.Color.FromArgb(160,175,210) };
-        private System.Windows.Forms.Label lblEmpTel      = new System.Windows.Forms.Label { Text = "Telefone:",      AutoSize = true, Left = 22, Top = 185, ForeColor = System.Drawing.Color.FromArgb(160,175,210) };
-        private System.Windows.Forms.Label lblEmpEmail    = new System.Windows.Forms.Label { Text = "E-mail:",        AutoSize = true, Left = 22, Top = 216, ForeColor = System.Drawing.Color.FromArgb(160,175,210) };
-        private System.Windows.Forms.Label lblEmpEnd      = new System.Windows.Forms.Label { Text = "Endere\u00e7o:", AutoSize = true, Left = 22, Top = 247, ForeColor = System.Drawing.Color.FromArgb(160,175,210) };
+        private System.Windows.Forms.Label lblEmpTitle    = new System.Windows.Forms.Label { Text = "Dados da Empresa", AutoSize = true, Left = 22, Top = 18, Font = new System.Drawing.Font("Segoe UI", 11F, System.Drawing.FontStyle.Bold), ForeColor = System.Drawing.Color.FromArgb(176,110,42) };
+        private System.Windows.Forms.Label lblEmpNome     = new System.Windows.Forms.Label { Text = "Raz\u00e3o Social:",  AutoSize = true, Left = 22, Top = 92,  ForeColor = System.Drawing.Color.FromArgb(70,70,70) };
+        private System.Windows.Forms.Label lblEmpFantasia = new System.Windows.Forms.Label { Text = "Nome Fantasia:",  AutoSize = true, Left = 22, Top = 123, ForeColor = System.Drawing.Color.FromArgb(70,70,70) };
+        private System.Windows.Forms.Label lblEmpCNPJ     = new System.Windows.Forms.Label { Text = "CNPJ:",          AutoSize = true, Left = 22, Top = 154, ForeColor = System.Drawing.Color.FromArgb(70,70,70) };
+        private System.Windows.Forms.Label lblEmpTel      = new System.Windows.Forms.Label { Text = "Telefone:",      AutoSize = true, Left = 22, Top = 185, ForeColor = System.Drawing.Color.FromArgb(70,70,70) };
+        private System.Windows.Forms.Label lblEmpEmail    = new System.Windows.Forms.Label { Text = "E-mail:",        AutoSize = true, Left = 22, Top = 216, ForeColor = System.Drawing.Color.FromArgb(70,70,70) };
+        private System.Windows.Forms.Label lblEmpEnd      = new System.Windows.Forms.Label { Text = "Endere\u00e7o:", AutoSize = true, Left = 22, Top = 247, ForeColor = System.Drawing.Color.FromArgb(70,70,70) };
         // labels usuario
-        private System.Windows.Forms.Label lblUsrNome      = new System.Windows.Forms.Label { Text = "Nome:",              AutoSize = true, Left = 22, Top = 25,  ForeColor = System.Drawing.Color.FromArgb(160,175,210) };
-        private System.Windows.Forms.Label lblUsrLogin     = new System.Windows.Forms.Label { Text = "Login:",             AutoSize = true, Left = 22, Top = 65,  ForeColor = System.Drawing.Color.FromArgb(160,175,210) };
-        private System.Windows.Forms.Label lblUsrSenha     = new System.Windows.Forms.Label { Text = "Senha:",             AutoSize = true, Left = 22, Top = 105, ForeColor = System.Drawing.Color.FromArgb(160,175,210) };
-        private System.Windows.Forms.Label lblUsrSenhaConf = new System.Windows.Forms.Label { Text = "Confirmar:",         AutoSize = true, Left = 22, Top = 145, ForeColor = System.Drawing.Color.FromArgb(160,175,210) };
-        private System.Windows.Forms.Label lblUsrNivel     = new System.Windows.Forms.Label { Text = "N\u00edvel:",        AutoSize = true, Left = 22, Top = 185, ForeColor = System.Drawing.Color.FromArgb(160,175,210) };
-        private System.Windows.Forms.Label lblUsrSit       = new System.Windows.Forms.Label { Text = "Situa\u00e7\u00e3o:", AutoSize = true, Left = 22, Top = 225, ForeColor = System.Drawing.Color.FromArgb(160,175,210) };
-        private System.Windows.Forms.Label lblUsrModulos   = new System.Windows.Forms.Label { Text = "M\u00f3dulos Liberados:", AutoSize = true, Left = 22, Top = 248, Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold), ForeColor = System.Drawing.Color.FromArgb(243,156,18) };
+        private System.Windows.Forms.Label lblUsrNome      = new System.Windows.Forms.Label { Text = "Nome:",              AutoSize = true, Left = 22, Top = 25,  ForeColor = System.Drawing.Color.FromArgb(70,70,70) };
+        private System.Windows.Forms.Label lblUsrLogin     = new System.Windows.Forms.Label { Text = "Login:",             AutoSize = true, Left = 22, Top = 65,  ForeColor = System.Drawing.Color.FromArgb(70,70,70) };
+        private System.Windows.Forms.Label lblUsrSenha     = new System.Windows.Forms.Label { Text = "Senha:",             AutoSize = true, Left = 22, Top = 105, ForeColor = System.Drawing.Color.FromArgb(70,70,70) };
+        private System.Windows.Forms.Label lblUsrSenhaConf = new System.Windows.Forms.Label { Text = "Confirmar:",         AutoSize = true, Left = 22, Top = 145, ForeColor = System.Drawing.Color.FromArgb(70,70,70) };
+        private System.Windows.Forms.Label lblUsrNivel     = new System.Windows.Forms.Label { Text = "N\u00edvel:",        AutoSize = true, Left = 22, Top = 185, ForeColor = System.Drawing.Color.FromArgb(70,70,70) };
+        private System.Windows.Forms.Label lblUsrSit       = new System.Windows.Forms.Label { Text = "Situa\u00e7\u00e3o:", AutoSize = true, Left = 22, Top = 225, ForeColor = System.Drawing.Color.FromArgb(70,70,70) };
+        private System.Windows.Forms.Label lblUsrModulos   = new System.Windows.Forms.Label { Text = "M\u00f3dulos Liberados:", AutoSize = true, Left = 22, Top = 248, Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold), ForeColor = System.Drawing.Color.FromArgb(176,110,42) };
         // labels impressao
-        private System.Windows.Forms.Label lblImpTitle    = new System.Windows.Forms.Label { Text = "Configura\u00e7\u00e3o de Impress\u00e3o", AutoSize = true, Left = 22, Top = 6, Font = new System.Drawing.Font("Segoe UI", 11F, System.Drawing.FontStyle.Bold), ForeColor = System.Drawing.Color.FromArgb(243,156,18) };
-        private System.Windows.Forms.Label lblImpRotulos  = new System.Windows.Forms.Label { Text = "R\u00f3tulos do Cupom:", AutoSize = true, Left = 22, Top = 290, Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold), ForeColor = System.Drawing.Color.FromArgb(243,156,18) };
-        private System.Windows.Forms.Label lblImpNome      = new System.Windows.Forms.Label { Text = "Nome (cabe\u00e7alho):", AutoSize = true, Left = 22, Top = 36,  ForeColor = System.Drawing.Color.FromArgb(160,175,210) };
-        private System.Windows.Forms.Label lblImpEnd       = new System.Windows.Forms.Label { Text = "Endere\u00e7o:",       AutoSize = true, Left = 22, Top = 68,  ForeColor = System.Drawing.Color.FromArgb(160,175,210) };
-        private System.Windows.Forms.Label lblImpTel       = new System.Windows.Forms.Label { Text = "Telefone:",           AutoSize = true, Left = 22, Top = 100, ForeColor = System.Drawing.Color.FromArgb(160,175,210) };
-        private System.Windows.Forms.Label lblImpCNPJ      = new System.Windows.Forms.Label { Text = "CNPJ:",               AutoSize = true, Left = 22, Top = 132, ForeColor = System.Drawing.Color.FromArgb(160,175,210) };
-        private System.Windows.Forms.Label lblImpSep       = new System.Windows.Forms.Label { Text = "Separador:",          AutoSize = true, Left = 22, Top = 164, ForeColor = System.Drawing.Color.FromArgb(160,175,210) };
-        private System.Windows.Forms.Label lblImpAviso     = new System.Windows.Forms.Label { Text = "Aviso fiscal:",       AutoSize = true, Left = 22, Top = 196, ForeColor = System.Drawing.Color.FromArgb(160,175,210) };
-        private System.Windows.Forms.Label lblImpRodape    = new System.Windows.Forms.Label { Text = "Rodap\u00e9:",        AutoSize = true, Left = 22, Top = 228, ForeColor = System.Drawing.Color.FromArgb(160,175,210) };
-        private System.Windows.Forms.Label lblImpNum       = new System.Windows.Forms.Label { Text = "N\u00ba Pedido:",     AutoSize = true, Left = 22, Top = 306, ForeColor = System.Drawing.Color.FromArgb(160,175,210) };
-        private System.Windows.Forms.Label lblImpColItem   = new System.Windows.Forms.Label { Text = "Col. Item:",          AutoSize = true, Left = 22, Top = 338, ForeColor = System.Drawing.Color.FromArgb(160,175,210) };
-        private System.Windows.Forms.Label lblImpColTotal  = new System.Windows.Forms.Label { Text = "Col. Total:",         AutoSize = true, Left = 22, Top = 370, ForeColor = System.Drawing.Color.FromArgb(160,175,210) };
-        private System.Windows.Forms.Label lblImpSubtotal  = new System.Windows.Forms.Label { Text = "Subtotal:",           AutoSize = true, Left = 22, Top = 402, ForeColor = System.Drawing.Color.FromArgb(160,175,210) };
-        private System.Windows.Forms.Label lblImpTaxa      = new System.Windows.Forms.Label { Text = "Taxa entrega:",       AutoSize = true, Left = 22, Top = 434, ForeColor = System.Drawing.Color.FromArgb(160,175,210) };
-        private System.Windows.Forms.Label lblImpTotalPagar= new System.Windows.Forms.Label { Text = "Total a pagar:",      AutoSize = true, Left = 22, Top = 466, ForeColor = System.Drawing.Color.FromArgb(160,175,210) };
-        private System.Windows.Forms.Label lblImpAtendente = new System.Windows.Forms.Label { Text = "Atendente:",          AutoSize = true, Left = 22, Top = 498, ForeColor = System.Drawing.Color.FromArgb(160,175,210) };
-        private System.Windows.Forms.Label lblImpressora   = new System.Windows.Forms.Label { Text = "Impressora:",         AutoSize = true, Left = 22, Top = 536, ForeColor = System.Drawing.Color.FromArgb(160,175,210) };
-        private System.Windows.Forms.Label lblLargura      = new System.Windows.Forms.Label { Text = "Largura (chars):",    AutoSize = true, Left = 22, Top = 568, ForeColor = System.Drawing.Color.FromArgb(160,175,210) };
+        private System.Windows.Forms.Label lblImpTitle    = new System.Windows.Forms.Label { Text = "Configura\u00e7\u00e3o de Impress\u00e3o", AutoSize = true, Left = 22, Top = 6, Font = new System.Drawing.Font("Segoe UI", 11F, System.Drawing.FontStyle.Bold), ForeColor = System.Drawing.Color.FromArgb(176,110,42) };
+        private System.Windows.Forms.Label lblImpRotulos  = new System.Windows.Forms.Label { Text = "R\u00f3tulos do Cupom:", AutoSize = true, Left = 22, Top = 290, Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold), ForeColor = System.Drawing.Color.FromArgb(176,110,42) };
+        private System.Windows.Forms.Label lblImpNome      = new System.Windows.Forms.Label { Text = "Nome (cabe\u00e7alho):", AutoSize = true, Left = 22, Top = 36,  ForeColor = System.Drawing.Color.FromArgb(70,70,70) };
+        private System.Windows.Forms.Label lblImpEnd       = new System.Windows.Forms.Label { Text = "Endere\u00e7o:",       AutoSize = true, Left = 22, Top = 68,  ForeColor = System.Drawing.Color.FromArgb(70,70,70) };
+        private System.Windows.Forms.Label lblImpTel       = new System.Windows.Forms.Label { Text = "Telefone:",           AutoSize = true, Left = 22, Top = 100, ForeColor = System.Drawing.Color.FromArgb(70,70,70) };
+        private System.Windows.Forms.Label lblImpCNPJ      = new System.Windows.Forms.Label { Text = "CNPJ:",               AutoSize = true, Left = 22, Top = 132, ForeColor = System.Drawing.Color.FromArgb(70,70,70) };
+        private System.Windows.Forms.Label lblImpSep       = new System.Windows.Forms.Label { Text = "Separador:",          AutoSize = true, Left = 22, Top = 164, ForeColor = System.Drawing.Color.FromArgb(70,70,70) };
+        private System.Windows.Forms.Label lblImpAviso     = new System.Windows.Forms.Label { Text = "Aviso fiscal:",       AutoSize = true, Left = 22, Top = 196, ForeColor = System.Drawing.Color.FromArgb(70,70,70) };
+        private System.Windows.Forms.Label lblImpRodape    = new System.Windows.Forms.Label { Text = "Rodap\u00e9:",        AutoSize = true, Left = 22, Top = 228, ForeColor = System.Drawing.Color.FromArgb(70,70,70) };
+        private System.Windows.Forms.Label lblImpNum       = new System.Windows.Forms.Label { Text = "N\u00ba Pedido:",     AutoSize = true, Left = 22, Top = 306, ForeColor = System.Drawing.Color.FromArgb(70,70,70) };
+        private System.Windows.Forms.Label lblImpColItem   = new System.Windows.Forms.Label { Text = "Col. Item:",          AutoSize = true, Left = 22, Top = 338, ForeColor = System.Drawing.Color.FromArgb(70,70,70) };
+        private System.Windows.Forms.Label lblImpColTotal  = new System.Windows.Forms.Label { Text = "Col. Total:",         AutoSize = true, Left = 22, Top = 370, ForeColor = System.Drawing.Color.FromArgb(70,70,70) };
+        private System.Windows.Forms.Label lblImpSubtotal  = new System.Windows.Forms.Label { Text = "Subtotal:",           AutoSize = true, Left = 22, Top = 402, ForeColor = System.Drawing.Color.FromArgb(70,70,70) };
+        private System.Windows.Forms.Label lblImpTaxa      = new System.Windows.Forms.Label { Text = "Taxa entrega:",       AutoSize = true, Left = 22, Top = 434, ForeColor = System.Drawing.Color.FromArgb(70,70,70) };
+        private System.Windows.Forms.Label lblImpTotalPagar= new System.Windows.Forms.Label { Text = "Total a pagar:",      AutoSize = true, Left = 22, Top = 466, ForeColor = System.Drawing.Color.FromArgb(70,70,70) };
+        private System.Windows.Forms.Label lblImpAtendente = new System.Windows.Forms.Label { Text = "Atendente:",          AutoSize = true, Left = 22, Top = 498, ForeColor = System.Drawing.Color.FromArgb(70,70,70) };
+        private System.Windows.Forms.Label lblImpressora   = new System.Windows.Forms.Label { Text = "Impressora:",         AutoSize = true, Left = 22, Top = 536, ForeColor = System.Drawing.Color.FromArgb(70,70,70) };
+        private System.Windows.Forms.Label lblLargura      = new System.Windows.Forms.Label { Text = "Largura (chars):",    AutoSize = true, Left = 22, Top = 568, ForeColor = System.Drawing.Color.FromArgb(70,70,70) };
     }
 }

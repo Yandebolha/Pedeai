@@ -1,4 +1,4 @@
-﻿using System.Drawing;
+using System.Drawing;
 using System.Windows.Forms;
 
 namespace Pedeai.Forms
@@ -59,7 +59,7 @@ namespace Pedeai.Forms
             this.txtDescricao.Top  = 84;
             this.txtDescricao.Width = 306;
             this.txtDescricao.BackColor = System.Drawing.Color.FromArgb(50, 65, 100);
-            this.txtDescricao.ForeColor = System.Drawing.Color.White;
+            this.txtDescricao.ForeColor = System.Drawing.Color.FromArgb(50, 50, 50);
             // lblVal
             this.lblVal.Text = "Valor R$:";
             this.lblVal.Left = 12;
@@ -72,14 +72,14 @@ namespace Pedeai.Forms
             this.numValor.DecimalPlaces = 2;
             this.numValor.Maximum = 9999999;
             this.numValor.BackColor = System.Drawing.Color.FromArgb(50, 65, 100);
-            this.numValor.ForeColor = System.Drawing.Color.White;
+            this.numValor.ForeColor = System.Drawing.Color.FromArgb(50, 50, 50);
             // btnSal
             this.btnSal.Text = "Salvar";
             this.btnSal.Left = 110;
             this.btnSal.Top  = 162;
             this.btnSal.Width  = 110;
             this.btnSal.Height = 30;
-            this.btnSal.BackColor = System.Drawing.Color.FromArgb(52, 152, 219);
+            this.btnSal.BackColor = System.Drawing.Color.FromArgb(224, 113, 42);
             this.btnSal.ForeColor = System.Drawing.Color.White;
             this.btnSal.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnSal.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
@@ -98,7 +98,7 @@ namespace Pedeai.Forms
             this.btnCanc.FlatAppearance.BorderSize = 0;
             this.btnCanc.Click += new System.EventHandler(this.BtnCanc_Click);
             // Form
-            this.BackColor       = System.Drawing.Color.FromArgb(36, 48, 82);
+            this.BackColor       = System.Drawing.Color.FromArgb(176, 110, 42);
             this.ForeColor       = System.Drawing.Color.White;
             this.Font            = new System.Drawing.Font("Segoe UI", 9F);
             this.ClientSize      = new System.Drawing.Size(420, 208);

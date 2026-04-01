@@ -71,17 +71,17 @@ namespace Pedeai.Forms
             this.lblCaixaIni.Font      = new System.Drawing.Font("Segoe UI", 9F);
             this.lblCaixaIni.Text      = "";
             this.lblCaixaIni.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            this.lblCaixaIni.BackColor = System.Drawing.Color.FromArgb(36, 48, 82);
+            this.lblCaixaIni.BackColor = System.Drawing.Color.FromArgb(176, 110, 42);
 
             // ── pnlAbrir ───────────────────────────────────────────────────
             this.pnlAbrir.Dock      = System.Windows.Forms.DockStyle.Top;
             this.pnlAbrir.Height    = 140;
-            this.pnlAbrir.BackColor = System.Drawing.Color.FromArgb(36, 48, 82);
+            this.pnlAbrir.BackColor = System.Drawing.Color.FromArgb(176, 110, 42);
             this.pnlAbrir.Padding   = new System.Windows.Forms.Padding(12, 8, 12, 8);
 
             this.lblAbrir.Text      = "Abrir Turno";
             this.lblAbrir.Font      = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
-            this.lblAbrir.ForeColor = System.Drawing.Color.FromArgb(39, 174, 96);
+            this.lblAbrir.ForeColor = System.Drawing.Color.FromArgb(87, 120, 38);
             this.lblAbrir.Left = 12; this.lblAbrir.Top = 8; this.lblAbrir.AutoSize = true;
 
             this.lblCaixaIniLabel.Text      = "Caixa inicial (R$):";
@@ -104,7 +104,7 @@ namespace Pedeai.Forms
             this.btnAbrir.Text      = "\u25B6 Abrir Turno";
             this.btnAbrir.Left      = 12; this.btnAbrir.Top = 100;
             this.btnAbrir.Width     = 140; this.btnAbrir.Height = 30;
-            this.btnAbrir.BackColor = System.Drawing.Color.FromArgb(39, 174, 96);
+            this.btnAbrir.BackColor = System.Drawing.Color.FromArgb(87, 120, 38);
             this.btnAbrir.ForeColor = System.Drawing.Color.White;
             this.btnAbrir.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnAbrir.Cursor    = System.Windows.Forms.Cursors.Hand;
@@ -121,7 +121,7 @@ namespace Pedeai.Forms
             // ── pnlFechar ──────────────────────────────────────────────────
             this.pnlFechar.Dock      = System.Windows.Forms.DockStyle.Top;
             this.pnlFechar.Height    = 140;
-            this.pnlFechar.BackColor = System.Drawing.Color.FromArgb(36, 48, 82);
+            this.pnlFechar.BackColor = System.Drawing.Color.FromArgb(176, 110, 42);
             this.pnlFechar.Padding   = new System.Windows.Forms.Padding(12, 8, 12, 8);
             this.pnlFechar.Visible   = false;
 
@@ -166,7 +166,7 @@ namespace Pedeai.Forms
 
             // ── pnlHistorico ───────────────────────────────────────────────
             this.pnlHistorico.Dock      = System.Windows.Forms.DockStyle.Fill;
-            this.pnlHistorico.BackColor = System.Drawing.Color.FromArgb(28, 37, 65);
+            this.pnlHistorico.BackColor = System.Drawing.Color.FromArgb(245, 237, 216);
 
             this.lblHist.Text      = "Hist\u00f3rico de Turnos";
             this.lblHist.Font      = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
@@ -182,7 +182,7 @@ namespace Pedeai.Forms
             this.pnlFiltro.BackColor = System.Drawing.Color.Transparent;
 
             this.lblDe.Text      = "De:";
-            this.lblDe.ForeColor = System.Drawing.Color.White;
+            this.lblDe.ForeColor = System.Drawing.Color.FromArgb(60, 60, 60);
             this.lblDe.Left = 4; this.lblDe.Top = 12; this.lblDe.AutoSize = true;
 
             this.dtpDe.Left   = 30; this.dtpDe.Top = 8; this.dtpDe.Width = 110;
@@ -190,7 +190,7 @@ namespace Pedeai.Forms
             this.dtpDe.Value  = System.DateTime.Today.AddDays(-30);
 
             this.lblAte.Text      = "At\u00e9:";
-            this.lblAte.ForeColor = System.Drawing.Color.White;
+            this.lblAte.ForeColor = System.Drawing.Color.FromArgb(60, 60, 60);
             this.lblAte.Left = 152; this.lblAte.Top = 12; this.lblAte.AutoSize = true;
 
             this.dtpAte.Left   = 182; this.dtpAte.Top = 8; this.dtpAte.Width = 110;
@@ -200,7 +200,7 @@ namespace Pedeai.Forms
             this.btnFiltrar.Text      = "Filtrar";
             this.btnFiltrar.Left      = 304; this.btnFiltrar.Top = 6;
             this.btnFiltrar.Width     = 80; this.btnFiltrar.Height = 26;
-            this.btnFiltrar.BackColor = System.Drawing.Color.FromArgb(52, 152, 219);
+            this.btnFiltrar.BackColor = System.Drawing.Color.FromArgb(224, 113, 42);
             this.btnFiltrar.ForeColor = System.Drawing.Color.White;
             this.btnFiltrar.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnFiltrar.Cursor    = System.Windows.Forms.Cursors.Hand;
@@ -215,16 +215,16 @@ namespace Pedeai.Forms
 
             // gridHistorico
             this.gridHistorico.Dock                  = System.Windows.Forms.DockStyle.Fill;
-            this.gridHistorico.BackgroundColor        = System.Drawing.Color.FromArgb(22, 30, 55);
-            this.gridHistorico.ForeColor              = System.Drawing.Color.White;
-            this.gridHistorico.GridColor              = System.Drawing.Color.FromArgb(50, 60, 100);
+            this.gridHistorico.BackgroundColor        = System.Drawing.Color.FromArgb(250, 245, 238);
+            this.gridHistorico.ForeColor              = System.Drawing.Color.FromArgb(50, 50, 50);
+            this.gridHistorico.GridColor              = System.Drawing.Color.FromArgb(200, 185, 160);
             this.gridHistorico.CellBorderStyle        = System.Windows.Forms.DataGridViewCellBorderStyle.SingleHorizontal;
             this.gridHistorico.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.gridHistorico.ColumnHeadersDefaultCellStyle.BackColor = System.Drawing.Color.FromArgb(28, 37, 65);
-            this.gridHistorico.ColumnHeadersDefaultCellStyle.ForeColor = System.Drawing.Color.FromArgb(200, 210, 240);
-            this.gridHistorico.DefaultCellStyle.BackColor  = System.Drawing.Color.FromArgb(30, 40, 70);
-            this.gridHistorico.DefaultCellStyle.ForeColor  = System.Drawing.Color.White;
-            this.gridHistorico.DefaultCellStyle.SelectionBackColor = System.Drawing.Color.FromArgb(52, 152, 219);
+            this.gridHistorico.ColumnHeadersDefaultCellStyle.BackColor = System.Drawing.Color.FromArgb(240, 230, 202);
+            this.gridHistorico.ColumnHeadersDefaultCellStyle.ForeColor = System.Drawing.Color.FromArgb(60, 60, 60);
+            this.gridHistorico.DefaultCellStyle.BackColor  = System.Drawing.Color.White;
+            this.gridHistorico.DefaultCellStyle.ForeColor  = System.Drawing.Color.FromArgb(50, 50, 50);
+            this.gridHistorico.DefaultCellStyle.SelectionBackColor = System.Drawing.Color.FromArgb(224, 113, 42);
             this.gridHistorico.AutoSizeColumnsMode    = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
             this.gridHistorico.ReadOnly               = true;
             this.gridHistorico.SelectionMode          = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
@@ -251,7 +251,7 @@ namespace Pedeai.Forms
             // ── Form ──────────────────────────────────────────────────────
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode       = System.Windows.Forms.AutoScaleMode.Font;
-            this.BackColor           = System.Drawing.Color.FromArgb(28, 37, 65);
+            this.BackColor           = System.Drawing.Color.FromArgb(245, 237, 216);
             this.ClientSize          = new System.Drawing.Size(640, 560);
             this.Font                = new System.Drawing.Font("Segoe UI", 9F);
             this.MinimumSize         = new System.Drawing.Size(640, 500);

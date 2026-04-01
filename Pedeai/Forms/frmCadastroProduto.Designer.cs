@@ -1,4 +1,4 @@
-﻿using System.Drawing;
+using System.Drawing;
 using System.Windows.Forms;
 
 namespace Pedeai.Forms
@@ -53,16 +53,16 @@ namespace Pedeai.Forms
             this.grid.ReadOnly = true; this.grid.AllowUserToAddRows = false;
             this.grid.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
             this.grid.RowHeadersVisible = false;
-            this.grid.BackgroundColor = System.Drawing.Color.FromArgb(20, 28, 55);
-            this.grid.DefaultCellStyle.BackColor = System.Drawing.Color.FromArgb(20, 28, 55);
-            this.grid.DefaultCellStyle.ForeColor = System.Drawing.Color.White;
-            this.grid.DefaultCellStyle.SelectionBackColor = System.Drawing.Color.FromArgb(52, 152, 219);
+            this.grid.BackgroundColor = System.Drawing.Color.FromArgb(250, 245, 238);
+            this.grid.DefaultCellStyle.BackColor = System.Drawing.Color.White;
+            this.grid.DefaultCellStyle.ForeColor = System.Drawing.Color.FromArgb(50, 50, 50);
+            this.grid.DefaultCellStyle.SelectionBackColor = System.Drawing.Color.FromArgb(224, 113, 42);
             this.grid.DefaultCellStyle.SelectionForeColor = System.Drawing.Color.White;
-            this.grid.AlternatingRowsDefaultCellStyle.BackColor = System.Drawing.Color.FromArgb(28, 37, 65);
-            this.grid.GridColor = System.Drawing.Color.FromArgb(40, 55, 90);
+            this.grid.AlternatingRowsDefaultCellStyle.BackColor = System.Drawing.Color.FromArgb(245, 237, 216);
+            this.grid.GridColor = System.Drawing.Color.FromArgb(200, 185, 160);
             this.grid.Font = new System.Drawing.Font("Segoe UI", 9F); this.grid.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.grid.ColumnHeadersDefaultCellStyle.BackColor = System.Drawing.Color.FromArgb(36, 48, 82);
-            this.grid.ColumnHeadersDefaultCellStyle.ForeColor = System.Drawing.Color.White;
+            this.grid.ColumnHeadersDefaultCellStyle.BackColor = System.Drawing.Color.FromArgb(240, 230, 202);
+            this.grid.ColumnHeadersDefaultCellStyle.ForeColor = System.Drawing.Color.FromArgb(60, 60, 60);
             this.grid.ColumnHeadersDefaultCellStyle.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
             this.grid.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
             this.grid.ColumnHeadersHeight = 34; this.grid.RowTemplate.Height = 28;
@@ -70,10 +70,10 @@ namespace Pedeai.Forms
             this.grid.DataError += new System.Windows.Forms.DataGridViewDataErrorEventHandler(this.Grid_DataError);
             // topBar
             this.topBar.Dock = System.Windows.Forms.DockStyle.Top; this.topBar.Height = 44;
-            this.topBar.BackColor = System.Drawing.Color.FromArgb(36, 48, 82);
+            this.topBar.BackColor = System.Drawing.Color.FromArgb(176, 110, 42);
             this.topBar.Controls.Add(this.btnNovo); this.topBar.Controls.Add(this.btnEditar); this.topBar.Controls.Add(this.btnCat);
             this.btnNovo.Text="+ Novo Produto"; this.btnNovo.Left=8; this.btnNovo.Top=8; this.btnNovo.Width=115; this.btnNovo.Height=28;
-            this.btnNovo.BackColor=System.Drawing.Color.FromArgb(39,174,96); this.btnNovo.ForeColor=System.Drawing.Color.White;
+            this.btnNovo.BackColor=System.Drawing.Color.FromArgb(87,120,38); this.btnNovo.ForeColor=System.Drawing.Color.White;
             this.btnNovo.FlatStyle=System.Windows.Forms.FlatStyle.Flat; this.btnNovo.Font=new System.Drawing.Font("Segoe UI",9F,System.Drawing.FontStyle.Bold);
             this.btnNovo.FlatAppearance.BorderSize=0; this.btnNovo.Click+=new System.EventHandler(this.BtnNovoProd_Click);
             this.btnEditar.Text="\u270F Editar"; this.btnEditar.Left=133; this.btnEditar.Top=8; this.btnEditar.Width=95; this.btnEditar.Height=28;
@@ -81,22 +81,22 @@ namespace Pedeai.Forms
             this.btnEditar.FlatStyle=System.Windows.Forms.FlatStyle.Flat; this.btnEditar.Font=new System.Drawing.Font("Segoe UI",9F,System.Drawing.FontStyle.Bold);
             this.btnEditar.FlatAppearance.BorderSize=0; this.btnEditar.Click+=new System.EventHandler(this.BtnEditarProd_Click);
             this.btnCat.Text="Categorias"; this.btnCat.Left=238; this.btnCat.Top=8; this.btnCat.Width=100; this.btnCat.Height=28;
-            this.btnCat.BackColor=System.Drawing.Color.FromArgb(52,152,219); this.btnCat.ForeColor=System.Drawing.Color.White;
+            this.btnCat.BackColor=System.Drawing.Color.FromArgb(224,113,42); this.btnCat.ForeColor=System.Drawing.Color.White;
             this.btnCat.FlatStyle=System.Windows.Forms.FlatStyle.Flat; this.btnCat.Font=new System.Drawing.Font("Segoe UI",9F,System.Drawing.FontStyle.Bold);
             this.btnCat.FlatAppearance.BorderSize=0; this.btnCat.Click+=new System.EventHandler(this.BtnCatProd_Click);
             // pnlSearch
             this.pnlSearch.Dock=System.Windows.Forms.DockStyle.Top; this.pnlSearch.Height=38;
-            this.pnlSearch.BackColor=System.Drawing.Color.FromArgb(22,30,55);
+            this.pnlSearch.BackColor=System.Drawing.Color.FromArgb(235,226,208);
             this.pnlSearch.Controls.Add(this._txtFiltro); this.pnlSearch.Controls.Add(this.btnPesq);
             this._txtFiltro.Left=8; this._txtFiltro.Top=7; this._txtFiltro.Width=260; this._txtFiltro.Font=new System.Drawing.Font("Segoe UI",9.5F);
             this._txtFiltro.KeyDown+=new System.Windows.Forms.KeyEventHandler(this.TxtFiltro_KeyDown);
             this.btnPesq.Text="Pesquisar"; this.btnPesq.Left=276; this.btnPesq.Top=6; this.btnPesq.Width=90; this.btnPesq.Height=26;
-            this.btnPesq.BackColor=System.Drawing.Color.FromArgb(52,152,219); this.btnPesq.ForeColor=System.Drawing.Color.White;
+            this.btnPesq.BackColor=System.Drawing.Color.FromArgb(224,113,42); this.btnPesq.ForeColor=System.Drawing.Color.White;
             this.btnPesq.FlatStyle=System.Windows.Forms.FlatStyle.Flat; this.btnPesq.Cursor=System.Windows.Forms.Cursors.Hand;
             this.btnPesq.FlatAppearance.BorderSize=0; this.btnPesq.Click+=new System.EventHandler(this.BtnPesqProd_Click);
             // pnlForm
             this.pnlForm.Dock=System.Windows.Forms.DockStyle.Bottom; this.pnlForm.Height=225;
-            this.pnlForm.BackColor=System.Drawing.Color.FromArgb(28,37,65);
+            this.pnlForm.BackColor=System.Drawing.Color.FromArgb(245,237,216);
             this.pnlForm.BorderStyle=System.Windows.Forms.BorderStyle.FixedSingle; this.pnlForm.Visible=false;
             this.pnlForm.Controls.Add(this.lblCat);  this.pnlForm.Controls.Add(this.cmbCategoria);
             this.pnlForm.Controls.Add(this.lblNom);  this.pnlForm.Controls.Add(this.txtNome);
@@ -143,20 +143,20 @@ namespace Pedeai.Forms
             this.numEstoque.DecimalPlaces=2; this.numEstoque.Minimum=-999999; this.numEstoque.Maximum=999999;
             this.chkControlaEstoque.Text="Controla estoque"; this.chkControlaEstoque.Left=615; this.chkControlaEstoque.Top=78; this.chkControlaEstoque.AutoSize=true;
             // row 4
-            this.lblPub.Text="Publica\u00e7\u00f5es:"; this.lblPub.AutoSize=true; this.lblPub.Left=10; this.lblPub.Top=119; this.lblPub.ForeColor=System.Drawing.Color.FromArgb(180,190,220);
+            this.lblPub.Text="Publica\u00e7\u00f5es:"; this.lblPub.AutoSize=true; this.lblPub.Left=10; this.lblPub.Top=119; this.lblPub.ForeColor=System.Drawing.Color.FromArgb(70,70,70);
             this.chkSite.Text="No site"; this.chkSite.Left=90; this.chkSite.Top=116; this.chkSite.AutoSize=true;
             this.chkDestaque.Text="Destaque"; this.chkDestaque.Left=180; this.chkDestaque.Top=116; this.chkDestaque.AutoSize=true;
             // pnlBtns
             this.pnlBtns.Dock=System.Windows.Forms.DockStyle.Bottom; this.pnlBtns.Height=48;
-            this.pnlBtns.BackColor=System.Drawing.Color.FromArgb(28,37,65);
+            this.pnlBtns.BackColor=System.Drawing.Color.FromArgb(245,237,216);
             this.pnlBtns.Controls.Add(this.btnS); this.pnlBtns.Controls.Add(this.btnC); this.pnlBtns.Controls.Add(this.btnD);
             this.pnlBtns.SizeChanged+=new System.EventHandler(this.PnlBtns_SizeChanged);
             this.btnS.Text="Salvar"; this.btnS.Left=10; this.btnS.Top=10; this.btnS.Width=110; this.btnS.Height=28;
-            this.btnS.BackColor=System.Drawing.Color.FromArgb(52,152,219); this.btnS.ForeColor=System.Drawing.Color.White;
+            this.btnS.BackColor=System.Drawing.Color.FromArgb(224,113,42); this.btnS.ForeColor=System.Drawing.Color.White;
             this.btnS.FlatStyle=System.Windows.Forms.FlatStyle.Flat; this.btnS.Font=new System.Drawing.Font("Segoe UI",9F,System.Drawing.FontStyle.Bold);
             this.btnS.FlatAppearance.BorderSize=0; this.btnS.Click+=new System.EventHandler(this.BtnSalvar_Click);
             this.btnC.Text="Cancelar"; this.btnC.Left=130; this.btnC.Top=10; this.btnC.Width=110; this.btnC.Height=28;
-            this.btnC.BackColor=System.Drawing.Color.FromArgb(80,95,130); this.btnC.ForeColor=System.Drawing.Color.White;
+            this.btnC.BackColor=System.Drawing.Color.FromArgb(224,113,42); this.btnC.ForeColor=System.Drawing.Color.White;
             this.btnC.FlatStyle=System.Windows.Forms.FlatStyle.Flat; this.btnC.Font=new System.Drawing.Font("Segoe UI",9F,System.Drawing.FontStyle.Bold);
             this.btnC.FlatAppearance.BorderSize=0; this.btnC.Click+=new System.EventHandler(this.BtnCancelarProd_Click);
             this.btnD.Text="Desativar"; this.btnD.Left=250; this.btnD.Top=10; this.btnD.Width=110; this.btnD.Height=28;
@@ -168,8 +168,8 @@ namespace Pedeai.Forms
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(904, 581);
             this.MinimumSize = new System.Drawing.Size(820, 540);
-            this.BackColor = System.Drawing.Color.FromArgb(15, 22, 45);
-            this.ForeColor = System.Drawing.Color.White;
+            this.BackColor = System.Drawing.Color.FromArgb(245, 237, 216);
+            this.ForeColor = System.Drawing.Color.FromArgb(60, 60, 60);
             this.Font = new System.Drawing.Font("Segoe UI", 9F);
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "Cadastro de Produtos";

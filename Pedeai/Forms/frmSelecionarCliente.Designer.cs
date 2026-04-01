@@ -1,4 +1,4 @@
-﻿using System.Drawing;
+using System.Drawing;
 using System.Windows.Forms;
 
 namespace Pedeai.Forms
@@ -42,16 +42,16 @@ namespace Pedeai.Forms
             this.grid.ReadOnly = true; this.grid.AllowUserToAddRows = false;
             this.grid.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
             this.grid.RowHeadersVisible = false;
-            this.grid.BackgroundColor = System.Drawing.Color.FromArgb(28, 37, 65);
+            this.grid.BackgroundColor = System.Drawing.Color.FromArgb(245, 237, 216);
             this.grid.GridColor = System.Drawing.Color.FromArgb(50, 60, 100);
-            this.grid.DefaultCellStyle.BackColor = System.Drawing.Color.FromArgb(28, 37, 65);
-            this.grid.DefaultCellStyle.ForeColor = System.Drawing.Color.White;
-            this.grid.DefaultCellStyle.SelectionBackColor = System.Drawing.Color.FromArgb(52, 152, 219);
+            this.grid.DefaultCellStyle.BackColor = System.Drawing.Color.FromArgb(245, 237, 216);
+            this.grid.DefaultCellStyle.ForeColor = System.Drawing.Color.FromArgb(50, 50, 50);
+            this.grid.DefaultCellStyle.SelectionBackColor = System.Drawing.Color.FromArgb(224, 113, 42);
             this.grid.DefaultCellStyle.SelectionForeColor = System.Drawing.Color.White;
-            this.grid.AlternatingRowsDefaultCellStyle.BackColor = System.Drawing.Color.FromArgb(36, 48, 82);
+            this.grid.AlternatingRowsDefaultCellStyle.BackColor = System.Drawing.Color.FromArgb(176, 110, 42);
             this.grid.Font = new System.Drawing.Font("Segoe UI", 9F); this.grid.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.grid.ColumnHeadersDefaultCellStyle.BackColor = System.Drawing.Color.FromArgb(36, 48, 82);
-            this.grid.ColumnHeadersDefaultCellStyle.ForeColor = System.Drawing.Color.White;
+            this.grid.ColumnHeadersDefaultCellStyle.BackColor = System.Drawing.Color.FromArgb(240, 230, 202);
+            this.grid.ColumnHeadersDefaultCellStyle.ForeColor = System.Drawing.Color.FromArgb(60, 60, 60);
             this.grid.ColumnHeadersDefaultCellStyle.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
             this.grid.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
             this.grid.ColumnHeadersHeight = 34; this.grid.RowTemplate.Height = 28;
@@ -59,7 +59,7 @@ namespace Pedeai.Forms
             this.grid.DataError += new System.Windows.Forms.DataGridViewDataErrorEventHandler(this.Grid_DataError);
             // topBar
             this.topBar.Dock = System.Windows.Forms.DockStyle.Top; this.topBar.Height = 44;
-            this.topBar.BackColor = System.Drawing.Color.FromArgb(36, 48, 82);
+            this.topBar.BackColor = System.Drawing.Color.FromArgb(176, 110, 42);
             this.topBar.Controls.Add(this.lblB);
             this.topBar.Controls.Add(this.txtBusca);
             this.topBar.Controls.Add(this.btnB);
@@ -87,7 +87,7 @@ namespace Pedeai.Forms
             this.btnSel.FlatAppearance.BorderSize = 0; this.btnSel.Click += new System.EventHandler(this.BtnSelecionar_Click);
             // pnlForm
             this.pnlForm.Dock = System.Windows.Forms.DockStyle.Bottom; this.pnlForm.Height = 110;
-            this.pnlForm.BackColor = System.Drawing.Color.FromArgb(28, 37, 65);
+            this.pnlForm.BackColor = System.Drawing.Color.FromArgb(245, 237, 216);
             this.pnlForm.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.pnlForm.Visible = false;
             this.pnlForm.Controls.Add(this.lblNome);    this.pnlForm.Controls.Add(this.txtNomeCad);
@@ -128,8 +128,8 @@ namespace Pedeai.Forms
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(820, 500);
             this.Font = new System.Drawing.Font("Segoe UI", 9F);
-            this.BackColor = System.Drawing.Color.FromArgb(15, 22, 45);
-            this.ForeColor = System.Drawing.Color.White;
+            this.BackColor = System.Drawing.Color.FromArgb(245, 237, 216);
+            this.ForeColor = System.Drawing.Color.FromArgb(60, 60, 60);
             this.MinimumSize = new System.Drawing.Size(700, 400);
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "Selecionar Cliente";
