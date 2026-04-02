@@ -21,7 +21,6 @@ namespace Pedeai.Forms
             this.btnEntrar      = new System.Windows.Forms.Button();
             this.pnlCard        = new System.Windows.Forms.Panel();
             this.picLogo        = new System.Windows.Forms.PictureBox();
-            this.lblBrand       = new System.Windows.Forms.Label();
             this.lblTagline     = new System.Windows.Forms.Label();
             this.lblLoginTitle  = new System.Windows.Forms.Label();
             this.pnlLoginCard   = new System.Windows.Forms.Panel();
@@ -29,60 +28,53 @@ namespace Pedeai.Forms
             this.pnlSenhaCard   = new System.Windows.Forms.Panel();
             this.SuspendLayout();
             // ── pnlCard (white card centered on form) ─────────────────────
-            this.pnlCard.SetBounds(0, 0, 480, 580);
+            this.pnlCard.SetBounds(0, 0, 480, 560);
             this.pnlCard.BackColor = System.Drawing.Color.White;
             this.pnlCard.Anchor    = System.Windows.Forms.AnchorStyles.None;
             this.pnlCard.MouseDown += new System.Windows.Forms.MouseEventHandler(this.FormDrag_MouseDown);
             // btnFechar (X at top-right of card)
             this.btnFechar.Text = "\u2715";
-            this.btnFechar.SetBounds(446, 8, 26, 26);
+            this.btnFechar.SetBounds(442, 8, 28, 28);
             this.btnFechar.BackColor = System.Drawing.Color.Transparent;
-            this.btnFechar.ForeColor = System.Drawing.Color.FromArgb(120, 120, 120);
+            this.btnFechar.ForeColor = System.Drawing.Color.FromArgb(140, 120, 95);
             this.btnFechar.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnFechar.Font      = new System.Drawing.Font("Segoe UI", 10F);
+            this.btnFechar.Font      = new System.Drawing.Font("Segoe UI", 11F, System.Drawing.FontStyle.Bold);
             this.btnFechar.Cursor    = System.Windows.Forms.Cursors.Hand;
             this.btnFechar.DialogResult = System.Windows.Forms.DialogResult.Cancel;
             this.btnFechar.FlatAppearance.BorderSize = 0;
             this.btnFechar.Click += new System.EventHandler(this.BtnFechar_Click);
-            // picLogo (circular logo area)
+            // picLogo — exibe PNG com SizeMode=Zoom; BackColor=White funde os cantos no card
             ((System.ComponentModel.ISupportInitialize)(this.picLogo)).BeginInit();
-            this.picLogo.SetBounds(165, 36, 150, 150);
+            this.picLogo.SetBounds(140, 24, 200, 200);
             this.picLogo.SizeMode  = System.Windows.Forms.PictureBoxSizeMode.Zoom;
-            this.picLogo.BackColor = System.Drawing.Color.Transparent;
+            this.picLogo.BackColor = System.Drawing.Color.White;
             ((System.ComponentModel.ISupportInitialize)(this.picLogo)).EndInit();
-            // lblBrand
-            this.lblBrand.Text      = "RanGoFood";
-            this.lblBrand.Font      = new System.Drawing.Font("Segoe UI", 22F, System.Drawing.FontStyle.Bold);
-            this.lblBrand.ForeColor = System.Drawing.Color.FromArgb(176, 110, 42);
-            this.lblBrand.AutoSize  = false;
-            this.lblBrand.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            this.lblBrand.SetBounds(0, 192, 480, 38);
-            this.lblBrand.BackColor = System.Drawing.Color.Transparent;
             // lblTagline
             this.lblTagline.Text      = "Sistema de Gest\u00e3o de Pedidos";
             this.lblTagline.Font      = new System.Drawing.Font("Segoe UI", 10F);
-            this.lblTagline.ForeColor = System.Drawing.Color.FromArgb(120, 120, 120);
+            this.lblTagline.ForeColor = System.Drawing.Color.FromArgb(120, 110, 95);
             this.lblTagline.AutoSize  = false;
             this.lblTagline.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            this.lblTagline.SetBounds(0, 230, 480, 24);
+            this.lblTagline.SetBounds(0, 208, 480, 24);
             this.lblTagline.BackColor = System.Drawing.Color.Transparent;
             // lblLoginTitle
             this.lblLoginTitle.Text      = "\U0001F464  USU\u00c1RIO";
             this.lblLoginTitle.Font      = new System.Drawing.Font("Segoe UI", 8F, System.Drawing.FontStyle.Bold);
-            this.lblLoginTitle.ForeColor = System.Drawing.Color.FromArgb(80, 80, 80);
+            this.lblLoginTitle.ForeColor = System.Drawing.Color.FromArgb(80, 70, 55);
             this.lblLoginTitle.AutoSize  = true;
-            this.lblLoginTitle.SetBounds(60, 270, 200, 16);
+            this.lblLoginTitle.SetBounds(60, 248, 200, 16);
             this.lblLoginTitle.BackColor = System.Drawing.Color.Transparent;
             // pnlLoginCard (text box container, light gray bg)
-            this.pnlLoginCard.SetBounds(60, 290, 360, 38);
-            this.pnlLoginCard.BackColor    = System.Drawing.Color.FromArgb(240, 240, 240);
-            this.pnlLoginCard.BorderStyle  = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.pnlLoginCard.SetBounds(60, 268, 360, 40);
+            this.pnlLoginCard.BackColor    = System.Drawing.Color.FromArgb(238, 234, 227);
+            this.pnlLoginCard.BorderStyle  = System.Windows.Forms.BorderStyle.None;
             // txtLogin
-            this.txtLogin.SetBounds(8, 6, 340, 24);
-            this.txtLogin.BackColor    = System.Drawing.Color.FromArgb(240, 240, 240);
-            this.txtLogin.ForeColor    = System.Drawing.Color.FromArgb(60, 60, 60);
+            this.txtLogin.SetBounds(10, 8, 340, 24);
+            this.txtLogin.BackColor    = System.Drawing.Color.FromArgb(238, 234, 227);
+            this.txtLogin.ForeColor    = System.Drawing.Color.FromArgb(60, 50, 35);
             this.txtLogin.BorderStyle  = System.Windows.Forms.BorderStyle.None;
-            this.txtLogin.Font         = new System.Drawing.Font("Segoe UI", 11F);
+            this.txtLogin.Font         = new System.Drawing.Font("Segoe UI", 10F);
+            this.txtLogin.PlaceholderText = "LOGIN OU NOME";
             this.txtLogin.KeyDown     += new System.Windows.Forms.KeyEventHandler(this.TxtLogin_KeyDown);
             this.txtLogin.Leave       += new System.EventHandler(this.TxtLogin_Leave);
             this.pnlLoginCard.Controls.Add(this.txtLogin);
@@ -91,25 +83,25 @@ namespace Pedeai.Forms
             this.lblNomeUsuario.Font      = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Italic);
             this.lblNomeUsuario.ForeColor = System.Drawing.Color.FromArgb(87, 120, 38);
             this.lblNomeUsuario.AutoSize  = false;
-            this.lblNomeUsuario.SetBounds(60, 332, 360, 16);
+            this.lblNomeUsuario.SetBounds(60, 312, 360, 16);
             this.lblNomeUsuario.BackColor = System.Drawing.Color.Transparent;
             // lblSenhaTitle
             this.lblSenhaTitle.Text      = "\U0001F512  SENHA";
             this.lblSenhaTitle.Font      = new System.Drawing.Font("Segoe UI", 8F, System.Drawing.FontStyle.Bold);
-            this.lblSenhaTitle.ForeColor = System.Drawing.Color.FromArgb(80, 80, 80);
+            this.lblSenhaTitle.ForeColor = System.Drawing.Color.FromArgb(80, 70, 55);
             this.lblSenhaTitle.AutoSize  = true;
-            this.lblSenhaTitle.SetBounds(60, 354, 100, 16);
+            this.lblSenhaTitle.SetBounds(60, 334, 100, 16);
             this.lblSenhaTitle.BackColor = System.Drawing.Color.Transparent;
             // pnlSenhaCard
-            this.pnlSenhaCard.SetBounds(60, 374, 360, 38);
-            this.pnlSenhaCard.BackColor   = System.Drawing.Color.FromArgb(240, 240, 240);
-            this.pnlSenhaCard.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.pnlSenhaCard.SetBounds(60, 354, 360, 40);
+            this.pnlSenhaCard.BackColor   = System.Drawing.Color.FromArgb(238, 234, 227);
+            this.pnlSenhaCard.BorderStyle = System.Windows.Forms.BorderStyle.None;
             // txtSenha
-            this.txtSenha.SetBounds(8, 6, 340, 24);
-            this.txtSenha.BackColor    = System.Drawing.Color.FromArgb(240, 240, 240);
-            this.txtSenha.ForeColor    = System.Drawing.Color.FromArgb(60, 60, 60);
+            this.txtSenha.SetBounds(10, 8, 340, 24);
+            this.txtSenha.BackColor    = System.Drawing.Color.FromArgb(238, 234, 227);
+            this.txtSenha.ForeColor    = System.Drawing.Color.FromArgb(60, 50, 35);
             this.txtSenha.BorderStyle  = System.Windows.Forms.BorderStyle.None;
-            this.txtSenha.Font         = new System.Drawing.Font("Segoe UI", 11F);
+            this.txtSenha.Font         = new System.Drawing.Font("Segoe UI", 10F);
             this.txtSenha.PasswordChar = '\u2022';
             this.txtSenha.KeyDown     += new System.Windows.Forms.KeyEventHandler(this.TxtSenha_KeyDown);
             this.pnlSenhaCard.Controls.Add(this.txtSenha);
@@ -119,11 +111,11 @@ namespace Pedeai.Forms
             this.lblMensagem.AutoSize  = false;
             this.lblMensagem.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             this.lblMensagem.Font      = new System.Drawing.Font("Segoe UI", 9F);
-            this.lblMensagem.SetBounds(60, 416, 360, 18);
+            this.lblMensagem.SetBounds(60, 398, 360, 18);
             this.lblMensagem.BackColor = System.Drawing.Color.Transparent;
             // btnEntrar
             this.btnEntrar.Text      = "Entrar";
-            this.btnEntrar.SetBounds(60, 440, 360, 44);
+            this.btnEntrar.SetBounds(60, 422, 360, 46);
             this.btnEntrar.BackColor = System.Drawing.Color.FromArgb(224, 113, 42);
             this.btnEntrar.ForeColor = System.Drawing.Color.White;
             this.btnEntrar.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
@@ -135,7 +127,6 @@ namespace Pedeai.Forms
             // assemble pnlCard
             this.pnlCard.Controls.Add(this.btnFechar);
             this.pnlCard.Controls.Add(this.picLogo);
-            this.pnlCard.Controls.Add(this.lblBrand);
             this.pnlCard.Controls.Add(this.lblTagline);
             this.pnlCard.Controls.Add(this.lblLoginTitle);
             this.pnlCard.Controls.Add(this.pnlLoginCard);
@@ -151,10 +142,10 @@ namespace Pedeai.Forms
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
             this.MaximizeBox     = false;
             this.MinimizeBox     = false;
-            this.BackColor       = System.Drawing.Color.FromArgb(235, 228, 212);
+            this.BackColor       = System.Drawing.Color.FromArgb(225, 218, 205);
             this.ForeColor       = System.Drawing.Color.FromArgb(60, 60, 60);
             this.Font            = new System.Drawing.Font("Segoe UI", 10F);
-            this.ClientSize      = new System.Drawing.Size(480, 580);
+            this.ClientSize      = new System.Drawing.Size(480, 560);
             this.Controls.Add(this.pnlCard);
             this.ResumeLayout(false);
         }
@@ -167,7 +158,6 @@ namespace Pedeai.Forms
         internal System.Windows.Forms.Button    btnEntrar;
         private  System.Windows.Forms.Panel     pnlCard;
         private  System.Windows.Forms.PictureBox picLogo;
-        private  System.Windows.Forms.Label     lblBrand;
         private  System.Windows.Forms.Label     lblTagline;
         private  System.Windows.Forms.Label     lblLoginTitle;
         private  System.Windows.Forms.Panel     pnlLoginCard;

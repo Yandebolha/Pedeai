@@ -14,14 +14,60 @@ namespace Pedeai.Forms
             InitializeComponent();
             if (System.ComponentModel.LicenseManager.UsageMode == System.ComponentModel.LicenseUsageMode.Designtime) return;
             _bll = new UsuarioBLL();
-            // Tenta carregar o logo do sistema (RanGoFood.png na pasta do executável)
+
+            // Carrega a logo — SizeMode=Zoom, fundo branco igual ao card (cantos brancos do PNG invisíveis)
             try
             {
                 string imgPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "RanGoFood.png");
                 if (System.IO.File.Exists(imgPath))
-                    picLogo.Image = Image.FromFile(imgPath);
+                    picLogo.Image = new Bitmap(imgPath);
             }
-            catch { /* sem imagem, exibe em branco */ }
+            catch { }
+
+            // Borda arredondada no card
+            pnlCard.Paint += (s, e) =>
+            {
+                var g = e.Graphics;
+                g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+                var rc = new Rectangle(1, 1, pnlCard.Width - 3, pnlCard.Height - 3);
+                using var pen = new Pen(Color.FromArgb(200, 165, 110), 2f);
+                DrawRoundedRect(g, pen, rc, 18);
+            };
+
+            // Fundo arredondado nos campos de input
+            pnlLoginCard.Paint += (s, e) => PaintInputPanel(e.Graphics, pnlLoginCard);
+            pnlSenhaCard.Paint  += (s, e) => PaintInputPanel(e.Graphics, pnlSenhaCard);
+        }
+
+        private static void PaintInputPanel(Graphics g, Panel pnl)
+        {
+            g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+            var rc = new Rectangle(0, 0, pnl.Width - 1, pnl.Height - 1);
+            using var brush = new SolidBrush(Color.FromArgb(238, 234, 227));
+            DrawRoundedRectFill(g, brush, rc, 8);
+        }
+
+        private static void DrawRoundedRect(Graphics g, Pen pen, Rectangle rc, int radius)
+        {
+            using var path = RoundedPath(rc, radius);
+            g.DrawPath(pen, path);
+        }
+
+        private static void DrawRoundedRectFill(Graphics g, Brush brush, Rectangle rc, int radius)
+        {
+            using var path = RoundedPath(rc, radius);
+            g.FillPath(brush, path);
+        }
+
+        private static System.Drawing.Drawing2D.GraphicsPath RoundedPath(Rectangle rc, int r)
+        {
+            var path = new System.Drawing.Drawing2D.GraphicsPath();
+            path.AddArc(rc.X, rc.Y, r * 2, r * 2, 180, 90);
+            path.AddArc(rc.Right - r * 2, rc.Y, r * 2, r * 2, 270, 90);
+            path.AddArc(rc.Right - r * 2, rc.Bottom - r * 2, r * 2, r * 2, 0, 90);
+            path.AddArc(rc.X, rc.Bottom - r * 2, r * 2, r * 2, 90, 90);
+            path.CloseFigure();
+            return path;
         }
 
         private void BtnEntrar_Click(object sender, EventArgs e)
