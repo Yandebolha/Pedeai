@@ -101,11 +101,12 @@ namespace Pedeai.Forms
             this.btnSal.Click += new System.EventHandler(this.BtnSalvar_Click);
             this.btnCanc.Text = "Cancelar";
             this.btnCanc.Height = 34; this.btnCanc.Width = 98; this.btnCanc.Top = 10;
-            this.btnCanc.BackColor = System.Drawing.Color.FromArgb(224, 113, 42);
-            this.btnCanc.ForeColor = System.Drawing.Color.White;
+            this.btnCanc.BackColor = System.Drawing.Color.FromArgb(245, 237, 216);
+            this.btnCanc.ForeColor = System.Drawing.Color.FromArgb(120, 80, 30);
             this.btnCanc.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnCanc.Font = new System.Drawing.Font("Segoe UI", 9.5F);
-            this.btnCanc.FlatAppearance.BorderSize = 0;
+            this.btnCanc.FlatAppearance.BorderSize = 1;
+            this.btnCanc.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(200, 165, 100);
             this.btnCanc.Click += new System.EventHandler(this.BtnCanc_Click);
             this.lblTotal.Text = "R$ 0,00";
             this.lblTotal.Font = new System.Drawing.Font("Segoe UI", 16F, System.Drawing.FontStyle.Bold);
@@ -272,8 +273,7 @@ namespace Pedeai.Forms
             this.btnMeioAMeio.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnMeioAMeio.Font      = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
             this.btnMeioAMeio.FlatAppearance.BorderSize = 0;
-            this.btnMeioAMeio.Anchor    = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
-            this.btnMeioAMeio.Click    += new System.EventHandler(this.BtnMeioAMeio_Click);
+            this.btnMeioAMeio.Anchor    = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;            this.btnMeioAMeio.Visible   = false;            this.btnMeioAMeio.Click    += new System.EventHandler(this.BtnMeioAMeio_Click);
             this.sideContent.Dock = System.Windows.Forms.DockStyle.Fill;
             this.sideContent.BackColor = System.Drawing.Color.FromArgb(17, 24, 50);
             this.sideContent.AutoScroll = true;
@@ -493,7 +493,7 @@ namespace Pedeai.Forms
             numDescontoItem.SetBounds(x, 57, 68, 26); x += 76;
             lblDesconto.SetBounds(x, 61, 120, 16);
             btnMeioAMeio.SetBounds(pw - 270, 57, 152, 26);
-            btnAdd.SetBounds(pw - 110, 57, 124, 26);
+            btnAdd.SetBounds(pw - 134, 57, 148, 26);
         }
 
         private void CmbEntrega_SelectedIndexChanged(object sender, System.EventArgs e) { AtualizarVisibilidade(); }

@@ -21,11 +21,11 @@ namespace Pedeai
         private int  _paginaAtual = 0; // 0=Dashboard 1=Pedidos 2=Financeiro
 
         // -- Cores ------------------------------------------------------------
-        private static readonly Color CorSidebar    = Color.FromArgb(28, 37, 65);
-        private static readonly Color CorTopBar     = Color.FromArgb(36, 48, 82);
-        private static readonly Color CorBotaoAtivo = Color.FromArgb(52, 152, 219);
-        private static readonly Color CorCard       = Color.FromArgb(44, 55, 95);
-        private static readonly Color CorFundo      = Color.FromArgb(15, 22, 45);
+        private static readonly Color CorSidebar    = Color.FromArgb(18, 20, 25);
+        private static readonly Color CorTopBar     = Color.White;
+        private static readonly Color CorBotaoAtivo = Color.FromArgb(176, 110, 42);
+        private static readonly Color CorCard       = Color.FromArgb(165, 105, 42);
+        private static readonly Color CorFundo      = Color.FromArgb(248, 245, 240);
 
         public Form1()
         {
@@ -62,7 +62,7 @@ namespace Pedeai
                 Width     = 210,
                 Height    = 42,
                 BackColor = Color.Transparent,
-                ForeColor = Color.FromArgb(200, 210, 240),
+                ForeColor = Color.FromArgb(195, 185, 165),
                 FlatStyle = FlatStyle.Flat,
                 Font      = new Font("Segoe UI", 10),
                 TextAlign = ContentAlignment.MiddleLeft,
@@ -70,8 +70,8 @@ namespace Pedeai
                 Cursor    = Cursors.Hand
             };
             btn.FlatAppearance.BorderSize       = 0;
-            btn.FlatAppearance.MouseOverBackColor = Color.FromArgb(50, 60, 100);
-            btn.FlatAppearance.MouseDownBackColor = Color.FromArgb(52, 152, 219);
+            btn.FlatAppearance.MouseOverBackColor = Color.FromArgb(35, 38, 48);
+            btn.FlatAppearance.MouseDownBackColor = Color.FromArgb(176, 110, 42);
             btn.Click += (_, __) => onClick();
             return btn;
         }
@@ -115,10 +115,10 @@ namespace Pedeai
                 Padding       = new Padding(0, 0, 0, 16)
             };
 
-            lblPedidosHoje  = CriarCard(pnlCards, "Pedidos Hoje",     "0",       Color.FromArgb(41, 128, 185));
-            lblFaturamento  = CriarCard(pnlCards, "Faturamento Hoje", "R$ 0,00", Color.FromArgb(39, 174, 96));
-            lblClientes     = CriarCard(pnlCards, "Total Clientes",   "0",       Color.FromArgb(142, 68, 173));
-            lblPendentes    = CriarCard(pnlCards, "Pedidos Pendentes","0",       Color.FromArgb(211, 84, 0), () =>
+            lblPedidosHoje  = CriarCard(pnlCards, "Pedidos Hoje",     "0",       Color.FromArgb(176, 110, 42));
+            lblFaturamento  = CriarCard(pnlCards, "Faturamento Hoje", "R$ 0,00", Color.FromArgb(115, 140, 50));
+            lblClientes     = CriarCard(pnlCards, "Total Clientes",   "0",       Color.FromArgb(155, 95, 40));
+            lblPendentes    = CriarCard(pnlCards, "Pedidos Pendentes","0",       Color.FromArgb(190, 100, 30), () =>
             {
                 MostrarPedidos();
                 if (cmbFiltroPedido != null)
@@ -131,8 +131,8 @@ namespace Pedeai
 
             // ── Barra de filtro de período ─────────────────────────────────────
             // ── Área de gráficos ──
-            Panel  MkOuter() => new Panel { Dock = DockStyle.Fill, BackColor = Color.FromArgb(13, 24, 46) };
-            Panel  MkFiltro() => new Panel { Dock = DockStyle.Top, Height = 34, BackColor = Color.FromArgb(22, 30, 55) };
+            Panel  MkOuter() => new Panel { Dock = DockStyle.Fill, BackColor = Color.FromArgb(248, 245, 240) };
+            Panel  MkFiltro() => new Panel { Dock = DockStyle.Top, Height = 34, BackColor = Color.FromArgb(235, 228, 213) };
             Label  MkLbl(string t, int x) => new Label { Text = t, ForeColor = Color.FromArgb(180, 200, 240), Left = x, Top = 9, AutoSize = true };
             DateTimePicker MkDtp(int x, DateTime v) => new DateTimePicker { Left = x, Top = 6, Width = 105, Format = DateTimePickerFormat.Short, Value = v };
             Button MkBtn(int x, Action fn)
@@ -157,7 +157,7 @@ namespace Pedeai
 
             // Gráfico 1: Vendas por Canal  (Diário / Semanal / Mensal / Anual)
             var outerC = MkOuter();
-            var filtC  = new Panel { Dock = DockStyle.Top, Height = 34, BackColor = Color.FromArgb(22, 30, 55) };
+            var filtC  = new Panel { Dock = DockStyle.Top, Height = 34, BackColor = Color.FromArgb(235, 228, 213) };
             var periodos = new[] { ("Diário", "dia"), ("Semanal", "semana"), ("Mensal", "mes"), ("Anual", "ano") };
             _btnsPeriodo = new Button[4];
             for (int pi = 0; pi < periodos.Length; pi++)
@@ -170,8 +170,8 @@ namespace Pedeai
                     Top       = 5,
                     Width     = 70,
                     Height    = 24,
-                    BackColor = idx == 0 ? CorBotaoAtivo : Color.FromArgb(40, 55, 95),
-                    ForeColor = Color.White,
+                    BackColor = idx == 0 ? CorBotaoAtivo : Color.FromArgb(200, 192, 170),
+                    ForeColor = idx == 0 ? Color.White : Color.FromArgb(70, 60, 45),
                     FlatStyle = FlatStyle.Flat,
                     Cursor    = Cursors.Hand,
                     Font      = new Font("Segoe UI", 8f)
@@ -180,21 +180,21 @@ namespace Pedeai
                 bp.Click += (_, __) =>
                 {
                     _periodoCanal = per;
-                    foreach (var b in _btnsPeriodo) b.BackColor = Color.FromArgb(40, 55, 95);
-                    bp.BackColor = CorBotaoAtivo;
+                    foreach (var b in _btnsPeriodo) { b.BackColor = Color.FromArgb(200, 192, 170); b.ForeColor = Color.FromArgb(70, 60, 45); }
+                    bp.BackColor = CorBotaoAtivo; bp.ForeColor = Color.White;
                     CarregarChartCanal();
                 };
                 _btnsPeriodo[pi] = bp;
                 filtC.Controls.Add(bp);
             }
-            _pnlChartCanal = new Panel { Dock = DockStyle.Fill, BackColor = Color.FromArgb(13, 24, 46), Tag = "Vendas por Canal" };
-            _pnlChartCanal.Paint += (s, e) => DesenharBarrasVerticais(e.Graphics, (Panel)s, _dadosCanal, Color.FromArgb(245, 175, 35));
+            _pnlChartCanal = new Panel { Dock = DockStyle.Fill, BackColor = Color.FromArgb(248, 245, 240), Tag = "Vendas por Canal" };
+            _pnlChartCanal.Paint += (s, e) => DesenharBarrasVerticais(e.Graphics, (Panel)s, _dadosCanal, Color.FromArgb(176, 110, 42));
             outerC.Controls.Add(_pnlChartCanal); outerC.Controls.Add(filtC);
-            outerC.Controls.Add(new Panel { Height = 4, Dock = DockStyle.Top, BackColor = Color.FromArgb(41, 128, 185) });
+            outerC.Controls.Add(new Panel { Height = 4, Dock = DockStyle.Top, BackColor = Color.FromArgb(176, 110, 42) });
 
             // Gráfico 2: Top 3 Produtos (Diário / Semanal / Mensal / Anual)
             var outerP = MkOuter();
-            var filtP  = new Panel { Dock = DockStyle.Top, Height = 34, BackColor = Color.FromArgb(22, 30, 55) };
+            var filtP  = new Panel { Dock = DockStyle.Top, Height = 34, BackColor = Color.FromArgb(235, 228, 213) };
             var periodosProd = new[] { ("Diário", "dia"), ("Semanal", "semana"), ("Mensal", "mes"), ("Anual", "ano") };
             _btnsProdPeriodo = new Button[4];
             for (int pi = 0; pi < periodosProd.Length; pi++)
@@ -207,8 +207,8 @@ namespace Pedeai
                     Top       = 5,
                     Width     = 70,
                     Height    = 24,
-                    BackColor = idx == 0 ? CorBotaoAtivo : Color.FromArgb(40, 55, 95),
-                    ForeColor = Color.White,
+                    BackColor = idx == 0 ? CorBotaoAtivo : Color.FromArgb(200, 192, 170),
+                    ForeColor = idx == 0 ? Color.White : Color.FromArgb(70, 60, 45),
                     FlatStyle = FlatStyle.Flat,
                     Cursor    = Cursors.Hand,
                     Font      = new Font("Segoe UI", 8f)
@@ -217,21 +217,21 @@ namespace Pedeai
                 bp.Click += (_, __) =>
                 {
                     _periodoProd = per;
-                    foreach (var b in _btnsProdPeriodo) b.BackColor = Color.FromArgb(40, 55, 95);
-                    bp.BackColor = CorBotaoAtivo;
+                    foreach (var b in _btnsProdPeriodo) { b.BackColor = Color.FromArgb(200, 192, 170); b.ForeColor = Color.FromArgb(70, 60, 45); }
+                    bp.BackColor = CorBotaoAtivo; bp.ForeColor = Color.White;
                     CarregarChartProdutos();
                 };
                 _btnsProdPeriodo[pi] = bp;
                 filtP.Controls.Add(bp);
             }
-            _pnlChartProdutos = new Panel { Dock = DockStyle.Fill, BackColor = Color.FromArgb(13, 24, 46), Tag = "Top 3 Produtos" };
-            _pnlChartProdutos.Paint += (s, e) => DesenharBarrasVerticais(e.Graphics, (Panel)s, _dadosProdutos, Color.FromArgb(245, 175, 35), "0");
+            _pnlChartProdutos = new Panel { Dock = DockStyle.Fill, BackColor = Color.FromArgb(248, 245, 240), Tag = "Top 3 Produtos" };
+            _pnlChartProdutos.Paint += (s, e) => DesenharBarrasVerticais(e.Graphics, (Panel)s, _dadosProdutos, Color.FromArgb(160, 100, 38), "0");
             outerP.Controls.Add(_pnlChartProdutos); outerP.Controls.Add(filtP);
-            outerP.Controls.Add(new Panel { Height = 4, Dock = DockStyle.Top, BackColor = Color.FromArgb(142, 68, 173) });
+            outerP.Controls.Add(new Panel { Height = 4, Dock = DockStyle.Top, BackColor = Color.FromArgb(155, 95, 38) });
 
             // Gráfico 3: Receita por Dia (Diário / Semanal / Mensal / Anual)
             var outerD = MkOuter();
-            var filtD  = new Panel { Dock = DockStyle.Top, Height = 34, BackColor = Color.FromArgb(22, 30, 55) };
+            var filtD  = new Panel { Dock = DockStyle.Top, Height = 34, BackColor = Color.FromArgb(235, 228, 213) };
             var periodosDias = new[] { ("Diário", "dia"), ("Semanal", "semana"), ("Mensal", "mes"), ("Anual", "ano") };
             _btnsDiasPeriodo = new Button[4];
             for (int pi = 0; pi < periodosDias.Length; pi++)
@@ -244,8 +244,8 @@ namespace Pedeai
                     Top       = 5,
                     Width     = 70,
                     Height    = 24,
-                    BackColor = idx == 0 ? CorBotaoAtivo : Color.FromArgb(40, 55, 95),
-                    ForeColor = Color.White,
+                    BackColor = idx == 0 ? CorBotaoAtivo : Color.FromArgb(200, 192, 170),
+                    ForeColor = idx == 0 ? Color.White : Color.FromArgb(70, 60, 45),
                     FlatStyle = FlatStyle.Flat,
                     Cursor    = Cursors.Hand,
                     Font      = new Font("Segoe UI", 8f)
@@ -254,17 +254,17 @@ namespace Pedeai
                 bp.Click += (_, __) =>
                 {
                     _periodoDias = per;
-                    foreach (var b in _btnsDiasPeriodo) b.BackColor = Color.FromArgb(40, 55, 95);
-                    bp.BackColor = CorBotaoAtivo;
+                    foreach (var b in _btnsDiasPeriodo) { b.BackColor = Color.FromArgb(200, 192, 170); b.ForeColor = Color.FromArgb(70, 60, 45); }
+                    bp.BackColor = CorBotaoAtivo; bp.ForeColor = Color.White;
                     CarregarChartDias();
                 };
                 _btnsDiasPeriodo[pi] = bp;
                 filtD.Controls.Add(bp);
             }
-            _pnlChartDias = new Panel { Dock = DockStyle.Fill, BackColor = Color.FromArgb(13, 24, 46), Tag = "Receita por Dia" };
-            _pnlChartDias.Paint += (s, e) => DesenharBarrasVerticais(e.Graphics, (Panel)s, _dadosDias, Color.FromArgb(245, 175, 35));
+            _pnlChartDias = new Panel { Dock = DockStyle.Fill, BackColor = Color.FromArgb(248, 245, 240), Tag = "Receita por Dia" };
+            _pnlChartDias.Paint += (s, e) => DesenharBarrasVerticais(e.Graphics, (Panel)s, _dadosDias, Color.FromArgb(115, 140, 50));
             outerD.Controls.Add(_pnlChartDias); outerD.Controls.Add(filtD);
-            outerD.Controls.Add(new Panel { Height = 4, Dock = DockStyle.Top, BackColor = Color.FromArgb(39, 174, 96) });
+            outerD.Controls.Add(new Panel { Height = 4, Dock = DockStyle.Top, BackColor = Color.FromArgb(115, 140, 50) });
 
             tbl.Controls.Add(outerC, 0, 0);
             tbl.Controls.Add(outerP, 0, 1);
@@ -304,14 +304,14 @@ namespace Pedeai
             g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.ClearTypeGridFit;
             int W = pnl.Width, H = pnl.Height;
 
-            using var bgBrush    = new SolidBrush(Color.FromArgb(13, 24, 46));
+            using var bgBrush    = new SolidBrush(Color.FromArgb(248, 245, 240));
             using var titleFont  = new Font("Segoe UI", 10f, FontStyle.Bold);
             using var labelFont  = new Font("Segoe UI", 7f);
             using var valFont    = new Font("Segoe UI", 7f, FontStyle.Bold);
-            using var whiteBrush = new SolidBrush(Color.White);
-            using var grayBrush  = new SolidBrush(Color.FromArgb(140, 165, 205));
+            using var whiteBrush = new SolidBrush(Color.FromArgb(50, 40, 20));
+            using var grayBrush  = new SolidBrush(Color.FromArgb(130, 115, 90));
             using var barBrush   = new SolidBrush(corBarra);
-            using var gridPen    = new System.Drawing.Pen(Color.FromArgb(30, 50, 90), 1f);
+            using var gridPen    = new System.Drawing.Pen(Color.FromArgb(215, 205, 190), 1f);
             gridPen.DashStyle    = System.Drawing.Drawing2D.DashStyle.Dot;
 
             g.FillRectangle(bgBrush, 0, 0, W, H);
@@ -389,14 +389,14 @@ namespace Pedeai
             g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.ClearTypeGridFit;
             int W = pnl.Width, H = pnl.Height;
 
-            using var bgBrush    = new SolidBrush(Color.FromArgb(13, 24, 46));
+            using var bgBrush    = new SolidBrush(Color.FromArgb(248, 245, 240));
             using var titleFont  = new Font("Segoe UI", 10f, FontStyle.Bold);
             using var labelFont  = new Font("Segoe UI", 7.5f);
             using var valFont    = new Font("Segoe UI", 7f, FontStyle.Bold);
-            using var whiteBrush = new SolidBrush(Color.White);
-            using var grayBrush  = new SolidBrush(Color.FromArgb(140, 165, 205));
+            using var whiteBrush = new SolidBrush(Color.FromArgb(50, 40, 20));
+            using var grayBrush  = new SolidBrush(Color.FromArgb(130, 115, 90));
             using var barBrush   = new SolidBrush(corBarra);
-            using var gridPen    = new System.Drawing.Pen(Color.FromArgb(30, 50, 90), 1f);
+            using var gridPen    = new System.Drawing.Pen(Color.FromArgb(215, 205, 190), 1f);
             gridPen.DashStyle    = System.Drawing.Drawing2D.DashStyle.Dot;
 
             g.FillRectangle(bgBrush, 0, 0, W, H);
@@ -446,14 +446,14 @@ namespace Pedeai
             g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.ClearTypeGridFit;
             int W = pnl.Width, H = pnl.Height;
 
-            using var bgBrush    = new SolidBrush(Color.FromArgb(13, 24, 46));
+            using var bgBrush    = new SolidBrush(Color.FromArgb(248, 245, 240));
             using var titleFont  = new Font("Segoe UI", 10f, FontStyle.Bold);
             using var labelFont  = new Font("Segoe UI", 7f);
-            using var whiteBrush = new SolidBrush(Color.White);
-            using var grayBrush  = new SolidBrush(Color.FromArgb(140, 165, 205));
+            using var whiteBrush = new SolidBrush(Color.FromArgb(50, 40, 20));
+            using var grayBrush  = new SolidBrush(Color.FromArgb(130, 115, 90));
             using var linePen    = new System.Drawing.Pen(corLinha, 2.5f);
             using var dotBrush   = new SolidBrush(corLinha);
-            using var gridPen    = new System.Drawing.Pen(Color.FromArgb(30, 50, 90), 1f);
+            using var gridPen    = new System.Drawing.Pen(Color.FromArgb(215, 205, 190), 1f);
             gridPen.DashStyle    = System.Drawing.Drawing2D.DashStyle.Dot;
 
             g.FillRectangle(bgBrush, 0, 0, W, H);
@@ -594,14 +594,28 @@ namespace Pedeai
             pnl.Controls.Add(new Label
             {
                 Text      = titulo,
-                ForeColor = Color.FromArgb(220, 230, 255),
+                ForeColor = Color.FromArgb(235, 215, 185),
                 Font      = new Font("Segoe UI", 9),
                 AutoSize  = false,
-                Width     = w,
+                Width     = w - 60,
                 Height    = 28,
                 Top       = 14,
                 Left      = 14,
                 TextAlign = ContentAlignment.TopLeft
+            });
+
+            // Food/dish icon on the right side
+            pnl.Controls.Add(new Label
+            {
+                Text      = "\uD83C\uDF7D",
+                ForeColor = Color.FromArgb(80, 255, 255, 255),
+                Font      = new Font("Segoe UI", 32),
+                AutoSize  = false,
+                Width     = 58,
+                Height    = 68,
+                Top       = 18,
+                Left      = w - 62,
+                TextAlign = ContentAlignment.MiddleCenter
             });
 
             var lblVal = new Label
@@ -610,7 +624,7 @@ namespace Pedeai
                 ForeColor = Color.White,
                 Font      = new Font("Segoe UI", 20, FontStyle.Bold),
                 AutoSize  = false,
-                Width     = w,
+                Width     = w - 60,
                 Height    = 50,
                 Top       = 40,
                 Left      = 14,
@@ -636,7 +650,7 @@ namespace Pedeai
                 BackColor = Color.Transparent
             };
 
-            var lblSit = new Label { Text = "Situacao:", ForeColor = Color.White, Left = 0, Top = 14, AutoSize = true };
+            var lblSit = new Label { Text = "Situacao:", ForeColor = Color.FromArgb(50, 40, 25), Left = 0, Top = 14, AutoSize = true };
             cmbFiltroPedido = new ComboBox
             {
                 Left          = 68,
@@ -647,7 +661,7 @@ namespace Pedeai
             cmbFiltroPedido.Items.AddRange(new object[] { "Todos", "Pendentes", "Em Preparo", "Finalizados", "Cancelados" });
             cmbFiltroPedido.SelectedIndex = 0;
 
-            var lblDt = new Label { Text = "Data:", ForeColor = Color.White, Left = 244, Top = 14, AutoSize = true };
+            var lblDt = new Label { Text = "Data:", ForeColor = Color.FromArgb(50, 40, 25), Left = 244, Top = 14, AutoSize = true };
             dtpFiltroPedido = new DateTimePicker
             {
                 Left   = 286,
@@ -679,8 +693,8 @@ namespace Pedeai
                 Top       = 8,
                 Width     = 80,
                 Height    = 28,
-                BackColor = Color.FromArgb(80, 90, 130),
-                ForeColor = Color.White,
+                BackColor = Color.FromArgb(200, 192, 170),
+                ForeColor = Color.FromArgb(60, 50, 35),
                 FlatStyle = FlatStyle.Flat,
                 Cursor    = Cursors.Hand
             };
@@ -716,7 +730,7 @@ namespace Pedeai
             lblDetalhe = new Label
             {
                 Text      = "Itens do Pedido",
-                ForeColor = Color.White,
+                ForeColor = Color.FromArgb(50, 40, 25),
                 Font      = new Font("Segoe UI", 10, FontStyle.Bold),
                 Dock      = DockStyle.Top,
                 Height    = 28,
@@ -801,11 +815,11 @@ namespace Pedeai
                 AllowUserToAddRows     = false,
                 SelectionMode          = DataGridViewSelectionMode.FullRowSelect,
                 RowHeadersVisible      = false,
-                BackgroundColor        = Color.FromArgb(28, 37, 65),
-                GridColor              = Color.FromArgb(50, 60, 100),
-                DefaultCellStyle       = { BackColor = Color.FromArgb(28, 37, 65), ForeColor = Color.White, SelectionBackColor = CorBotaoAtivo, SelectionForeColor = Color.White },
-                AlternatingRowsDefaultCellStyle = { BackColor = Color.FromArgb(36, 48, 82) },
-                ColumnHeadersDefaultCellStyle   = { BackColor = CorTopBar, ForeColor = Color.White, Font = new Font("Segoe UI", 9, FontStyle.Bold) },
+                BackgroundColor        = Color.White,
+                GridColor              = Color.FromArgb(220, 210, 195),
+                DefaultCellStyle       = { BackColor = Color.White, ForeColor = Color.FromArgb(50, 40, 30), SelectionBackColor = Color.FromArgb(176, 110, 42), SelectionForeColor = Color.White },
+                AlternatingRowsDefaultCellStyle = { BackColor = Color.FromArgb(250, 247, 242) },
+                ColumnHeadersDefaultCellStyle   = { BackColor = Color.FromArgb(36, 48, 82), ForeColor = Color.White, Font = new Font("Segoe UI", 9, FontStyle.Bold) },
                 ColumnHeadersHeightSizeMode     = DataGridViewColumnHeadersHeightSizeMode.DisableResizing,
                 ColumnHeadersHeight             = 36,
                 RowTemplate                     = { Height = 28 },
@@ -1235,9 +1249,9 @@ namespace Pedeai
 
             // ── Filtro ──
             var pnlFil = new Panel { Dock = DockStyle.Top, Height = 48, BackColor = Color.Transparent };
-            var lblDe  = new Label { Text = "De:",  ForeColor = Color.White, Left = 0,   Top = 14, AutoSize = true };
+            var lblDe  = new Label { Text = "De:",  ForeColor = Color.FromArgb(50, 40, 25), Left = 0,   Top = 14, AutoSize = true };
             dtpFinDe   = new DateTimePicker { Left = 32,  Top = 10, Width = 120, Format = DateTimePickerFormat.Short, Value = DateTime.Today.AddDays(-30) };
-            var lblAte = new Label { Text = "Ate:", ForeColor = Color.White, Left = 164, Top = 14, AutoSize = true };
+            var lblAte = new Label { Text = "Ate:", ForeColor = Color.FromArgb(50, 40, 25), Left = 164, Top = 14, AutoSize = true };
             dtpFinAte  = new DateTimePicker { Left = 198, Top = 10, Width = 120, Format = DateTimePickerFormat.Short, Value = DateTime.Today };
             var btnFil = new Button { Text = "Filtrar", Left = 332, Top = 8, Width = 80, Height = 28, BackColor = CorBotaoAtivo, ForeColor = Color.White, FlatStyle = FlatStyle.Flat, Cursor = Cursors.Hand };
             btnFil.FlatAppearance.BorderSize = 0;
@@ -1263,7 +1277,7 @@ namespace Pedeai
             gridFinanceiro.CellClick += FinanceiroDia_DblClick;
 
             // ── Rodapé: Gastos de Material / Insumos ──
-            var pnlGastos = new Panel { Dock = DockStyle.Bottom, Height = 210, BackColor = Color.FromArgb(22, 30, 55) };
+            var pnlGastos = new Panel { Dock = DockStyle.Bottom, Height = 210, BackColor = Color.FromArgb(235, 228, 213) };
 
             var lblGTitle = new Label
             {
@@ -1310,9 +1324,9 @@ namespace Pedeai
             {
                 Dock      = DockStyle.Bottom,
                 Height    = 28,
-                ForeColor = Color.FromArgb(243, 156, 18),
+                ForeColor = Color.FromArgb(140, 90, 25),
                 Font      = new Font("Segoe UI", 9F, FontStyle.Bold),
-                BackColor = Color.FromArgb(22, 30, 55),
+                BackColor = Color.FromArgb(235, 228, 213),
                 Padding   = new Padding(4, 6, 0, 0),
                 Text      = ""
             };
@@ -1332,7 +1346,7 @@ namespace Pedeai
             pnl.Controls.Add(new Label
             {
                 Text      = titulo,
-                ForeColor = Color.FromArgb(220, 230, 255),
+                ForeColor = Color.FromArgb(235, 215, 185),
                 Font      = new Font("Segoe UI", 8F),
                 AutoSize  = false, Width = w, Height = 22, Top = 8, Left = 8,
             });
@@ -1388,17 +1402,17 @@ namespace Pedeai
 
                 // ── 9 cards ──
                 _pnlFinCards.Controls.Clear();
-                CriarCardFin("Total de Pedidos",    pedidos.ToString("N0"),    Color.FromArgb(41,  128, 185));
-                CriarCardFin("Vendas",              totalBruto.ToString("C"),  Color.FromArgb(39,  174,  96));
-                CriarCardFin("Compras/Entradas",    totalCompras.ToString("C"),Color.FromArgb(192,  57,  43));
-                CriarCardFin("Gastos Material",     gastosMaterial.ToString("C"), Color.FromArgb(165, 105, 18));
-                CriarCardFin("Taxa de Entrega",     taxaEnt.ToString("C"),     Color.FromArgb(22,  160, 133));
+                CriarCardFin("Total de Pedidos",    pedidos.ToString("N0"),    Color.FromArgb(176, 110, 42));
+                CriarCardFin("Vendas",              totalBruto.ToString("C"),  Color.FromArgb(115, 140, 50));
+                CriarCardFin("Compras/Entradas",    totalCompras.ToString("C"),Color.FromArgb(180, 70, 55));
+                CriarCardFin("Gastos Material",     gastosMaterial.ToString("C"), Color.FromArgb(160, 100, 38));
+                CriarCardFin("Taxa de Entrega",     taxaEnt.ToString("C"),     Color.FromArgb(130, 100, 48));
                 CriarCardFin("Lucro Estimado",      lucroFinal.ToString("C"),
-                    lucroFinal >= 0 ? Color.FromArgb(52, 152, 219) : Color.FromArgb(192, 57, 43));
+                    lucroFinal >= 0 ? Color.FromArgb(115, 140, 50) : Color.FromArgb(180, 70, 55));
                 // Conciliação por forma de pagamento
-                CriarCardFin("Dinheiro",            totalDinheiro.ToString("C"), Color.FromArgb(39, 174, 96));
-                CriarCardFin("Cart\u00e3o",         totalCartao.ToString("C"),   Color.FromArgb(41, 128, 185));
-                CriarCardFin("Pix",                 totalPix.ToString("C"),      Color.FromArgb(142, 68, 173));
+                CriarCardFin("Dinheiro",            totalDinheiro.ToString("C"), Color.FromArgb(155, 130, 48));
+                CriarCardFin("Cart\u00e3o",         totalCartao.ToString("C"),   Color.FromArgb(73, 110, 160));
+                CriarCardFin("Pix",                 totalPix.ToString("C"),      Color.FromArgb(80, 130, 110));
 
                 // ── Gastos material grid ──
                 _gridGastos.DataSource = _gastosBLL.Listar(de, ate);
@@ -1470,15 +1484,44 @@ namespace Pedeai
             while (pnlSidebar.Controls.Count > 1)
                 pnlSidebar.Controls.RemoveAt(1);
 
-            int navY = 10;
+            // -- Logo no topo do sidebar --
+            var pnlLogo = new Panel { Left = 0, Top = 5, Width = 245, Height = 72, BackColor = Color.Transparent };
+            var lblIcon  = new Label
+            {
+                Text      = "🍽",
+                Font      = new Font("Segoe UI", 22),
+                AutoSize  = false,
+                Width     = 46,
+                Height    = 46,
+                Left      = 12,
+                Top       = 12,
+                TextAlign = ContentAlignment.MiddleCenter,
+                ForeColor = Color.FromArgb(200, 165, 110)
+            };
+            var lblLogoSide = new Label
+            {
+                Text      = "RanGoFood",
+                Font      = new Font("Segoe UI", 13, FontStyle.Bold),
+                AutoSize  = true,
+                Left      = 62,
+                Top       = 20,
+                ForeColor = Color.FromArgb(210, 185, 140)
+            };
+            var sepLogo = new Panel { Left = 0, Top = 66, Width = 245, Height = 1, BackColor = Color.FromArgb(40, 42, 52) };
+            pnlLogo.Controls.Add(lblIcon);
+            pnlLogo.Controls.Add(lblLogoSide);
+            pnlLogo.Controls.Add(sepLogo);
+            pnlSidebar.Controls.Add(pnlLogo);
+
+            int navY = 80;
 
             void Secao(string titulo)
             {
-                if (navY > 10) navY += 4;
+                if (navY > 80) navY += 4;
                 var lbl = new Label
                 {
                     Text      = titulo,
-                    ForeColor = Color.FromArgb(80, 110, 160),
+                    ForeColor = Color.FromArgb(90, 82, 68),
                     Font      = new Font("Segoe UI", 7.5F, FontStyle.Bold),
                     AutoSize  = false,
                     Left      = 14,
@@ -1495,7 +1538,7 @@ namespace Pedeai
                     Top       = navY,
                     Width     = 182,
                     Height    = 1,
-                    BackColor = Color.FromArgb(45, 60, 105)
+                    BackColor = Color.FromArgb(40, 42, 52)
                 };
                 pnlSidebar.Controls.Add(sep);
                 navY += 5;

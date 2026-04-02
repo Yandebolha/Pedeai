@@ -56,7 +56,7 @@ namespace Pedeai
             // 
             // pnlTopBar
             // 
-            this.pnlTopBar.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(36)))), ((int)(((byte)(48)))), ((int)(((byte)(82)))));
+            this.pnlTopBar.BackColor = System.Drawing.Color.White;
             this.pnlTopBar.Controls.Add(this.btnSair);
             this.pnlTopBar.Controls.Add(this.lblTitulo);
             this.pnlTopBar.Controls.Add(this.lblLogoTopBar);
@@ -80,7 +80,7 @@ namespace Pedeai
             // 
             this.lblLogoTopBar.AutoSize = true;
             this.lblLogoTopBar.Font = new System.Drawing.Font("Segoe UI", 17F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.lblLogoTopBar.ForeColor = System.Drawing.Color.White;
+            this.lblLogoTopBar.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(50)))), ((int)(((byte)(40)))), ((int)(((byte)(20)))));
             this.lblLogoTopBar.Location = new System.Drawing.Point(551, 8);
             this.lblLogoTopBar.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.lblLogoTopBar.Name = "lblLogoTopBar";
@@ -94,7 +94,7 @@ namespace Pedeai
             // btnAtualizar
             // 
             this.btnAtualizar.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnAtualizar.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(52)))), ((int)(((byte)(152)))), ((int)(((byte)(219)))));
+            this.btnAtualizar.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(176)))), ((int)(((byte)(110)))), ((int)(((byte)(42)))));
             this.btnAtualizar.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnAtualizar.FlatAppearance.BorderSize = 0;
             this.btnAtualizar.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
@@ -128,12 +128,12 @@ namespace Pedeai
             // 
             // btnLogoff
             // 
-            this.btnLogoff.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(36)))), ((int)(((byte)(52)))), ((int)(((byte)(88)))));
+            this.btnLogoff.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(235)))), ((int)(((byte)(228)))), ((int)(((byte)(215)))));
             this.btnLogoff.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.btnLogoff.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(55)))), ((int)(((byte)(75)))), ((int)(((byte)(120)))));
+            this.btnLogoff.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(176)))), ((int)(((byte)(110)))), ((int)(((byte)(42)))));
             this.btnLogoff.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnLogoff.Font = new System.Drawing.Font("Segoe UI", 8.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.btnLogoff.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(150)))), ((int)(((byte)(185)))), ((int)(((byte)(230)))));
+            this.btnLogoff.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(120)))), ((int)(((byte)(75)))), ((int)(((byte)(25)))));
             this.btnLogoff.Location = new System.Drawing.Point(787, 14);
             this.btnLogoff.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.btnLogoff.Name = "btnLogoff";
@@ -162,12 +162,12 @@ namespace Pedeai
             // 
             // btnMaximize
             // 
-            this.btnMaximize.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(52)))), ((int)(((byte)(68)))), ((int)(((byte)(105)))));
+            this.btnMaximize.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(215)))), ((int)(((byte)(205)))));
             this.btnMaximize.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnMaximize.FlatAppearance.BorderSize = 0;
             this.btnMaximize.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnMaximize.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.btnMaximize.ForeColor = System.Drawing.Color.White;
+            this.btnMaximize.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(55)))), ((int)(((byte)(45)))));
             this.btnMaximize.Location = new System.Drawing.Point(1195, 0);
             this.btnMaximize.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.btnMaximize.Name = "btnMaximize";
@@ -179,12 +179,12 @@ namespace Pedeai
             // 
             // btnMinimize
             // 
-            this.btnMinimize.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(52)))), ((int)(((byte)(68)))), ((int)(((byte)(105)))));
+            this.btnMinimize.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(215)))), ((int)(((byte)(205)))));
             this.btnMinimize.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnMinimize.FlatAppearance.BorderSize = 0;
             this.btnMinimize.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnMinimize.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.btnMinimize.ForeColor = System.Drawing.Color.White;
+            this.btnMinimize.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(55)))), ((int)(((byte)(45)))));
             this.btnMinimize.Location = new System.Drawing.Point(1154, 0);
             this.btnMinimize.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.btnMinimize.Name = "btnMinimize";
@@ -198,7 +198,7 @@ namespace Pedeai
             // 
             this.lblTitulo.AutoSize = true;
             this.lblTitulo.Font = new System.Drawing.Font("Segoe UI", 14F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.lblTitulo.ForeColor = System.Drawing.Color.White;
+            this.lblTitulo.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(50)))), ((int)(((byte)(40)))), ((int)(((byte)(20)))));
             this.lblTitulo.Location = new System.Drawing.Point(35, 14);
             this.lblTitulo.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.lblTitulo.Name = "lblTitulo";
@@ -211,7 +211,7 @@ namespace Pedeai
             // 
             // pnlSidebar
             // 
-            this.pnlSidebar.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(28)))), ((int)(((byte)(37)))), ((int)(((byte)(65)))));
+            this.pnlSidebar.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(18)))), ((int)(((byte)(20)))), ((int)(((byte)(25)))));
             this.pnlSidebar.Controls.Add(this.pnlSidebarAccent);
             this.pnlSidebar.Dock = System.Windows.Forms.DockStyle.Left;
             this.pnlSidebar.Location = new System.Drawing.Point(0, 60);
@@ -222,7 +222,7 @@ namespace Pedeai
             // 
             // pnlSidebarAccent
             // 
-            this.pnlSidebarAccent.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(52)))), ((int)(((byte)(152)))), ((int)(((byte)(219)))));
+            this.pnlSidebarAccent.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(176)))), ((int)(((byte)(110)))), ((int)(((byte)(42)))));
             this.pnlSidebarAccent.Location = new System.Drawing.Point(0, 0);
             this.pnlSidebarAccent.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.pnlSidebarAccent.Name = "pnlSidebarAccent";
@@ -231,7 +231,7 @@ namespace Pedeai
             // 
             // pnlFooter
             // 
-            this.pnlFooter.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(18)))), ((int)(((byte)(25)))), ((int)(((byte)(50)))));
+            this.pnlFooter.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(18)))), ((int)(((byte)(20)))), ((int)(((byte)(25)))));
             this.pnlFooter.Controls.Add(this.lblFooterEmpresa);
             this.pnlFooter.Controls.Add(this.lblFooterUsuario);
             this.pnlFooter.Dock = System.Windows.Forms.DockStyle.Bottom;
@@ -246,7 +246,7 @@ namespace Pedeai
             // 
             this.lblFooterEmpresa.AutoSize = true;
             this.lblFooterEmpresa.Font = new System.Drawing.Font("Segoe UI", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.lblFooterEmpresa.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(90)))), ((int)(((byte)(120)))), ((int)(((byte)(170)))));
+            this.lblFooterEmpresa.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(120)))), ((int)(((byte)(105)))), ((int)(((byte)(80)))));
             this.lblFooterEmpresa.Location = new System.Drawing.Point(14, 8);
             this.lblFooterEmpresa.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.lblFooterEmpresa.Name = "lblFooterEmpresa";
@@ -257,7 +257,7 @@ namespace Pedeai
             // 
             this.lblFooterUsuario.AutoSize = true;
             this.lblFooterUsuario.Font = new System.Drawing.Font("Segoe UI", 8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.lblFooterUsuario.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(130)))), ((int)(((byte)(165)))), ((int)(((byte)(220)))));
+            this.lblFooterUsuario.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(160)))), ((int)(((byte)(140)))), ((int)(((byte)(110)))));
             this.lblFooterUsuario.Location = new System.Drawing.Point(0, 8);
             this.lblFooterUsuario.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.lblFooterUsuario.Name = "lblFooterUsuario";
@@ -267,7 +267,7 @@ namespace Pedeai
             // 
             // pnlContent
             // 
-            this.pnlContent.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(15)))), ((int)(((byte)(22)))), ((int)(((byte)(45)))));
+            this.pnlContent.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(245)))), ((int)(((byte)(240)))));
             this.pnlContent.Dock = System.Windows.Forms.DockStyle.Fill;
             this.pnlContent.Location = new System.Drawing.Point(245, 60);
             this.pnlContent.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
@@ -376,7 +376,7 @@ namespace Pedeai
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(15)))), ((int)(((byte)(22)))), ((int)(((byte)(45)))));
+            this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(245)))), ((int)(((byte)(240)))));
             this.ClientSize = new System.Drawing.Size(1283, 762);
             this.Controls.Add(this.pnlContent);
             this.Controls.Add(this.pnlFooter);
