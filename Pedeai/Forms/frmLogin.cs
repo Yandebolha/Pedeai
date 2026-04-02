@@ -15,12 +15,20 @@ namespace Pedeai.Forms
             if (System.ComponentModel.LicenseManager.UsageMode == System.ComponentModel.LicenseUsageMode.Designtime) return;
             _bll = new UsuarioBLL();
 
-            // Carrega a logo — SizeMode=Zoom, fundo branco igual ao card (cantos brancos do PNG invisíveis)
+            // Carrega e recorta a logo num quadrado central — sem letterbox
             try
             {
                 string imgPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "RanGoFood.png");
                 if (System.IO.File.Exists(imgPath))
-                    picLogo.Image = new Bitmap(imgPath);
+                {
+                    using var full = new Bitmap(imgPath);
+                    int size = Math.Min(full.Width, full.Height);
+                    int cx   = (full.Width  - size) / 2;
+                    int cy   = (full.Height - size) / 2;
+                    picLogo.Image = full.Clone(
+                        new Rectangle(cx, cy, size, size),
+                        full.PixelFormat);
+                }
             }
             catch { }
 

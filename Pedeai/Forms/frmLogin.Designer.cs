@@ -43,9 +43,9 @@ namespace Pedeai.Forms
             this.btnFechar.DialogResult = System.Windows.Forms.DialogResult.Cancel;
             this.btnFechar.FlatAppearance.BorderSize = 0;
             this.btnFechar.Click += new System.EventHandler(this.BtnFechar_Click);
-            // picLogo — exibe PNG com SizeMode=Zoom; BackColor=White funde os cantos no card
+            // picLogo — quadrado 200x200, recortado em código sem letterbox
             ((System.ComponentModel.ISupportInitialize)(this.picLogo)).BeginInit();
-            this.picLogo.SetBounds(140, 24, 200, 200);
+            this.picLogo.SetBounds(140, 28, 200, 200);
             this.picLogo.SizeMode  = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.picLogo.BackColor = System.Drawing.Color.White;
             ((System.ComponentModel.ISupportInitialize)(this.picLogo)).EndInit();
@@ -55,7 +55,7 @@ namespace Pedeai.Forms
             this.lblTagline.ForeColor = System.Drawing.Color.FromArgb(120, 110, 95);
             this.lblTagline.AutoSize  = false;
             this.lblTagline.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            this.lblTagline.SetBounds(0, 208, 480, 24);
+            this.lblTagline.SetBounds(0, 234, 480, 24);
             this.lblTagline.BackColor = System.Drawing.Color.Transparent;
             // lblLoginTitle
             this.lblLoginTitle.Text      = "\U0001F464  USU\u00c1RIO";
