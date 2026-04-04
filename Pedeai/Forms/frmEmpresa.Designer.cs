@@ -182,7 +182,7 @@ namespace Pedeai.Forms
             // 
             this.cmbUsrNivel.BackColor = System.Drawing.Color.White;
             this.cmbUsrNivel.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cmbUsrNivel.ForeColor = System.Drawing.Color.White;
+            this.cmbUsrNivel.ForeColor = System.Drawing.Color.FromArgb(50, 50, 50);
             this.cmbUsrNivel.Items.AddRange(new object[] {
             "Operador",
             "Gerente",
@@ -196,7 +196,7 @@ namespace Pedeai.Forms
             // 
             this.cmbUsrSit.BackColor = System.Drawing.Color.White;
             this.cmbUsrSit.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cmbUsrSit.ForeColor = System.Drawing.Color.White;
+            this.cmbUsrSit.ForeColor = System.Drawing.Color.FromArgb(50, 50, 50);
             this.cmbUsrSit.Items.AddRange(new object[] {
             "Ativo",
             "Inativo"});
@@ -221,7 +221,7 @@ namespace Pedeai.Forms
             this.lstUsuarios.BackColor = System.Drawing.Color.White;
             this.lstUsuarios.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.lstUsuarios.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.lstUsuarios.ForeColor = System.Drawing.Color.White;
+            this.lstUsuarios.ForeColor = System.Drawing.Color.FromArgb(50, 50, 50);
             this.lstUsuarios.ItemHeight = 17;
             this.lstUsuarios.Location = new System.Drawing.Point(0, 25);
             this.lstUsuarios.Name = "lstUsuarios";
@@ -406,7 +406,7 @@ namespace Pedeai.Forms
             this.chkModTurno.Size = new System.Drawing.Size(140, 22);
             this.chkModTurno.TabIndex = 24;
             this.chkModTurno.Text = "Turno de Caixa";
-            this.chkModTurno.ForeColor = System.Drawing.Color.White;
+            this.chkModTurno.ForeColor = System.Drawing.Color.FromArgb(50, 50, 50);
             // 
             // txtImpNomeEmpresa
             // 
@@ -553,7 +553,7 @@ namespace Pedeai.Forms
             // 
             this.cmbImpressora.BackColor = System.Drawing.Color.White;
             this.cmbImpressora.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cmbImpressora.ForeColor = System.Drawing.Color.White;
+            this.cmbImpressora.ForeColor = System.Drawing.Color.FromArgb(50, 50, 50);
             this.cmbImpressora.Items.AddRange(new object[] {
             "(Impressora padr�o do sistema)"});
             this.cmbImpressora.Location = new System.Drawing.Point(208, 530);
@@ -616,7 +616,7 @@ namespace Pedeai.Forms
             this.tabEmp.Controls.Add(this.lblEmpEmail);
             this.tabEmp.Controls.Add(this.lblEmpEnd);
             this.tabEmp.Controls.Add(this.lblEmpTitle);
-            this.tabEmp.ForeColor = System.Drawing.Color.White;
+            this.tabEmp.ForeColor = System.Drawing.Color.FromArgb(50, 50, 50);
             this.tabEmp.Location = new System.Drawing.Point(4, 30);
             this.tabEmp.Name = "tabEmp";
             this.tabEmp.Size = new System.Drawing.Size(996, 607);
@@ -673,7 +673,7 @@ namespace Pedeai.Forms
             this.tabUsr.Controls.Add(this.lblUsrNivel);
             this.tabUsr.Controls.Add(this.lblUsrSit);
             this.tabUsr.Controls.Add(this.lblUsrModulos);
-            this.tabUsr.ForeColor = System.Drawing.Color.White;
+            this.tabUsr.ForeColor = System.Drawing.Color.FromArgb(50, 50, 50);
             this.tabUsr.Location = new System.Drawing.Point(4, 30);
             this.tabUsr.Name = "tabUsr";
             this.tabUsr.Size = new System.Drawing.Size(996, 607);
@@ -719,7 +719,7 @@ namespace Pedeai.Forms
             this.tabImp.Controls.Add(this.lblLargura);
             this.tabImp.Controls.Add(this.lblImpTitle);
             this.tabImp.Controls.Add(this.lblImpRotulos);
-            this.tabImp.ForeColor = System.Drawing.Color.White;
+            this.tabImp.ForeColor = System.Drawing.Color.FromArgb(50, 50, 50);
             this.tabImp.Location = new System.Drawing.Point(4, 30);
             this.tabImp.Name = "tabImp";
             this.tabImp.Size = new System.Drawing.Size(996, 642);
