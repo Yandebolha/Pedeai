@@ -122,12 +122,11 @@ namespace Pedeai.DAL
                         GROUP BY DATE_FORMAT(pediData_Lancamento,'%Y-%m')
                         ORDER BY Periodo";
             else if (periodo == "ano")
-                sql = @"SELECT DATE_FORMAT(pediData_Lancamento,'%Y-%m') AS Periodo,
+                sql = @"SELECT YEAR(pediData_Lancamento) AS Periodo,
                         COALESCE(SUM(pediValor_Total),0) AS TotalVendas
                         FROM pedido_web
-                        WHERE YEAR(pediData_Lancamento) = YEAR(CURDATE())
-                          AND pediSituacao <> 6
-                        GROUP BY DATE_FORMAT(pediData_Lancamento,'%Y-%m')
+                        WHERE pediSituacao <> 6
+                        GROUP BY YEAR(pediData_Lancamento)
                         ORDER BY Periodo";
             else // dia
                 sql = @"SELECT DATE_FORMAT(pediData_Lancamento,'%d/%m') AS Periodo,
@@ -170,7 +169,7 @@ namespace Pedeai.DAL
             else if (periodo == "mes")
                 where = "p.pediData_Lancamento >= CURDATE() - INTERVAL 29 DAY";
             else if (periodo == "ano")
-                where = "YEAR(p.pediData_Lancamento) = YEAR(CURDATE())";
+                where = "p.pediData_Lancamento >= CURDATE() - INTERVAL 3 YEAR";
             else // dia
                 where = "DATE(p.pediData_Lancamento) = CURDATE()";
             var sql = $@"SELECT i.itpwNome_Mercadoria AS Produto,

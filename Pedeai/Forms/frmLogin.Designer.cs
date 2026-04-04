@@ -35,12 +35,12 @@ namespace Pedeai.Forms
             // 
             // txtLogin
             // 
-            this.txtLogin.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(240)))), ((int)(((byte)(240)))));
+            this.txtLogin.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(238)))), ((int)(((byte)(234)))), ((int)(((byte)(227)))));
             this.txtLogin.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.txtLogin.Font = new System.Drawing.Font("Segoe UI", 11F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.txtLogin.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(60)))), ((int)(((byte)(60)))));
             this.txtLogin.Location = new System.Drawing.Point(9, 8);
-            this.txtLogin.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.txtLogin.Margin = new System.Windows.Forms.Padding(4);
             this.txtLogin.Name = "txtLogin";
             this.txtLogin.Size = new System.Drawing.Size(397, 20);
             this.txtLogin.TabIndex = 0;
@@ -49,12 +49,12 @@ namespace Pedeai.Forms
             // 
             // txtSenha
             // 
-            this.txtSenha.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(240)))), ((int)(((byte)(240)))));
+            this.txtSenha.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(238)))), ((int)(((byte)(234)))), ((int)(((byte)(227)))));
             this.txtSenha.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.txtSenha.Font = new System.Drawing.Font("Segoe UI", 11F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.txtSenha.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(60)))), ((int)(((byte)(60)))));
             this.txtSenha.Location = new System.Drawing.Point(9, 8);
-            this.txtSenha.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.txtSenha.Margin = new System.Windows.Forms.Padding(4);
             this.txtSenha.Name = "txtSenha";
             this.txtSenha.PasswordChar = '•';
             this.txtSenha.Size = new System.Drawing.Size(397, 20);
@@ -94,7 +94,7 @@ namespace Pedeai.Forms
             this.btnFechar.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.btnFechar.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(120)))), ((int)(((byte)(120)))), ((int)(((byte)(120)))));
             this.btnFechar.Location = new System.Drawing.Point(520, 10);
-            this.btnFechar.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.btnFechar.Margin = new System.Windows.Forms.Padding(4);
             this.btnFechar.Name = "btnFechar";
             this.btnFechar.Size = new System.Drawing.Size(30, 34);
             this.btnFechar.TabIndex = 0;
@@ -112,7 +112,7 @@ namespace Pedeai.Forms
             this.btnEntrar.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.btnEntrar.ForeColor = System.Drawing.Color.White;
             this.btnEntrar.Location = new System.Drawing.Point(70, 575);
-            this.btnEntrar.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.btnEntrar.Margin = new System.Windows.Forms.Padding(4);
             this.btnEntrar.Name = "btnEntrar";
             this.btnEntrar.Size = new System.Drawing.Size(420, 58);
             this.btnEntrar.TabIndex = 10;
@@ -136,17 +136,18 @@ namespace Pedeai.Forms
             this.pnlCard.Controls.Add(this.lblMensagem);
             this.pnlCard.Controls.Add(this.btnEntrar);
             this.pnlCard.Location = new System.Drawing.Point(0, 0);
-            this.pnlCard.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.pnlCard.Margin = new System.Windows.Forms.Padding(4);
             this.pnlCard.Name = "pnlCard";
             this.pnlCard.Size = new System.Drawing.Size(560, 758);
             this.pnlCard.TabIndex = 0;
+            this.pnlCard.Paint += new System.Windows.Forms.PaintEventHandler(this.pnlCard_Paint);
             this.pnlCard.MouseDown += new System.Windows.Forms.MouseEventHandler(this.FormDrag_MouseDown);
             // 
             // picLogo
             // 
             this.picLogo.BackColor = System.Drawing.Color.Transparent;
             this.picLogo.Location = new System.Drawing.Point(192, 47);
-            this.picLogo.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.picLogo.Margin = new System.Windows.Forms.Padding(4);
             this.picLogo.Name = "picLogo";
             this.picLogo.Size = new System.Drawing.Size(175, 196);
             this.picLogo.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
@@ -195,11 +196,10 @@ namespace Pedeai.Forms
             // 
             // pnlLoginCard
             // 
-            this.pnlLoginCard.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(240)))), ((int)(((byte)(240)))));
-            this.pnlLoginCard.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.pnlLoginCard.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(238)))), ((int)(((byte)(234)))), ((int)(((byte)(227)))));
             this.pnlLoginCard.Controls.Add(this.txtLogin);
             this.pnlLoginCard.Location = new System.Drawing.Point(70, 379);
-            this.pnlLoginCard.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.pnlLoginCard.Margin = new System.Windows.Forms.Padding(4);
             this.pnlLoginCard.Name = "pnlLoginCard";
             this.pnlLoginCard.Size = new System.Drawing.Size(420, 49);
             this.pnlLoginCard.TabIndex = 5;
@@ -219,11 +219,10 @@ namespace Pedeai.Forms
             // 
             // pnlSenhaCard
             // 
-            this.pnlSenhaCard.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(240)))), ((int)(((byte)(240)))));
-            this.pnlSenhaCard.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.pnlSenhaCard.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(238)))), ((int)(((byte)(234)))), ((int)(((byte)(227)))));
             this.pnlSenhaCard.Controls.Add(this.txtSenha);
             this.pnlSenhaCard.Location = new System.Drawing.Point(70, 489);
-            this.pnlSenhaCard.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.pnlSenhaCard.Margin = new System.Windows.Forms.Padding(4);
             this.pnlSenhaCard.Name = "pnlSenhaCard";
             this.pnlSenhaCard.Size = new System.Drawing.Size(420, 49);
             this.pnlSenhaCard.TabIndex = 8;
@@ -234,12 +233,12 @@ namespace Pedeai.Forms
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 17F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(235)))), ((int)(((byte)(228)))), ((int)(((byte)(212)))));
-            this.ClientSize = new System.Drawing.Size(560, 758);
+            this.ClientSize = new System.Drawing.Size(560, 749);
             this.Controls.Add(this.pnlCard);
             this.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(60)))), ((int)(((byte)(60)))));
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
-            this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.Margin = new System.Windows.Forms.Padding(4);
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "frmLogin";

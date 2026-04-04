@@ -86,6 +86,9 @@ namespace Pedeai
         private Button[]        _btnsPeriodo;
         private Button[]        _btnsProdPeriodo;
         private Button[]        _btnsDiasPeriodo;
+        private DateTimePicker  _dtpIniCanal, _dtpFimCanal;
+        private DateTimePicker  _dtpIniProd,  _dtpFimProd;
+        private DateTimePicker  _dtpIniDias,  _dtpFimDias;
         private (string label, float value)[] _dadosCanal    = Array.Empty<(string, float)>();
         private (string label, float value)[] _dadosProdutos = Array.Empty<(string, float)>();
         private (string label, float value)[] _dadosDias     = Array.Empty<(string, float)>();
@@ -117,7 +120,11 @@ namespace Pedeai
 
             lblPedidosHoje  = CriarCard(pnlCards, "Pedidos Hoje",     "0",       Color.FromArgb(176, 110, 42));
             lblFaturamento  = CriarCard(pnlCards, "Faturamento Hoje", "R$ 0,00", Color.FromArgb(115, 140, 50));
-            lblClientes     = CriarCard(pnlCards, "Total Clientes",   "0",       Color.FromArgb(155, 95, 40));
+            lblClientes     = CriarCard(pnlCards, "Total Clientes",   "0",       Color.FromArgb(155, 95, 40), () =>
+            {
+                using (var frm = new Forms.frmCadastroCliente())
+                    frm.ShowDialog(this);
+            });
             lblPendentes    = CriarCard(pnlCards, "Pedidos Pendentes","0",       Color.FromArgb(190, 100, 30), () =>
             {
                 MostrarPedidos();
@@ -187,6 +194,22 @@ namespace Pedeai
                 _btnsPeriodo[pi] = bp;
                 filtC.Controls.Add(bp);
             }
+            filtC.Height = 64;
+            _dtpIniCanal = new DateTimePicker { Left = 30,  Top = 36, Width = 100, Height = 24, Format = DateTimePickerFormat.Short, Value = DateTime.Today.AddDays(-30) };
+            _dtpFimCanal = new DateTimePicker { Left = 162, Top = 36, Width = 100, Height = 24, Format = DateTimePickerFormat.Short, Value = DateTime.Today };
+            filtC.Controls.Add(new Label { Text = "De:",  ForeColor = Color.FromArgb(80, 60, 40), Font = new Font("Segoe UI", 8f), Left = 4,   Top = 40, AutoSize = true });
+            filtC.Controls.Add(_dtpIniCanal);
+            filtC.Controls.Add(new Label { Text = "Até:", ForeColor = Color.FromArgb(80, 60, 40), Font = new Font("Segoe UI", 8f), Left = 136, Top = 40, AutoSize = true });
+            filtC.Controls.Add(_dtpFimCanal);
+            var btnFiltrarC = new Button { Text = "Filtrar", Left = 270, Top = 36, Width = 62, Height = 24, BackColor = CorBotaoAtivo, ForeColor = Color.White, FlatStyle = FlatStyle.Flat, Cursor = Cursors.Hand };
+            btnFiltrarC.FlatAppearance.BorderSize = 0;
+            btnFiltrarC.Click += (_, __) =>
+            {
+                _periodoCanal = "custom";
+                foreach (var b in _btnsPeriodo) { b.BackColor = Color.FromArgb(200, 192, 170); b.ForeColor = Color.FromArgb(70, 60, 45); }
+                CarregarChartCanal();
+            };
+            filtC.Controls.Add(btnFiltrarC);
             _pnlChartCanal = new Panel { Dock = DockStyle.Fill, BackColor = Color.FromArgb(248, 245, 240), Tag = "Vendas por Canal" };
             _pnlChartCanal.Paint += (s, e) => DesenharBarrasVerticais(e.Graphics, (Panel)s, _dadosCanal, Color.FromArgb(176, 110, 42));
             outerC.Controls.Add(_pnlChartCanal); outerC.Controls.Add(filtC);
@@ -224,7 +247,23 @@ namespace Pedeai
                 _btnsProdPeriodo[pi] = bp;
                 filtP.Controls.Add(bp);
             }
-            _pnlChartProdutos = new Panel { Dock = DockStyle.Fill, BackColor = Color.FromArgb(248, 245, 240), Tag = "Top 3 Produtos" };
+            filtP.Height = 64;
+            _dtpIniProd = new DateTimePicker { Left = 30,  Top = 36, Width = 100, Height = 24, Format = DateTimePickerFormat.Short, Value = DateTime.Today.AddDays(-30) };
+            _dtpFimProd = new DateTimePicker { Left = 162, Top = 36, Width = 100, Height = 24, Format = DateTimePickerFormat.Short, Value = DateTime.Today };
+            filtP.Controls.Add(new Label { Text = "De:",  ForeColor = Color.FromArgb(80, 60, 40), Font = new Font("Segoe UI", 8f), Left = 4,   Top = 40, AutoSize = true });
+            filtP.Controls.Add(_dtpIniProd);
+            filtP.Controls.Add(new Label { Text = "Até:", ForeColor = Color.FromArgb(80, 60, 40), Font = new Font("Segoe UI", 8f), Left = 136, Top = 40, AutoSize = true });
+            filtP.Controls.Add(_dtpFimProd);
+            var btnFiltrarP = new Button { Text = "Filtrar", Left = 270, Top = 36, Width = 62, Height = 24, BackColor = CorBotaoAtivo, ForeColor = Color.White, FlatStyle = FlatStyle.Flat, Cursor = Cursors.Hand };
+            btnFiltrarP.FlatAppearance.BorderSize = 0;
+            btnFiltrarP.Click += (_, __) =>
+            {
+                _periodoProd = "custom";
+                foreach (var b in _btnsProdPeriodo) { b.BackColor = Color.FromArgb(200, 192, 170); b.ForeColor = Color.FromArgb(70, 60, 45); }
+                CarregarChartProdutos();
+            };
+            filtP.Controls.Add(btnFiltrarP);
+            _pnlChartProdutos = new Panel { Dock = DockStyle.Fill, BackColor = Color.FromArgb(248, 245, 240), Tag = "Top 5 Produtos" };
             _pnlChartProdutos.Paint += (s, e) => DesenharBarrasVerticais(e.Graphics, (Panel)s, _dadosProdutos, Color.FromArgb(160, 100, 38), "0");
             outerP.Controls.Add(_pnlChartProdutos); outerP.Controls.Add(filtP);
             outerP.Controls.Add(new Panel { Height = 4, Dock = DockStyle.Top, BackColor = Color.FromArgb(155, 95, 38) });
@@ -261,6 +300,22 @@ namespace Pedeai
                 _btnsDiasPeriodo[pi] = bp;
                 filtD.Controls.Add(bp);
             }
+            filtD.Height = 64;
+            _dtpIniDias = new DateTimePicker { Left = 30,  Top = 36, Width = 100, Height = 24, Format = DateTimePickerFormat.Short, Value = DateTime.Today.AddDays(-30) };
+            _dtpFimDias = new DateTimePicker { Left = 162, Top = 36, Width = 100, Height = 24, Format = DateTimePickerFormat.Short, Value = DateTime.Today };
+            filtD.Controls.Add(new Label { Text = "De:",  ForeColor = Color.FromArgb(80, 60, 40), Font = new Font("Segoe UI", 8f), Left = 4,   Top = 40, AutoSize = true });
+            filtD.Controls.Add(_dtpIniDias);
+            filtD.Controls.Add(new Label { Text = "Até:", ForeColor = Color.FromArgb(80, 60, 40), Font = new Font("Segoe UI", 8f), Left = 136, Top = 40, AutoSize = true });
+            filtD.Controls.Add(_dtpFimDias);
+            var btnFiltrarD = new Button { Text = "Filtrar", Left = 270, Top = 36, Width = 62, Height = 24, BackColor = CorBotaoAtivo, ForeColor = Color.White, FlatStyle = FlatStyle.Flat, Cursor = Cursors.Hand };
+            btnFiltrarD.FlatAppearance.BorderSize = 0;
+            btnFiltrarD.Click += (_, __) =>
+            {
+                _periodoDias = "custom";
+                foreach (var b in _btnsDiasPeriodo) { b.BackColor = Color.FromArgb(200, 192, 170); b.ForeColor = Color.FromArgb(70, 60, 45); }
+                CarregarChartDias();
+            };
+            filtD.Controls.Add(btnFiltrarD);
             _pnlChartDias = new Panel { Dock = DockStyle.Fill, BackColor = Color.FromArgb(248, 245, 240), Tag = "Receita por Dia" };
             _pnlChartDias.Paint += (s, e) => DesenharBarrasVerticais(e.Graphics, (Panel)s, _dadosDias, Color.FromArgb(115, 140, 50));
             outerD.Controls.Add(_pnlChartDias); outerD.Controls.Add(filtD);
@@ -529,7 +584,7 @@ namespace Pedeai
             for (int i = 0; i < dt.Rows.Count; i++)
             {
                 string lbl = isDate && dt.Rows[i][colLabel] is DateTime d
-                    ? d.ToString("MM/dd")
+                    ? d.ToString("dd/MM")
                     : dt.Rows[i][colLabel]?.ToString() ?? "";
                 float val  = dt.Rows[i][colValue] == DBNull.Value ? 0f : Convert.ToSingle(dt.Rows[i][colValue]);
                 result[i]  = (lbl, val);
@@ -544,8 +599,9 @@ namespace Pedeai
             if (_pnlChartCanal == null) return;
             try
             {
-                _dadosCanal = DataTableParaChart(
-                    _dashBLL.GetVendasPorPeriodo(_periodoCanal), "Periodo", "TotalVendas");
+                _dadosCanal = _periodoCanal == "custom"
+                    ? DataTableParaChart(_dashBLL.GetVendasPorCanal(_dtpIniCanal.Value, _dtpFimCanal.Value), "Canal", "TotalVendas")
+                    : DataTableParaChart(_dashBLL.GetVendasPorPeriodo(_periodoCanal), "Periodo", "TotalVendas");
                 _pnlChartCanal.Invalidate();
             }
             catch { }
@@ -556,8 +612,9 @@ namespace Pedeai
             if (_pnlChartProdutos == null) return;
             try
             {
-                _dadosProdutos = DataTableParaChart(
-                    _dashBLL.GetTopProdutosPeriodo(_periodoProd, 3), "Produto", "Quantidade");
+                _dadosProdutos = _periodoProd == "custom"
+                    ? DataTableParaChart(_dashBLL.GetTopProdutos(_dtpIniProd.Value, _dtpFimProd.Value, 5), "Produto", "Quantidade")
+                    : DataTableParaChart(_dashBLL.GetTopProdutosPeriodo(_periodoProd, 5), "Produto", "Quantidade");
                 _pnlChartProdutos.Invalidate();
             }
             catch { }
@@ -568,8 +625,9 @@ namespace Pedeai
             if (_pnlChartDias == null) return;
             try
             {
-                _dadosDias = DataTableParaChart(
-                    _dashBLL.GetVendasPorPeriodo(_periodoDias), "Periodo", "TotalVendas");
+                _dadosDias = _periodoDias == "custom"
+                    ? DataTableParaChart(_dashBLL.GetVendasPorDia(_dtpIniDias.Value, _dtpFimDias.Value), "Dia", "TotalVendas", true)
+                    : DataTableParaChart(_dashBLL.GetVendasPorPeriodo(_periodoDias), "Periodo", "TotalVendas");
                 _pnlChartDias.Invalidate();
             }
             catch { }
@@ -597,25 +655,11 @@ namespace Pedeai
                 ForeColor = Color.FromArgb(235, 215, 185),
                 Font      = new Font("Segoe UI", 9),
                 AutoSize  = false,
-                Width     = w - 60,
+                Width     = w - 20,
                 Height    = 28,
                 Top       = 14,
                 Left      = 14,
                 TextAlign = ContentAlignment.TopLeft
-            });
-
-            // Food/dish icon on the right side
-            pnl.Controls.Add(new Label
-            {
-                Text      = "\uD83C\uDF7D",
-                ForeColor = Color.FromArgb(80, 255, 255, 255),
-                Font      = new Font("Segoe UI", 32),
-                AutoSize  = false,
-                Width     = 58,
-                Height    = 68,
-                Top       = 18,
-                Left      = w - 62,
-                TextAlign = ContentAlignment.MiddleCenter
             });
 
             var lblVal = new Label
@@ -624,13 +668,16 @@ namespace Pedeai
                 ForeColor = Color.White,
                 Font      = new Font("Segoe UI", 20, FontStyle.Bold),
                 AutoSize  = false,
-                Width     = w - 60,
+                Width     = w - 20,
                 Height    = 50,
                 Top       = 40,
                 Left      = 14,
                 TextAlign = ContentAlignment.TopLeft
             };
             pnl.Controls.Add(lblVal);
+            if (onClick != null)
+                foreach (Control c in pnl.Controls)
+                    c.Click += (_, __) => onClick();
             pai.Controls.Add(pnl);
             return lblVal;
         }

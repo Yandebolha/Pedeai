@@ -15,6 +15,10 @@ namespace Pedeai.Forms
             if (System.ComponentModel.LicenseManager.UsageMode == System.ComponentModel.LicenseUsageMode.Designtime) return;
             _bll = new UsuarioBLL();
 
+            // Placeholder nos campos
+            SendMessagePlaceholder(txtLogin.Handle, EM_SETCUEBANNER, (System.IntPtr)1, "Usuário");
+            SendMessagePlaceholder(txtSenha.Handle,  EM_SETCUEBANNER, (System.IntPtr)1, "Senha");
+
             // Carrega e recorta a logo num quadrado central — sem letterbox
             try
             {
@@ -41,30 +45,12 @@ namespace Pedeai.Forms
                 using var pen = new Pen(Color.FromArgb(200, 165, 110), 2f);
                 DrawRoundedRect(g, pen, rc, 18);
             };
-
-            // Fundo arredondado nos campos de input
-            pnlLoginCard.Paint += (s, e) => PaintInputPanel(e.Graphics, pnlLoginCard);
-            pnlSenhaCard.Paint  += (s, e) => PaintInputPanel(e.Graphics, pnlSenhaCard);
-        }
-
-        private static void PaintInputPanel(Graphics g, Panel pnl)
-        {
-            g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
-            var rc = new Rectangle(0, 0, pnl.Width - 1, pnl.Height - 1);
-            using var brush = new SolidBrush(Color.FromArgb(238, 234, 227));
-            DrawRoundedRectFill(g, brush, rc, 8);
         }
 
         private static void DrawRoundedRect(Graphics g, Pen pen, Rectangle rc, int radius)
         {
             using var path = RoundedPath(rc, radius);
             g.DrawPath(pen, path);
-        }
-
-        private static void DrawRoundedRectFill(Graphics g, Brush brush, Rectangle rc, int radius)
-        {
-            using var path = RoundedPath(rc, radius);
-            g.FillPath(brush, path);
         }
 
         private static System.Drawing.Drawing2D.GraphicsPath RoundedPath(Rectangle rc, int r)
@@ -163,8 +149,11 @@ namespace Pedeai.Forms
 
         private const int WM_NCLBUTTONDOWN = 0xA1;
         private const int HT_CAPTION       = 0x2;
+        private const int EM_SETCUEBANNER  = 0x1501;
         [System.Runtime.InteropServices.DllImport("user32.dll")]
         private static extern int SendMessage(System.IntPtr hWnd, int Msg, int wParam, int lParam);
+        [System.Runtime.InteropServices.DllImport("user32.dll", EntryPoint = "SendMessageW", CharSet = System.Runtime.InteropServices.CharSet.Unicode)]
+        private static extern System.IntPtr SendMessagePlaceholder(System.IntPtr hWnd, int msg, System.IntPtr wParam, string lParam);
         [System.Runtime.InteropServices.DllImport("user32.dll")]
         private static extern bool ReleaseCapture();
 
@@ -178,6 +167,11 @@ namespace Pedeai.Forms
         }
 
         private void picLogo_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void pnlCard_Paint(object sender, PaintEventArgs e)
         {
 
         }
