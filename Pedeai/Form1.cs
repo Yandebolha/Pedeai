@@ -118,8 +118,8 @@ namespace Pedeai
                 Padding       = new Padding(0, 0, 0, 16)
             };
 
-            lblPedidosHoje  = CriarCard(pnlCards, "Pedidos Hoje",     "0",       Color.FromArgb(176, 110, 42));
-            lblFaturamento  = CriarCard(pnlCards, "Faturamento Hoje", "R$ 0,00", Color.FromArgb(115, 140, 50));
+            lblPedidosHoje  = CriarCard(pnlCards, "Pedidos Hoje",     "0",       Color.FromArgb(176, 110, 42), () => MostrarPedidos());
+            lblFaturamento  = CriarCard(pnlCards, "Faturamento Hoje", "R$ 0,00", Color.FromArgb(115, 140, 50), () => MostrarFinanceiro());
             lblClientes     = CriarCard(pnlCards, "Total Clientes",   "0",       Color.FromArgb(155, 95, 40), () =>
             {
                 using (var frm = new Forms.frmCadastroCliente())
@@ -194,14 +194,14 @@ namespace Pedeai
                 _btnsPeriodo[pi] = bp;
                 filtC.Controls.Add(bp);
             }
-            filtC.Height = 64;
-            _dtpIniCanal = new DateTimePicker { Left = 30,  Top = 36, Width = 100, Height = 24, Format = DateTimePickerFormat.Short, Value = DateTime.Today.AddDays(-30) };
-            _dtpFimCanal = new DateTimePicker { Left = 162, Top = 36, Width = 100, Height = 24, Format = DateTimePickerFormat.Short, Value = DateTime.Today };
-            filtC.Controls.Add(new Label { Text = "De:",  ForeColor = Color.FromArgb(80, 60, 40), Font = new Font("Segoe UI", 8f), Left = 4,   Top = 40, AutoSize = true });
+            filtC.Height = 34;
+            _dtpIniCanal = new DateTimePicker { Left = 330, Top = 5, Width = 90, Height = 24, Format = DateTimePickerFormat.Short, Value = DateTime.Today.AddDays(-30) };
+            _dtpFimCanal = new DateTimePicker { Left = 450, Top = 5, Width = 90, Height = 24, Format = DateTimePickerFormat.Short, Value = DateTime.Today };
+            filtC.Controls.Add(new Label { Text = "De:",  ForeColor = Color.FromArgb(80, 60, 40), Font = new Font("Segoe UI", 8f), Left = 308, Top = 9, AutoSize = true });
             filtC.Controls.Add(_dtpIniCanal);
-            filtC.Controls.Add(new Label { Text = "Até:", ForeColor = Color.FromArgb(80, 60, 40), Font = new Font("Segoe UI", 8f), Left = 136, Top = 40, AutoSize = true });
+            filtC.Controls.Add(new Label { Text = "Até:", ForeColor = Color.FromArgb(80, 60, 40), Font = new Font("Segoe UI", 8f), Left = 426, Top = 9, AutoSize = true });
             filtC.Controls.Add(_dtpFimCanal);
-            var btnFiltrarC = new Button { Text = "Filtrar", Left = 270, Top = 36, Width = 62, Height = 24, BackColor = CorBotaoAtivo, ForeColor = Color.White, FlatStyle = FlatStyle.Flat, Cursor = Cursors.Hand };
+            var btnFiltrarC = new Button { Text = "Filtrar", Left = 546, Top = 5, Width = 62, Height = 24, BackColor = CorBotaoAtivo, ForeColor = Color.White, FlatStyle = FlatStyle.Flat, Cursor = Cursors.Hand };
             btnFiltrarC.FlatAppearance.BorderSize = 0;
             btnFiltrarC.Click += (_, __) =>
             {
@@ -247,14 +247,14 @@ namespace Pedeai
                 _btnsProdPeriodo[pi] = bp;
                 filtP.Controls.Add(bp);
             }
-            filtP.Height = 64;
-            _dtpIniProd = new DateTimePicker { Left = 30,  Top = 36, Width = 100, Height = 24, Format = DateTimePickerFormat.Short, Value = DateTime.Today.AddDays(-30) };
-            _dtpFimProd = new DateTimePicker { Left = 162, Top = 36, Width = 100, Height = 24, Format = DateTimePickerFormat.Short, Value = DateTime.Today };
-            filtP.Controls.Add(new Label { Text = "De:",  ForeColor = Color.FromArgb(80, 60, 40), Font = new Font("Segoe UI", 8f), Left = 4,   Top = 40, AutoSize = true });
+            filtP.Height = 34;
+            _dtpIniProd = new DateTimePicker { Left = 330, Top = 5, Width = 90, Height = 24, Format = DateTimePickerFormat.Short, Value = DateTime.Today.AddDays(-30) };
+            _dtpFimProd = new DateTimePicker { Left = 450, Top = 5, Width = 90, Height = 24, Format = DateTimePickerFormat.Short, Value = DateTime.Today };
+            filtP.Controls.Add(new Label { Text = "De:",  ForeColor = Color.FromArgb(80, 60, 40), Font = new Font("Segoe UI", 8f), Left = 308, Top = 9, AutoSize = true });
             filtP.Controls.Add(_dtpIniProd);
-            filtP.Controls.Add(new Label { Text = "Até:", ForeColor = Color.FromArgb(80, 60, 40), Font = new Font("Segoe UI", 8f), Left = 136, Top = 40, AutoSize = true });
+            filtP.Controls.Add(new Label { Text = "Até:", ForeColor = Color.FromArgb(80, 60, 40), Font = new Font("Segoe UI", 8f), Left = 426, Top = 9, AutoSize = true });
             filtP.Controls.Add(_dtpFimProd);
-            var btnFiltrarP = new Button { Text = "Filtrar", Left = 270, Top = 36, Width = 62, Height = 24, BackColor = CorBotaoAtivo, ForeColor = Color.White, FlatStyle = FlatStyle.Flat, Cursor = Cursors.Hand };
+            var btnFiltrarP = new Button { Text = "Filtrar", Left = 546, Top = 5, Width = 62, Height = 24, BackColor = CorBotaoAtivo, ForeColor = Color.White, FlatStyle = FlatStyle.Flat, Cursor = Cursors.Hand };
             btnFiltrarP.FlatAppearance.BorderSize = 0;
             btnFiltrarP.Click += (_, __) =>
             {
@@ -300,14 +300,14 @@ namespace Pedeai
                 _btnsDiasPeriodo[pi] = bp;
                 filtD.Controls.Add(bp);
             }
-            filtD.Height = 64;
-            _dtpIniDias = new DateTimePicker { Left = 30,  Top = 36, Width = 100, Height = 24, Format = DateTimePickerFormat.Short, Value = DateTime.Today.AddDays(-30) };
-            _dtpFimDias = new DateTimePicker { Left = 162, Top = 36, Width = 100, Height = 24, Format = DateTimePickerFormat.Short, Value = DateTime.Today };
-            filtD.Controls.Add(new Label { Text = "De:",  ForeColor = Color.FromArgb(80, 60, 40), Font = new Font("Segoe UI", 8f), Left = 4,   Top = 40, AutoSize = true });
+            filtD.Height = 34;
+            _dtpIniDias = new DateTimePicker { Left = 330, Top = 5, Width = 90, Height = 24, Format = DateTimePickerFormat.Short, Value = DateTime.Today.AddDays(-30) };
+            _dtpFimDias = new DateTimePicker { Left = 450, Top = 5, Width = 90, Height = 24, Format = DateTimePickerFormat.Short, Value = DateTime.Today };
+            filtD.Controls.Add(new Label { Text = "De:",  ForeColor = Color.FromArgb(80, 60, 40), Font = new Font("Segoe UI", 8f), Left = 308, Top = 9, AutoSize = true });
             filtD.Controls.Add(_dtpIniDias);
-            filtD.Controls.Add(new Label { Text = "Até:", ForeColor = Color.FromArgb(80, 60, 40), Font = new Font("Segoe UI", 8f), Left = 136, Top = 40, AutoSize = true });
+            filtD.Controls.Add(new Label { Text = "Até:", ForeColor = Color.FromArgb(80, 60, 40), Font = new Font("Segoe UI", 8f), Left = 426, Top = 9, AutoSize = true });
             filtD.Controls.Add(_dtpFimDias);
-            var btnFiltrarD = new Button { Text = "Filtrar", Left = 270, Top = 36, Width = 62, Height = 24, BackColor = CorBotaoAtivo, ForeColor = Color.White, FlatStyle = FlatStyle.Flat, Cursor = Cursors.Hand };
+            var btnFiltrarD = new Button { Text = "Filtrar", Left = 546, Top = 5, Width = 62, Height = 24, BackColor = CorBotaoAtivo, ForeColor = Color.White, FlatStyle = FlatStyle.Flat, Cursor = Cursors.Hand };
             btnFiltrarD.FlatAppearance.BorderSize = 0;
             btnFiltrarD.Click += (_, __) =>
             {

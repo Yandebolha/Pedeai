@@ -1,4 +1,4 @@
-using System.Drawing;
+﻿using System.Drawing;
 using System.Windows.Forms;
 
 namespace Pedeai.Forms
@@ -635,7 +635,7 @@ namespace Pedeai.Forms
             this.btnSalvEmp.Name = "btnSalvEmp";
             this.btnSalvEmp.Size = new System.Drawing.Size(160, 32);
             this.btnSalvEmp.TabIndex = 6;
-            this.btnSalvEmp.Text = "?  Salvar Empresa";
+            this.btnSalvEmp.Text = "✓  Salvar Empresa";
             this.btnSalvEmp.UseVisualStyleBackColor = false;
             this.btnSalvEmp.Click += new System.EventHandler(this.BtnSalvarEmpresa_Click);
             // 
@@ -678,7 +678,7 @@ namespace Pedeai.Forms
             this.tabUsr.Name = "tabUsr";
             this.tabUsr.Size = new System.Drawing.Size(996, 607);
             this.tabUsr.TabIndex = 1;
-            this.tabUsr.Text = "  Usu�rios  ";
+            this.tabUsr.Text = "  Usuários  ";
             // 
             // tabImp
             // 
@@ -724,7 +724,7 @@ namespace Pedeai.Forms
             this.tabImp.Name = "tabImp";
             this.tabImp.Size = new System.Drawing.Size(996, 642);
             this.tabImp.TabIndex = 2;
-            this.tabImp.Text = "  Impress�o  ";
+            this.tabImp.Text = "  Impressão  ";
             // 
             // btnSalvImp
             // 
@@ -737,7 +737,7 @@ namespace Pedeai.Forms
             this.btnSalvImp.Name = "btnSalvImp";
             this.btnSalvImp.Size = new System.Drawing.Size(200, 32);
             this.btnSalvImp.TabIndex = 16;
-            this.btnSalvImp.Text = "?  Salvar Configura��o";
+            this.btnSalvImp.Text = "✓  Salvar Configuração";
             this.btnSalvImp.UseVisualStyleBackColor = false;
             this.btnSalvImp.Click += new System.EventHandler(this.BtnSalvarImpressao_Click);
             // 
@@ -766,7 +766,7 @@ namespace Pedeai.Forms
             this.MinimumSize = new System.Drawing.Size(960, 620);
             this.Name = "frmEmpresa";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
-            this.Text = "Empresa e Usu�rios";
+            this.Text = "Empresa e Usuários";
             this.pnlBuscaUsuarios.ResumeLayout(false);
             this.pnlBuscaUsuarios.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numLargura)).EndInit();

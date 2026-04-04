@@ -123,7 +123,7 @@ namespace Pedeai.Forms
             // pnlCard
             // 
             this.pnlCard.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.pnlCard.BackColor = System.Drawing.Color.White;
+            this.pnlCard.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(235)))), ((int)(((byte)(228)))), ((int)(((byte)(212)))));
             this.pnlCard.Controls.Add(this.btnFechar);
             this.pnlCard.Controls.Add(this.picLogo);
             this.pnlCard.Controls.Add(this.lblBrand);
@@ -145,7 +145,7 @@ namespace Pedeai.Forms
             // 
             // picLogo
             // 
-            this.picLogo.BackColor = System.Drawing.Color.Transparent;
+            this.picLogo.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(235)))), ((int)(((byte)(228)))), ((int)(((byte)(212)))));
             this.picLogo.Location = new System.Drawing.Point(192, 47);
             this.picLogo.Margin = new System.Windows.Forms.Padding(4);
             this.picLogo.Name = "picLogo";
