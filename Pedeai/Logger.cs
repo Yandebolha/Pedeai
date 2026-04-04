@@ -9,7 +9,7 @@ namespace Pedeai
         private static readonly object _lock = new object();
 
         private static string FilePath =>
-            Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Log.txt");
+            Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Log_sistema.txt");
 
         public static void Log(string acao, string detalhe = "")
         {

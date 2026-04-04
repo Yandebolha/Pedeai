@@ -601,7 +601,7 @@ namespace Pedeai.Forms
             this.txtNome.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(14)))), ((int)(((byte)(21)))), ((int)(((byte)(46)))));
             this.txtNome.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.txtNome.Font = new System.Drawing.Font("Segoe UI", 9.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.txtNome.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(50)))), ((int)(((byte)(50)))), ((int)(((byte)(50)))));
+            this.txtNome.ForeColor = System.Drawing.Color.White;
             this.txtNome.Location = new System.Drawing.Point(16, 58);
             this.txtNome.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.txtNome.Name = "txtNome";
@@ -641,7 +641,7 @@ namespace Pedeai.Forms
             this.txtTelefone.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(14)))), ((int)(((byte)(21)))), ((int)(((byte)(46)))));
             this.txtTelefone.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.txtTelefone.Font = new System.Drawing.Font("Segoe UI", 9.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.txtTelefone.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(50)))), ((int)(((byte)(50)))), ((int)(((byte)(50)))));
+            this.txtTelefone.ForeColor = System.Drawing.Color.White;
             this.txtTelefone.Location = new System.Drawing.Point(16, 115);
             this.txtTelefone.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.txtTelefone.Name = "txtTelefone";

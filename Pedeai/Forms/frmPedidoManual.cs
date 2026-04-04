@@ -94,10 +94,10 @@ namespace Pedeai.Forms
             dlg.Size            = new Size(600, 440);
             dlg.FormBorderStyle = FormBorderStyle.FixedDialog;
             dlg.MaximizeBox     = dlg.MinimizeBox = false;
-            dlg.BackColor       = Color.FromArgb(28, 37, 65);
+            dlg.BackColor       = Color.FromArgb(245, 237, 216);
 
             var txtFiltro = new TextBox { Dock = DockStyle.Top, Height = 28,
-                BackColor = Color.FromArgb(36, 48, 82), ForeColor = Color.White,
+                BackColor = Color.White, ForeColor = Color.FromArgb(50, 50, 50),
                 BorderStyle = BorderStyle.FixedSingle,
                 Font = new Font("Segoe UI", 10F),
                 PlaceholderText = "Filtrar por nome..." };
@@ -107,10 +107,10 @@ namespace Pedeai.Forms
                 Dock = DockStyle.Fill, ReadOnly = true, AllowUserToAddRows = false,
                 SelectionMode = DataGridViewSelectionMode.FullRowSelect,
                 RowHeadersVisible = false, AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill,
-                BackgroundColor = Color.FromArgb(28, 37, 65), GridColor = Color.FromArgb(50, 60, 100),
-                DefaultCellStyle = { BackColor = Color.FromArgb(28, 37, 65), ForeColor = Color.White,
-                    SelectionBackColor = Color.FromArgb(52, 152, 219), SelectionForeColor = Color.White },
-                ColumnHeadersDefaultCellStyle = { BackColor = Color.FromArgb(36, 48, 82), ForeColor = Color.White,
+                BackgroundColor = Color.FromArgb(245, 237, 216), GridColor = Color.FromArgb(200, 185, 160),
+                DefaultCellStyle = { BackColor = Color.FromArgb(245, 237, 216), ForeColor = Color.FromArgb(50, 50, 50),
+                    SelectionBackColor = Color.FromArgb(224, 113, 42), SelectionForeColor = Color.White },
+                ColumnHeadersDefaultCellStyle = { BackColor = Color.FromArgb(176, 110, 42), ForeColor = Color.White,
                     Font = new Font("Segoe UI", 9F, FontStyle.Bold) },
                 BorderStyle = BorderStyle.None, Font = new Font("Segoe UI", 9F),
                 MultiSelect = false
@@ -140,7 +140,7 @@ namespace Pedeai.Forms
             };
 
             var btnOk = new Button { Text = "Selecionar", Dock = DockStyle.Bottom, Height = 34,
-                BackColor = Color.FromArgb(33, 150, 243), ForeColor = Color.White,
+                BackColor = Color.FromArgb(87, 120, 38), ForeColor = Color.White,
                 FlatStyle = FlatStyle.Flat, Font = new Font("Segoe UI", 9F, FontStyle.Bold) };
             btnOk.FlatAppearance.BorderSize = 0;
             btnOk.Click += (_, __) =>

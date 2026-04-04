@@ -198,6 +198,35 @@ namespace Pedeai.DB
                         turSituacao      CHAR(1)       NOT NULL DEFAULT 'A'
                     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
 
+                // ── 10. Tabela: cupom ─────────────────────────────────────────
+                Exec(conn, @"
+                    CREATE TABLE IF NOT EXISTS cupom (
+                        auxCodigo              INT            NOT NULL DEFAULT 1,
+                        Codigo                 INT            NOT NULL AUTO_INCREMENT PRIMARY KEY,
+                        cupomCodigo            VARCHAR(50)    NOT NULL,
+                        cupomDescricao         VARCHAR(200)   NOT NULL DEFAULT '',
+                        cupomTipo              VARCHAR(20)    NOT NULL DEFAULT 'PERCENTUAL',
+                        cupomValor             DECIMAL(10,2)  NOT NULL DEFAULT 0,
+                        cupomPedido_Minimo     DECIMAL(10,2)  NOT NULL DEFAULT 0,
+                        cupomLimite_Usos       INT            NOT NULL DEFAULT 0,
+                        cupomUsos_Realizados   INT            NOT NULL DEFAULT 0,
+                        cupomValido_Ate        DATE           NOT NULL,
+                        cupomData_Cadastro     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                        Situacao               CHAR(1)        NOT NULL DEFAULT 'A',
+                        Status_Transmissao     CHAR(1)        NOT NULL DEFAULT 'N',
+                        Info                   VARCHAR(255)   NOT NULL DEFAULT ''
+                    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+
+                // Garante colunas que podem faltar em instalações antigas
+                AddColumnIfNotExists(conn, db, "cupom", "Status_Transmissao",
+                    "CHAR(1) NOT NULL DEFAULT 'N'");
+                AddColumnIfNotExists(conn, db, "cupom", "Info",
+                    "VARCHAR(255) NOT NULL DEFAULT ''");
+
+                // Corrige cupomTipo se estiver como INT em instalações antigas
+                EnsureColumnType(conn, db, "cupom", "cupomTipo",
+                    "int", "MODIFY COLUMN `cupomTipo` VARCHAR(20) NOT NULL DEFAULT 'PERCENTUAL'");
+
                 return true;
             }
             catch (Exception ex)
@@ -231,6 +260,25 @@ namespace Pedeai.DB
             var exists = Convert.ToInt32(check.ExecuteScalar()) > 0;
             if (!exists)
                 Exec(conn, $"ALTER TABLE `{table}` ADD COLUMN `{column}` {definition}");
+        }
+
+        /// <summary>
+        /// Executa um ALTER TABLE se o tipo atual da coluna começar com <paramref name="typeContains"/>.
+        /// </summary>
+        private static void EnsureColumnType(
+            MySqlConnection conn, string db, string table, string column,
+            string typeContains, string alterClause)
+        {
+            using var check = new MySqlCommand(@"
+                SELECT DATA_TYPE FROM information_schema.COLUMNS
+                WHERE TABLE_SCHEMA=@db AND TABLE_NAME=@tbl AND COLUMN_NAME=@col
+                LIMIT 1", conn);
+            check.Parameters.AddWithValue("@db",  db);
+            check.Parameters.AddWithValue("@tbl", table);
+            check.Parameters.AddWithValue("@col", column);
+            var dataType = check.ExecuteScalar()?.ToString() ?? "";
+            if (dataType.IndexOf(typeContains, StringComparison.OrdinalIgnoreCase) >= 0)
+                Exec(conn, $"ALTER TABLE `{table}` {alterClause}");
         }
 
         private static string HashSenha(string senha)
