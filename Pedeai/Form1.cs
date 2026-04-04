@@ -1191,36 +1191,50 @@ namespace Pedeai
                     frm.StartPosition   = FormStartPosition.CenterParent;
                     frm.FormBorderStyle = FormBorderStyle.FixedDialog;
                     frm.MaximizeBox     = frm.MinimizeBox = false;
-                    frm.BackColor       = Color.FromArgb(36, 48, 82);
-                    frm.ForeColor       = Color.White;
+                    frm.BackColor       = Color.FromArgb(245, 237, 216);
+                    frm.ForeColor       = Color.FromArgb(50, 50, 50);
                     frm.Font            = new Font("Segoe UI", 9F);
                     frm.ClientSize      = new Size(420, 280);
 
+                    // Barra de título interna
+                    var pnlTop = new Panel { Left = 0, Top = 0, Width = 420, Height = 36,
+                        BackColor = Color.FromArgb(176, 110, 42) };
+                    var lblTit = new Label { Text = $"Total do pedido:  R$ {total:N2}",
+                        ForeColor = Color.White, Font = new Font("Segoe UI", 10F, FontStyle.Bold),
+                        AutoSize = true, Left = 12, Top = 8 };
+                    pnlTop.Controls.Add(lblTit);
+                    frm.Controls.Add(pnlTop);
+
                     void Lbl(string t, int x, int y)
                     {
-                        frm.Controls.Add(new Label { Text = t, Left = x, Top = y, AutoSize = true, ForeColor = Color.White });
+                        frm.Controls.Add(new Label { Text = t, Left = x, Top = y, AutoSize = true,
+                            ForeColor = Color.FromArgb(70, 70, 70) });
                     }
 
-                    Lbl($"Total do pedido: R$ {total:N2}", 12, 14);
-                    Lbl("Divida o pagamento por forma (deixe 0 se n\u00e3o usar):", 12, 36);
-                    Lbl("Dinheiro (R$):", 12, 68);
-                    var numDin = new NumericUpDown { Left = 160, Top = 64, Width = 120, DecimalPlaces = 2, Maximum = 99999M, Value = 0M };
-                    Lbl("Cart\u00e3o (R$):", 12, 104);
-                    var numCar = new NumericUpDown { Left = 160, Top = 100, Width = 120, DecimalPlaces = 2, Maximum = 99999M, Value = 0M };
-                    Lbl("Pix (R$):", 12, 140);
-                    var numPix = new NumericUpDown { Left = 160, Top = 136, Width = 120, DecimalPlaces = 2, Maximum = 99999M, Value = 0M };
+                    Lbl("Divida o pagamento por forma (deixe 0 se n\u00e3o usar):", 12, 46);
+                    Lbl("Dinheiro (R$):", 12, 80);
+                    var numDin = new NumericUpDown { Left = 160, Top = 76, Width = 120, DecimalPlaces = 2, Maximum = 99999M, Value = 0M,
+                        BackColor = Color.White, ForeColor = Color.FromArgb(50, 50, 50) };
+                    Lbl("Cart\u00e3o (R$):", 12, 116);
+                    var numCar = new NumericUpDown { Left = 160, Top = 112, Width = 120, DecimalPlaces = 2, Maximum = 99999M, Value = 0M,
+                        BackColor = Color.White, ForeColor = Color.FromArgb(50, 50, 50) };
+                    Lbl("Pix (R$):", 12, 152);
+                    var numPix = new NumericUpDown { Left = 160, Top = 148, Width = 120, DecimalPlaces = 2, Maximum = 99999M, Value = 0M,
+                        BackColor = Color.White, ForeColor = Color.FromArgb(50, 50, 50) };
 
                     if (pedido.pediForma_Pagamento == 1) numCar.Value = total;
                     else if (pedido.pediForma_Pagamento == 2) numPix.Value = total;
                     else numDin.Value = total;
 
-                    Lbl("C\u00f3d. Transa\u00e7\u00e3o (cart\u00e3o/Pix):", 12, 176);
-                    var txtTrans = new TextBox { Left = 240, Top = 172, Width = 164 };
+                    Lbl("C\u00f3d. Transa\u00e7\u00e3o (cart\u00e3o/Pix):", 12, 188);
+                    var txtTrans = new TextBox { Left = 240, Top = 184, Width = 164,
+                        BackColor = Color.White, ForeColor = Color.FromArgb(50, 50, 50),
+                        BorderStyle = BorderStyle.FixedSingle };
 
                     var lblSoma = new Label
                     {
-                        Left = 12, Top = 210, Width = 280,
-                        ForeColor = Color.FromArgb(243, 156, 18),
+                        Left = 12, Top = 218, Width = 300, AutoSize = false,
+                        ForeColor = Color.FromArgb(176, 110, 42),
                         Font = new Font("Segoe UI", 9F, FontStyle.Bold),
                         Text = ""
                     };
@@ -1232,7 +1246,7 @@ namespace Pedeai
                         decimal diff = soma - total;
                         string sinal = diff >= 0 ? "Troco: R$ " + diff.ToString("N2") : "Falta: R$ " + (-diff).ToString("N2");
                         lblSoma.Text = $"Soma: R$ {soma:N2}  |  {sinal}";
-                        lblSoma.ForeColor = diff >= 0 ? Color.FromArgb(39, 174, 96) : Color.FromArgb(231, 76, 60);
+                        lblSoma.ForeColor = diff >= 0 ? Color.FromArgb(87, 120, 38) : Color.FromArgb(192, 57, 43);
                     }
 
                     numDin.ValueChanged += (_, __) => AtualizarSoma();
@@ -1242,8 +1256,10 @@ namespace Pedeai
 
                     frm.Controls.AddRange(new Control[] { numDin, numCar, numPix, txtTrans });
 
-                    var btnOk  = new Button { Text = "\u2714 Confirmar", Left = 100, Top = 238, Width = 130, Height = 28, DialogResult = DialogResult.OK,  BackColor = Color.FromArgb(39, 174, 96),   ForeColor = Color.White, FlatStyle = FlatStyle.Flat };
-                    var btnCan = new Button { Text = "Cancelar",     Left = 246, Top = 238, Width = 90,  Height = 28, DialogResult = DialogResult.Cancel, BackColor = Color.FromArgb(108,117,125), ForeColor = Color.White, FlatStyle = FlatStyle.Flat };
+                    var btnOk  = new Button { Text = "\u2714 Confirmar", Left = 100, Top = 243, Width = 140, Height = 28, DialogResult = DialogResult.OK,
+                        BackColor = Color.FromArgb(87, 120, 38), ForeColor = Color.White, FlatStyle = FlatStyle.Flat };
+                    var btnCan = new Button { Text = "Cancelar",     Left = 252, Top = 243, Width = 100, Height = 28, DialogResult = DialogResult.Cancel,
+                        BackColor = Color.FromArgb(224, 113, 42), ForeColor = Color.White, FlatStyle = FlatStyle.Flat };
                     btnOk.FlatAppearance.BorderSize = btnCan.FlatAppearance.BorderSize = 0;
                     frm.Controls.AddRange(new Control[] { btnOk, btnCan });
                     frm.AcceptButton = btnOk;
