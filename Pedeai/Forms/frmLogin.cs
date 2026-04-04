@@ -158,5 +158,23 @@ namespace Pedeai.Forms
                 e.SuppressKeyPress = true;
             }
         }
+
+        private void BtnFechar_Click(object s, EventArgs e) { DialogResult = DialogResult.Cancel; Close(); }
+
+        private const int WM_NCLBUTTONDOWN = 0xA1;
+        private const int HT_CAPTION       = 0x2;
+        [System.Runtime.InteropServices.DllImport("user32.dll")]
+        private static extern int SendMessage(System.IntPtr hWnd, int Msg, int wParam, int lParam);
+        [System.Runtime.InteropServices.DllImport("user32.dll")]
+        private static extern bool ReleaseCapture();
+
+        private void FormDrag_MouseDown(object sender, System.Windows.Forms.MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Left)
+            {
+                ReleaseCapture();
+                SendMessage(Handle, WM_NCLBUTTONDOWN, HT_CAPTION, 0);
+            }
+        }
     }
 }
