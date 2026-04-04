@@ -29,11 +29,11 @@ namespace Pedeai.Forms
         private void ModoNovo()
         {
             _codigoEditando = 0;
-            txtCodigo.Clear(); txtDescricao.Clear();
+            txtDescricao.Clear();
             cmbTipo.SelectedIndex = 0; cmbSituacao.SelectedIndex = 0;
             numValor.Value = 0; numMinimo.Value = 0; numLimite.Value = 0;
             dtpValido.Value = DateTime.Today.AddMonths(1);
-            pnlForm.Visible = true; txtCodigo.Focus();
+            pnlForm.Visible = true; txtDescricao.Focus();
         }
 
         private void CarregarParaEditar()
@@ -43,25 +43,24 @@ namespace Pedeai.Forms
             var obj = _bll.PesquisaCodigo(cod);
             if (obj == null) return;
             _codigoEditando = cod;
-            txtCodigo.Text = obj.cupomCodigo ?? "";
-            txtDescricao.Text = obj.cupomDescricao ?? "";
+            txtDescricao.Text = !string.IsNullOrWhiteSpace(obj.cupomDescricao) ? obj.cupomDescricao : (obj.cupomCodigo ?? "");
             cmbTipo.SelectedItem = obj.cupomTipo ?? "PERCENTUAL";
             numValor.Value = obj.cupomValor;
             numMinimo.Value = obj.cupomPedido_Minimo;
             numLimite.Value = obj.cupomLimite_Usos;
             dtpValido.Value = obj.cupomValido_Ate > DateTime.MinValue ? obj.cupomValido_Ate : DateTime.Today.AddMonths(1);
             cmbSituacao.SelectedItem = (obj.Situacao == "I") ? "Inativo" : "Ativo";
-            pnlForm.Visible = true; txtCodigo.Focus();
+            pnlForm.Visible = true; txtDescricao.Focus();
         }
 
         private void BtnSalvar_Click(object sender, EventArgs e)
         {
-            if (string.IsNullOrWhiteSpace(txtCodigo.Text)) { MessageBox.Show("Informe o código do cupom."); return; }
+            if (string.IsNullOrWhiteSpace(txtDescricao.Text)) { MessageBox.Show("Informe o nome do cupom."); return; }
             var obj = new Cupom
             {
                 Codigo             = _codigoEditando,
-                cupomCodigo        = txtCodigo.Text.Trim().ToUpper(),
-                cupomDescricao     = txtDescricao.Text,
+                cupomCodigo        = txtDescricao.Text.Trim().ToUpper(),
+                cupomDescricao     = txtDescricao.Text.Trim(),
                 cupomTipo          = cmbTipo.SelectedItem?.ToString() ?? "PERCENTUAL",
                 cupomValor         = numValor.Value,
                 cupomPedido_Minimo = numMinimo.Value,

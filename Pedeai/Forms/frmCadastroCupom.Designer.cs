@@ -22,7 +22,6 @@ namespace Pedeai.Forms
             this.btnS        = new System.Windows.Forms.Button();
             this.btnC        = new System.Windows.Forms.Button();
             this.btnD        = new System.Windows.Forms.Button();
-            this.txtCodigo   = new System.Windows.Forms.TextBox();
             this.txtDescricao= new System.Windows.Forms.TextBox();
             this.cmbTipo     = new System.Windows.Forms.ComboBox();
             this.cmbSituacao = new System.Windows.Forms.ComboBox();
@@ -30,7 +29,6 @@ namespace Pedeai.Forms
             this.numMinimo   = new System.Windows.Forms.NumericUpDown();
             this.numLimite   = new System.Windows.Forms.NumericUpDown();
             this.dtpValido   = new System.Windows.Forms.DateTimePicker();
-            this.lblCod      = new System.Windows.Forms.Label();
             this.lblDesc     = new System.Windows.Forms.Label();
             this.lblTipo     = new System.Windows.Forms.Label();
             this.lblSit      = new System.Windows.Forms.Label();
@@ -93,7 +91,6 @@ namespace Pedeai.Forms
             this.pnlForm.BackColor = System.Drawing.Color.FromArgb(245, 237, 216);
             this.pnlForm.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.pnlForm.Visible = false;
-            this.pnlForm.Controls.Add(this.lblCod);    this.pnlForm.Controls.Add(this.txtCodigo);
             this.pnlForm.Controls.Add(this.lblDesc);   this.pnlForm.Controls.Add(this.txtDescricao);
             this.pnlForm.Controls.Add(this.lblTipo);   this.pnlForm.Controls.Add(this.cmbTipo);
             this.pnlForm.Controls.Add(this.lblSit);    this.pnlForm.Controls.Add(this.cmbSituacao);
@@ -103,10 +100,8 @@ namespace Pedeai.Forms
             this.pnlForm.Controls.Add(this.lblVal2);   this.pnlForm.Controls.Add(this.dtpValido);
             this.pnlForm.Controls.Add(this.pnlBtns);
             // row 1 labels/fields
-            this.lblCod.Text = "C\u00f3digo:";    this.lblCod.AutoSize = true;  this.lblCod.Left = 10;  this.lblCod.Top = 11;
-            this.txtCodigo.Left = 65; this.txtCodigo.Top = 8; this.txtCodigo.Width = 100;
-            this.lblDesc.Text = "Descri\u00e7\u00e3o:"; this.lblDesc.AutoSize = true; this.lblDesc.Left = 175; this.lblDesc.Top = 11;
-            this.txtDescricao.Left = 245; this.txtDescricao.Top = 8; this.txtDescricao.Width = 200;
+            this.lblDesc.Text = "Nome:"; this.lblDesc.AutoSize = true; this.lblDesc.Left = 10; this.lblDesc.Top = 11;
+            this.txtDescricao.Left = 65; this.txtDescricao.Top = 8; this.txtDescricao.Width = 250;
             this.lblTipo.Text = "Tipo:"; this.lblTipo.AutoSize = true; this.lblTipo.Left = 455; this.lblTipo.Top = 11;
             this.cmbTipo.Left = 490; this.cmbTipo.Top = 8; this.cmbTipo.Width = 100;
             this.cmbTipo.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
@@ -171,7 +166,6 @@ namespace Pedeai.Forms
 
         internal System.Windows.Forms.DataGridView   grid;
         internal System.Windows.Forms.Panel          pnlForm;
-        internal System.Windows.Forms.TextBox        txtCodigo;
         internal System.Windows.Forms.TextBox        txtDescricao;
         internal System.Windows.Forms.ComboBox       cmbTipo;
         internal System.Windows.Forms.ComboBox       cmbSituacao;
@@ -186,7 +180,6 @@ namespace Pedeai.Forms
         internal System.Windows.Forms.Button         btnD;
         private  System.Windows.Forms.Panel          topBar;
         private  System.Windows.Forms.Panel          pnlBtns;
-        private  System.Windows.Forms.Label          lblCod;
         private  System.Windows.Forms.Label          lblDesc;
         private  System.Windows.Forms.Label          lblTipo;
         private  System.Windows.Forms.Label          lblSit;

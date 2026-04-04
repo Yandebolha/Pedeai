@@ -1099,14 +1099,17 @@ namespace Pedeai
                 if (finaliza)
                 {
                     if (MostrarDialogPagamento(pedido, out decimal vPago, out string trans,
-                                               out decimal din, out decimal car, out decimal pix))
+                                               out decimal din, out decimal car, out decimal pix,
+                                               out string autNome))
                     {
                         var eF = _pedidoBLL.FinalizarPedido(cod, novaSit, vPago, trans, din, car, pix);
                         if (!string.IsNullOrEmpty(eF)) MessageBox.Show("Erro: " + eF);
                         else
                         {
-                            Logger.Log("Pedido finalizado",
-                                $"#{cod} | Sit={novaSit} | Total={pedido.pediValor_Total:N2} | Pago={vPago:N2} | Din={din:N2} Car={car:N2} Pix={pix:N2}");
+                            string logExtra = $"#{cod} | Sit={novaSit} | Total={pedido.pediValor_Total:N2} | Pago={vPago:N2} | Din={din:N2} Car={car:N2} Pix={pix:N2}";
+                            if (!string.IsNullOrEmpty(autNome))
+                                logExtra += $" | DESCONTO R$ {(pedido.pediValor_Total - vPago):N2} autorizado por {autNome}";
+                            Logger.Log("Pedido finalizado", logExtra);
                             CarregarPedidos();
                         }
                     }
@@ -1165,112 +1168,159 @@ namespace Pedeai
 
         private bool MostrarDialogPagamento(PedidoWeb pedido,
                                              out decimal valorPago, out string transacao,
-                                             out decimal pagoDinheiro, out decimal pagoCartao, out decimal pagoPix)
+                                             out decimal pagoDinheiro, out decimal pagoCartao, out decimal pagoPix,
+                                             out string autorizadorNome)
         {
-            valorPago    = pedido.pediValor_Total;
-            transacao    = "";
-            pagoDinheiro = 0m;
-            pagoCartao   = 0m;
-            pagoPix      = 0m;
-
+            valorPago       = pedido.pediValor_Total;
+            transacao       = "";
+            pagoDinheiro    = 0m;
+            pagoCartao      = 0m;
+            pagoPix         = 0m;
+            autorizadorNome = "";
             decimal total = pedido.pediValor_Total;
 
-            using var frm = new Form();
-            frm.Text            = "Finalizar Pedido \u2014 Pagamento";
-            frm.StartPosition   = FormStartPosition.CenterParent;
-            frm.FormBorderStyle = FormBorderStyle.FixedDialog;
-            frm.MaximizeBox     = frm.MinimizeBox = false;
-            frm.BackColor       = Color.FromArgb(36, 48, 82);
-            frm.ForeColor       = Color.White;
-            frm.Font            = new Font("Segoe UI", 9F);
-            frm.ClientSize      = new Size(420, 280);
-
-            void Lbl(string t, int x, int y)
+            while (true)   // loop: "Voltar" reinicia o formulário de pagamento
             {
-                frm.Controls.Add(new Label
+                decimal tmpDin = 0, tmpCar = 0, tmpPix = 0;
+                string  tmpTrans = "";
+                bool    confirmed = false;
+
+                using (var frm = new Form())
                 {
-                    Text      = t, Left = x, Top = y,
-                    AutoSize  = true, ForeColor = Color.White
-                });
-            }
+                    frm.Text            = "Finalizar Pedido \u2014 Pagamento";
+                    frm.StartPosition   = FormStartPosition.CenterParent;
+                    frm.FormBorderStyle = FormBorderStyle.FixedDialog;
+                    frm.MaximizeBox     = frm.MinimizeBox = false;
+                    frm.BackColor       = Color.FromArgb(36, 48, 82);
+                    frm.ForeColor       = Color.White;
+                    frm.Font            = new Font("Segoe UI", 9F);
+                    frm.ClientSize      = new Size(420, 280);
 
-            Lbl($"Total do pedido: R$ {total:N2}", 12, 14);
-            Lbl("Divida o pagamento por forma (deixe 0 se n\u00e3o usar):", 12, 36);
+                    void Lbl(string t, int x, int y)
+                    {
+                        frm.Controls.Add(new Label { Text = t, Left = x, Top = y, AutoSize = true, ForeColor = Color.White });
+                    }
 
-            Lbl("Dinheiro (R$):", 12, 68);
-            var numDin = new NumericUpDown { Left = 160, Top = 64, Width = 120, DecimalPlaces = 2, Maximum = 99999M, Value = 0M };
+                    Lbl($"Total do pedido: R$ {total:N2}", 12, 14);
+                    Lbl("Divida o pagamento por forma (deixe 0 se n\u00e3o usar):", 12, 36);
+                    Lbl("Dinheiro (R$):", 12, 68);
+                    var numDin = new NumericUpDown { Left = 160, Top = 64, Width = 120, DecimalPlaces = 2, Maximum = 99999M, Value = 0M };
+                    Lbl("Cart\u00e3o (R$):", 12, 104);
+                    var numCar = new NumericUpDown { Left = 160, Top = 100, Width = 120, DecimalPlaces = 2, Maximum = 99999M, Value = 0M };
+                    Lbl("Pix (R$):", 12, 140);
+                    var numPix = new NumericUpDown { Left = 160, Top = 136, Width = 120, DecimalPlaces = 2, Maximum = 99999M, Value = 0M };
 
-            Lbl("Cart\u00e3o (R$):", 12, 104);
-            var numCar = new NumericUpDown { Left = 160, Top = 100, Width = 120, DecimalPlaces = 2, Maximum = 99999M, Value = 0M };
+                    if (pedido.pediForma_Pagamento == 1) numCar.Value = total;
+                    else if (pedido.pediForma_Pagamento == 2) numPix.Value = total;
+                    else numDin.Value = total;
 
-            Lbl("Pix (R$):", 12, 140);
-            var numPix = new NumericUpDown { Left = 160, Top = 136, Width = 120, DecimalPlaces = 2, Maximum = 99999M, Value = 0M };
+                    Lbl("C\u00f3d. Transa\u00e7\u00e3o (cart\u00e3o/Pix):", 12, 176);
+                    var txtTrans = new TextBox { Left = 240, Top = 172, Width = 164 };
 
-            // Preenche o campo correspondente à forma original do pedido com o total
-            if (pedido.pediForma_Pagamento == 1) numCar.Value = total;
-            else if (pedido.pediForma_Pagamento == 2) numPix.Value = total;
-            else numDin.Value = total;
+                    var lblSoma = new Label
+                    {
+                        Left = 12, Top = 210, Width = 280,
+                        ForeColor = Color.FromArgb(243, 156, 18),
+                        Font = new Font("Segoe UI", 9F, FontStyle.Bold),
+                        Text = ""
+                    };
+                    frm.Controls.Add(lblSoma);
 
-            Lbl("C\u00f3d. Transa\u00e7\u00e3o (cart\u00e3o/Pix):", 12, 176);
-            var txtTrans = new TextBox { Left = 240, Top = 172, Width = 164 };
+                    void AtualizarSoma()
+                    {
+                        decimal soma = numDin.Value + numCar.Value + numPix.Value;
+                        decimal diff = soma - total;
+                        string sinal = diff >= 0 ? "Troco: R$ " + diff.ToString("N2") : "Falta: R$ " + (-diff).ToString("N2");
+                        lblSoma.Text = $"Soma: R$ {soma:N2}  |  {sinal}";
+                        lblSoma.ForeColor = diff >= 0 ? Color.FromArgb(39, 174, 96) : Color.FromArgb(231, 76, 60);
+                    }
 
-            var lblSoma = new Label
-            {
-                Left = 12, Top = 210, Width = 280,
-                ForeColor = Color.FromArgb(243, 156, 18),
-                Font = new Font("Segoe UI", 9F, FontStyle.Bold),
-                Text = ""
-            };
-            frm.Controls.Add(lblSoma);
+                    numDin.ValueChanged += (_, __) => AtualizarSoma();
+                    numCar.ValueChanged += (_, __) => AtualizarSoma();
+                    numPix.ValueChanged += (_, __) => AtualizarSoma();
+                    AtualizarSoma();
 
-            void AtualizarSoma()
-            {
-                decimal soma = numDin.Value + numCar.Value + numPix.Value;
-                decimal diff = soma - total;
-                string sinal = diff >= 0 ? "Troco: R$ " + diff.ToString("N2") : "Falta: R$ " + (-diff).ToString("N2");
-                lblSoma.Text = $"Soma: R$ {soma:N2}  |  {sinal}";
-                lblSoma.ForeColor = diff >= 0 ? Color.FromArgb(39, 174, 96) : Color.FromArgb(231, 76, 60);
-            }
+                    frm.Controls.AddRange(new Control[] { numDin, numCar, numPix, txtTrans });
 
-            numDin.ValueChanged += (_, __) => AtualizarSoma();
-            numCar.ValueChanged += (_, __) => AtualizarSoma();
-            numPix.ValueChanged += (_, __) => AtualizarSoma();
-            AtualizarSoma();
+                    var btnOk  = new Button { Text = "\u2714 Confirmar", Left = 100, Top = 238, Width = 130, Height = 28, DialogResult = DialogResult.OK,  BackColor = Color.FromArgb(39, 174, 96),   ForeColor = Color.White, FlatStyle = FlatStyle.Flat };
+                    var btnCan = new Button { Text = "Cancelar",     Left = 246, Top = 238, Width = 90,  Height = 28, DialogResult = DialogResult.Cancel, BackColor = Color.FromArgb(108,117,125), ForeColor = Color.White, FlatStyle = FlatStyle.Flat };
+                    btnOk.FlatAppearance.BorderSize = btnCan.FlatAppearance.BorderSize = 0;
+                    frm.Controls.AddRange(new Control[] { btnOk, btnCan });
+                    frm.AcceptButton = btnOk;
+                    frm.CancelButton = btnCan;
 
-            frm.Controls.AddRange(new Control[] { numDin, numCar, numPix, txtTrans });
+                    confirmed = frm.ShowDialog(this) == DialogResult.OK;
+                    if (confirmed)
+                    {
+                        tmpDin   = numDin.Value;
+                        tmpCar   = numCar.Value;
+                        tmpPix   = numPix.Value;
+                        tmpTrans = txtTrans.Text.Trim();
+                    }
+                }
 
-            var btnOk  = new Button { Text = "\u2714 Confirmar", Left = 100, Top = 238, Width = 130, Height = 28, DialogResult = DialogResult.OK,  BackColor = Color.FromArgb(39, 174, 96),   ForeColor = Color.White, FlatStyle = FlatStyle.Flat };
-            var btnCan = new Button { Text = "Cancelar",     Left = 246, Top = 238, Width = 90,  Height = 28, DialogResult = DialogResult.Cancel, BackColor = Color.FromArgb(108,117,125), ForeColor = Color.White, FlatStyle = FlatStyle.Flat };
-            btnOk.FlatAppearance.BorderSize = btnCan.FlatAppearance.BorderSize = 0;
-            frm.Controls.AddRange(new Control[] { btnOk, btnCan });
-            frm.AcceptButton = btnOk;
-            frm.CancelButton = btnCan;
+                if (!confirmed) return false;
 
-            if (frm.ShowDialog(this) != DialogResult.OK)
-                return false;
+                pagoDinheiro = tmpDin;
+                pagoCartao   = tmpCar;
+                pagoPix      = tmpPix;
+                valorPago    = pagoDinheiro + pagoCartao + pagoPix;
+                transacao    = tmpTrans;
 
-            pagoDinheiro = numDin.Value;
-            pagoCartao   = numCar.Value;
-            pagoPix      = numPix.Value;
-            valorPago    = pagoDinheiro + pagoCartao + pagoPix;
-            transacao    = txtTrans.Text.Trim();
+                if (valorPago >= total) return true;
 
-            // Se soma menor que total, exige autorização
-            if (valorPago < total)
-            {
+                // Valor pago menor que o total — mostrar aviso com opção de voltar ou autorizar
                 decimal desconto = total - valorPago;
-                MessageBox.Show(
-                    $"Total pago (R$ {valorPago:N2}) \u00e9 menor que o total (R$ {total:N2}).\n" +
-                    $"Desconto de R$ {desconto:N2} requer autoriza\u00e7\u00e3o.",
-                    "Autoriza\u00e7\u00e3o Necess\u00e1ria",
-                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                string  opcao    = "cancelar";
+
+                using (var dlgAviso = new Form())
+                {
+                    dlgAviso.Text            = "Autoriza\u00e7\u00e3o Necess\u00e1ria";
+                    dlgAviso.StartPosition   = FormStartPosition.CenterParent;
+                    dlgAviso.FormBorderStyle = FormBorderStyle.FixedDialog;
+                    dlgAviso.MaximizeBox     = dlgAviso.MinimizeBox = false;
+                    dlgAviso.BackColor       = Color.FromArgb(245, 237, 216);
+                    dlgAviso.ClientSize      = new Size(430, 172);
+                    dlgAviso.Font            = new Font("Segoe UI", 9F);
+
+                    var ico = new Label
+                    {
+                        Text = "\u26A0", Left = 14, Top = 14, AutoSize = true,
+                        ForeColor = Color.FromArgb(243, 156, 18),
+                        Font = new Font("Segoe UI", 20F)
+                    };
+                    var msg = new Label
+                    {
+                        Text      = $"Total pago (R$ {valorPago:N2}) \u00e9 menor que o total (R$ {total:N2}).\n" +
+                                    $"Desconto de R$ {desconto:N2} requer autoriza\u00e7\u00e3o de gerente.",
+                        Left = 58, Top = 16, Width = 358, Height = 60, AutoSize = false,
+                        ForeColor = Color.FromArgb(50, 50, 50), Font = new Font("Segoe UI", 9.5F)
+                    };
+                    var btnVoltar = new Button
+                    {
+                        Text = "\u2190 Voltar e Corrigir", Left = 14, Top = 124, Width = 184, Height = 32,
+                        BackColor = Color.FromArgb(108, 117, 125), ForeColor = Color.White, FlatStyle = FlatStyle.Flat
+                    };
+                    var btnAut = new Button
+                    {
+                        Text = "Autorizar com Gerente", Left = 206, Top = 124, Width = 210, Height = 32,
+                        BackColor = Color.FromArgb(176, 110, 42), ForeColor = Color.White, FlatStyle = FlatStyle.Flat
+                    };
+                    btnVoltar.FlatAppearance.BorderSize = btnAut.FlatAppearance.BorderSize = 0;
+                    btnVoltar.Click += (_, __) => { opcao = "voltar";    dlgAviso.Close(); };
+                    btnAut.Click    += (_, __) => { opcao = "autorizar"; dlgAviso.Close(); };
+                    dlgAviso.Controls.AddRange(new Control[] { ico, msg, btnVoltar, btnAut });
+                    dlgAviso.ShowDialog(this);
+                }
+
+                if (opcao == "voltar")    continue;    // reinicia o loop — mostra o formulário de pagamento novamente
+                if (opcao != "autorizar") return false; // fechou com X
 
                 using var dlgAuth = new Forms.frmAutorizacao();
-                if (dlgAuth.ShowDialog(this) != DialogResult.OK)
-                    return false;
+                if (dlgAuth.ShowDialog(this) != DialogResult.OK) return false;
+                autorizadorNome = dlgAuth.UsuarioAutorizador.usuNome;
+                return true;
             }
-
-            return true;
         }
 
         // ────────────────────────────────────────────────────────────────────
