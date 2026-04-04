@@ -22,7 +22,7 @@ namespace Pedeai.Forms
             // Carrega e recorta a logo num quadrado central — sem letterbox
             try
             {
-                string imgPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "RanGoFood.png");
+                string imgPath = System.IO.Path.Combine(Application.StartupPath, "RanGoFood.png");
                 if (System.IO.File.Exists(imgPath))
                 {
                     using var full = new Bitmap(imgPath);
