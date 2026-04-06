@@ -51,6 +51,16 @@ namespace Pedeai.DAL
             try
             {
                 using var conn = AbrirConexao();
+
+                if (!string.IsNullOrWhiteSpace(obj.clieCPF_CNPJ_))
+                {
+                    using var chk = new MySqlCommand(
+                        "SELECT COUNT(*) FROM cliente WHERE clieCPF_CNPJ_ = @cpf AND Situacao = 'A'", conn);
+                    chk.Parameters.AddWithValue("@cpf", obj.clieCPF_CNPJ_.Trim());
+                    if (Convert.ToInt32(chk.ExecuteScalar()) > 0)
+                        return $"J\u00e1 existe um cliente cadastrado com o CPF/CNPJ '{obj.clieCPF_CNPJ_}'.";
+                }
+
                 obj.Codigo    = ProximoCodigo("cliente", conn);
                 obj.auxCodigo = ProximoAuxCodigo("cliente", conn);
                 obj.clieData_Cadastro = DateTime.Now;
@@ -75,13 +85,22 @@ namespace Pedeai.DAL
             try
             {
                 using var conn = AbrirConexao();
+
+                if (!string.IsNullOrWhiteSpace(obj.clieCPF_CNPJ_))
+                {
+                    using var chk = new MySqlCommand(
+                        "SELECT COUNT(*) FROM cliente WHERE clieCPF_CNPJ_ = @cpf AND Situacao = 'A' AND Codigo <> @cod", conn);
+                    chk.Parameters.AddWithValue("@cpf", obj.clieCPF_CNPJ_.Trim());
+                    chk.Parameters.AddWithValue("@cod", obj.Codigo);
+                    if (Convert.ToInt32(chk.ExecuteScalar()) > 0)
+                        return $"J\u00e1 existe outro cliente com o CPF/CNPJ '{obj.clieCPF_CNPJ_}'.";
+                }
                 var sql = @"UPDATE cliente SET
                             clieNome_RazaoSocial=@nome, clieTelefone=@tel, clieCelular=@cel,
                             clieEmail=@email, clieCPF_CNPJ_=@cpf, clieCEP=@cep,
                             clieEndereco=@end, clieNumero=@num, clieComplemento=@comp,
                             clieBairro=@bairro, clieCidade=@cidade, clieEstado=@estado, Situacao=@sit
-                            WHERE Codigo=@cod";
-                using var cmd = new MySqlCommand(sql, conn);
+                            WHERE Codigo=@cod";                using var cmd = new MySqlCommand(sql, conn);
                 BindParams(cmd, obj);
                 cmd.ExecuteNonQuery();
                 return "";

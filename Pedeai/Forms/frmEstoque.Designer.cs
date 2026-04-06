@@ -32,9 +32,16 @@ namespace Pedeai.Forms
             this.numQtde      = new System.Windows.Forms.NumericUpDown();
             this.lblCusto2    = new System.Windows.Forms.Label();
             this.numCusto     = new System.Windows.Forms.NumericUpDown();
-            this.lblMin       = new System.Windows.Forms.Label();
-            this.numEstMin    = new System.Windows.Forms.NumericUpDown();
+            this.lblCustoUnit  = new System.Windows.Forms.Label();
             this.chkEhProduto = new System.Windows.Forms.CheckBox();
+            this.lblFracEntrada    = new System.Windows.Forms.Label();
+            this.numFracEntrada    = new System.Windows.Forms.NumericUpDown();
+            this.txtFracEntradaUn  = new System.Windows.Forms.TextBox();
+            this.lblFracSaida      = new System.Windows.Forms.Label();
+            this.numFracSaida      = new System.Windows.Forms.NumericUpDown();
+            this.txtFracSaidaUn    = new System.Windows.Forms.TextBox();
+            this.lblCategoria      = new System.Windows.Forms.Label();
+            this.cmbCategoria      = new System.Windows.Forms.ComboBox();
             // pnlAjuste controls
             this.pnlAjuste    = new System.Windows.Forms.Panel();
             this.lblAjusteNomeLbl = new System.Windows.Forms.Label();
@@ -73,7 +80,7 @@ namespace Pedeai.Forms
             this.grid.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
             this.grid.ColumnHeadersHeight = 34; this.grid.RowTemplate.Height = 28;
             this.grid.DoubleClick += new System.EventHandler(this.Grid_DoubleClick);
-            this.grid.DataError += new System.Windows.Forms.DataGridViewDataErrorEventHandler((s, e) => e.ThrowException = false);
+            this.grid.DataError += new System.Windows.Forms.DataGridViewDataErrorEventHandler(this.Grid_DataError);
 
             // ── topBar ────────────────────────────────────────────────────────
             this.topBar.Dock = System.Windows.Forms.DockStyle.Top; this.topBar.Height = 44;
@@ -124,7 +131,7 @@ namespace Pedeai.Forms
 
             // pnlCadastro (field-entry panel)
             this.pnlCadastro.Left = 0; this.pnlCadastro.Top = 28;
-            this.pnlCadastro.Width = 900; this.pnlCadastro.Height = 80;
+            this.pnlCadastro.Width = 980; this.pnlCadastro.Height = 90;
             this.pnlCadastro.BackColor = System.Drawing.Color.Transparent;
             this.pnlCadastro.Anchor = ((System.Windows.Forms.AnchorStyles)(
                 System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right));
@@ -138,34 +145,70 @@ namespace Pedeai.Forms
             this.lblUn.ForeColor = System.Drawing.Color.FromArgb(70, 70, 70);
             this.txtUnidade.Left = 326; this.txtUnidade.Top = 4; this.txtUnidade.Width = 55;
             this.txtUnidade.BackColor = System.Drawing.Color.White; this.txtUnidade.ForeColor = System.Drawing.Color.FromArgb(50, 50, 50);
-            this.txtUnidade.Text = "un";
+            this.txtUnidade.Text = "un"; this.txtUnidade.CharacterCasing = System.Windows.Forms.CharacterCasing.Upper;
 
             this.lblQtde2.Text = "Qtde:"; this.lblQtde2.AutoSize = true; this.lblQtde2.Left = 390; this.lblQtde2.Top = 7;
             this.lblQtde2.ForeColor = System.Drawing.Color.FromArgb(70, 70, 70);
             this.numQtde.Left = 432; this.numQtde.Top = 4; this.numQtde.Width = 90;
-            this.numQtde.DecimalPlaces = 3; this.numQtde.Maximum = 999999; this.numQtde.Minimum = 0;
+            this.numQtde.DecimalPlaces = 2; this.numQtde.Maximum = 999999; this.numQtde.Minimum = 0;
+            this.numQtde.ValueChanged += new System.EventHandler(this.NumCustoQtde_ValueChanged);
 
-            this.lblCusto2.Text = "Custo R$:"; this.lblCusto2.AutoSize = true; this.lblCusto2.Left = 530; this.lblCusto2.Top = 7;
+            this.lblCusto2.Text = "Custo (total) R$:"; this.lblCusto2.AutoSize = true; this.lblCusto2.Left = 530; this.lblCusto2.Top = 7;
             this.lblCusto2.ForeColor = System.Drawing.Color.FromArgb(70, 70, 70);
-            this.numCusto.Left = 596; this.numCusto.Top = 4; this.numCusto.Width = 95;
-            this.numCusto.DecimalPlaces = 4; this.numCusto.Maximum = 999999; this.numCusto.Minimum = 0;
+            this.numCusto.Left = 660; this.numCusto.Top = 4; this.numCusto.Width = 95;
+            this.numCusto.DecimalPlaces = 2; this.numCusto.Maximum = 9999999; this.numCusto.Minimum = 0;
+            this.numCusto.ValueChanged += new System.EventHandler(this.NumCustoQtde_ValueChanged);
 
-            this.lblMin.Text = "Est. Mín:"; this.lblMin.AutoSize = true; this.lblMin.Left = 700; this.lblMin.Top = 7;
-            this.lblMin.ForeColor = System.Drawing.Color.FromArgb(70, 70, 70);
-            this.numEstMin.Left = 762; this.numEstMin.Top = 4; this.numEstMin.Width = 90;
-            this.numEstMin.DecimalPlaces = 3; this.numEstMin.Maximum = 999999; this.numEstMin.Minimum = 0;
+            this.lblCustoUnit.AutoSize = false; this.lblCustoUnit.Left = 762; this.lblCustoUnit.Top = 7;
+            this.lblCustoUnit.Width = 180; this.lblCustoUnit.Height = 20;
+            this.lblCustoUnit.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
+            this.lblCustoUnit.ForeColor = System.Drawing.Color.FromArgb(87, 120, 38);
+            this.lblCustoUnit.Text = "";
 
             this.chkEhProduto.Text = "É Produto (sincronizar com catálogo)";
             this.chkEhProduto.Left = 10; this.chkEhProduto.Top = 38; this.chkEhProduto.AutoSize = true;
             this.chkEhProduto.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
             this.chkEhProduto.ForeColor = System.Drawing.Color.FromArgb(87, 120, 38);
+            this.chkEhProduto.CheckedChanged += new System.EventHandler(this.ChkEhProduto_CheckedChanged);
+
+            // fracção entrada: label | num | txt-unidade
+            this.lblFracEntrada.Text = "Fração Entrada:"; this.lblFracEntrada.AutoSize = true; this.lblFracEntrada.Left = 230; this.lblFracEntrada.Top = 41;
+            this.lblFracEntrada.ForeColor = System.Drawing.Color.FromArgb(70, 70, 70); this.lblFracEntrada.Visible = false;
+            this.numFracEntrada.Left = 340; this.numFracEntrada.Top = 38; this.numFracEntrada.Width = 75;
+            this.numFracEntrada.DecimalPlaces = 2; this.numFracEntrada.Maximum = 99999; this.numFracEntrada.Minimum = 0;
+            this.numFracEntrada.Value = 1; this.numFracEntrada.Visible = false;
+            this.txtFracEntradaUn.Left = 420; this.txtFracEntradaUn.Top = 38; this.txtFracEntradaUn.Width = 55;
+            this.txtFracEntradaUn.BackColor = System.Drawing.Color.White; this.txtFracEntradaUn.ForeColor = System.Drawing.Color.FromArgb(50, 50, 50);
+            this.txtFracEntradaUn.PlaceholderText = "un"; this.txtFracEntradaUn.Visible = false;
+            this.txtFracEntradaUn.CharacterCasing = System.Windows.Forms.CharacterCasing.Upper;
+
+            // fração saída: label | num | txt-unidade
+            this.lblFracSaida.Text = "Fração Saída:"; this.lblFracSaida.AutoSize = true; this.lblFracSaida.Left = 490; this.lblFracSaida.Top = 41;
+            this.lblFracSaida.ForeColor = System.Drawing.Color.FromArgb(70, 70, 70); this.lblFracSaida.Visible = false;
+            this.numFracSaida.Left = 582; this.numFracSaida.Top = 38; this.numFracSaida.Width = 75;
+            this.numFracSaida.DecimalPlaces = 2; this.numFracSaida.Maximum = 99999; this.numFracSaida.Minimum = 0;
+            this.numFracSaida.Value = 1; this.numFracSaida.Visible = false;
+            this.numFracSaida.ValueChanged += new System.EventHandler(this.NumCustoQtde_ValueChanged);
+            this.txtFracSaidaUn.Left = 662; this.txtFracSaidaUn.Top = 38; this.txtFracSaidaUn.Width = 55;
+            this.txtFracSaidaUn.BackColor = System.Drawing.Color.White; this.txtFracSaidaUn.ForeColor = System.Drawing.Color.FromArgb(50, 50, 50);
+            this.txtFracSaidaUn.PlaceholderText = "un"; this.txtFracSaidaUn.Visible = false;
+            this.txtFracSaidaUn.CharacterCasing = System.Windows.Forms.CharacterCasing.Upper;
+
+            // categoria
+            this.lblCategoria.Text = "Categoria:"; this.lblCategoria.AutoSize = true; this.lblCategoria.Left = 730; this.lblCategoria.Top = 41;
+            this.lblCategoria.ForeColor = System.Drawing.Color.FromArgb(70, 70, 70); this.lblCategoria.Visible = false;
+            this.cmbCategoria.Left = 800; this.cmbCategoria.Top = 37; this.cmbCategoria.Width = 150;
+            this.cmbCategoria.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cmbCategoria.BackColor = System.Drawing.Color.White; this.cmbCategoria.Visible = false;
 
             this.pnlCadastro.Controls.Add(this.lblNom2);   this.pnlCadastro.Controls.Add(this.txtNome);
             this.pnlCadastro.Controls.Add(this.lblUn);     this.pnlCadastro.Controls.Add(this.txtUnidade);
             this.pnlCadastro.Controls.Add(this.lblQtde2);  this.pnlCadastro.Controls.Add(this.numQtde);
-            this.pnlCadastro.Controls.Add(this.lblCusto2); this.pnlCadastro.Controls.Add(this.numCusto);
-            this.pnlCadastro.Controls.Add(this.lblMin);    this.pnlCadastro.Controls.Add(this.numEstMin);
+            this.pnlCadastro.Controls.Add(this.lblCusto2); this.pnlCadastro.Controls.Add(this.numCusto); this.pnlCadastro.Controls.Add(this.lblCustoUnit);
             this.pnlCadastro.Controls.Add(this.chkEhProduto);
+            this.pnlCadastro.Controls.Add(this.lblFracEntrada); this.pnlCadastro.Controls.Add(this.numFracEntrada); this.pnlCadastro.Controls.Add(this.txtFracEntradaUn);
+            this.pnlCadastro.Controls.Add(this.lblFracSaida);   this.pnlCadastro.Controls.Add(this.numFracSaida);   this.pnlCadastro.Controls.Add(this.txtFracSaidaUn);
+            this.pnlCadastro.Controls.Add(this.lblCategoria);   this.pnlCadastro.Controls.Add(this.cmbCategoria);
 
             // pnlAjuste (qty adjustment panel)
             this.pnlAjuste.Left = 0; this.pnlAjuste.Top = 28;
@@ -195,7 +238,7 @@ namespace Pedeai.Forms
             this.lblAjQtde.Text = "Quantidade:"; this.lblAjQtde.AutoSize = true; this.lblAjQtde.Left = 586; this.lblAjQtde.Top = 7;
             this.lblAjQtde.ForeColor = System.Drawing.Color.FromArgb(70, 70, 70);
             this.numAjusteQtde.Left = 666; this.numAjusteQtde.Top = 4; this.numAjusteQtde.Width = 100;
-            this.numAjusteQtde.DecimalPlaces = 3; this.numAjusteQtde.Maximum = 999999; this.numAjusteQtde.Minimum = 0;
+            this.numAjusteQtde.DecimalPlaces = 2; this.numAjusteQtde.Maximum = 999999; this.numAjusteQtde.Minimum = 0;
 
             this.pnlAjuste.Controls.Add(this.lblAjusteNomeLbl);
             this.pnlAjuste.Controls.Add(this.lblAjusteNome);
@@ -263,8 +306,16 @@ namespace Pedeai.Forms
         internal System.Windows.Forms.TextBox        txtUnidade;
         internal System.Windows.Forms.NumericUpDown  numQtde;
         internal System.Windows.Forms.NumericUpDown  numCusto;
-        internal System.Windows.Forms.NumericUpDown  numEstMin;
+        internal System.Windows.Forms.Label          lblCustoUnit;
         internal System.Windows.Forms.CheckBox       chkEhProduto;
+        internal System.Windows.Forms.Label          lblFracEntrada;
+        internal System.Windows.Forms.NumericUpDown  numFracEntrada;
+        internal System.Windows.Forms.TextBox        txtFracEntradaUn;
+        internal System.Windows.Forms.Label          lblFracSaida;
+        internal System.Windows.Forms.NumericUpDown  numFracSaida;
+        internal System.Windows.Forms.TextBox        txtFracSaidaUn;
+        internal System.Windows.Forms.Label          lblCategoria;
+        internal System.Windows.Forms.ComboBox       cmbCategoria;
         internal System.Windows.Forms.Label          lblFormTitulo;
         internal System.Windows.Forms.Label          lblAjusteNome;
         internal System.Windows.Forms.Label          lblAjusteAtual;
@@ -285,7 +336,6 @@ namespace Pedeai.Forms
         private  System.Windows.Forms.Label          lblUn;
         private  System.Windows.Forms.Label          lblQtde2;
         private  System.Windows.Forms.Label          lblCusto2;
-        private  System.Windows.Forms.Label          lblMin;
         private  System.Windows.Forms.Label          lblAjusteNomeLbl;
         private  System.Windows.Forms.Label          lblAjusteAtualLbl;
         private  System.Windows.Forms.Label          lblAjTipo;

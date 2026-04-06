@@ -8,7 +8,8 @@ namespace Pedeai.Forms
 {
     public partial class frmEstoque : Form
     {
-        private readonly EstoqueBLL _bll = new EstoqueBLL();
+        private readonly EstoqueBLL          _bll      = new EstoqueBLL();
+        private readonly GrupoMercadoriaBLL  _grupoBll = new GrupoMercadoriaBLL();
         private int     _codigoEditando  = 0;
         private bool    _modoAjuste      = false; // true = adjusting qty, false = editing/adding
 
@@ -16,7 +17,7 @@ namespace Pedeai.Forms
         {
             InitializeComponent();
             if (System.ComponentModel.LicenseManager.UsageMode == System.ComponentModel.LicenseUsageMode.Designtime) return;
-            Load += (_, __) => CarregarGrid();
+            Load += (_, __) => { CarregarGrid(); CarregarCategorias(); };
         }
 
         // ── Grid ─────────────────────────────────────────────────────────────
@@ -34,7 +35,6 @@ namespace Pedeai.Forms
                 if (grid.Columns["Unidade"]   != null) { grid.Columns["Unidade"].HeaderText   = "Unid.";        grid.Columns["Unidade"].FillWeight   = 8; }
                 if (grid.Columns["Qtde"]      != null) { grid.Columns["Qtde"].HeaderText      = "Qtde";         grid.Columns["Qtde"].FillWeight      = 10; }
                 if (grid.Columns["Custo"]     != null) { grid.Columns["Custo"].HeaderText     = "Custo R$";     grid.Columns["Custo"].FillWeight     = 12; }
-                if (grid.Columns["EstMinimo"] != null) { grid.Columns["EstMinimo"].HeaderText = "Est. Mínimo";  grid.Columns["EstMinimo"].FillWeight = 12; }
                 ModoNeutro();
             }
             catch (Exception ex) { MessageBox.Show("Erro: " + ex.Message); }
@@ -47,6 +47,22 @@ namespace Pedeai.Forms
             _modoAjuste     = false;
         }
 
+        private void CarregarCategorias()
+        {
+            try
+            {
+                var dt = _grupoBll.Listar(apenasAtivas: true);
+                cmbCategoria.Items.Clear();
+                cmbCategoria.Items.Add(new CategoriaItem(null, "-- nenhuma --"));
+                foreach (System.Data.DataRow row in dt.Rows)
+                    cmbCategoria.Items.Add(new CategoriaItem(
+                        Convert.ToInt32(row["Codigo"]),
+                        row["Nome"]?.ToString() ?? ""));
+                if (cmbCategoria.Items.Count > 0) cmbCategoria.SelectedIndex = 0;
+            }
+            catch { /* silencioso */ }
+        }
+
         // ── Toolbar events ────────────────────────────────────────────────────
 
         private void TxtFiltro_KeyDown(object sender, KeyEventArgs e)
@@ -55,6 +71,8 @@ namespace Pedeai.Forms
         }
 
         private void BtnPesq_Click(object sender, EventArgs e) => CarregarGrid();
+
+        private void Grid_DataError(object sender, DataGridViewDataErrorEventArgs e) { e.ThrowException = false; }
 
         private void BtnNovo_Click(object sender, EventArgs e)
         {
@@ -66,6 +84,35 @@ namespace Pedeai.Forms
             lblFormTitulo.Text = "Novo Item de Estoque";
             pnlForm.Visible    = true;
             txtNome.Focus();
+        }
+
+        private void ChkEhProduto_CheckedChanged(object sender, EventArgs e)
+        {
+            bool vis = chkEhProduto.Checked;
+            lblFracEntrada.Visible  = vis;
+            numFracEntrada.Visible  = vis;
+            txtFracEntradaUn.Visible = vis;
+            lblFracSaida.Visible    = vis;
+            numFracSaida.Visible    = vis;
+            txtFracSaidaUn.Visible  = vis;
+            lblCategoria.Visible    = vis;
+            cmbCategoria.Visible    = vis;
+            AtualizarCustoUnit();
+        }
+
+        private void NumCustoQtde_ValueChanged(object sender, EventArgs e) => AtualizarCustoUnit();
+
+        private void AtualizarCustoUnit()
+        {
+            if (!chkEhProduto.Checked || numFracSaida.Value == 0 || numQtde.Value == 0)
+            {
+                lblCustoUnit.Text = "";
+                return;
+            }
+            decimal totalUnidades = numQtde.Value * numFracSaida.Value;
+            decimal custoPorUn   = numCusto.Value / totalUnidades;
+            string  unSaida      = string.IsNullOrWhiteSpace(txtFracSaidaUn.Text) ? "un" : txtFracSaidaUn.Text.Trim();
+            lblCustoUnit.Text = $"= R$ {custoPorUn:F2} / {unSaida}  ({totalUnidades:N2} {unSaida})";
         }
 
         // ── Grid double-click → edit ──────────────────────────────────────────
@@ -83,8 +130,20 @@ namespace Pedeai.Forms
             txtUnidade.Text     = obj.estoUnidade;
             numQtde.Value       = obj.estoQtde_Atual  > numQtde.Maximum  ? numQtde.Maximum  : obj.estoQtde_Atual;
             numCusto.Value      = obj.estoPreco_Custo > numCusto.Maximum ? numCusto.Maximum : obj.estoPreco_Custo;
-            numEstMin.Value     = obj.estoEstoque_Min > numEstMin.Maximum ? numEstMin.Maximum: obj.estoEstoque_Min;
-            chkEhProduto.Checked = obj.estoEh_Produto;
+            chkEhProduto.Checked  = obj.estoEh_Produto;
+            numFracEntrada.Value   = obj.estoFracao_Entrada > numFracEntrada.Maximum ? numFracEntrada.Maximum : obj.estoFracao_Entrada;
+            txtFracEntradaUn.Text  = obj.estoFracao_Entrada_Unidade;
+            numFracSaida.Value     = obj.estoFracao_Saida   > numFracSaida.Maximum   ? numFracSaida.Maximum   : obj.estoFracao_Saida;
+            txtFracSaidaUn.Text    = obj.estoFracao_Saida_Unidade;
+            SelecionarCategoria(obj.Codigo_Grupo);
+            // Reverter qtde e custo para os valores de entrada originais
+            if (obj.estoEh_Produto && obj.estoFracao_Saida > 0)
+            {
+                decimal qtdeEntrada  = obj.estoQtde_Atual / obj.estoFracao_Saida;
+                decimal custoTotal   = obj.estoPreco_Custo * obj.estoQtde_Atual;
+                numQtde.Value  = qtdeEntrada  > numQtde.Maximum  ? numQtde.Maximum  : qtdeEntrada;
+                numCusto.Value = custoTotal   > numCusto.Maximum ? numCusto.Maximum : custoTotal;
+            }
             lblFormTitulo.Text  = "Editar Item";
             pnlAjuste.Visible   = false;
             pnlCadastro.Visible = true;
@@ -132,12 +191,24 @@ namespace Pedeai.Forms
                 {
                     Codigo          = _codigoEditando,
                     estoNome        = txtNome.Text.Trim(),
-                    estoUnidade     = string.IsNullOrWhiteSpace(txtUnidade.Text) ? "un" : txtUnidade.Text.Trim(),
-                    estoQtde_Atual  = numQtde.Value,
+                    estoUnidade     = string.IsNullOrWhiteSpace(txtUnidade.Text) ? "UN" : txtUnidade.Text.Trim(),
                     estoPreco_Custo = numCusto.Value,
-                    estoEstoque_Min = numEstMin.Value,
-                    estoEh_Produto  = chkEhProduto.Checked,
+                    estoQtde_Atual  = numQtde.Value,
+                    estoEh_Produto     = chkEhProduto.Checked,
+                    estoFracao_Entrada          = chkEhProduto.Checked ? numFracEntrada.Value : 1,
+                    estoFracao_Entrada_Unidade  = chkEhProduto.Checked ? txtFracEntradaUn.Text.Trim() : "",
+                    estoFracao_Saida            = chkEhProduto.Checked ? numFracSaida.Value   : 1,
+                    estoFracao_Saida_Unidade    = chkEhProduto.Checked ? txtFracSaidaUn.Text.Trim() : "",
+                    Codigo_Grupo = chkEhProduto.Checked ? (cmbCategoria.SelectedItem as CategoriaItem)?.Codigo : null,
                 };
+
+                // Aplica frações: converte qtde/custo para unidades de saída
+                if (chkEhProduto.Checked && obj.estoFracao_Saida > 0)
+                {
+                    decimal totalUnidades = obj.estoQtde_Atual * obj.estoFracao_Saida;
+                    obj.estoQtde_Atual  = totalUnidades;
+                    obj.estoPreco_Custo = totalUnidades > 0 ? numCusto.Value / totalUnidades : numCusto.Value;
+                }
 
                 // Preserve existing Codigo_Mercadoria if editing
                 if (_codigoEditando > 0)
@@ -170,8 +241,27 @@ namespace Pedeai.Forms
         private void LimparForm()
         {
             txtNome.Clear(); txtUnidade.Text = "un";
-            numQtde.Value = 0; numCusto.Value = 0; numEstMin.Value = 0;
+            numQtde.Value = 0; numCusto.Value = 0;
             chkEhProduto.Checked = false;
+            numFracEntrada.Value = 1; txtFracEntradaUn.Clear();
+            numFracSaida.Value = 1;   txtFracSaidaUn.Clear();
+            if (cmbCategoria.Items.Count > 0) cmbCategoria.SelectedIndex = 0;
+        }
+
+        private void SelecionarCategoria(int? codigoGrupo)
+        {
+            if (codigoGrupo == null) { if (cmbCategoria.Items.Count > 0) cmbCategoria.SelectedIndex = 0; return; }
+            foreach (CategoriaItem item in cmbCategoria.Items)
+                if (item.Codigo == codigoGrupo) { cmbCategoria.SelectedItem = item; return; }
+            if (cmbCategoria.Items.Count > 0) cmbCategoria.SelectedIndex = 0;
+        }
+
+        private sealed class CategoriaItem
+        {
+            public int?   Codigo { get; }
+            private string Nome  { get; }
+            public CategoriaItem(int? codigo, string nome) { Codigo = codigo; Nome = nome; }
+            public override string ToString() => Nome;
         }
     }
 }

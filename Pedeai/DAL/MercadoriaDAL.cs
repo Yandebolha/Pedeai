@@ -45,6 +45,15 @@ namespace Pedeai.DAL
             try
             {
                 using var conn = AbrirConexao();
+
+                using (var chk = new MySqlCommand(
+                    "SELECT COUNT(*) FROM mercadoria WHERE mercMercadoria = @nome AND Situacao = 'A'", conn))
+                {
+                    chk.Parameters.AddWithValue("@nome", obj.mercMercadoria);
+                    if (Convert.ToInt32(chk.ExecuteScalar()) > 0)
+                        return $"J\u00e1 existe um produto com o nome '{obj.mercMercadoria}'.";
+                }
+
                 obj.Codigo    = ProximoCodigo("mercadoria", conn);
                 obj.auxCodigo = ProximoAuxCodigo("mercadoria", conn);
                 obj.mercData_Cadastro = DateTime.Now;
@@ -70,6 +79,15 @@ namespace Pedeai.DAL
             try
             {
                 using var conn = AbrirConexao();
+
+                using (var chk = new MySqlCommand(
+                    "SELECT COUNT(*) FROM mercadoria WHERE mercMercadoria = @nome AND Situacao = 'A' AND Codigo <> @cod", conn))
+                {
+                    chk.Parameters.AddWithValue("@nome", obj.mercMercadoria);
+                    chk.Parameters.AddWithValue("@cod",  obj.Codigo);
+                    if (Convert.ToInt32(chk.ExecuteScalar()) > 0)
+                        return $"J\u00e1 existe outro produto com o nome '{obj.mercMercadoria}'.";
+                }
                 var sql = @"UPDATE mercadoria SET
                             Codigo_Grupo=@grp, mercMercadoria=@nome, mercApresentacao=@desc,
                             mercPreco_Venda=@preco, mercPreco_Custo=@custo, mercPreco_Promocional=@promo, mercEstoque_Atual=@est,

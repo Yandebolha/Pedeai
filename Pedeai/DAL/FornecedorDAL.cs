@@ -41,6 +41,16 @@ namespace Pedeai.DAL
             try
             {
                 using var conn = AbrirConexao();
+
+                if (!string.IsNullOrWhiteSpace(obj.fornCPF_CNPJ_))
+                {
+                    using var chk = new MySqlCommand(
+                        "SELECT COUNT(*) FROM fornecedor WHERE fornCPF_CNPJ_ = @cnpj AND Situacao = 'A'", conn);
+                    chk.Parameters.AddWithValue("@cnpj", obj.fornCPF_CNPJ_.Trim());
+                    if (Convert.ToInt32(chk.ExecuteScalar()) > 0)
+                        return $"J\u00e1 existe um fornecedor cadastrado com o CNPJ/CPF '{obj.fornCPF_CNPJ_}'.";
+                }
+
                 obj.Codigo    = ProximoCodigo("fornecedor", conn);
                 obj.auxCodigo = ProximoAuxCodigo("fornecedor", conn);
                 obj.fornData_Cadastro = DateTime.Now;
@@ -65,6 +75,17 @@ namespace Pedeai.DAL
             try
             {
                 using var conn = AbrirConexao();
+
+                if (!string.IsNullOrWhiteSpace(obj.fornCPF_CNPJ_))
+                {
+                    using var chk = new MySqlCommand(
+                        "SELECT COUNT(*) FROM fornecedor WHERE fornCPF_CNPJ_ = @cnpj AND Situacao = 'A' AND Codigo <> @cod", conn);
+                    chk.Parameters.AddWithValue("@cnpj", obj.fornCPF_CNPJ_.Trim());
+                    chk.Parameters.AddWithValue("@cod",  obj.Codigo);
+                    if (Convert.ToInt32(chk.ExecuteScalar()) > 0)
+                        return $"J\u00e1 existe outro fornecedor com o CNPJ/CPF '{obj.fornCPF_CNPJ_}'.";
+                }
+
                 var sql = @"UPDATE fornecedor SET
                             fornNome_RazaoSocial=@razao, fornApelido_Fantasia=@fantasia, fornCPF_CNPJ_=@cnpj,
                             fornRG_InscricaoEstadual=@ie, fornTelefone=@tel, fornEmail=@email, fornContato=@cont,

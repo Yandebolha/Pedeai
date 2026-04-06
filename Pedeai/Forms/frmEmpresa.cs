@@ -29,7 +29,8 @@ namespace Pedeai.Forms
                 CarregarConfiguracaoImpressao();
                 SetModoEdicao(false);
                 // Aba "Sistema" visível apenas para Admin (nivel 9)
-                btnResetarBanco.Visible = UsuarioSessao.TemNivel(9);
+                if (!UsuarioSessao.TemNivel(9))
+                    tabControl.TabPages.Remove(tabSistema);
             };
         }
 
@@ -355,6 +356,31 @@ namespace Pedeai.Forms
             if (!UsuarioSessao.TemNivel(9))
             {
                 MessageBox.Show("Apenas administradores podem executar esta ação.", "Acesso negado",
+                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            // ── Solicitar senha do admin ──────────────────────────────────────
+            string senhaDigitada;
+            using (var dlg = new Form())
+            {
+                dlg.Text = "Confirmar Identidade";
+                dlg.Size = new Size(360, 150);
+                dlg.FormBorderStyle = FormBorderStyle.FixedDialog;
+                dlg.StartPosition = FormStartPosition.CenterParent;
+                dlg.MaximizeBox = false; dlg.MinimizeBox = false;
+                var lbl = new Label { Text = "Senha do administrador:", Left = 20, Top = 18, AutoSize = true };
+                var txt = new TextBox { Left = 20, Top = 40, Width = 300, UseSystemPasswordChar = true };
+                var btnOk  = new Button { Text = "Confirmar", DialogResult = DialogResult.OK,     Left = 130, Top = 76, Width = 100, Height = 28 };
+                var btnCan = new Button { Text = "Cancelar",  DialogResult = DialogResult.Cancel,  Left = 240, Top = 76, Width = 80,  Height = 28 };
+                dlg.Controls.AddRange(new Control[] { lbl, txt, btnOk, btnCan });
+                dlg.AcceptButton = btnOk; dlg.CancelButton = btnCan;
+                if (dlg.ShowDialog(this) != DialogResult.OK) return;
+                senhaDigitada = txt.Text;
+            }
+            if (new UsuarioBLL().Autenticar("admin", senhaDigitada) == null)
+            {
+                MessageBox.Show("Senha do administrador incorreta.", "Acesso negado",
                     MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }

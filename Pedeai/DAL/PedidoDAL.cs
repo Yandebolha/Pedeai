@@ -196,23 +196,34 @@ namespace Pedeai.DAL
                     // Verificar estoque disponível antes da baixa
                     var sqlChkEst = @"SELECT mercMercadoria, mercEstoque_Atual, mercControla_Estoque
                                       FROM mercadoria WHERE Codigo = @merc LIMIT 1";
-                    using var cmdChk = new MySqlCommand(sqlChkEst, conn, trans);
-                    cmdChk.Parameters.AddWithValue("@merc", item.Codigo_Mercadoria);
-                    using (var rdr = cmdChk.ExecuteReader())
+                    // Verificar estoque: ler dados para fora do reader antes de qualquer rollback,
+                    // pois MySqlConnector não permite operações na conexão enquanto um reader está aberto.
+                    string nomeProdInsuf = null;
+                    decimal estDispInsuf = 0m;
+                    using (var cmdChk = new MySqlCommand(sqlChkEst, conn, trans))
                     {
-                        if (rdr.Read() && Convert.ToInt32(rdr["mercControla_Estoque"]) == 1)
+                        cmdChk.Parameters.AddWithValue("@merc", item.Codigo_Mercadoria);
+                        using (var rdr = cmdChk.ExecuteReader())
                         {
-                            var nomeProd   = rdr["mercMercadoria"]?.ToString() ?? item.itpwNome_Mercadoria;
-                            var estDisp    = rdr["mercEstoque_Atual"] == DBNull.Value
-                                                ? 0m
-                                                : Convert.ToDecimal(rdr["mercEstoque_Atual"]);
-                            if (item.itpwQtde > estDisp)
+                            if (rdr.Read() && Convert.ToInt32(rdr["mercControla_Estoque"]) == 1)
                             {
-                                trans.Rollback();
-                                return $"Estoque insuficiente para \"{nomeProd}\": " +
-                                       $"disponível {estDisp:0.##}, solicitado {item.itpwQtde:0.##}.";
+                                var nomeRdr = rdr["mercMercadoria"]?.ToString() ?? item.itpwNome_Mercadoria;
+                                var estRdr  = rdr["mercEstoque_Atual"] == DBNull.Value
+                                                 ? 0m
+                                                 : Convert.ToDecimal(rdr["mercEstoque_Atual"]);
+                                if (item.itpwQtde > estRdr)
+                                {
+                                    nomeProdInsuf = nomeRdr;
+                                    estDispInsuf  = estRdr;
+                                }
                             }
-                        }
+                        } // reader fechado aqui
+                    } // cmdChk descartado aqui
+                    if (nomeProdInsuf != null)
+                    {
+                        trans.Rollback();
+                        return $"Estoque insuficiente para \"{nomeProdInsuf}\": " +
+                               $"disponível {estDispInsuf:0.##}, solicitado {item.itpwQtde:0.##}.";
                     }
 
                     // Baixa de estoque (apenas quando o produto controla estoque)

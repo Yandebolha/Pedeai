@@ -14,7 +14,6 @@ namespace Pedeai.DAL
             var where = string.IsNullOrWhiteSpace(filtro) ? "" : " AND estoNome LIKE @f";
             var sql = $@"SELECT Codigo, estoNome AS Nome, estoUnidade AS Unidade,
                                estoQtde_Atual AS Qtde, estoPreco_Custo AS Custo,
-                               estoEstoque_Min AS EstMinimo,
                                estoEh_Produto AS EhProduto, Situacao
                         FROM estoque_item
                         WHERE Situacao = 'A'{where}
@@ -42,11 +41,23 @@ namespace Pedeai.DAL
             try
             {
                 using var conn = AbrirConexao();
+
+                using (var chk = new MySqlCommand(
+                    "SELECT COUNT(*) FROM estoque_item WHERE estoNome = @nome AND Situacao = 'A'", conn))
+                {
+                    chk.Parameters.AddWithValue("@nome", obj.estoNome);
+                    if (Convert.ToInt32(chk.ExecuteScalar()) > 0)
+                        return $"J\u00e1 existe um item de estoque com o nome '{obj.estoNome}'.";
+                }
+
                 using var cmd = new MySqlCommand(@"
                     INSERT INTO estoque_item
                         (estoNome, estoUnidade, estoQtde_Atual, estoPreco_Custo,
-                         estoEstoque_Min, estoEh_Produto, Codigo_Mercadoria, Situacao, estoData_Cadastro)
-                    VALUES (@nome, @un, @qtde, @custo, @min, @ehprod, @codmerc, 'A', NOW())", conn);
+                         estoEh_Produto, estoFracao_Entrada, estoFracao_Entrada_Unidade,
+                         estoFracao_Saida, estoFracao_Saida_Unidade, Codigo_Grupo,
+                         Codigo_Mercadoria, Situacao, estoData_Cadastro)
+                    VALUES (@nome, @un, @qtde, @custo, @ehprod, @fracent, @fracentun,
+                            @fracsai, @fracsaiun, @codgrupo, @codmerc, 'A', NOW())", conn);
                 Bind(cmd, obj);
                 cmd.ExecuteNonQuery();
                 return "";
@@ -59,12 +70,24 @@ namespace Pedeai.DAL
             try
             {
                 using var conn = AbrirConexao();
+
+                using (var chk = new MySqlCommand(
+                    "SELECT COUNT(*) FROM estoque_item WHERE estoNome = @nome AND Situacao = 'A' AND Codigo <> @cod", conn))
+                {
+                    chk.Parameters.AddWithValue("@nome", obj.estoNome);
+                    chk.Parameters.AddWithValue("@cod",  obj.Codigo);
+                    if (Convert.ToInt32(chk.ExecuteScalar()) > 0)
+                        return $"J\u00e1 existe outro item com o nome '{obj.estoNome}'.";
+                }
+
                 using var cmd = new MySqlCommand(@"
                     UPDATE estoque_item SET
                         estoNome = @nome, estoUnidade = @un,
                         estoQtde_Atual = @qtde, estoPreco_Custo = @custo,
-                        estoEstoque_Min = @min, estoEh_Produto = @ehprod,
-                        Codigo_Mercadoria = @codmerc
+                        estoEh_Produto = @ehprod,
+                        estoFracao_Entrada = @fracent, estoFracao_Entrada_Unidade = @fracentun,
+                        estoFracao_Saida = @fracsai, estoFracao_Saida_Unidade = @fracsaiun,
+                        Codigo_Grupo = @codgrupo, Codigo_Mercadoria = @codmerc
                     WHERE Codigo = @cod", conn);
                 Bind(cmd, obj);
                 cmd.Parameters.AddWithValue("@cod", obj.Codigo);
@@ -104,8 +127,13 @@ namespace Pedeai.DAL
             cmd.Parameters.AddWithValue("@un",     obj.estoUnidade);
             cmd.Parameters.AddWithValue("@qtde",   obj.estoQtde_Atual);
             cmd.Parameters.AddWithValue("@custo",  obj.estoPreco_Custo);
-            cmd.Parameters.AddWithValue("@min",    obj.estoEstoque_Min);
-            cmd.Parameters.AddWithValue("@ehprod", obj.estoEh_Produto ? 1 : 0);
+            cmd.Parameters.AddWithValue("@ehprod",  obj.estoEh_Produto ? 1 : 0);
+            cmd.Parameters.AddWithValue("@fracent",   obj.estoFracao_Entrada);
+            cmd.Parameters.AddWithValue("@fracentun", obj.estoFracao_Entrada_Unidade ?? "");
+            cmd.Parameters.AddWithValue("@fracsai",   obj.estoFracao_Saida);
+            cmd.Parameters.AddWithValue("@fracsaiun", obj.estoFracao_Saida_Unidade ?? "");
+            cmd.Parameters.AddWithValue("@codgrupo",
+                (object)obj.Codigo_Grupo ?? DBNull.Value);
             cmd.Parameters.AddWithValue("@codmerc",
                 (object)obj.Codigo_Mercadoria ?? DBNull.Value);
         }
@@ -117,8 +145,12 @@ namespace Pedeai.DAL
             estoUnidade       = r["estoUnidade"]?.ToString() ?? "un",
             estoQtde_Atual    = r["estoQtde_Atual"]  == DBNull.Value ? 0 : Convert.ToDecimal(r["estoQtde_Atual"]),
             estoPreco_Custo   = r["estoPreco_Custo"] == DBNull.Value ? 0 : Convert.ToDecimal(r["estoPreco_Custo"]),
-            estoEstoque_Min   = r["estoEstoque_Min"] == DBNull.Value ? 0 : Convert.ToDecimal(r["estoEstoque_Min"]),
             estoEh_Produto    = r["estoEh_Produto"]?.ToString() == "1" || r["estoEh_Produto"]?.ToString() == "True",
+            estoFracao_Entrada          = r["estoFracao_Entrada"] == DBNull.Value ? 1 : Convert.ToDecimal(r["estoFracao_Entrada"]),
+            estoFracao_Entrada_Unidade  = r["estoFracao_Entrada_Unidade"]?.ToString() ?? "",
+            estoFracao_Saida            = r["estoFracao_Saida"]  == DBNull.Value ? 1 : Convert.ToDecimal(r["estoFracao_Saida"]),
+            estoFracao_Saida_Unidade    = r["estoFracao_Saida_Unidade"]?.ToString() ?? "",
+            Codigo_Grupo      = r["Codigo_Grupo"] == DBNull.Value ? (int?)null : Convert.ToInt32(r["Codigo_Grupo"]),
             Codigo_Mercadoria = r["Codigo_Mercadoria"] == DBNull.Value ? (int?)null : Convert.ToInt32(r["Codigo_Mercadoria"]),
             Situacao          = r["Situacao"]?.ToString() ?? "A",
             estoData_Cadastro = r["estoData_Cadastro"] == DBNull.Value ? DateTime.Now : Convert.ToDateTime(r["estoData_Cadastro"]),

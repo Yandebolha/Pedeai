@@ -32,10 +32,17 @@ namespace Pedeai.BLL
 
         private string SincronizarProduto(EstoqueItem obj)
         {
-            DataTable cats = _gDAL.Listar();
             int codGrupo = 1;
-            if (cats.Rows.Count > 0)
-                codGrupo = Convert.ToInt32(cats.Rows[0]["Codigo"]);
+            if (obj.Codigo_Grupo.HasValue && obj.Codigo_Grupo.Value > 0)
+            {
+                codGrupo = obj.Codigo_Grupo.Value;
+            }
+            else
+            {
+                DataTable cats = _gDAL.Listar();
+                if (cats.Rows.Count > 0)
+                    codGrupo = Convert.ToInt32(cats.Rows[0]["Codigo"]);
+            }
 
             if (obj.Codigo_Mercadoria.HasValue && obj.Codigo_Mercadoria.Value > 0)
             {
@@ -44,6 +51,7 @@ namespace Pedeai.BLL
                 {
                     merc.mercMercadoria      = obj.estoNome;
                     merc.mercPreco_Custo     = obj.estoPreco_Custo;
+                    merc.mercPreco_Venda     = obj.estoPreco_Custo > 0 ? obj.estoPreco_Custo : merc.mercPreco_Venda;
                     merc.mercEstoque_Atual   = obj.estoQtde_Atual;
                     merc.mercControla_Estoque = true;
                     return _mDAL.Alterar(merc);

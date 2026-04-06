@@ -67,16 +67,16 @@ namespace Pedeai.Forms
             // ── lblCaixaIni ────────────────────────────────────────────────
             this.lblCaixaIni.Dock      = System.Windows.Forms.DockStyle.Top;
             this.lblCaixaIni.Height    = 24;
-            this.lblCaixaIni.ForeColor = System.Drawing.Color.FromArgb(220, 230, 255);
+            this.lblCaixaIni.ForeColor = System.Drawing.Color.FromArgb(70, 100, 155);
             this.lblCaixaIni.Font      = new System.Drawing.Font("Segoe UI", 9F);
             this.lblCaixaIni.Text      = "";
             this.lblCaixaIni.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            this.lblCaixaIni.BackColor = System.Drawing.Color.FromArgb(176, 110, 42);
+            this.lblCaixaIni.BackColor = System.Drawing.Color.FromArgb(245, 237, 216);
 
             // ── pnlAbrir ───────────────────────────────────────────────────
             this.pnlAbrir.Dock      = System.Windows.Forms.DockStyle.Top;
             this.pnlAbrir.Height    = 140;
-            this.pnlAbrir.BackColor = System.Drawing.Color.FromArgb(176, 110, 42);
+            this.pnlAbrir.BackColor = System.Drawing.Color.FromArgb(245, 237, 216);
             this.pnlAbrir.Padding   = new System.Windows.Forms.Padding(12, 8, 12, 8);
 
             this.lblAbrir.Text      = "Abrir Turno";
@@ -85,7 +85,7 @@ namespace Pedeai.Forms
             this.lblAbrir.Left = 12; this.lblAbrir.Top = 8; this.lblAbrir.AutoSize = true;
 
             this.lblCaixaIniLabel.Text      = "Caixa inicial (R$):";
-            this.lblCaixaIniLabel.ForeColor = System.Drawing.Color.White;
+            this.lblCaixaIniLabel.ForeColor = System.Drawing.Color.FromArgb(60, 60, 60);
             this.lblCaixaIniLabel.Left = 12; this.lblCaixaIniLabel.Top = 36; this.lblCaixaIniLabel.AutoSize = true;
 
             this.numCaixaInicial.Left            = 160; this.numCaixaInicial.Top = 32;
@@ -95,7 +95,7 @@ namespace Pedeai.Forms
             this.numCaixaInicial.Value           = 0;
 
             this.lblObsAbrir.Text      = "Observa\u00e7\u00e3o:";
-            this.lblObsAbrir.ForeColor = System.Drawing.Color.White;
+            this.lblObsAbrir.ForeColor = System.Drawing.Color.FromArgb(60, 60, 60);
             this.lblObsAbrir.Left = 12; this.lblObsAbrir.Top = 72; this.lblObsAbrir.AutoSize = true;
 
             this.txtObsAbrir.Left  = 160; this.txtObsAbrir.Top = 68;
@@ -121,7 +121,7 @@ namespace Pedeai.Forms
             // ── pnlFechar ──────────────────────────────────────────────────
             this.pnlFechar.Dock      = System.Windows.Forms.DockStyle.Top;
             this.pnlFechar.Height    = 140;
-            this.pnlFechar.BackColor = System.Drawing.Color.FromArgb(176, 110, 42);
+            this.pnlFechar.BackColor = System.Drawing.Color.FromArgb(245, 237, 216);
             this.pnlFechar.Padding   = new System.Windows.Forms.Padding(12, 8, 12, 8);
             this.pnlFechar.Visible   = false;
 
@@ -131,7 +131,7 @@ namespace Pedeai.Forms
             this.lblFechar.Left = 12; this.lblFechar.Top = 8; this.lblFechar.AutoSize = true;
 
             this.lblCaixaFinLabel.Text      = "Caixa final (R$):";
-            this.lblCaixaFinLabel.ForeColor = System.Drawing.Color.White;
+            this.lblCaixaFinLabel.ForeColor = System.Drawing.Color.FromArgb(60, 60, 60);
             this.lblCaixaFinLabel.Left = 12; this.lblCaixaFinLabel.Top = 36; this.lblCaixaFinLabel.AutoSize = true;
 
             this.numCaixaFinal.Left          = 160; this.numCaixaFinal.Top = 32;
@@ -141,7 +141,7 @@ namespace Pedeai.Forms
             this.numCaixaFinal.Value         = 0;
 
             this.lblObsFechar.Text      = "Observa\u00e7\u00e3o:";
-            this.lblObsFechar.ForeColor = System.Drawing.Color.White;
+            this.lblObsFechar.ForeColor = System.Drawing.Color.FromArgb(60, 60, 60);
             this.lblObsFechar.Left = 12; this.lblObsFechar.Top = 72; this.lblObsFechar.AutoSize = true;
 
             this.txtObsFechar.Left  = 160; this.txtObsFechar.Top = 68;

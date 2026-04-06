@@ -353,6 +353,11 @@ Itens de estoque independentes do catálogo de produtos. Permite controlar maté
 | `estoPreco_Custo` | DECIMAL(12,4) | Custo unitário médio |
 | `estoEstoque_Min` | DECIMAL(12,4) | Quantidade mínima desejada (alerta visual) |
 | `estoEh_Produto` | TINYINT(1) | `1` = sincronizar com `mercadoria` (este item também é vendido) |
+| `estoFracao_Entrada` | DECIMAL(12,4) | Fator de conversão na entrada: 1 unidade recebida = N unidades em estoque (padrão `1`) |
+| `estoFracao_Entrada_Unidade` | VARCHAR(20) | Unidade de medida da fração de entrada (ex.: `"cx"`, `"kg"`) |
+| `estoFracao_Saida` | DECIMAL(12,4) | Fator de conversão na saída: 1 unidade do catálogo vendida = N unidades debitadas do estoque (padrão `1`) |
+| `estoFracao_Saida_Unidade` | VARCHAR(20) | Unidade de medida da fração de saída (ex.: `"un"`, `"g"`) |
+| `Codigo_Grupo` | INT FK→grupo_mercadoria | Categoria do catálogo a vincular quando `estoEh_Produto=1` |
 | `Codigo_Mercadoria` | INT FK→mercadoria | Produto do catálogo vinculado (preenchido quando `estoEh_Produto=1`) |
 | `Situacao` | CHAR(1) | `'A'`=Ativo · `'I'`=Inativo |
 | `estoData_Cadastro` | DATETIME | Data de cadastro |

@@ -230,17 +230,36 @@ namespace Pedeai.DB
                 // ── 11. Tabela: estoque_item ──────────────────────────────────
                 Exec(conn, @"
                     CREATE TABLE IF NOT EXISTS estoque_item (
-                        Codigo              INT           NOT NULL AUTO_INCREMENT PRIMARY KEY,
-                        estoNome            VARCHAR(150)  NOT NULL DEFAULT '',
-                        estoUnidade         VARCHAR(20)   NOT NULL DEFAULT 'un',
-                        estoQtde_Atual      DECIMAL(12,4) NOT NULL DEFAULT 0,
-                        estoPreco_Custo     DECIMAL(12,4) NOT NULL DEFAULT 0,
-                        estoEstoque_Min     DECIMAL(12,4) NOT NULL DEFAULT 0,
-                        estoEh_Produto      TINYINT(1)    NOT NULL DEFAULT 0,
-                        Codigo_Mercadoria   INT           NULL DEFAULT NULL,
-                        Situacao            CHAR(1)       NOT NULL DEFAULT 'A',
-                        estoData_Cadastro   DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP
+                        Codigo                      INT           NOT NULL AUTO_INCREMENT PRIMARY KEY,
+                        estoNome                    VARCHAR(150)  NOT NULL DEFAULT '',
+                        estoUnidade                 VARCHAR(20)   NOT NULL DEFAULT 'un',
+                        estoQtde_Atual              DECIMAL(12,4) NOT NULL DEFAULT 0,
+                        estoPreco_Custo             DECIMAL(12,4) NOT NULL DEFAULT 0,
+                        estoEh_Produto              TINYINT(1)    NOT NULL DEFAULT 0,
+                        estoFracao_Entrada          DECIMAL(12,4) NOT NULL DEFAULT 1,
+                        estoFracao_Entrada_Unidade  VARCHAR(20)   NOT NULL DEFAULT '',
+                        estoFracao_Saida            DECIMAL(12,4) NOT NULL DEFAULT 1,
+                        estoFracao_Saida_Unidade    VARCHAR(20)   NOT NULL DEFAULT '',
+                        Codigo_Grupo                INT           NULL DEFAULT NULL,
+                        Codigo_Mercadoria           INT           NULL DEFAULT NULL,
+                        Situacao                    CHAR(1)       NOT NULL DEFAULT 'A',
+                        estoData_Cadastro           DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP
                     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+
+                // Colunas de fração (instalações existentes)
+                // Remove coluna descontinuada
+                DropColumnIfExists(conn, db, "estoque_item", "estoEstoque_Min");
+
+                AddColumnIfNotExists(conn, db, "estoque_item", "estoFracao_Entrada",
+                    "DECIMAL(12,4) NOT NULL DEFAULT 1");
+                AddColumnIfNotExists(conn, db, "estoque_item", "estoFracao_Saida",
+                    "DECIMAL(12,4) NOT NULL DEFAULT 1");
+                AddColumnIfNotExists(conn, db, "estoque_item", "estoFracao_Entrada_Unidade",
+                    "VARCHAR(20) NOT NULL DEFAULT ''");
+                AddColumnIfNotExists(conn, db, "estoque_item", "estoFracao_Saida_Unidade",
+                    "VARCHAR(20) NOT NULL DEFAULT ''");
+                AddColumnIfNotExists(conn, db, "estoque_item", "Codigo_Grupo",
+                    "INT NULL DEFAULT NULL");
 
                 return true;
             }
@@ -275,6 +294,20 @@ namespace Pedeai.DB
             var exists = Convert.ToInt32(check.ExecuteScalar()) > 0;
             if (!exists)
                 Exec(conn, $"ALTER TABLE `{table}` ADD COLUMN `{column}` {definition}");
+        }
+
+        private static void DropColumnIfExists(
+            MySqlConnection conn, string db, string table, string column)
+        {
+            using var check = new MySqlCommand(@"
+                SELECT COUNT(*) FROM information_schema.COLUMNS
+                WHERE TABLE_SCHEMA=@db AND TABLE_NAME=@tbl AND COLUMN_NAME=@col", conn);
+            check.Parameters.AddWithValue("@db",  db);
+            check.Parameters.AddWithValue("@tbl", table);
+            check.Parameters.AddWithValue("@col", column);
+            var exists = Convert.ToInt32(check.ExecuteScalar()) > 0;
+            if (exists)
+                Exec(conn, $"ALTER TABLE `{table}` DROP COLUMN `{column}`");
         }
 
         /// <summary>
