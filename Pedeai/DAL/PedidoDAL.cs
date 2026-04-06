@@ -366,7 +366,13 @@ namespace Pedeai.DAL
                     'Venda'                 AS Tipo,
                     p.pediNumero            AS Referencia,
                     p.pediNome_Cliente      AS Descricao,
-                    p.pediValor_Total       AS Valor,
+                    COALESCE(p.pediValor_Pago, p.pediValor_Total) AS Valor,
+                    p.pediValor_Total       AS ValorOriginal,
+                    p.pediValor_Pago        AS ValorRecebido,
+                    CASE WHEN p.pediValor_Pago IS NOT NULL
+                              AND p.pediValor_Pago < p.pediValor_Total
+                         THEN p.pediValor_Total - p.pediValor_Pago
+                         ELSE NULL END      AS Desconto,
                     CASE p.pediForma_Pagamento
                         WHEN 0 THEN 'Dinheiro' WHEN 1 THEN 'Cartão' WHEN 2 THEN 'Pix'
                         ELSE 'Outro' END     AS Pagamento,
@@ -387,6 +393,9 @@ namespace Pedeai.DAL
                     CONCAT('#', e.Codigo)  AS Referencia,
                     CONCAT('Entrada - ', e.entNome_Fornecedor) AS Descricao,
                     -e.entValorTotal        AS Valor,
+                    NULL                    AS ValorOriginal,
+                    NULL                    AS ValorRecebido,
+                    NULL                    AS Desconto,
                     ''                      AS Pagamento,
                     'Lançado'               AS Status,
                     0                       AS CodigoPedido

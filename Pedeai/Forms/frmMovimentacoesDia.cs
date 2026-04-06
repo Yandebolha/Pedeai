@@ -21,7 +21,7 @@ namespace Pedeai.Forms
             lblTit.Text = $"\U0001F4CB  Movimenta\u00e7\u00f5es do dia {dia:dd/MM/yyyy}";
 
             // Resumo
-            decimal totalVendas = 0, totalCompras = 0;
+            decimal totalVendas = 0, totalCompras = 0, totalDescontos = 0;
             if (dt != null)
                 foreach (DataRow r in dt.Rows)
                 {
@@ -31,10 +31,13 @@ namespace Pedeai.Forms
                         if (v >= 0) totalVendas  += v;
                         else        totalCompras += Math.Abs(v);
                     }
+                    if (r.Table.Columns.Contains("Desconto") && r["Desconto"] != DBNull.Value)
+                        totalDescontos += Convert.ToDecimal(r["Desconto"]);
                 }
             decimal saldo = totalVendas - totalCompras;
             lblRes.Text = $"  Vendas: R$ {totalVendas:N2}   |   Compras: R$ {totalCompras:N2}   |   " +
-                          $"Saldo do dia: R$ {saldo:N2}";
+                          $"Saldo do dia: R$ {saldo:N2}" +
+                          (totalDescontos > 0 ? $"   |   \u2193 Descontos concedidos: R$ {totalDescontos:N2}" : "");
 
             // Bind data
             if (dt != null)
@@ -89,21 +92,41 @@ namespace Pedeai.Forms
         private void ConfigurarColunas(DataGridView g)
         {
             if (g.Columns.Count == 0) return;
-            var show = new System.Collections.Generic.Dictionary<string, string>
+
+            // Detect whether any row has a discount
+            bool temDesconto = false;
+            foreach (DataGridViewRow row in g.Rows)
             {
-                ["Horario"]    = "Hor\u00e1rio",
-                ["Tipo"]       = "Tipo",
-                ["Referencia"] = "Refer\u00eancia",
-                ["Descricao"]  = "Descri\u00e7\u00e3o",
-                ["Valor"]      = "Valor R$",
-                ["Pagamento"]  = "Pagamento",
-                ["Status"]     = "Status",
+                if (row.DataBoundItem == null) continue;
+                var dr = ((DataRowView)row.DataBoundItem).Row;
+                if (dr.Table.Columns.Contains("Desconto") && dr["Desconto"] != DBNull.Value)
+                { temDesconto = true; break; }
+            }
+
+            var show = new System.Collections.Generic.Dictionary<string, (string header, int fill)>
+            {
+                ["Horario"]       = ("Hor\u00e1rio",      9),
+                ["Tipo"]          = ("Tipo",            6),
+                ["Referencia"]    = ("Refer\u00eancia",  7),
+                ["Descricao"]     = ("Descri\u00e7\u00e3o", 22),
+                ["Valor"]         = ("Valor R$",        10),
+                ["ValorOriginal"]  = ("Valor Original",  10),
+                ["ValorRecebido"]  = ("Valor Recebido",  10),
+                ["Desconto"]      = ("Desconto R$",     9),
+                ["Pagamento"]     = ("Pagamento",        9),
+                ["Status"]        = ("Status",           8),
             };
+
             foreach (DataGridViewColumn col in g.Columns)
-                col.Visible = show.ContainsKey(col.Name);
-            foreach (var kv in show)
-                if (g.Columns.Contains(kv.Key))
-                    g.Columns[kv.Key].HeaderText = kv.Value;
+            {
+                if (!show.ContainsKey(col.Name)) { col.Visible = false; continue; }
+                // Only show discount columns when at least one row has a discount
+                if ((col.Name == "ValorOriginal" || col.Name == "ValorRecebido" || col.Name == "Desconto") && !temDesconto)
+                { col.Visible = false; continue; }
+                col.Visible    = true;
+                col.HeaderText = show[col.Name].header;
+                col.FillWeight = show[col.Name].fill;
+            }
         }
 
         private static void MostrarItensDialog(string numPedido, string cliente, DataTable dtItens)
@@ -197,8 +220,13 @@ namespace Pedeai.Forms
                 if (row.DataBoundItem == null) continue;
                 var dr   = ((DataRowView)row.DataBoundItem).Row;
                 var tipo = dr["Tipo"]?.ToString();
+                bool temDesconto = dr.Table.Columns.Contains("Desconto")
+                                   && dr["Desconto"] != DBNull.Value
+                                   && Convert.ToDecimal(dr["Desconto"]) > 0;
                 if (tipo == "Compra")
                     row.DefaultCellStyle.BackColor = Color.FromArgb(255, 220, 215);
+                else if (temDesconto)
+                    row.DefaultCellStyle.BackColor = Color.FromArgb(255, 240, 200); // amber — has discount
                 else
                     row.DefaultCellStyle.BackColor = Color.FromArgb(215, 245, 220);
             }
