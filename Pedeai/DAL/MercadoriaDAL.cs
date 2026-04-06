@@ -94,6 +94,46 @@ namespace Pedeai.DAL
             cmd.ExecuteNonQuery();
         }
 
+        /// <summary>Lista produtos com estoque controlado, opcionalmente filtrando por nome.</summary>
+        public DataTable ListarEstoque(string filtro = "")
+        {
+            var dt = new DataTable();
+            using var conn = AbrirConexao();
+            var where = string.IsNullOrWhiteSpace(filtro)
+                ? ""
+                : " AND m.mercMercadoria LIKE @filtro";
+            var sql = $@"SELECT m.Codigo,
+                               m.mercMercadoria        AS Produto,
+                               g.grmeDescricao_        AS Categoria,
+                               m.mercEstoque_Atual     AS Estoque,
+                               m.Situacao
+                        FROM mercadoria m
+                        LEFT JOIN grupo_mercadoria g ON g.Codigo = m.Codigo_Grupo
+                        WHERE m.mercControla_Estoque = 1{where}
+                        ORDER BY g.grmeOrdem, m.mercOrdem, m.mercMercadoria";
+            using var cmd = new MySqlCommand(sql, conn);
+            if (!string.IsNullOrWhiteSpace(filtro))
+                cmd.Parameters.AddWithValue("@filtro", "%" + filtro + "%");
+            new MySqlDataAdapter(cmd).Fill(dt);
+            return dt;
+        }
+
+        /// <summary>Ajusta o estoque de um produto: delta positivo = entrada, negativo = saída.</summary>
+        public string AjustarEstoque(int codigoProduto, decimal delta, string tipo, string obs)
+        {
+            try
+            {
+                using var conn = AbrirConexao();
+                using var cmd = new MySqlCommand(
+                    "UPDATE mercadoria SET mercEstoque_Atual = mercEstoque_Atual + @delta WHERE Codigo = @cod", conn);
+                cmd.Parameters.AddWithValue("@delta", delta);
+                cmd.Parameters.AddWithValue("@cod",   codigoProduto);
+                cmd.ExecuteNonQuery();
+                return "";
+            }
+            catch (Exception ex) { return ex.Message; }
+        }
+
         private static void BindParams(MySqlCommand cmd, Mercadoria obj)
         {
             cmd.Parameters.AddWithValue("@aux",   obj.auxCodigo);

@@ -382,12 +382,12 @@ namespace Pedeai.Forms
             if (_produtos.Count == 0) { MessageBox.Show("Nenhum produto carregado."); return; }
 
             using var dlg = new Form();
-            dlg.Text            = "Pizza \u00BD + \u00BD";
+            dlg.Text            = "Pedido Fracionado";
             dlg.StartPosition   = FormStartPosition.CenterParent;
             dlg.Size            = new Size(700, 430);
             dlg.FormBorderStyle = FormBorderStyle.FixedDialog;
             dlg.MaximizeBox     = dlg.MinimizeBox = false;
-            dlg.BackColor       = Color.FromArgb(28, 37, 65);
+            dlg.BackColor       = Color.FromArgb(245, 237, 216);
 
             DataGridView MkGrid()
             {
@@ -396,10 +396,10 @@ namespace Pedeai.Forms
                     Dock = DockStyle.Fill, ReadOnly = true, AllowUserToAddRows = false,
                     SelectionMode = DataGridViewSelectionMode.FullRowSelect,
                     RowHeadersVisible = false, AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill,
-                    BackgroundColor = Color.FromArgb(28, 37, 65), GridColor = Color.FromArgb(50, 60, 100),
-                    DefaultCellStyle = { BackColor = Color.FromArgb(28, 37, 65), ForeColor = Color.White,
-                        SelectionBackColor = Color.FromArgb(52, 152, 219) },
-                    ColumnHeadersDefaultCellStyle = { BackColor = Color.FromArgb(36, 48, 82), ForeColor = Color.White,
+                    BackgroundColor = Color.FromArgb(250, 245, 238), GridColor = Color.FromArgb(200, 185, 160),
+                    DefaultCellStyle = { BackColor = Color.White, ForeColor = Color.FromArgb(50, 50, 50),
+                        SelectionBackColor = Color.FromArgb(224, 113, 42), SelectionForeColor = Color.White },
+                    ColumnHeadersDefaultCellStyle = { BackColor = Color.FromArgb(176, 110, 42), ForeColor = Color.White,
                         Font = new Font("Segoe UI", 8.5F, FontStyle.Bold) },
                     BorderStyle = BorderStyle.None, Font = new Font("Segoe UI", 9F), MultiSelect = false,
                 };
@@ -409,9 +409,9 @@ namespace Pedeai.Forms
                 return g;
             }
 
-            var pnlTop = new Panel { Dock = DockStyle.Top, Height = 36, BackColor = Color.FromArgb(36, 48, 82) };
-            var lblTit = new Label { Text = "Selecione os dois sabores da pizza:", Dock = DockStyle.Fill,
-                ForeColor = Color.FromArgb(170, 200, 240), Font = new Font("Segoe UI", 9.5F, FontStyle.Bold),
+            var pnlTop = new Panel { Dock = DockStyle.Top, Height = 36, BackColor = Color.FromArgb(176, 110, 42) };
+            var lblTit = new Label { Text = "Selecione os dois produtos:", Dock = DockStyle.Fill,
+                ForeColor = Color.White, Font = new Font("Segoe UI", 9.5F, FontStyle.Bold),
                 TextAlign = ContentAlignment.MiddleLeft, Padding = new Padding(10, 0, 0, 0) };
             pnlTop.Controls.Add(lblTit);
 
@@ -422,7 +422,7 @@ namespace Pedeai.Forms
             tbl.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
 
             Label MkLbl(string t) => new Label { Text = t, Dock = DockStyle.Fill,
-                ForeColor = Color.FromArgb(110, 130, 175), Font = new Font("Segoe UI", 8.5F),
+                ForeColor = Color.FromArgb(70, 70, 70), Font = new Font("Segoe UI", 8.5F),
                 TextAlign = ContentAlignment.MiddleLeft, Padding = new Padding(6, 0, 0, 0) };
 
             var grid1 = MkGrid();
@@ -432,8 +432,8 @@ namespace Pedeai.Forms
             tbl.Controls.Add(grid1, 0, 1);
             tbl.Controls.Add(grid2, 1, 1);
 
-            var btnOk = new Button { Text = "Adicionar \u00BD + \u00BD", Dock = DockStyle.Bottom, Height = 38,
-                BackColor = Color.FromArgb(106, 90, 205), ForeColor = Color.White,
+            var btnOk = new Button { Text = "Adicionar Pedido Fracionado", Dock = DockStyle.Bottom, Height = 38,
+                BackColor = Color.FromArgb(87, 120, 38), ForeColor = Color.White,
                 FlatStyle = FlatStyle.Flat, Font = new Font("Segoe UI", 10F, FontStyle.Bold), Cursor = Cursors.Hand };
             btnOk.FlatAppearance.BorderSize = 0;
 
@@ -441,7 +441,7 @@ namespace Pedeai.Forms
             btnOk.Click += (_, __) =>
             {
                 if (grid1.CurrentRow == null || grid2.CurrentRow == null)
-                { MessageBox.Show("Selecione um sabor em cada coluna.", "Pizza \u00BD + \u00BD"); return; }
+                { MessageBox.Show("Selecione um produto em cada coluna.", "Pedido Fracionado"); return; }
                 var n1 = grid1.CurrentRow.Cells["Nome"].Value?.ToString() ?? "";
                 var n2 = grid2.CurrentRow.Cells["Nome"].Value?.ToString() ?? "";
                 escolha1 = _produtos.Find(p => p.Nome == n1);

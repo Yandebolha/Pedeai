@@ -142,7 +142,7 @@ namespace Pedeai.Forms
             this.pnlBtns.SizeChanged += new System.EventHandler(this.PnlBtns_SizeChanged);
             // btnS
             this.btnS.Text="Salvar"; this.btnS.Left=10; this.btnS.Top=10; this.btnS.Width=110; this.btnS.Height=28;
-            this.btnS.BackColor=System.Drawing.Color.FromArgb(39,174,96); this.btnS.ForeColor=System.Drawing.Color.White;
+            this.btnS.BackColor=System.Drawing.Color.FromArgb(87,120,38); this.btnS.ForeColor=System.Drawing.Color.White;
             this.btnS.FlatStyle=System.Windows.Forms.FlatStyle.Flat; this.btnS.Font=new System.Drawing.Font("Segoe UI",9F,System.Drawing.FontStyle.Bold);
             this.btnS.FlatAppearance.BorderSize=0; this.btnS.Click+=new System.EventHandler(this.BtnSalvar_Click);
             // btnC

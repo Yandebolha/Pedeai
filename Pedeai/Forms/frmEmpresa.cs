@@ -195,6 +195,7 @@ namespace Pedeai.Forms
             if (chkModFornecedores.Checked)     mods.Add("Fornecedores");
             if (chkModCupons.Checked)           mods.Add("Cupons");
             if (chkModEmpresa.Checked)          mods.Add("Empresa");
+            if (chkModEstoque.Checked)          mods.Add("Estoque");
             if (chkModCancelarPedidos.Checked)   mods.Add("CancelarPedidos");
             if (chkModEntradaMercadoria.Checked) mods.Add("EntradaMercadoria");
             if (chkModAvisos.Checked)           mods.Add("Avisos");
@@ -217,6 +218,7 @@ namespace Pedeai.Forms
             chkModFornecedores.Checked     = tem("Fornecedores");
             chkModCupons.Checked           = tem("Cupons");
             chkModEmpresa.Checked          = tem("Empresa");
+            chkModEstoque.Checked          = tem("Estoque");
             chkModCancelarPedidos.Checked   = tem("CancelarPedidos");
             chkModEntradaMercadoria.Checked = tem("EntradaMercadoria");
             chkModAvisos.Checked            = tem("Avisos");

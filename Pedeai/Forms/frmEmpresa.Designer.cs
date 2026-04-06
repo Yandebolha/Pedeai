@@ -40,6 +40,7 @@ namespace Pedeai.Forms
             this.chkModClientes = new System.Windows.Forms.CheckBox();
             this.chkModFornecedores = new System.Windows.Forms.CheckBox();
             this.chkModCupons = new System.Windows.Forms.CheckBox();
+            this.chkModEstoque = new System.Windows.Forms.CheckBox();
             this.chkModEmpresa = new System.Windows.Forms.CheckBox();
             this.chkModCancelarPedidos = new System.Windows.Forms.CheckBox();
             this.chkModEntradaMercadoria = new System.Windows.Forms.CheckBox();
@@ -391,6 +392,15 @@ namespace Pedeai.Forms
             this.chkModEntradaMercadoria.TabIndex = 16;
             this.chkModEntradaMercadoria.Text = "Ent. Mercadoria";
             // 
+            // chkModEstoque
+            //
+            this.chkModEstoque.Location = new System.Drawing.Point(168, 338);
+            this.chkModEstoque.Name = "chkModEstoque";
+            this.chkModEstoque.Size = new System.Drawing.Size(102, 22);
+            this.chkModEstoque.TabIndex = 25;
+            this.chkModEstoque.Text = "Estoque";
+            this.chkModEstoque.ForeColor = System.Drawing.Color.FromArgb(50, 50, 50);
+            // 
             // chkModAvisos
             // 
             this.chkModAvisos.Location = new System.Drawing.Point(380, 338);
@@ -656,6 +666,7 @@ namespace Pedeai.Forms
             this.tabUsr.Controls.Add(this.chkModClientes);
             this.tabUsr.Controls.Add(this.chkModFornecedores);
             this.tabUsr.Controls.Add(this.chkModCupons);
+            this.tabUsr.Controls.Add(this.chkModEstoque);
             this.tabUsr.Controls.Add(this.chkModEmpresa);
             this.tabUsr.Controls.Add(this.chkModCancelarPedidos);
             this.tabUsr.Controls.Add(this.chkModEntradaMercadoria);
@@ -814,6 +825,7 @@ namespace Pedeai.Forms
         internal System.Windows.Forms.CheckBox chkModEmpresa;
         internal System.Windows.Forms.CheckBox chkModCancelarPedidos;
         internal System.Windows.Forms.CheckBox chkModEntradaMercadoria;
+        internal System.Windows.Forms.CheckBox chkModEstoque;
         internal System.Windows.Forms.CheckBox chkModAvisos;
         internal System.Windows.Forms.CheckBox chkModTurno;
         // Impressao

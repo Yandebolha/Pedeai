@@ -491,7 +491,7 @@ namespace Pedeai.Forms
             this.btnMeioAMeio.Name = "btnMeioAMeio";
             this.btnMeioAMeio.Size = new System.Drawing.Size(177, 30);
             this.btnMeioAMeio.TabIndex = 10;
-            this.btnMeioAMeio.Text = "½ + ½  Pizza";
+            this.btnMeioAMeio.Text = "Pedido Fracionado";
             this.btnMeioAMeio.UseVisualStyleBackColor = false;
             this.btnMeioAMeio.Click += new System.EventHandler(this.BtnMeioAMeio_Click);
             // 

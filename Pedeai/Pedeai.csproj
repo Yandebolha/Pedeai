@@ -113,6 +113,12 @@
     <Compile Update="Forms\frmEntradaMercadoria.Designer.cs">
       <DependentUpon>frmEntradaMercadoria.cs</DependentUpon>
     </Compile>
+    <Compile Update="Forms\frmEstoque.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Forms\frmEstoque.Designer.cs">
+      <DependentUpon>frmEstoque.cs</DependentUpon>
+    </Compile>
     <Compile Update="Forms\frmLogin.cs">
       <SubType>Form</SubType>
     </Compile>
