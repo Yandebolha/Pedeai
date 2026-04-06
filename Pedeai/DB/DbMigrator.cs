@@ -261,6 +261,51 @@ namespace Pedeai.DB
                 AddColumnIfNotExists(conn, db, "estoque_item", "Codigo_Grupo",
                     "INT NULL DEFAULT NULL");
 
+                // ── 12. Tabela: fornecedor ────────────────────────────────────
+                Exec(conn, @"
+                    CREATE TABLE IF NOT EXISTS fornecedor (
+                        auxCodigo                INT           NOT NULL DEFAULT 1,
+                        Codigo                   INT           NOT NULL AUTO_INCREMENT PRIMARY KEY,
+                        fornNome_RazaoSocial     VARCHAR(150)  NOT NULL DEFAULT '',
+                        fornApelido_Fantasia     VARCHAR(100)  NOT NULL DEFAULT '',
+                        fornCPF_CNPJ_            VARCHAR(20)   NOT NULL DEFAULT '',
+                        fornRG_InscricaoEstadual VARCHAR(30)   NOT NULL DEFAULT '',
+                        fornTelefone             VARCHAR(20)   NOT NULL DEFAULT '',
+                        fornEmail                VARCHAR(100)  NOT NULL DEFAULT '',
+                        fornContato              VARCHAR(100)  NOT NULL DEFAULT '',
+                        fornCEP                  VARCHAR(10)   NOT NULL DEFAULT '',
+                        fornEndereco             VARCHAR(200)  NOT NULL DEFAULT '',
+                        fornNumero               VARCHAR(10)   NOT NULL DEFAULT '',
+                        fornBairro               VARCHAR(100)  NOT NULL DEFAULT '',
+                        fornCidade               VARCHAR(100)  NOT NULL DEFAULT '',
+                        fornEstado               VARCHAR(5)    NOT NULL DEFAULT '',
+                        fornObservacoes          VARCHAR(500)  NOT NULL DEFAULT '',
+                        fornData_Cadastro        DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                        Situacao                 CHAR(1)       NOT NULL DEFAULT 'A',
+                        Status_Transmissao       CHAR(1)       NOT NULL DEFAULT 'N',
+                        Info                     VARCHAR(255)  NOT NULL DEFAULT ''
+                    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+
+                // Colunas adicionadas ao fornecedor (instalações existentes sem essas colunas)
+                AddColumnIfNotExists(conn, db, "fornecedor", "fornContato",
+                    "VARCHAR(100) NOT NULL DEFAULT ''");
+                AddColumnIfNotExists(conn, db, "fornecedor", "fornRG_InscricaoEstadual",
+                    "VARCHAR(30) NOT NULL DEFAULT ''");
+                AddColumnIfNotExists(conn, db, "fornecedor", "fornCEP",
+                    "VARCHAR(10) NOT NULL DEFAULT ''");
+                AddColumnIfNotExists(conn, db, "fornecedor", "fornEndereco",
+                    "VARCHAR(200) NOT NULL DEFAULT ''");
+                AddColumnIfNotExists(conn, db, "fornecedor", "fornNumero",
+                    "VARCHAR(10) NOT NULL DEFAULT ''");
+                AddColumnIfNotExists(conn, db, "fornecedor", "fornBairro",
+                    "VARCHAR(100) NOT NULL DEFAULT ''");
+                AddColumnIfNotExists(conn, db, "fornecedor", "fornCidade",
+                    "VARCHAR(100) NOT NULL DEFAULT ''");
+                AddColumnIfNotExists(conn, db, "fornecedor", "fornEstado",
+                    "VARCHAR(5) NOT NULL DEFAULT ''");
+                AddColumnIfNotExists(conn, db, "fornecedor", "fornObservacoes",
+                    "VARCHAR(500) NOT NULL DEFAULT ''");
+
                 return true;
             }
             catch (Exception ex)

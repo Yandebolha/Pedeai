@@ -25,7 +25,7 @@ namespace Pedeai.Forms
             InitializeComponent();
             if (System.ComponentModel.LicenseManager.UsageMode == System.ComponentModel.LicenseUsageMode.Designtime) return;
             _pedidoBLL = new PedidoBLL(); _mercBLL = new MercadoriaBLL(); _clienteBLL = new ClienteBLL(); _cupomBLL = new CupomBLL();
-            Load += (_, __) => CarregarProdutos();
+            Load += (_, __) => { CarregarProdutos(); PnlAddItem_SizeChanged(null, EventArgs.Empty); };
         }
 
         // -- Selecao de cliente ----------------------------------------------

@@ -25,9 +25,9 @@ namespace Pedeai.Forms
             this.txtFantasia = new System.Windows.Forms.TextBox();
             this.txtCnpj     = new System.Windows.Forms.TextBox();
             this.txtIe       = new System.Windows.Forms.TextBox();
-            this.txtTelefone = new System.Windows.Forms.TextBox();
+            this.txtTelefone = new System.Windows.Forms.MaskedTextBox();
             this.txtEmail    = new System.Windows.Forms.TextBox();
-            this.txtCep      = new System.Windows.Forms.TextBox();
+            this.txtCep      = new System.Windows.Forms.MaskedTextBox();
             this.txtEndereco = new System.Windows.Forms.TextBox();
             this.txtNumero   = new System.Windows.Forms.TextBox();
             this.txtBairro   = new System.Windows.Forms.TextBox();
@@ -103,37 +103,38 @@ namespace Pedeai.Forms
             this.pnlForm.Controls.Add(this.lblUF);     this.pnlForm.Controls.Add(this.txtEstado);
             this.pnlForm.Controls.Add(this.pnlBtns);
             // row 1
-            this.lblRaz.Text = "Raz\u00e3o Social:"; this.lblRaz.AutoSize=true; this.lblRaz.Left=10; this.lblRaz.Top=11;
+            this.lblRaz.Text = "Raz\u00e3o Social:"; this.lblRaz.AutoSize=true; this.lblRaz.Left=10; this.lblRaz.Top=11; this.lblRaz.ForeColor=System.Drawing.Color.FromArgb(60,80,120);
             this.txtRazao.Left=90; this.txtRazao.Top=8; this.txtRazao.Width=230;
-            this.lblFan.Text = "Nome Fantasia:"; this.lblFan.AutoSize=true; this.lblFan.Left=332; this.lblFan.Top=11;
+            this.lblFan.Text = "Nome Fantasia:"; this.lblFan.AutoSize=true; this.lblFan.Left=332; this.lblFan.Top=11; this.lblFan.ForeColor=System.Drawing.Color.FromArgb(60,80,120);
             this.txtFantasia.Left=430; this.txtFantasia.Top=8; this.txtFantasia.Width=160;
-            this.lblCnpj.Text = "CNPJ/CPF:"; this.lblCnpj.AutoSize=true; this.lblCnpj.Left=600; this.lblCnpj.Top=11;
-            this.txtCnpj.Left=660; this.txtCnpj.Top=8; this.txtCnpj.Width=130;
-            this.lblSit.Text = "Situa\u00e7\u00e3o:"; this.lblSit.AutoSize=true; this.lblSit.Left=800; this.lblSit.Top=11;
-            this.cmbSituacao.Left=854; this.cmbSituacao.Top=8; this.cmbSituacao.Width=65;
+            this.lblCnpj.Text = "CNPJ/CPF:"; this.lblCnpj.AutoSize=true; this.lblCnpj.Left=600; this.lblCnpj.Top=11; this.lblCnpj.ForeColor=System.Drawing.Color.FromArgb(60,80,120);
+            this.txtCnpj.Left=660; this.txtCnpj.Top=8; this.txtCnpj.Width=145;
+            this.txtCnpj.TextChanged += new System.EventHandler(this.TxtCnpj_TextChanged);
+            this.lblSit.Text = "Situa\u00e7\u00e3o:"; this.lblSit.AutoSize=true; this.lblSit.Left=814; this.lblSit.Top=11; this.lblSit.ForeColor=System.Drawing.Color.FromArgb(60,80,120);
+            this.cmbSituacao.Left=868; this.cmbSituacao.Top=8; this.cmbSituacao.Width=65;
             this.cmbSituacao.DropDownStyle=System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cmbSituacao.Items.AddRange(new object[]{"A","I"}); this.cmbSituacao.SelectedIndex=0;
             // row 2
-            this.lblIe.Text = "Insc. Estadual:"; this.lblIe.AutoSize=true; this.lblIe.Left=10; this.lblIe.Top=43;
+            this.lblIe.Text = "Insc. Estadual:"; this.lblIe.AutoSize=true; this.lblIe.Left=10; this.lblIe.Top=43; this.lblIe.ForeColor=System.Drawing.Color.FromArgb(60,80,120);
             this.txtIe.Left=100; this.txtIe.Top=40; this.txtIe.Width=120;
-            this.lblTel.Text = "Telefone:"; this.lblTel.AutoSize=true; this.lblTel.Left=232; this.lblTel.Top=43;
-            this.txtTelefone.Left=290; this.txtTelefone.Top=40; this.txtTelefone.Width=120;
-            this.lblEmail.Text = "E-mail:"; this.lblEmail.AutoSize=true; this.lblEmail.Left=422; this.lblEmail.Top=43;
-            this.txtEmail.Left=467; this.txtEmail.Top=40; this.txtEmail.Width=200;
+            this.lblTel.Text = "Telefone:"; this.lblTel.AutoSize=true; this.lblTel.Left=232; this.lblTel.Top=43; this.lblTel.ForeColor=System.Drawing.Color.FromArgb(60,80,120);
+            this.txtTelefone.Mask="(00) 00000-0000"; this.txtTelefone.Left=290; this.txtTelefone.Top=40; this.txtTelefone.Width=135;
+            this.lblEmail.Text = "E-mail:"; this.lblEmail.AutoSize=true; this.lblEmail.Left=438; this.lblEmail.Top=43; this.lblEmail.ForeColor=System.Drawing.Color.FromArgb(60,80,120);
+            this.txtEmail.Left=483; this.txtEmail.Top=40; this.txtEmail.Width=200;
             // row 3
-            this.lblCep.Text = "CEP:"; this.lblCep.AutoSize=true; this.lblCep.Left=10; this.lblCep.Top=75;
-            this.txtCep.Left=42; this.txtCep.Top=72; this.txtCep.Width=85;
+            this.lblCep.Text = "CEP:"; this.lblCep.AutoSize=true; this.lblCep.Left=10; this.lblCep.Top=75; this.lblCep.ForeColor=System.Drawing.Color.FromArgb(60,80,120);
+            this.txtCep.Mask="00000-000"; this.txtCep.Left=42; this.txtCep.Top=72; this.txtCep.Width=90;
             this.txtCep.Leave += new System.EventHandler(this.TxtCep_Leave);
-            this.lblEnd.Text = "Endere\u00e7o:"; this.lblEnd.AutoSize=true; this.lblEnd.Left=138; this.lblEnd.Top=75;
-            this.txtEndereco.Left=200; this.txtEndereco.Top=72; this.txtEndereco.Width=220;
-            this.lblNum.Text = "N\u00ba:"; this.lblNum.AutoSize=true; this.lblNum.Left=430; this.lblNum.Top=75;
-            this.txtNumero.Left=448; this.txtNumero.Top=72; this.txtNumero.Width=60;
-            this.lblBai.Text = "Bairro:"; this.lblBai.AutoSize=true; this.lblBai.Left=520; this.lblBai.Top=75;
-            this.txtBairro.Left=565; this.txtBairro.Top=72; this.txtBairro.Width=150;
+            this.lblEnd.Text = "Endere\u00e7o:"; this.lblEnd.AutoSize=true; this.lblEnd.Left=145; this.lblEnd.Top=75; this.lblEnd.ForeColor=System.Drawing.Color.FromArgb(60,80,120);
+            this.txtEndereco.Left=207; this.txtEndereco.Top=72; this.txtEndereco.Width=220;
+            this.lblNum.Text = "N\u00ba:"; this.lblNum.AutoSize=true; this.lblNum.Left=438; this.lblNum.Top=75; this.lblNum.ForeColor=System.Drawing.Color.FromArgb(60,80,120);
+            this.txtNumero.Left=456; this.txtNumero.Top=72; this.txtNumero.Width=60;
+            this.lblBai.Text = "Bairro:"; this.lblBai.AutoSize=true; this.lblBai.Left=528; this.lblBai.Top=75; this.lblBai.ForeColor=System.Drawing.Color.FromArgb(60,80,120);
+            this.txtBairro.Left=573; this.txtBairro.Top=72; this.txtBairro.Width=150;
             // row 4
-            this.lblCid.Text = "Cidade:"; this.lblCid.AutoSize=true; this.lblCid.Left=10; this.lblCid.Top=107;
+            this.lblCid.Text = "Cidade:"; this.lblCid.AutoSize=true; this.lblCid.Left=10; this.lblCid.Top=107; this.lblCid.ForeColor=System.Drawing.Color.FromArgb(60,80,120);
             this.txtCidade.Left=58; this.txtCidade.Top=104; this.txtCidade.Width=200;
-            this.lblUF.Text = "UF:"; this.lblUF.AutoSize=true; this.lblUF.Left=268; this.lblUF.Top=107;
+            this.lblUF.Text = "UF:"; this.lblUF.AutoSize=true; this.lblUF.Left=268; this.lblUF.Top=107; this.lblUF.ForeColor=System.Drawing.Color.FromArgb(60,80,120);
             this.txtEstado.Left=285; this.txtEstado.Top=104; this.txtEstado.Width=42;
             // pnlBtns
             this.pnlBtns.Dock = System.Windows.Forms.DockStyle.Bottom; this.pnlBtns.Height = 48;
@@ -153,8 +154,8 @@ namespace Pedeai.Forms
             // Form
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(934, 581);
-            this.MinimumSize = new System.Drawing.Size(860, 540);
+            this.ClientSize = new System.Drawing.Size(960, 530);
+            this.MinimumSize = new System.Drawing.Size(860, 460);
             this.BackColor = System.Drawing.Color.FromArgb(245, 237, 216);
             this.ForeColor = System.Drawing.Color.FromArgb(60, 60, 60);
             this.Font = new System.Drawing.Font("Segoe UI", 9F);
@@ -172,9 +173,9 @@ namespace Pedeai.Forms
         internal System.Windows.Forms.TextBox      txtFantasia;
         internal System.Windows.Forms.TextBox      txtCnpj;
         internal System.Windows.Forms.TextBox      txtIe;
-        internal System.Windows.Forms.TextBox      txtTelefone;
+        internal System.Windows.Forms.MaskedTextBox txtTelefone;
         internal System.Windows.Forms.TextBox      txtEmail;
-        internal System.Windows.Forms.TextBox      txtCep;
+        internal System.Windows.Forms.MaskedTextBox txtCep;
         internal System.Windows.Forms.TextBox      txtEndereco;
         internal System.Windows.Forms.TextBox      txtNumero;
         internal System.Windows.Forms.TextBox      txtBairro;
@@ -204,6 +205,7 @@ namespace Pedeai.Forms
         private void Grid_DoubleClick(object s, System.EventArgs e) { CarregarParaEditar(); }
         private void Grid_DataError(object s, System.Windows.Forms.DataGridViewDataErrorEventArgs e) { e.ThrowException = false; }
         private void BtnNovoForn_Click(object s, System.EventArgs e)      { ModoNovo(); }
+        private void TxtCnpj_TextChanged(object s, System.EventArgs e)    { AplicarMascaraCnpj(); }
         private void BtnAtualizarForn_Click(object s, System.EventArgs e)  { CarregarGrid(); }
         private void BtnCancelarForn_Click(object s, System.EventArgs e)   { pnlForm.Visible = false; _codigoEditando = 0; }
         private void PnlBtns_SizeChanged(object s, System.EventArgs e)

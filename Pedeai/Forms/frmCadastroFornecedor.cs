@@ -13,6 +13,7 @@ namespace Pedeai.Forms
     {
         private FornecedorBLL _bll;
         private int _codigoEditando = 0;
+        private bool _formatandoCnpj = false;
 
         public frmCadastroFornecedor()
         {
@@ -31,7 +32,10 @@ namespace Pedeai.Forms
         private void ModoNovo()
         {
             _codigoEditando = 0;
-            foreach (var c in pnlForm.Controls) if (c is TextBox tb) tb.Clear();
+            foreach (Control c in pnlForm.Controls)
+            {
+                if (c is System.Windows.Forms.TextBoxBase tb) tb.Clear();
+            }
             cmbSituacao.SelectedIndex = 0;
             pnlForm.Visible = true; txtRazao.Focus();
         }
@@ -86,6 +90,30 @@ namespace Pedeai.Forms
             pnlForm.Visible = false; _codigoEditando = 0; CarregarGrid();
         }
         private void TxtCep_Leave(object sender, EventArgs e) => _ = BuscarCepForn();
+
+        private void AplicarMascaraCnpj()
+        {
+            if (_formatandoCnpj) return;
+            _formatandoCnpj = true;
+            var digits = new string(System.Array.FindAll(txtCnpj.Text.ToCharArray(), char.IsDigit));
+            if (digits.Length > 14) digits = digits.Substring(0, 14);
+            string fmt = FormatarCpfCnpj(digits);
+            int diff = fmt.Length - txtCnpj.Text.Length;
+            int caret = txtCnpj.SelectionStart;
+            txtCnpj.Text = fmt;
+            txtCnpj.SelectionStart = Math.Min(Math.Max(caret + diff, 0), fmt.Length);
+            _formatandoCnpj = false;
+        }
+
+        private static string FormatarCpfCnpj(string d)
+        {
+            if (d.Length <=  3) return d;
+            if (d.Length <=  6) return $"{d.Substring(0,3)}.{d.Substring(3)}";
+            if (d.Length <=  9) return $"{d.Substring(0,3)}.{d.Substring(3,3)}.{d.Substring(6)}";
+            if (d.Length <= 11) return $"{d.Substring(0,3)}.{d.Substring(3,3)}.{d.Substring(6,3)}-{d.Substring(9)}";
+            if (d.Length <= 12) return $"{d.Substring(0,2)}.{d.Substring(2,3)}.{d.Substring(5,3)}/{d.Substring(8)}";
+            return $"{d.Substring(0,2)}.{d.Substring(2,3)}.{d.Substring(5,3)}/{d.Substring(8,4)}-{d.Substring(12)}";
+        }
 
         private async Task BuscarCepForn()
         {
