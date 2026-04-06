@@ -28,6 +28,8 @@ namespace Pedeai.Forms
                 CarregarUsuarios();
                 CarregarConfiguracaoImpressao();
                 SetModoEdicao(false);
+                // Aba "Sistema" visível apenas para Admin (nivel 9)
+                btnResetarBanco.Visible = UsuarioSessao.TemNivel(9);
             };
         }
 
@@ -345,6 +347,53 @@ namespace Pedeai.Forms
         private void frmEmpresa_Load(object sender, EventArgs e)
         {
 
+        }
+
+        // ── ABA SISTEMA ───────────────────────────────────────────────────────
+        private void BtnResetarBanco_Click(object sender, EventArgs e)
+        {
+            if (!UsuarioSessao.TemNivel(9))
+            {
+                MessageBox.Show("Apenas administradores podem executar esta ação.", "Acesso negado",
+                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            var r1 = MessageBox.Show(
+                "ATENÇÃO!\n\nEsta ação irá apagar TODOS os dados do sistema:\n" +
+                "• Pedidos\n• Clientes\n• Fornecedores\n• Mercadorias\n• Entradas\n" +
+                "• Estoque\n• Cupons\n• Gastos\n• Turnos\n• Todos os usuários\n\n" +
+                "Após o reset, o único acesso será:\n" +
+                "  Login: admin  |  Senha: $up0rte\n\nDeseja continuar?",
+                "Confirmar Reset do Banco",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Warning);
+            if (r1 != DialogResult.Yes) return;
+
+            var r2 = MessageBox.Show(
+                "ÚLTIMA CONFIRMAÇÃO!\n\nEsta operação é IRREVERSÍVEL.\n" +
+                "Todos os dados serão perdidos permanentemente.\n\nTem absoluta certeza?",
+                "Confirmar Reset — Última Chance",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Stop);
+            if (r2 != DialogResult.Yes) return;
+
+            Cursor = Cursors.WaitCursor;
+            var erro = DB.DbMigrator.ResetarBanco();
+            Cursor = Cursors.Default;
+
+            if (!string.IsNullOrEmpty(erro))
+            {
+                MessageBox.Show("Erro ao resetar banco:\n" + erro, "Erro",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            else
+            {
+                MessageBox.Show("Banco de dados resetado com sucesso!\nO sistema está pronto para uso.", "Concluído",
+                    MessageBoxButtons.OK, MessageBoxIcon.Information);
+                CarregarEmpresa();
+                CarregarConfiguracaoImpressao();
+            }
         }
     }
 }

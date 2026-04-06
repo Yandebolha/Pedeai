@@ -69,12 +69,17 @@ namespace Pedeai.Forms
             this.tabImp = new System.Windows.Forms.TabPage();
             this.btnSalvImp = new System.Windows.Forms.Button();
             this.btnTesteImp = new System.Windows.Forms.Button();
+            this.tabSistema = new System.Windows.Forms.TabPage();
+            this.lblResetTitulo = new System.Windows.Forms.Label();
+            this.lblResetAviso = new System.Windows.Forms.Label();
+            this.btnResetarBanco = new System.Windows.Forms.Button();
             this.pnlBuscaUsuarios.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numLargura)).BeginInit();
             this.tabControl.SuspendLayout();
             this.tabEmp.SuspendLayout();
             this.tabUsr.SuspendLayout();
             this.tabImp.SuspendLayout();
+            this.tabSistema.SuspendLayout();
             this.SuspendLayout();
             // 
             // txtEmpNome
@@ -600,6 +605,7 @@ namespace Pedeai.Forms
             this.tabControl.Controls.Add(this.tabEmp);
             this.tabControl.Controls.Add(this.tabUsr);
             this.tabControl.Controls.Add(this.tabImp);
+            this.tabControl.Controls.Add(this.tabSistema);
             this.tabControl.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tabControl.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.tabControl.Location = new System.Drawing.Point(0, 0);
@@ -767,6 +773,54 @@ namespace Pedeai.Forms
             this.btnTesteImp.UseVisualStyleBackColor = false;
             this.btnTesteImp.Click += new System.EventHandler(this.BtnImprimirTeste_Click);
             // 
+            // tabSistema
+            // 
+            this.tabSistema.Controls.Add(this.lblResetTitulo);
+            this.tabSistema.Controls.Add(this.lblResetAviso);
+            this.tabSistema.Controls.Add(this.btnResetarBanco);
+            this.tabSistema.BackColor = System.Drawing.Color.FromArgb(245, 237, 216);
+            this.tabSistema.ForeColor = System.Drawing.Color.FromArgb(50, 50, 50);
+            this.tabSistema.Location = new System.Drawing.Point(4, 30);
+            this.tabSistema.Name = "tabSistema";
+            this.tabSistema.Size = new System.Drawing.Size(996, 642);
+            this.tabSistema.TabIndex = 3;
+            this.tabSistema.Text = "  Sistema  ";
+            // 
+            // lblResetTitulo
+            // 
+            this.lblResetTitulo.AutoSize = true;
+            this.lblResetTitulo.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.lblResetTitulo.ForeColor = System.Drawing.Color.FromArgb(176, 110, 42);
+            this.lblResetTitulo.Location = new System.Drawing.Point(30, 30);
+            this.lblResetTitulo.Name = "lblResetTitulo";
+            this.lblResetTitulo.Text = "Zona de Perigo";
+            // 
+            // lblResetAviso
+            // 
+            this.lblResetAviso.AutoSize = false;
+            this.lblResetAviso.Font = new System.Drawing.Font("Segoe UI", 9.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.lblResetAviso.ForeColor = System.Drawing.Color.FromArgb(80, 80, 80);
+            this.lblResetAviso.Location = new System.Drawing.Point(30, 70);
+            this.lblResetAviso.Name = "lblResetAviso";
+            this.lblResetAviso.Size = new System.Drawing.Size(600, 80);
+            this.lblResetAviso.Text = "Reseta completamente o banco de dados apagando TODOS os registros, incluindo usuários.\r\nApós o reset, o único acesso disponível será: login 'admin' com senha '$up0rte'.\r\nEsta operação é irreversível.";
+            // 
+            // btnResetarBanco
+            // 
+            this.btnResetarBanco.BackColor = System.Drawing.Color.FromArgb(180, 40, 40);
+            this.btnResetarBanco.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.btnResetarBanco.FlatAppearance.BorderSize = 0;
+            this.btnResetarBanco.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnResetarBanco.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.btnResetarBanco.ForeColor = System.Drawing.Color.White;
+            this.btnResetarBanco.Location = new System.Drawing.Point(30, 165);
+            this.btnResetarBanco.Name = "btnResetarBanco";
+            this.btnResetarBanco.Size = new System.Drawing.Size(260, 40);
+            this.btnResetarBanco.TabIndex = 0;
+            this.btnResetarBanco.Text = "⚠  Resetar Banco de Dados";
+            this.btnResetarBanco.UseVisualStyleBackColor = false;
+            this.btnResetarBanco.Click += new System.EventHandler(this.BtnResetarBanco_Click);
+            // 
             // frmEmpresa
             // 
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(13)))), ((int)(((byte)(19)))), ((int)(((byte)(40)))));
@@ -788,6 +842,8 @@ namespace Pedeai.Forms
             this.tabUsr.PerformLayout();
             this.tabImp.ResumeLayout(false);
             this.tabImp.PerformLayout();
+            this.tabSistema.ResumeLayout(false);
+            this.tabSistema.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -850,6 +906,10 @@ namespace Pedeai.Forms
         private System.Windows.Forms.TabPage        tabEmp;
         private System.Windows.Forms.TabPage        tabUsr;
         private System.Windows.Forms.TabPage        tabImp;
+        private System.Windows.Forms.TabPage        tabSistema;
+        private System.Windows.Forms.Label          lblResetTitulo;
+        private System.Windows.Forms.Label          lblResetAviso;
+        internal System.Windows.Forms.Button        btnResetarBanco;
         private System.Windows.Forms.Button         btnSalvEmp;
         private System.Windows.Forms.Button         btnSalvImp;
         private System.Windows.Forms.Button         btnTesteImp;

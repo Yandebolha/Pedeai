@@ -304,5 +304,70 @@ namespace Pedeai.DB
             foreach (var b in bytes) sb.Append(b.ToString("x2"));
             return sb.ToString();
         }
+
+        private static void TruncateIfExists(MySqlConnection conn, string table)
+        {
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText = "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = DATABASE() AND table_name = @t";
+            cmd.Parameters.AddWithValue("@t", table);
+            if (Convert.ToInt64(cmd.ExecuteScalar()) > 0)
+                Exec(conn, $"TRUNCATE TABLE `{table}`");
+        }
+
+        /// <summary>
+        /// Apaga TODOS os dados do banco, reinsere apenas o usuário Admin (Codigo=1)
+        /// e o registro mínimo de empresa/config_impressao.
+        /// Retorna string vazia em caso de sucesso ou a mensagem de erro.
+        /// </summary>
+        public static string ResetarBanco()
+        {
+            try
+            {
+                using var conn = new MySqlConnection(ConnStr);
+                conn.Open();
+
+                Exec(conn, "SET FOREIGN_KEY_CHECKS = 0");
+
+                string[] truncar = {
+                    "usuario",
+                    "itens_pedido_web", "pedido_web",
+                    "item_entrada_mercadoria", "parcela_entrada_mercadoria",
+                    "entrada_mercadoria", "gasto_material", "necessidade_empresa",
+                    "turno", "estoque_item", "cliente", "cupom", "fornecedor",
+                    "mercadoria", "grupo_mercadoria", "empresa", "config_impressao"
+                };
+                foreach (var t in truncar)
+                    TruncateIfExists(conn, t);
+
+                string[] dropar = {
+                    "produto", "categoria", "pedido", "item_pedido",
+                    "pagamento", "notificacao", "configuracao", "taxa_entrega",
+                    "banner", "avaliacao", "token_dispositivo", "endereco_cliente",
+                    "horario_funcionamento"
+                };
+                foreach (var t in dropar)
+                    Exec(conn, $"DROP TABLE IF EXISTS `{t}`");
+
+                Exec(conn, "SET FOREIGN_KEY_CHECKS = 1");
+
+                // Re-seed: admin com Codigo=1 e senha $up0rte
+                string hashAdmin = HashSenha("$up0rte");
+                Exec(conn, $@"INSERT INTO usuario
+                    (Codigo, auxCodigo, usuNome, usuLogin, usuSenha, usuNivel, Situacao)
+                    VALUES (1, 1, 'Administrador', 'admin', '{hashAdmin}', 9, 'A')");
+
+                Exec(conn, @"INSERT IGNORE INTO empresa
+                    (Codigo, empNome, empNome_Fantasia, empCNPJ, empTelefone, empEmail, empEndereco, Info)
+                    VALUES (1, 'Minha Empresa', '', '', '', '', '', '')");
+
+                Exec(conn, "INSERT IGNORE INTO config_impressao (Codigo) VALUES (1)");
+
+                return "";
+            }
+            catch (Exception ex)
+            {
+                return ex.Message;
+            }
+        }
     }
 }
