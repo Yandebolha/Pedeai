@@ -188,5 +188,20 @@ namespace Pedeai.Forms
             if (!string.IsNullOrEmpty(erro)) { MessageBox.Show("Erro: " + erro); return; }
             pnlForm.Visible = false; _codigoEditando = 0; CarregarGrid();
         }
+
+        private void lblCep_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void txtCep_MaskInputRejected(object sender, MaskInputRejectedEventArgs e)
+        {
+
+        }
+
+        private void lblEnd_Click(object sender, EventArgs e)
+        {
+
+        }
     }
 }

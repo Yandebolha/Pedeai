@@ -1520,7 +1520,7 @@ namespace Pedeai
                 // ── Totais de compras (entradas de mercadoria) ──
                 decimal totalCompras = _entradaBLL.TotalPeriodo(de, ate);
 
-                decimal fatLiquido = totalBruto - custoMerc;
+                decimal fatLiquido = totalBruto - custoMerc - taxaEnt;
                 decimal lucroReal  = totalBruto - totalCompras;
                 decimal saidas     = custoMerc + totalCompras;
 
@@ -1550,7 +1550,7 @@ namespace Pedeai
                     $"Venda Bruta: {totalBruto:C}  |  " +
                     $"Compras: {totalCompras:C}  |  " +
                     $"Outros Gastos: {gastosMaterial:C}  |  " +
-                    $"Venda L\u00edquida (- custo merc.): {fatLiquido:C}";
+                    $"Venda L\u00edquida (- custo merc. - taxa entrega): {fatLiquido:C}";
             }
             catch (Exception ex) { MessageBox.Show("Erro ao carregar financeiro: " + ex.Message); }
         }
