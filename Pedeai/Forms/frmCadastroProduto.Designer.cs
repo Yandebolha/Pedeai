@@ -16,7 +16,6 @@ namespace Pedeai.Forms
             this.grid               = new System.Windows.Forms.DataGridView();
             this.topBar             = new System.Windows.Forms.Panel();
             this.btnNovo            = new System.Windows.Forms.Button();
-            this.btnEditar          = new System.Windows.Forms.Button();
             this.btnCat             = new System.Windows.Forms.Button();
             this.pnlSearch          = new System.Windows.Forms.Panel();
             this._txtFiltro         = new System.Windows.Forms.TextBox();
@@ -71,16 +70,12 @@ namespace Pedeai.Forms
             // topBar
             this.topBar.Dock = System.Windows.Forms.DockStyle.Top; this.topBar.Height = 44;
             this.topBar.BackColor = System.Drawing.Color.FromArgb(176, 110, 42);
-            this.topBar.Controls.Add(this.btnNovo); this.topBar.Controls.Add(this.btnEditar); this.topBar.Controls.Add(this.btnCat);
+            this.topBar.Controls.Add(this.btnNovo); this.topBar.Controls.Add(this.btnCat);
             this.btnNovo.Text="+ Novo Produto"; this.btnNovo.Left=8; this.btnNovo.Top=8; this.btnNovo.Width=115; this.btnNovo.Height=28;
             this.btnNovo.BackColor=System.Drawing.Color.FromArgb(87,120,38); this.btnNovo.ForeColor=System.Drawing.Color.White;
             this.btnNovo.FlatStyle=System.Windows.Forms.FlatStyle.Flat; this.btnNovo.Font=new System.Drawing.Font("Segoe UI",9F,System.Drawing.FontStyle.Bold);
             this.btnNovo.FlatAppearance.BorderSize=0; this.btnNovo.Click+=new System.EventHandler(this.BtnNovoProd_Click);
-            this.btnEditar.Text="\u270F Editar"; this.btnEditar.Left=133; this.btnEditar.Top=8; this.btnEditar.Width=95; this.btnEditar.Height=28;
-            this.btnEditar.BackColor=System.Drawing.Color.FromArgb(230,126,34); this.btnEditar.ForeColor=System.Drawing.Color.White;
-            this.btnEditar.FlatStyle=System.Windows.Forms.FlatStyle.Flat; this.btnEditar.Font=new System.Drawing.Font("Segoe UI",9F,System.Drawing.FontStyle.Bold);
-            this.btnEditar.FlatAppearance.BorderSize=0; this.btnEditar.Click+=new System.EventHandler(this.BtnEditarProd_Click);
-            this.btnCat.Text="Categorias"; this.btnCat.Left=238; this.btnCat.Top=8; this.btnCat.Width=100; this.btnCat.Height=28;
+            this.btnCat.Text="Categorias"; this.btnCat.Left=133; this.btnCat.Top=8; this.btnCat.Width=100; this.btnCat.Height=28;
             this.btnCat.BackColor=System.Drawing.Color.FromArgb(224,113,42); this.btnCat.ForeColor=System.Drawing.Color.White;
             this.btnCat.FlatStyle=System.Windows.Forms.FlatStyle.Flat; this.btnCat.Font=new System.Drawing.Font("Segoe UI",9F,System.Drawing.FontStyle.Bold);
             this.btnCat.FlatAppearance.BorderSize=0; this.btnCat.Click+=new System.EventHandler(this.BtnCatProd_Click);
@@ -152,7 +147,7 @@ namespace Pedeai.Forms
             this.pnlBtns.Controls.Add(this.btnS); this.pnlBtns.Controls.Add(this.btnC); this.pnlBtns.Controls.Add(this.btnD);
             this.pnlBtns.SizeChanged+=new System.EventHandler(this.PnlBtns_SizeChanged);
             this.btnS.Text="Salvar"; this.btnS.Left=10; this.btnS.Top=10; this.btnS.Width=110; this.btnS.Height=28;
-            this.btnS.BackColor=System.Drawing.Color.FromArgb(224,113,42); this.btnS.ForeColor=System.Drawing.Color.White;
+            this.btnS.BackColor=System.Drawing.Color.FromArgb(39,174,96); this.btnS.ForeColor=System.Drawing.Color.White;
             this.btnS.FlatStyle=System.Windows.Forms.FlatStyle.Flat; this.btnS.Font=new System.Drawing.Font("Segoe UI",9F,System.Drawing.FontStyle.Bold);
             this.btnS.FlatAppearance.BorderSize=0; this.btnS.Click+=new System.EventHandler(this.BtnSalvar_Click);
             this.btnC.Text="Cancelar"; this.btnC.Left=130; this.btnC.Top=10; this.btnC.Width=110; this.btnC.Height=28;
@@ -194,7 +189,6 @@ namespace Pedeai.Forms
         internal System.Windows.Forms.CheckBox      chkDestaque;
         internal System.Windows.Forms.CheckBox      chkSite;
         internal System.Windows.Forms.Button        btnNovo;
-        internal System.Windows.Forms.Button        btnEditar;
         internal System.Windows.Forms.Button        btnCat;
         internal System.Windows.Forms.Button        btnPesq;
         internal System.Windows.Forms.Button        btnImg;

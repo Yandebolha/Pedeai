@@ -47,7 +47,7 @@ namespace Pedeai.Forms
             lblRes.TextAlign  = System.Drawing.ContentAlignment.MiddleLeft;
             lblRes.Padding    = new Padding(12, 0, 0, 0);
             lblRes.Font       = new Font("Segoe UI", 9F, FontStyle.Bold);
-            lblRes.ForeColor  = System.Drawing.Color.FromArgb(200, 225, 255);
+            lblRes.ForeColor  = System.Drawing.Color.FromArgb(100, 70, 30);
             pnlRes.Controls.Add(lblRes);
 
             // ── grid ─────────────────────────────────────────────────────
@@ -59,7 +59,7 @@ namespace Pedeai.Forms
             grid.RowHeadersVisible               = false;
             grid.BackgroundColor                 = System.Drawing.Color.White;
             grid.DefaultCellStyle.BackColor      = System.Drawing.Color.White;
-            grid.DefaultCellStyle.ForeColor      = System.Drawing.Color.White;
+            grid.DefaultCellStyle.ForeColor      = System.Drawing.Color.FromArgb(50, 50, 50);
             grid.GridColor                       = System.Drawing.Color.FromArgb(200, 185, 160);
             grid.BorderStyle                     = BorderStyle.None;
             grid.ColumnHeadersDefaultCellStyle.BackColor = System.Drawing.Color.FromArgb(240, 230, 202);

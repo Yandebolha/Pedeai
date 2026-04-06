@@ -198,9 +198,9 @@ namespace Pedeai.Forms
                 var dr   = ((DataRowView)row.DataBoundItem).Row;
                 var tipo = dr["Tipo"]?.ToString();
                 if (tipo == "Compra")
-                    row.DefaultCellStyle.BackColor = Color.FromArgb(60, 20, 20);
+                    row.DefaultCellStyle.BackColor = Color.FromArgb(255, 220, 215);
                 else
-                    row.DefaultCellStyle.BackColor = Color.FromArgb(15, 40, 25);
+                    row.DefaultCellStyle.BackColor = Color.FromArgb(215, 245, 220);
             }
         }
     }

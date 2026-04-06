@@ -1,6 +1,9 @@
 using System;
 using System.Drawing;
+using System.Net.Http;
+using System.Threading.Tasks;
 using System.Windows.Forms;
+using Newtonsoft.Json.Linq;
 using Pedeai.BLL;
 using Pedeai.Modelo;
 
@@ -46,14 +49,12 @@ namespace Pedeai.Forms
             txtIe.Text       = obj.fornRG_InscricaoEstadual ?? "";
             txtTelefone.Text = obj.fornTelefone ?? "";
             txtEmail.Text    = obj.fornEmail ?? "";
-            txtContato.Text  = obj.fornContato ?? "";
             txtCep.Text      = obj.fornCEP ?? "";
             txtEndereco.Text = obj.fornEndereco ?? "";
             txtNumero.Text   = obj.fornNumero ?? "";
             txtBairro.Text   = obj.fornBairro ?? "";
             txtCidade.Text   = obj.fornCidade ?? "";
             txtEstado.Text   = obj.fornEstado ?? "";
-            txtObs.Text      = obj.fornObservacoes ?? "";
             cmbSituacao.SelectedItem = obj.Situacao ?? "A";
             pnlForm.Visible = true; txtRazao.Focus();
         }
@@ -70,19 +71,41 @@ namespace Pedeai.Forms
                 fornRG_InscricaoEstadual  = txtIe.Text,
                 fornTelefone              = txtTelefone.Text,
                 fornEmail                 = txtEmail.Text,
-                fornContato               = txtContato.Text,
+                fornContato               = "",
                 fornCEP                   = txtCep.Text,
                 fornEndereco              = txtEndereco.Text,
                 fornNumero                = txtNumero.Text,
                 fornBairro                = txtBairro.Text,
                 fornCidade                = txtCidade.Text,
                 fornEstado                = txtEstado.Text,
-                fornObservacoes           = txtObs.Text,
+                fornObservacoes           = "",
                 Situacao                  = cmbSituacao.SelectedItem?.ToString() ?? "A",
             };
             var erro = _bll.Salvar(obj);
             if (!string.IsNullOrEmpty(erro)) { MessageBox.Show("Erro: " + erro); return; }
             pnlForm.Visible = false; _codigoEditando = 0; CarregarGrid();
+        }
+        private void TxtCep_Leave(object sender, EventArgs e) => _ = BuscarCepForn();
+
+        private async Task BuscarCepForn()
+        {
+            var cep = new string(System.Array.FindAll(txtCep.Text.ToCharArray(), char.IsDigit));
+            if (cep.Length != 8) return;
+            try
+            {
+                using var http = new HttpClient { Timeout = TimeSpan.FromSeconds(6) };
+                var json = await http.GetStringAsync("https://viacep.com.br/ws/" + cep + "/json/");
+                var obj = JObject.Parse(json);
+                if (obj["erro"] == null)
+                {
+                    txtEndereco.Text = obj["logradouro"]?.ToString() ?? "";
+                    txtBairro.Text   = obj["bairro"]?.ToString() ?? "";
+                    txtCidade.Text   = obj["localidade"]?.ToString() ?? "";
+                    txtEstado.Text   = obj["uf"]?.ToString() ?? "";
+                    txtNumero.Focus();
+                }
+            }
+            catch { /* ignora falhas de rede */ }
         }
     }
 }

@@ -493,7 +493,6 @@ namespace Pedeai.Forms
             this.btnMeioAMeio.TabIndex = 10;
             this.btnMeioAMeio.Text = "½ + ½  Pizza";
             this.btnMeioAMeio.UseVisualStyleBackColor = false;
-            this.btnMeioAMeio.Visible = false;
             this.btnMeioAMeio.Click += new System.EventHandler(this.BtnMeioAMeio_Click);
             // 
             // btnAdd
@@ -703,7 +702,7 @@ namespace Pedeai.Forms
             this.txtEndereco.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(14)))), ((int)(((byte)(21)))), ((int)(((byte)(46)))));
             this.txtEndereco.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.txtEndereco.Font = new System.Drawing.Font("Segoe UI", 9.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.txtEndereco.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(50)))), ((int)(((byte)(50)))), ((int)(((byte)(50)))));
+            this.txtEndereco.ForeColor = System.Drawing.Color.White;
             this.txtEndereco.Location = new System.Drawing.Point(16, 250);
             this.txtEndereco.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.txtEndereco.Name = "txtEndereco";
@@ -727,7 +726,7 @@ namespace Pedeai.Forms
             this.numTaxa.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(14)))), ((int)(((byte)(21)))), ((int)(((byte)(46)))));
             this.numTaxa.DecimalPlaces = 2;
             this.numTaxa.Font = new System.Drawing.Font("Segoe UI", 9.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.numTaxa.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(50)))), ((int)(((byte)(50)))), ((int)(((byte)(50)))));
+            this.numTaxa.ForeColor = System.Drawing.Color.White;
             this.numTaxa.Location = new System.Drawing.Point(16, 308);
             this.numTaxa.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.numTaxa.Maximum = new decimal(new int[] {
@@ -796,7 +795,7 @@ namespace Pedeai.Forms
             this.numTroco.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(14)))), ((int)(((byte)(21)))), ((int)(((byte)(46)))));
             this.numTroco.DecimalPlaces = 2;
             this.numTroco.Font = new System.Drawing.Font("Segoe UI", 9.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.numTroco.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(50)))), ((int)(((byte)(50)))), ((int)(((byte)(50)))));
+            this.numTroco.ForeColor = System.Drawing.Color.White;
             this.numTroco.Location = new System.Drawing.Point(16, 443);
             this.numTroco.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.numTroco.Maximum = new decimal(new int[] {
@@ -846,7 +845,7 @@ namespace Pedeai.Forms
             this.txtObs.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(14)))), ((int)(((byte)(21)))), ((int)(((byte)(46)))));
             this.txtObs.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.txtObs.Font = new System.Drawing.Font("Segoe UI", 9.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.txtObs.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(50)))), ((int)(((byte)(50)))), ((int)(((byte)(50)))));
+            this.txtObs.ForeColor = System.Drawing.Color.White;
             this.txtObs.Location = new System.Drawing.Point(16, 520);
             this.txtObs.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.txtObs.Name = "txtObs";
@@ -880,7 +879,7 @@ namespace Pedeai.Forms
             this.txtCupom.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.txtCupom.CharacterCasing = System.Windows.Forms.CharacterCasing.Upper;
             this.txtCupom.Font = new System.Drawing.Font("Segoe UI", 9.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.txtCupom.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(50)))), ((int)(((byte)(50)))), ((int)(((byte)(50)))));
+            this.txtCupom.ForeColor = System.Drawing.Color.White;
             this.txtCupom.Location = new System.Drawing.Point(16, 598);
             this.txtCupom.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.txtCupom.Name = "txtCupom";

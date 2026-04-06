@@ -27,14 +27,12 @@ namespace Pedeai.Forms
             this.txtIe       = new System.Windows.Forms.TextBox();
             this.txtTelefone = new System.Windows.Forms.TextBox();
             this.txtEmail    = new System.Windows.Forms.TextBox();
-            this.txtContato  = new System.Windows.Forms.TextBox();
             this.txtCep      = new System.Windows.Forms.TextBox();
             this.txtEndereco = new System.Windows.Forms.TextBox();
             this.txtNumero   = new System.Windows.Forms.TextBox();
             this.txtBairro   = new System.Windows.Forms.TextBox();
             this.txtCidade   = new System.Windows.Forms.TextBox();
             this.txtEstado   = new System.Windows.Forms.TextBox();
-            this.txtObs      = new System.Windows.Forms.TextBox();
             this.cmbSituacao = new System.Windows.Forms.ComboBox();
             this.lblRaz      = new System.Windows.Forms.Label();
             this.lblFan      = new System.Windows.Forms.Label();
@@ -43,14 +41,12 @@ namespace Pedeai.Forms
             this.lblIe       = new System.Windows.Forms.Label();
             this.lblTel      = new System.Windows.Forms.Label();
             this.lblEmail    = new System.Windows.Forms.Label();
-            this.lblCont     = new System.Windows.Forms.Label();
             this.lblCep      = new System.Windows.Forms.Label();
             this.lblEnd      = new System.Windows.Forms.Label();
             this.lblNum      = new System.Windows.Forms.Label();
             this.lblBai      = new System.Windows.Forms.Label();
             this.lblCid      = new System.Windows.Forms.Label();
             this.lblUF       = new System.Windows.Forms.Label();
-            this.lblObs      = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // grid
             this.grid.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -88,7 +84,7 @@ namespace Pedeai.Forms
             this.btnR.FlatStyle = System.Windows.Forms.FlatStyle.Flat; this.btnR.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
             this.btnR.FlatAppearance.BorderSize = 0; this.btnR.Click += new System.EventHandler(this.BtnAtualizarForn_Click);
             // pnlForm
-            this.pnlForm.Dock = System.Windows.Forms.DockStyle.Bottom; this.pnlForm.Height = 240;
+            this.pnlForm.Dock = System.Windows.Forms.DockStyle.Bottom; this.pnlForm.Height = 180;
             this.pnlForm.BackColor = System.Drawing.Color.FromArgb(245, 237, 216);
             this.pnlForm.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.pnlForm.Visible = false;
@@ -99,14 +95,12 @@ namespace Pedeai.Forms
             this.pnlForm.Controls.Add(this.lblIe);     this.pnlForm.Controls.Add(this.txtIe);
             this.pnlForm.Controls.Add(this.lblTel);    this.pnlForm.Controls.Add(this.txtTelefone);
             this.pnlForm.Controls.Add(this.lblEmail);  this.pnlForm.Controls.Add(this.txtEmail);
-            this.pnlForm.Controls.Add(this.lblCont);   this.pnlForm.Controls.Add(this.txtContato);
             this.pnlForm.Controls.Add(this.lblCep);    this.pnlForm.Controls.Add(this.txtCep);
             this.pnlForm.Controls.Add(this.lblEnd);    this.pnlForm.Controls.Add(this.txtEndereco);
             this.pnlForm.Controls.Add(this.lblNum);    this.pnlForm.Controls.Add(this.txtNumero);
             this.pnlForm.Controls.Add(this.lblBai);    this.pnlForm.Controls.Add(this.txtBairro);
             this.pnlForm.Controls.Add(this.lblCid);    this.pnlForm.Controls.Add(this.txtCidade);
             this.pnlForm.Controls.Add(this.lblUF);     this.pnlForm.Controls.Add(this.txtEstado);
-            this.pnlForm.Controls.Add(this.lblObs);    this.pnlForm.Controls.Add(this.txtObs);
             this.pnlForm.Controls.Add(this.pnlBtns);
             // row 1
             this.lblRaz.Text = "Raz\u00e3o Social:"; this.lblRaz.AutoSize=true; this.lblRaz.Left=10; this.lblRaz.Top=11;
@@ -126,11 +120,10 @@ namespace Pedeai.Forms
             this.txtTelefone.Left=290; this.txtTelefone.Top=40; this.txtTelefone.Width=120;
             this.lblEmail.Text = "E-mail:"; this.lblEmail.AutoSize=true; this.lblEmail.Left=422; this.lblEmail.Top=43;
             this.txtEmail.Left=467; this.txtEmail.Top=40; this.txtEmail.Width=200;
-            this.lblCont.Text = "Contato:"; this.lblCont.AutoSize=true; this.lblCont.Left=678; this.lblCont.Top=43;
-            this.txtContato.Left=730; this.txtContato.Top=40; this.txtContato.Width=150;
             // row 3
             this.lblCep.Text = "CEP:"; this.lblCep.AutoSize=true; this.lblCep.Left=10; this.lblCep.Top=75;
             this.txtCep.Left=42; this.txtCep.Top=72; this.txtCep.Width=85;
+            this.txtCep.Leave += new System.EventHandler(this.TxtCep_Leave);
             this.lblEnd.Text = "Endere\u00e7o:"; this.lblEnd.AutoSize=true; this.lblEnd.Left=138; this.lblEnd.Top=75;
             this.txtEndereco.Left=200; this.txtEndereco.Top=72; this.txtEndereco.Width=220;
             this.lblNum.Text = "N\u00ba:"; this.lblNum.AutoSize=true; this.lblNum.Left=430; this.lblNum.Top=75;
@@ -142,9 +135,6 @@ namespace Pedeai.Forms
             this.txtCidade.Left=58; this.txtCidade.Top=104; this.txtCidade.Width=200;
             this.lblUF.Text = "UF:"; this.lblUF.AutoSize=true; this.lblUF.Left=268; this.lblUF.Top=107;
             this.txtEstado.Left=285; this.txtEstado.Top=104; this.txtEstado.Width=42;
-            // row 5
-            this.lblObs.Text = "Observa\u00e7\u00f5es:"; this.lblObs.AutoSize=true; this.lblObs.Left=10; this.lblObs.Top=139;
-            this.txtObs.Left=92; this.txtObs.Top=136; this.txtObs.Width=450;
             // pnlBtns
             this.pnlBtns.Dock = System.Windows.Forms.DockStyle.Bottom; this.pnlBtns.Height = 48;
             this.pnlBtns.BackColor = System.Drawing.Color.FromArgb(245, 237, 216);
@@ -152,7 +142,7 @@ namespace Pedeai.Forms
             this.pnlBtns.SizeChanged += new System.EventHandler(this.PnlBtns_SizeChanged);
             // btnS
             this.btnS.Text="Salvar"; this.btnS.Left=10; this.btnS.Top=10; this.btnS.Width=110; this.btnS.Height=28;
-            this.btnS.BackColor=System.Drawing.Color.FromArgb(224,113,42); this.btnS.ForeColor=System.Drawing.Color.White;
+            this.btnS.BackColor=System.Drawing.Color.FromArgb(39,174,96); this.btnS.ForeColor=System.Drawing.Color.White;
             this.btnS.FlatStyle=System.Windows.Forms.FlatStyle.Flat; this.btnS.Font=new System.Drawing.Font("Segoe UI",9F,System.Drawing.FontStyle.Bold);
             this.btnS.FlatAppearance.BorderSize=0; this.btnS.Click+=new System.EventHandler(this.BtnSalvar_Click);
             // btnC
@@ -184,14 +174,12 @@ namespace Pedeai.Forms
         internal System.Windows.Forms.TextBox      txtIe;
         internal System.Windows.Forms.TextBox      txtTelefone;
         internal System.Windows.Forms.TextBox      txtEmail;
-        internal System.Windows.Forms.TextBox      txtContato;
         internal System.Windows.Forms.TextBox      txtCep;
         internal System.Windows.Forms.TextBox      txtEndereco;
         internal System.Windows.Forms.TextBox      txtNumero;
         internal System.Windows.Forms.TextBox      txtBairro;
         internal System.Windows.Forms.TextBox      txtCidade;
         internal System.Windows.Forms.TextBox      txtEstado;
-        internal System.Windows.Forms.TextBox      txtObs;
         internal System.Windows.Forms.ComboBox     cmbSituacao;
         internal System.Windows.Forms.Button       btnN;
         internal System.Windows.Forms.Button       btnR;
@@ -206,14 +194,12 @@ namespace Pedeai.Forms
         private  System.Windows.Forms.Label        lblIe;
         private  System.Windows.Forms.Label        lblTel;
         private  System.Windows.Forms.Label        lblEmail;
-        private  System.Windows.Forms.Label        lblCont;
         private  System.Windows.Forms.Label        lblCep;
         private  System.Windows.Forms.Label        lblEnd;
         private  System.Windows.Forms.Label        lblNum;
         private  System.Windows.Forms.Label        lblBai;
         private  System.Windows.Forms.Label        lblCid;
         private  System.Windows.Forms.Label        lblUF;
-        private  System.Windows.Forms.Label        lblObs;
 
         private void Grid_DoubleClick(object s, System.EventArgs e) { CarregarParaEditar(); }
         private void Grid_DataError(object s, System.Windows.Forms.DataGridViewDataErrorEventArgs e) { e.ThrowException = false; }

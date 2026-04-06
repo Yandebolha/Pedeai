@@ -31,7 +31,6 @@ namespace Pedeai.Forms
             this.txtBairro     = new System.Windows.Forms.TextBox();
             this.txtCidade     = new System.Windows.Forms.TextBox();
             this.txtEstado     = new System.Windows.Forms.TextBox();
-            this.txtTelefone   = new System.Windows.Forms.MaskedTextBox();
             this.txtCelular    = new System.Windows.Forms.MaskedTextBox();
             this.txtCep        = new System.Windows.Forms.MaskedTextBox();
             this.cmbSituacao   = new System.Windows.Forms.ComboBox();
@@ -39,7 +38,6 @@ namespace Pedeai.Forms
             this.lblNome       = new System.Windows.Forms.Label();
             this.lblCpf        = new System.Windows.Forms.Label();
             this.lblSit        = new System.Windows.Forms.Label();
-            this.lblTel        = new System.Windows.Forms.Label();
             this.lblCel        = new System.Windows.Forms.Label();
             this.lblEmail      = new System.Windows.Forms.Label();
             this.lblCep        = new System.Windows.Forms.Label();
@@ -95,7 +93,6 @@ namespace Pedeai.Forms
             this.pnlForm.Controls.Add(this.lblNome); this.pnlForm.Controls.Add(this.txtNome);
             this.pnlForm.Controls.Add(this.lblCpf);  this.pnlForm.Controls.Add(this.txtCpf);
             this.pnlForm.Controls.Add(this.lblSit);  this.pnlForm.Controls.Add(this.cmbSituacao);
-            this.pnlForm.Controls.Add(this.lblTel);  this.pnlForm.Controls.Add(this.txtTelefone);
             this.pnlForm.Controls.Add(this.lblCel);  this.pnlForm.Controls.Add(this.txtCelular);
             this.pnlForm.Controls.Add(this.lblEmail); this.pnlForm.Controls.Add(this.txtEmail);
             this.pnlForm.Controls.Add(this.lblCep);  this.pnlForm.Controls.Add(this.txtCep);
@@ -118,10 +115,8 @@ namespace Pedeai.Forms
             this.cmbSituacao.BackColor=System.Drawing.Color.White; this.cmbSituacao.ForeColor=System.Drawing.Color.White;
             this.cmbSituacao.Items.AddRange(new object[]{"Ativo","Inativo"}); this.cmbSituacao.SelectedIndex=0;
             // row 2
-            this.lblTel.Text="Telefone:"; this.lblTel.AutoSize=true; this.lblTel.Left=10; this.lblTel.Top=47; this.lblTel.ForeColor=System.Drawing.Color.FromArgb(160,175,210);
-            this.txtTelefone.Mask="(00) 0000-0000"; this.txtTelefone.Left=72; this.txtTelefone.Top=44; this.txtTelefone.Width=130; this.txtTelefone.BackColor=System.Drawing.Color.White; this.txtTelefone.ForeColor=System.Drawing.Color.FromArgb(50,50,50);
-            this.lblCel.Text="Celular:"; this.lblCel.AutoSize=true; this.lblCel.Left=216; this.lblCel.Top=47; this.lblCel.ForeColor=System.Drawing.Color.FromArgb(160,175,210);
-            this.txtCelular.Mask="(00) 00000-0000"; this.txtCelular.Left=268; this.txtCelular.Top=44; this.txtCelular.Width=140; this.txtCelular.BackColor=System.Drawing.Color.White; this.txtCelular.ForeColor=System.Drawing.Color.FromArgb(50,50,50);
+            this.lblCel.Text="Celular:"; this.lblCel.AutoSize=true; this.lblCel.Left=10; this.lblCel.Top=47; this.lblCel.ForeColor=System.Drawing.Color.FromArgb(160,175,210);
+            this.txtCelular.Mask="(00) 00000-0000"; this.txtCelular.Left=72; this.txtCelular.Top=44; this.txtCelular.Width=140; this.txtCelular.BackColor=System.Drawing.Color.White; this.txtCelular.ForeColor=System.Drawing.Color.FromArgb(50,50,50);
             this.lblEmail.Text="E-mail:"; this.lblEmail.AutoSize=true; this.lblEmail.Left=420; this.lblEmail.Top=47; this.lblEmail.ForeColor=System.Drawing.Color.FromArgb(160,175,210);
             this.txtEmail.Left=462; this.txtEmail.Top=44; this.txtEmail.Width=265; this.txtEmail.BackColor=System.Drawing.Color.White; this.txtEmail.ForeColor=System.Drawing.Color.FromArgb(50,50,50);
             // row 3
@@ -147,7 +142,7 @@ namespace Pedeai.Forms
             this.pnlBtns.Controls.Add(this.btnS); this.pnlBtns.Controls.Add(this.btnC);
             this.pnlBtns.SizeChanged+=new System.EventHandler(this.PnlBtns_SizeChanged);
             this.btnS.Text="Salvar"; this.btnS.Left=10; this.btnS.Top=10; this.btnS.Width=110; this.btnS.Height=28;
-            this.btnS.BackColor=System.Drawing.Color.FromArgb(224,113,42); this.btnS.ForeColor=System.Drawing.Color.White;
+            this.btnS.BackColor=System.Drawing.Color.FromArgb(39,174,96); this.btnS.ForeColor=System.Drawing.Color.White;
             this.btnS.FlatStyle=System.Windows.Forms.FlatStyle.Flat; this.btnS.Font=new System.Drawing.Font("Segoe UI",9F,System.Drawing.FontStyle.Bold);
             this.btnS.FlatAppearance.BorderSize=0; this.btnS.Click+=new System.EventHandler(this.BtnSalvar_Click);
             this.btnC.Text="Cancelar"; this.btnC.Left=130; this.btnC.Top=10; this.btnC.Width=110; this.btnC.Height=28;
@@ -182,7 +177,6 @@ namespace Pedeai.Forms
         internal System.Windows.Forms.TextBox        txtBairro;
         internal System.Windows.Forms.TextBox        txtCidade;
         internal System.Windows.Forms.TextBox        txtEstado;
-        internal System.Windows.Forms.MaskedTextBox  txtTelefone;
         internal System.Windows.Forms.MaskedTextBox  txtCelular;
         internal System.Windows.Forms.MaskedTextBox  txtCep;
         internal System.Windows.Forms.ComboBox       cmbSituacao;
@@ -196,7 +190,6 @@ namespace Pedeai.Forms
         private  System.Windows.Forms.Label          lblNome;
         private  System.Windows.Forms.Label          lblCpf;
         private  System.Windows.Forms.Label          lblSit;
-        private  System.Windows.Forms.Label          lblTel;
         private  System.Windows.Forms.Label          lblCel;
         private  System.Windows.Forms.Label          lblEmail;
         private  System.Windows.Forms.Label          lblCep;

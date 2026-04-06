@@ -134,7 +134,6 @@ namespace Pedeai.Forms
             if (obj == null) return;
             _codigoEditando = cod;
             txtNome.Text        = obj.clieNome_RazaoSocial ?? "";
-            txtTelefone.Text    = obj.clieTelefone ?? "";
             txtCelular.Text     = obj.clieCelular ?? "";
             txtEmail.Text       = obj.clieEmail ?? "";
             txtCpf.Text         = obj.clieCPF_CNPJ_ ?? "";
@@ -169,7 +168,7 @@ namespace Pedeai.Forms
             {
                 Codigo               = _codigoEditando,
                 clieNome_RazaoSocial = txtNome.Text.Trim(),
-                clieTelefone         = txtTelefone.Text,
+                clieTelefone         = "",
                 clieCelular          = txtCelular.Text,
                 clieEmail            = txtEmail.Text,
                 clieCPF_CNPJ_        = txtCpf.Text,
