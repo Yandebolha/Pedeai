@@ -69,9 +69,9 @@ namespace Pedeai
                 Padding   = new Padding(16, 0, 0, 0),
                 Cursor    = Cursors.Hand
             };
-            btn.FlatAppearance.BorderSize       = 0;
-            btn.FlatAppearance.MouseOverBackColor = Color.FromArgb(35, 38, 48);
-            btn.FlatAppearance.MouseDownBackColor = Color.FromArgb(176, 110, 42);
+            btn.FlatAppearance.BorderSize         = 0;
+            btn.FlatAppearance.MouseOverBackColor  = Color.FromArgb(35, 38, 48);
+            btn.FlatAppearance.MouseDownBackColor  = Color.FromArgb(176, 110, 42);
             btn.Click += (_, __) => onClick();
             return btn;
         }
@@ -1377,7 +1377,9 @@ namespace Pedeai
                 Dock          = DockStyle.Top,
                 Height        = 108,
                 FlowDirection = FlowDirection.LeftToRight,
-                WrapContents  = false,
+                WrapContents  = true,
+                AutoSize      = true,
+                AutoSizeMode  = AutoSizeMode.GrowAndShrink,
                 BackColor     = Color.Transparent,
                 Padding       = new Padding(0, 10, 0, 6)
             };
@@ -1601,7 +1603,7 @@ namespace Pedeai
             var pnlLogo = new Panel { Left = 0, Top = 5, Width = 245, Height = 72, BackColor = Color.Transparent };
             var lblIcon  = new Label
             {
-                Text      = "🍽",
+                Text      = "\U0001F37D",
                 Font      = new Font("Segoe UI", 22),
                 AutoSize  = false,
                 Width     = 46,

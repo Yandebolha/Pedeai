@@ -64,16 +64,40 @@ namespace Pedeai.DAL
             var dt = new DataTable();
             using var conn = AbrirConexao();
             int limit = Math.Max(1, Math.Min(top, 50));
-            var sql = $@"SELECT i.itpwNome_Mercadoria AS Produto,
-                CAST(SUM(i.itpwQtde) AS UNSIGNED) AS Quantidade,
-                COALESCE(SUM(i.itpwSubtotal), 0) AS TotalVendas
-                FROM itens_pedido_web i
-                JOIN pedido_web p ON p.Codigo = i.Codigo_Pedido
+            var sql = $@"SELECT sub.Produto,
+                COALESCE(SUM(sub.Quantidade), 0) AS Quantidade,
+                COALESCE(SUM(sub.TotalVendas), 0) AS TotalVendas
+            FROM (
+                SELECT i.itpwNome_Mercadoria AS Produto,
+                       SUM(i.itpwQtde) AS Quantidade,
+                       COALESCE(SUM(i.itpwSubtotal), 0) AS TotalVendas
+                FROM itens_pedido_web i JOIN pedido_web p ON p.Codigo = i.Codigo_Pedido
                 WHERE DATE(p.pediData_Lancamento) BETWEEN @de AND @ate
                   AND p.pediSituacao <> 6
+                  AND i.itpwNome_Mercadoria NOT LIKE '½% + ½%'
                 GROUP BY i.itpwNome_Mercadoria
-                ORDER BY Quantidade DESC
-                LIMIT {{limit}}";
+                UNION ALL
+                SELECT TRIM(REPLACE(SUBSTRING_INDEX(i.itpwNome_Mercadoria,' + ½ ',1),'½ ','')),
+                       SUM(i.itpwQtde * 0.5),
+                       COALESCE(SUM(i.itpwSubtotal * 0.5), 0)
+                FROM itens_pedido_web i JOIN pedido_web p ON p.Codigo = i.Codigo_Pedido
+                WHERE DATE(p.pediData_Lancamento) BETWEEN @de AND @ate
+                  AND p.pediSituacao <> 6
+                  AND i.itpwNome_Mercadoria LIKE '½% + ½%'
+                GROUP BY SUBSTRING_INDEX(i.itpwNome_Mercadoria,' + ½ ',1)
+                UNION ALL
+                SELECT TRIM(SUBSTRING_INDEX(i.itpwNome_Mercadoria,' + ½ ',-1)),
+                       SUM(i.itpwQtde * 0.5),
+                       COALESCE(SUM(i.itpwSubtotal * 0.5), 0)
+                FROM itens_pedido_web i JOIN pedido_web p ON p.Codigo = i.Codigo_Pedido
+                WHERE DATE(p.pediData_Lancamento) BETWEEN @de AND @ate
+                  AND p.pediSituacao <> 6
+                  AND i.itpwNome_Mercadoria LIKE '½% + ½%'
+                GROUP BY SUBSTRING_INDEX(i.itpwNome_Mercadoria,' + ½ ',-1)
+            ) sub
+            GROUP BY sub.Produto
+            ORDER BY Quantidade DESC
+            LIMIT {limit}";
             using var cmd = new MySqlCommand(sql, conn);
             cmd.Parameters.AddWithValue("@de",  de.Date);
             cmd.Parameters.AddWithValue("@ate", ate.Date);
@@ -145,15 +169,34 @@ namespace Pedeai.DAL
         {
             var dt = new DataTable();
             using var conn = AbrirConexao();
-            var sql = $@"SELECT i.itpwNome_Mercadoria AS Produto,
-                CAST(SUM(i.itpwQtde) AS UNSIGNED) AS Quantidade
-                FROM itens_pedido_web i
-                JOIN pedido_web p ON p.Codigo = i.Codigo_Pedido
+            var sql = $@"SELECT sub.Produto, COALESCE(SUM(sub.Quantidade), 0) AS Quantidade
+            FROM (
+                SELECT i.itpwNome_Mercadoria AS Produto, SUM(i.itpwQtde) AS Quantidade
+                FROM itens_pedido_web i JOIN pedido_web p ON p.Codigo = i.Codigo_Pedido
                 WHERE DATE(p.pediData_Lancamento) = CURDATE()
                   AND p.pediSituacao <> 6
+                  AND i.itpwNome_Mercadoria NOT LIKE '½% + ½%'
                 GROUP BY i.itpwNome_Mercadoria
-                ORDER BY Quantidade DESC
-                LIMIT {top}";
+                UNION ALL
+                SELECT TRIM(REPLACE(SUBSTRING_INDEX(i.itpwNome_Mercadoria,' + ½ ',1),'½ ','')),
+                       SUM(i.itpwQtde * 0.5)
+                FROM itens_pedido_web i JOIN pedido_web p ON p.Codigo = i.Codigo_Pedido
+                WHERE DATE(p.pediData_Lancamento) = CURDATE()
+                  AND p.pediSituacao <> 6
+                  AND i.itpwNome_Mercadoria LIKE '½% + ½%'
+                GROUP BY SUBSTRING_INDEX(i.itpwNome_Mercadoria,' + ½ ',1)
+                UNION ALL
+                SELECT TRIM(SUBSTRING_INDEX(i.itpwNome_Mercadoria,' + ½ ',-1)),
+                       SUM(i.itpwQtde * 0.5)
+                FROM itens_pedido_web i JOIN pedido_web p ON p.Codigo = i.Codigo_Pedido
+                WHERE DATE(p.pediData_Lancamento) = CURDATE()
+                  AND p.pediSituacao <> 6
+                  AND i.itpwNome_Mercadoria LIKE '½% + ½%'
+                GROUP BY SUBSTRING_INDEX(i.itpwNome_Mercadoria,' + ½ ',-1)
+            ) sub
+            GROUP BY sub.Produto
+            ORDER BY Quantidade DESC
+            LIMIT {top}";
             using var cmd = new MySqlCommand(sql, conn);
             new MySqlDataAdapter(cmd).Fill(dt);
             return dt;
@@ -172,15 +215,31 @@ namespace Pedeai.DAL
                 where = "p.pediData_Lancamento >= CURDATE() - INTERVAL 3 YEAR";
             else // dia
                 where = "DATE(p.pediData_Lancamento) = CURDATE()";
-            var sql = $@"SELECT i.itpwNome_Mercadoria AS Produto,
-                CAST(SUM(i.itpwQtde) AS UNSIGNED) AS Quantidade
-                FROM itens_pedido_web i
-                JOIN pedido_web p ON p.Codigo = i.Codigo_Pedido
-                WHERE {where}
-                  AND p.pediSituacao <> 6
+            var sql = $@"SELECT sub.Produto, COALESCE(SUM(sub.Quantidade), 0) AS Quantidade
+            FROM (
+                SELECT i.itpwNome_Mercadoria AS Produto, SUM(i.itpwQtde) AS Quantidade
+                FROM itens_pedido_web i JOIN pedido_web p ON p.Codigo = i.Codigo_Pedido
+                WHERE {where} AND p.pediSituacao <> 6
+                  AND i.itpwNome_Mercadoria NOT LIKE '½% + ½%'
                 GROUP BY i.itpwNome_Mercadoria
-                ORDER BY Quantidade DESC
-                LIMIT {top}";
+                UNION ALL
+                SELECT TRIM(REPLACE(SUBSTRING_INDEX(i.itpwNome_Mercadoria,' + ½ ',1),'½ ','')),
+                       SUM(i.itpwQtde * 0.5)
+                FROM itens_pedido_web i JOIN pedido_web p ON p.Codigo = i.Codigo_Pedido
+                WHERE {where} AND p.pediSituacao <> 6
+                  AND i.itpwNome_Mercadoria LIKE '½% + ½%'
+                GROUP BY SUBSTRING_INDEX(i.itpwNome_Mercadoria,' + ½ ',1)
+                UNION ALL
+                SELECT TRIM(SUBSTRING_INDEX(i.itpwNome_Mercadoria,' + ½ ',-1)),
+                       SUM(i.itpwQtde * 0.5)
+                FROM itens_pedido_web i JOIN pedido_web p ON p.Codigo = i.Codigo_Pedido
+                WHERE {where} AND p.pediSituacao <> 6
+                  AND i.itpwNome_Mercadoria LIKE '½% + ½%'
+                GROUP BY SUBSTRING_INDEX(i.itpwNome_Mercadoria,' + ½ ',-1)
+            ) sub
+            GROUP BY sub.Produto
+            ORDER BY Quantidade DESC
+            LIMIT {top}";
             using var cmd = new MySqlCommand(sql, conn);
             new MySqlDataAdapter(cmd).Fill(dt);
             return dt;

@@ -212,6 +212,8 @@ namespace Pedeai
             // pnlSidebar
             // 
             this.pnlSidebar.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(18)))), ((int)(((byte)(20)))), ((int)(((byte)(25)))));
+            this.pnlSidebar.AutoScroll = true;
+            this.pnlSidebar.AutoScrollMinSize = new System.Drawing.Size(0, 700);
             this.pnlSidebar.Controls.Add(this.pnlSidebarAccent);
             this.pnlSidebar.Dock = System.Windows.Forms.DockStyle.Left;
             this.pnlSidebar.Location = new System.Drawing.Point(0, 60);
@@ -386,7 +388,6 @@ namespace Pedeai
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
             this.KeyPreview = true;
             this.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.MinimumSize = new System.Drawing.Size(1073, 646);
             this.Name = "Form1";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "RanGoFood — Painel de Controle";

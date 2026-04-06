@@ -227,6 +227,21 @@ namespace Pedeai.DB
                 EnsureColumnType(conn, db, "cupom", "cupomTipo",
                     "int", "MODIFY COLUMN `cupomTipo` VARCHAR(20) NOT NULL DEFAULT 'PERCENTUAL'");
 
+                // ── 11. Tabela: estoque_item ──────────────────────────────────
+                Exec(conn, @"
+                    CREATE TABLE IF NOT EXISTS estoque_item (
+                        Codigo              INT           NOT NULL AUTO_INCREMENT PRIMARY KEY,
+                        estoNome            VARCHAR(150)  NOT NULL DEFAULT '',
+                        estoUnidade         VARCHAR(20)   NOT NULL DEFAULT 'un',
+                        estoQtde_Atual      DECIMAL(12,4) NOT NULL DEFAULT 0,
+                        estoPreco_Custo     DECIMAL(12,4) NOT NULL DEFAULT 0,
+                        estoEstoque_Min     DECIMAL(12,4) NOT NULL DEFAULT 0,
+                        estoEh_Produto      TINYINT(1)    NOT NULL DEFAULT 0,
+                        Codigo_Mercadoria   INT           NULL DEFAULT NULL,
+                        Situacao            CHAR(1)       NOT NULL DEFAULT 'A',
+                        estoData_Cadastro   DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP
+                    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+
                 return true;
             }
             catch (Exception ex)

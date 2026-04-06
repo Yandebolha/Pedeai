@@ -97,13 +97,13 @@ namespace Pedeai.Forms
 
             Col("Codigo",       "Cód.",         50,  DataGridViewContentAlignment.MiddleCenter);
             Col("Nome",         "Nome / Razão Social", 200);
-            Col("Telefone",     "Telefone",      110,  DataGridViewContentAlignment.MiddleCenter);
             Col("Celular",      "Celular",        125,  DataGridViewContentAlignment.MiddleCenter);
             Col("Email",        "E-mail",         180);
             Col("Cidade",       "Cidade",         120);
             Col("TotalPedidos", "Pedidos",         70,  DataGridViewContentAlignment.MiddleCenter);
             Col("TotalGasto",   "Total Gasto",     90,  DataGridViewContentAlignment.MiddleRight);
             if (grid.Columns.Contains("Situacao")) grid.Columns["Situacao"].Visible = false;
+            if (grid.Columns.Contains("Telefone")) grid.Columns["Telefone"].Visible = false;
 
             // Formata TotalGasto com R$
             foreach (DataGridViewRow row in grid.Rows)
