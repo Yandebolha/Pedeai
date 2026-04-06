@@ -86,6 +86,8 @@ namespace Pedeai.DB
                     "DECIMAL(10,2) NOT NULL DEFAULT 0");
                 AddColumnIfNotExists(conn, db, "pedido_web", "pediPago_Pix",
                     "DECIMAL(10,2) NOT NULL DEFAULT 0");
+                AddColumnIfNotExists(conn, db, "pedido_web", "pediAutorizador",
+                    "VARCHAR(150) NULL DEFAULT NULL");
 
                 // ── 4b. Colunas em grupo_mercadoria ─────────────────────────────
                 AddColumnIfNotExists(conn, db, "grupo_mercadoria", "grmeData_Cadastro",
@@ -150,7 +152,6 @@ namespace Pedeai.DB
                         entNome_Fornecedor  VARCHAR(150)  NOT NULL DEFAULT '',
                         entData             DATE          NOT NULL,
                         entNumeroDoc        VARCHAR(50)   NOT NULL DEFAULT '',
-                        entObservacoes      VARCHAR(500)  NOT NULL DEFAULT '',
                         entValorTotal       DECIMAL(12,2) NOT NULL DEFAULT 0.00,
                         Situacao            CHAR(1)       NOT NULL DEFAULT 'A',
                         Info                VARCHAR(255)  NOT NULL DEFAULT '',
@@ -260,6 +261,9 @@ namespace Pedeai.DB
                     "VARCHAR(20) NOT NULL DEFAULT ''");
                 AddColumnIfNotExists(conn, db, "estoque_item", "Codigo_Grupo",
                     "INT NULL DEFAULT NULL");
+
+                // Remove coluna descontinuada de entrada_mercadoria
+                DropColumnIfExists(conn, db, "entrada_mercadoria", "entObservacoes");
 
                 // ── 12. Tabela: fornecedor ────────────────────────────────────
                 Exec(conn, @"

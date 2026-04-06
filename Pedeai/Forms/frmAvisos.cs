@@ -98,15 +98,34 @@ namespace Pedeai.Forms
                 if (row.DataBoundItem == null) continue;
                 var dr = ((System.Data.DataRowView)row.DataBoundItem).Row;
                 var sit = dr["Situacao"]?.ToString();
-                if (sit == "P") { row.DefaultCellStyle.ForeColor = Color.FromArgb(100, 170, 100); continue; }
+                if (sit == "P")
+                {
+                    row.DefaultCellStyle.BackColor = Color.FromArgb(220, 240, 210);
+                    row.DefaultCellStyle.ForeColor = Color.FromArgb(45, 105, 45);
+                    continue;
+                }
                 if (!(dr["Vencimento"] is DateTime vcto)) continue;
                 var dias = (vcto.Date - DateTime.Today).Days;
                 if (dias < 0)
-                    row.DefaultCellStyle.BackColor = Color.FromArgb(80, 30, 30);
+                {
+                    row.DefaultCellStyle.BackColor = Color.FromArgb(255, 205, 205);
+                    row.DefaultCellStyle.ForeColor = Color.FromArgb(160, 30, 30);
+                }
                 else if (dias == 0)
-                    row.DefaultCellStyle.BackColor = Color.FromArgb(90, 70, 10);
+                {
+                    row.DefaultCellStyle.BackColor = Color.FromArgb(255, 220, 150);
+                    row.DefaultCellStyle.ForeColor = Color.FromArgb(140, 75, 10);
+                }
+                else if (dias == 1)
+                {
+                    row.DefaultCellStyle.BackColor = Color.FromArgb(255, 242, 180);
+                    row.DefaultCellStyle.ForeColor = Color.FromArgb(120, 90, 10);
+                }
                 else if (dias <= 7)
-                    row.DefaultCellStyle.BackColor = Color.FromArgb(70, 55, 10);
+                {
+                    row.DefaultCellStyle.BackColor = Color.FromArgb(255, 252, 220);
+                    row.DefaultCellStyle.ForeColor = Color.FromArgb(80, 70, 10);
+                }
             }
         }
 

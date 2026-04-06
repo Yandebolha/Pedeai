@@ -22,8 +22,18 @@ namespace Pedeai.Forms
             // Carrega e recorta a logo num quadrado central — sem letterbox
             try
             {
-                string imgPath = System.IO.Path.Combine(Application.StartupPath, "RanGoFood.png");
-                if (System.IO.File.Exists(imgPath))
+                string imgPath = null;
+                var candidatos = new[]
+                {
+                    System.IO.Path.Combine(Application.StartupPath, "RanGoFood.png"),
+                    System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "RanGoFood.png"),
+                    System.IO.Path.Combine(
+                        System.IO.Path.GetDirectoryName(Application.ExecutablePath) ?? "", "RanGoFood.png"),
+                };
+                foreach (var c in candidatos)
+                    if (System.IO.File.Exists(c)) { imgPath = c; break; }
+
+                if (imgPath != null)
                 {
                     using var full = new Bitmap(imgPath);
                     int size = Math.Min(full.Width, full.Height);

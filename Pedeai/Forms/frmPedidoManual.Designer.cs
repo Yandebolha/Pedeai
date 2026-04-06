@@ -14,9 +14,9 @@ namespace Pedeai.Forms
 
         private void InitializeComponent()
         {
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle4 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle5 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle6 = new System.Windows.Forms.DataGridViewCellStyle();
             this.topBar = new System.Windows.Forms.Panel();
             this.lblTituloPed = new System.Windows.Forms.Label();
             this.pnlRodape = new System.Windows.Forms.Panel();
@@ -134,7 +134,7 @@ namespace Pedeai.Forms
             this.lblTotalTag.AutoSize = true;
             this.lblTotalTag.Font = new System.Drawing.Font("Segoe UI", 8.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.lblTotalTag.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(80)))), ((int)(((byte)(80)))), ((int)(((byte)(80)))));
-            this.lblTotalTag.Location = new System.Drawing.Point(0, 21);
+            this.lblTotalTag.Location = new System.Drawing.Point(1075, 25);
             this.lblTotalTag.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.lblTotalTag.Name = "lblTotalTag";
             this.lblTotalTag.Size = new System.Drawing.Size(33, 15);
@@ -146,7 +146,7 @@ namespace Pedeai.Forms
             this.lblTotal.AutoSize = true;
             this.lblTotal.Font = new System.Drawing.Font("Segoe UI", 16F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.lblTotal.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(87)))), ((int)(((byte)(120)))), ((int)(((byte)(38)))));
-            this.lblTotal.Location = new System.Drawing.Point(0, 14);
+            this.lblTotal.Location = new System.Drawing.Point(1112, 16);
             this.lblTotal.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.lblTotal.Name = "lblTotal";
             this.lblTotal.Size = new System.Drawing.Size(91, 30);
@@ -160,7 +160,7 @@ namespace Pedeai.Forms
             this.btnSal.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnSal.Font = new System.Drawing.Font("Segoe UI", 9.5F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.btnSal.ForeColor = System.Drawing.Color.White;
-            this.btnSal.Location = new System.Drawing.Point(0, 12);
+            this.btnSal.Location = new System.Drawing.Point(494, 12);
             this.btnSal.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.btnSal.Name = "btnSal";
             this.btnSal.Size = new System.Drawing.Size(173, 39);
@@ -176,7 +176,7 @@ namespace Pedeai.Forms
             this.btnCanc.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnCanc.Font = new System.Drawing.Font("Segoe UI", 9.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.btnCanc.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(120)))), ((int)(((byte)(80)))), ((int)(((byte)(30)))));
-            this.btnCanc.Location = new System.Drawing.Point(0, 12);
+            this.btnCanc.Location = new System.Drawing.Point(677, 12);
             this.btnCanc.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.btnCanc.Name = "btnCanc";
             this.btnCanc.Size = new System.Drawing.Size(114, 39);
@@ -213,20 +213,20 @@ namespace Pedeai.Forms
             // gridItens
             // 
             this.gridItens.AllowUserToAddRows = false;
-            dataGridViewCellStyle1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(250)))), ((int)(((byte)(245)))), ((int)(((byte)(238)))));
-            this.gridItens.AlternatingRowsDefaultCellStyle = dataGridViewCellStyle1;
+            dataGridViewCellStyle4.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(250)))), ((int)(((byte)(245)))), ((int)(((byte)(238)))));
+            this.gridItens.AlternatingRowsDefaultCellStyle = dataGridViewCellStyle4;
             this.gridItens.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
             this.gridItens.BackgroundColor = System.Drawing.Color.FromArgb(((int)(((byte)(250)))), ((int)(((byte)(245)))), ((int)(((byte)(238)))));
             this.gridItens.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.gridItens.CellBorderStyle = System.Windows.Forms.DataGridViewCellBorderStyle.SingleHorizontal;
-            dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle2.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(230)))), ((int)(((byte)(202)))));
-            dataGridViewCellStyle2.Font = new System.Drawing.Font("Segoe UI", 8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            dataGridViewCellStyle2.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(60)))), ((int)(((byte)(60)))));
-            dataGridViewCellStyle2.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle2.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle2.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-            this.gridItens.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle2;
+            dataGridViewCellStyle5.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle5.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(230)))), ((int)(((byte)(202)))));
+            dataGridViewCellStyle5.Font = new System.Drawing.Font("Segoe UI", 8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            dataGridViewCellStyle5.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(60)))), ((int)(((byte)(60)))));
+            dataGridViewCellStyle5.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle5.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle5.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            this.gridItens.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle5;
             this.gridItens.ColumnHeadersHeight = 30;
             this.gridItens.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
             this.gridItens.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
@@ -236,15 +236,15 @@ namespace Pedeai.Forms
             this.colDesconto,
             this.colSubtotal,
             this.colRemover});
-            dataGridViewCellStyle3.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle3.BackColor = System.Drawing.Color.White;
-            dataGridViewCellStyle3.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            dataGridViewCellStyle3.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(50)))), ((int)(((byte)(50)))), ((int)(((byte)(50)))));
-            dataGridViewCellStyle3.Padding = new System.Windows.Forms.Padding(6, 0, 0, 0);
-            dataGridViewCellStyle3.SelectionBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(113)))), ((int)(((byte)(42)))));
-            dataGridViewCellStyle3.SelectionForeColor = System.Drawing.Color.White;
-            dataGridViewCellStyle3.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-            this.gridItens.DefaultCellStyle = dataGridViewCellStyle3;
+            dataGridViewCellStyle6.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle6.BackColor = System.Drawing.Color.White;
+            dataGridViewCellStyle6.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            dataGridViewCellStyle6.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(60)))), ((int)(((byte)(60)))));
+            dataGridViewCellStyle6.Padding = new System.Windows.Forms.Padding(6, 0, 0, 0);
+            dataGridViewCellStyle6.SelectionBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(113)))), ((int)(((byte)(42)))));
+            dataGridViewCellStyle6.SelectionForeColor = System.Drawing.Color.White;
+            dataGridViewCellStyle6.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            this.gridItens.DefaultCellStyle = dataGridViewCellStyle6;
             this.gridItens.Dock = System.Windows.Forms.DockStyle.Fill;
             this.gridItens.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.gridItens.GridColor = System.Drawing.Color.FromArgb(((int)(((byte)(200)))), ((int)(((byte)(185)))), ((int)(((byte)(160)))));
@@ -334,7 +334,7 @@ namespace Pedeai.Forms
             this.lblSecAddItem.AutoSize = true;
             this.lblSecAddItem.Font = new System.Drawing.Font("Segoe UI", 7.5F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.lblSecAddItem.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(80)))), ((int)(((byte)(80)))), ((int)(((byte)(80)))));
-            this.lblSecAddItem.Location = new System.Drawing.Point(16, 12);
+            this.lblSecAddItem.Location = new System.Drawing.Point(4, 10);
             this.lblSecAddItem.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.lblSecAddItem.Name = "lblSecAddItem";
             this.lblSecAddItem.Size = new System.Drawing.Size(88, 12);
@@ -349,11 +349,11 @@ namespace Pedeai.Forms
             this.txtBuscaProduto.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.txtBuscaProduto.Font = new System.Drawing.Font("Segoe UI", 9.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.txtBuscaProduto.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(50)))), ((int)(((byte)(50)))), ((int)(((byte)(50)))));
-            this.txtBuscaProduto.Location = new System.Drawing.Point(16, 32);
+            this.txtBuscaProduto.Location = new System.Drawing.Point(4, 25);
             this.txtBuscaProduto.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.txtBuscaProduto.Name = "txtBuscaProduto";
             this.txtBuscaProduto.PlaceholderText = "Pesquisar produto...";
-            this.txtBuscaProduto.Size = new System.Drawing.Size(966, 24);
+            this.txtBuscaProduto.Size = new System.Drawing.Size(778, 24);
             this.txtBuscaProduto.TabIndex = 1;
             this.txtBuscaProduto.TextChanged += new System.EventHandler(this.TxtBusca_TextChanged);
             // 
@@ -365,10 +365,10 @@ namespace Pedeai.Forms
             this.btnBuscarProduto.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnBuscarProduto.Font = new System.Drawing.Font("Segoe UI", 8.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.btnBuscarProduto.ForeColor = System.Drawing.Color.White;
-            this.btnBuscarProduto.Location = new System.Drawing.Point(499, 0);
+            this.btnBuscarProduto.Location = new System.Drawing.Point(790, 25);
             this.btnBuscarProduto.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.btnBuscarProduto.Name = "btnBuscarProduto";
-            this.btnBuscarProduto.Size = new System.Drawing.Size(75, 30);
+            this.btnBuscarProduto.Size = new System.Drawing.Size(59, 25);
             this.btnBuscarProduto.TabIndex = 2;
             this.btnBuscarProduto.Text = "Buscar";
             this.btnBuscarProduto.UseVisualStyleBackColor = false;
@@ -379,7 +379,7 @@ namespace Pedeai.Forms
             this.lQtde.AutoSize = true;
             this.lQtde.Font = new System.Drawing.Font("Segoe UI", 8.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.lQtde.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(70)))), ((int)(((byte)(70)))), ((int)(((byte)(70)))));
-            this.lQtde.Location = new System.Drawing.Point(0, 0);
+            this.lQtde.Location = new System.Drawing.Point(16, 63);
             this.lQtde.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.lQtde.Name = "lQtde";
             this.lQtde.Size = new System.Drawing.Size(33, 15);
@@ -391,7 +391,7 @@ namespace Pedeai.Forms
             this.numQtde.BackColor = System.Drawing.Color.White;
             this.numQtde.Font = new System.Drawing.Font("Segoe UI", 9.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.numQtde.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(50)))), ((int)(((byte)(50)))), ((int)(((byte)(50)))));
-            this.numQtde.Location = new System.Drawing.Point(0, 0);
+            this.numQtde.Location = new System.Drawing.Point(57, 58);
             this.numQtde.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.numQtde.Maximum = new decimal(new int[] {
             999,
@@ -417,7 +417,7 @@ namespace Pedeai.Forms
             this.lVal.AutoSize = true;
             this.lVal.Font = new System.Drawing.Font("Segoe UI", 8.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.lVal.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(70)))), ((int)(((byte)(70)))), ((int)(((byte)(70)))));
-            this.lVal.Location = new System.Drawing.Point(0, 0);
+            this.lVal.Location = new System.Drawing.Point(158, 63);
             this.lVal.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.lVal.Name = "lVal";
             this.lVal.Size = new System.Drawing.Size(33, 15);
@@ -430,7 +430,7 @@ namespace Pedeai.Forms
             this.numUnitario.DecimalPlaces = 2;
             this.numUnitario.Font = new System.Drawing.Font("Segoe UI", 9.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.numUnitario.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(50)))), ((int)(((byte)(50)))), ((int)(((byte)(50)))));
-            this.numUnitario.Location = new System.Drawing.Point(0, 0);
+            this.numUnitario.Location = new System.Drawing.Point(199, 58);
             this.numUnitario.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.numUnitario.Maximum = new decimal(new int[] {
             99999,
@@ -447,7 +447,7 @@ namespace Pedeai.Forms
             this.lDsc.AutoSize = true;
             this.lDsc.Font = new System.Drawing.Font("Segoe UI", 8.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.lDsc.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(70)))), ((int)(((byte)(70)))), ((int)(((byte)(70)))));
-            this.lDsc.Location = new System.Drawing.Point(0, 0);
+            this.lDsc.Location = new System.Drawing.Point(326, 63);
             this.lDsc.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.lDsc.Name = "lDsc";
             this.lDsc.Size = new System.Drawing.Size(45, 15);
@@ -460,7 +460,7 @@ namespace Pedeai.Forms
             this.numDescontoItem.DecimalPlaces = 1;
             this.numDescontoItem.Font = new System.Drawing.Font("Segoe UI", 9.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.numDescontoItem.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(50)))), ((int)(((byte)(50)))), ((int)(((byte)(50)))));
-            this.numDescontoItem.Location = new System.Drawing.Point(0, 0);
+            this.numDescontoItem.Location = new System.Drawing.Point(379, 58);
             this.numDescontoItem.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.numDescontoItem.Name = "numDescontoItem";
             this.numDescontoItem.Size = new System.Drawing.Size(79, 24);
@@ -486,7 +486,7 @@ namespace Pedeai.Forms
             this.btnMeioAMeio.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnMeioAMeio.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.btnMeioAMeio.ForeColor = System.Drawing.Color.White;
-            this.btnMeioAMeio.Location = new System.Drawing.Point(314, 0);
+            this.btnMeioAMeio.Location = new System.Drawing.Point(512, 58);
             this.btnMeioAMeio.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.btnMeioAMeio.Name = "btnMeioAMeio";
             this.btnMeioAMeio.Size = new System.Drawing.Size(177, 30);
@@ -503,7 +503,7 @@ namespace Pedeai.Forms
             this.btnAdd.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnAdd.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.btnAdd.ForeColor = System.Drawing.Color.White;
-            this.btnAdd.Location = new System.Drawing.Point(592, 0);
+            this.btnAdd.Location = new System.Drawing.Point(704, 58);
             this.btnAdd.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.btnAdd.Name = "btnAdd";
             this.btnAdd.Size = new System.Drawing.Size(145, 30);

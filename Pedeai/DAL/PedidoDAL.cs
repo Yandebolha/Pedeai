@@ -278,7 +278,8 @@ namespace Pedeai.DAL
 
         /// <summary>Finaliza pedido gravando valor pago e código de transação.</summary>
         public void FinalizarPedido(int codigo, int novaSituacao, decimal valorPago, string transacao,
-                                    decimal pagoDinheiro = 0, decimal pagoCartao = 0, decimal pagoPix = 0)
+                                    decimal pagoDinheiro = 0, decimal pagoCartao = 0, decimal pagoPix = 0,
+                                    string autorizador = "")
         {
             using var conn = AbrirConexao();
             var sql = @"UPDATE pedido_web
@@ -288,6 +289,7 @@ namespace Pedeai.DAL
                             pediPago_Dinheiro     = @din,
                             pediPago_Cartao       = @car,
                             pediPago_Pix          = @pix,
+                            pediAutorizador       = @aut,
                             pediData_Atualizacao  = NOW()
                         WHERE Codigo = @cod";
             using var cmd = new MySqlCommand(sql, conn);
@@ -297,6 +299,7 @@ namespace Pedeai.DAL
             cmd.Parameters.AddWithValue("@din",   pagoDinheiro);
             cmd.Parameters.AddWithValue("@car",   pagoCartao);
             cmd.Parameters.AddWithValue("@pix",   pagoPix);
+            cmd.Parameters.AddWithValue("@aut",   string.IsNullOrEmpty(autorizador) ? (object)DBNull.Value : autorizador);
             cmd.Parameters.AddWithValue("@cod",   codigo);
             cmd.ExecuteNonQuery();
         }
@@ -312,12 +315,12 @@ namespace Pedeai.DAL
                 SUM(p.pediSubtotal)                 AS Subtotal,
                 SUM(p.pediTaxa_Entrega)             AS TaxaEntrega,
                 SUM(p.pediDesconto)                 AS Descontos,
-                SUM(p.pediValor_Total)              AS TotalBruto,
-                SUM(CASE WHEN p.pediTipo_Entrega=1 THEN p.pediValor_Total ELSE 0 END) AS ValorEntrega,
-                SUM(CASE WHEN p.pediTipo_Entrega=0 THEN p.pediValor_Total ELSE 0 END) AS ValorRetirada,
-                SUM(CASE WHEN p.pediForma_Pagamento=0 THEN p.pediValor_Total ELSE 0 END) AS Dinheiro,
-                SUM(CASE WHEN p.pediForma_Pagamento=1 THEN p.pediValor_Total ELSE 0 END) AS Cartao,
-                SUM(CASE WHEN p.pediForma_Pagamento=2 THEN p.pediValor_Total ELSE 0 END) AS Pix,
+                SUM(COALESCE(p.pediValor_Pago, p.pediValor_Total)) AS TotalBruto,
+                SUM(CASE WHEN p.pediTipo_Entrega=1 THEN COALESCE(p.pediValor_Pago, p.pediValor_Total) ELSE 0 END) AS ValorEntrega,
+                SUM(CASE WHEN p.pediTipo_Entrega=0 THEN COALESCE(p.pediValor_Pago, p.pediValor_Total) ELSE 0 END) AS ValorRetirada,
+                SUM(COALESCE(p.pediPago_Dinheiro, 0)) AS Dinheiro,
+                SUM(COALESCE(p.pediPago_Cartao,   0)) AS Cartao,
+                SUM(COALESCE(p.pediPago_Pix,      0)) AS Pix,
                 COALESCE(SUM(custo.CustoMerc), 0)   AS CustoMercadorias
               FROM pedido_web p
               LEFT JOIN (
@@ -384,6 +387,7 @@ namespace Pedeai.DAL
                               AND p.pediValor_Pago < p.pediValor_Total
                          THEN p.pediValor_Total - p.pediValor_Pago
                          ELSE NULL END      AS Desconto,
+                    p.pediAutorizador       AS Autorizador,
                     CASE p.pediForma_Pagamento
                         WHEN 0 THEN 'Dinheiro' WHEN 1 THEN 'Cartão' WHEN 2 THEN 'Pix'
                         ELSE 'Outro' END     AS Pagamento,
@@ -407,6 +411,7 @@ namespace Pedeai.DAL
                     NULL                    AS ValorOriginal,
                     NULL                    AS ValorRecebido,
                     NULL                    AS Desconto,
+                    NULL                    AS Autorizador,
                     ''                      AS Pagamento,
                     'Lançado'               AS Status,
                     0                       AS CodigoPedido

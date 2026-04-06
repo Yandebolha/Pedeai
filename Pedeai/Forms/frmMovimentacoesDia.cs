@@ -113,6 +113,7 @@ namespace Pedeai.Forms
                 ["ValorOriginal"]  = ("Valor Original",  10),
                 ["ValorRecebido"]  = ("Valor Recebido",  10),
                 ["Desconto"]      = ("Desconto R$",     9),
+                ["Autorizador"]   = ("Autorizado por",  10),
                 ["Pagamento"]     = ("Pagamento",        9),
                 ["Status"]        = ("Status",           8),
             };
@@ -121,7 +122,7 @@ namespace Pedeai.Forms
             {
                 if (!show.ContainsKey(col.Name)) { col.Visible = false; continue; }
                 // Only show discount columns when at least one row has a discount
-                if ((col.Name == "ValorOriginal" || col.Name == "ValorRecebido" || col.Name == "Desconto") && !temDesconto)
+                if ((col.Name == "ValorOriginal" || col.Name == "ValorRecebido" || col.Name == "Desconto" || col.Name == "Autorizador") && !temDesconto)
                 { col.Visible = false; continue; }
                 col.Visible    = true;
                 col.HeaderText = show[col.Name].header;

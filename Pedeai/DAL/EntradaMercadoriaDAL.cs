@@ -20,7 +20,6 @@ namespace Pedeai.DAL
                         e.entNumeroDoc          AS Documento,
                         (SELECT COUNT(*) FROM item_entrada_mercadoria i WHERE i.Codigo_Entrada = e.Codigo) AS Itens,
                         e.entValorTotal         AS Total,
-                        e.entObservacoes        AS Observacoes,
                         e.entData_Lancamento    AS Lancamento
                 FROM entrada_mercadoria e
                 WHERE e.Situacao = 'A'";
@@ -75,11 +74,11 @@ namespace Pedeai.DAL
                 const string sqlE = @"
                     INSERT INTO entrada_mercadoria
                         (auxCodigo, Codigo, Codigo_Fornecedor, entNome_Fornecedor,
-                         entData, entNumeroDoc, entObservacoes, entValorTotal,
+                         entData, entNumeroDoc, entValorTotal,
                          Situacao, Info, entData_Lancamento)
                     VALUES
                         (@aux,@cod,@forn,@nomeForn,
-                         @dt,@doc,@obs,@total,
+                         @dt,@doc,@total,
                          'A','',@lancamento)";
                 using var cmdE = new MySqlCommand(sqlE, conn, trans);
                 cmdE.Parameters.AddWithValue("@aux",       entrada.auxCodigo);
@@ -88,7 +87,6 @@ namespace Pedeai.DAL
                 cmdE.Parameters.AddWithValue("@nomeForn",  entrada.entNome_Fornecedor ?? "");
                 cmdE.Parameters.AddWithValue("@dt",        entrada.entData.Date);
                 cmdE.Parameters.AddWithValue("@doc",       entrada.entNumeroDoc ?? "");
-                cmdE.Parameters.AddWithValue("@obs",       entrada.entObservacoes ?? "");
                 cmdE.Parameters.AddWithValue("@total",     entrada.entValorTotal);
                 cmdE.Parameters.AddWithValue("@lancamento",entrada.entData_Lancamento);
                 cmdE.ExecuteNonQuery();
@@ -223,7 +221,7 @@ namespace Pedeai.DAL
             entNome_Fornecedor = r["entNome_Fornecedor"]?.ToString() ?? "",
             entData            = Convert.ToDateTime(r["entData"]),
             entNumeroDoc       = r["entNumeroDoc"]?.ToString()       ?? "",
-            entObservacoes     = r["entObservacoes"]?.ToString()     ?? "",
+            entObservacoes     = "",
             entValorTotal      = r["entValorTotal"] == DBNull.Value ? 0m : Convert.ToDecimal(r["entValorTotal"]),
             Situacao           = r["Situacao"]?.ToString()           ?? "A",
             Info               = r["Info"]?.ToString()              ?? "",

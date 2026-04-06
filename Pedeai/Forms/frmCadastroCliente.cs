@@ -85,25 +85,28 @@ namespace Pedeai.Forms
         private void FormatarGrid()
         {
             if (grid.Columns.Count == 0) return;
-            grid.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.None;
 
-            void Col(string name, string header, int width, DataGridViewContentAlignment align = DataGridViewContentAlignment.MiddleLeft)
+            // Hide unused columns before setting fill mode
+            if (grid.Columns.Contains("Situacao")) grid.Columns["Situacao"].Visible = false;
+            if (grid.Columns.Contains("Telefone")) grid.Columns["Telefone"].Visible = false;
+
+            grid.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+
+            void Col(string name, string header, float fillWeight, DataGridViewContentAlignment align = DataGridViewContentAlignment.MiddleLeft)
             {
                 if (!grid.Columns.Contains(name)) return;
                 grid.Columns[name].HeaderText = header;
-                grid.Columns[name].Width      = width;
+                grid.Columns[name].FillWeight = fillWeight;
                 grid.Columns[name].DefaultCellStyle.Alignment = align;
             }
 
-            Col("Codigo",       "Cód.",         50,  DataGridViewContentAlignment.MiddleCenter);
-            Col("Nome",         "Nome / Razão Social", 200);
-            Col("Celular",      "Celular",        125,  DataGridViewContentAlignment.MiddleCenter);
-            Col("Email",        "E-mail",         180);
-            Col("Cidade",       "Cidade",         120);
-            Col("TotalPedidos", "Pedidos",         70,  DataGridViewContentAlignment.MiddleCenter);
-            Col("TotalGasto",   "Total Gasto",     90,  DataGridViewContentAlignment.MiddleRight);
-            if (grid.Columns.Contains("Situacao")) grid.Columns["Situacao"].Visible = false;
-            if (grid.Columns.Contains("Telefone")) grid.Columns["Telefone"].Visible = false;
+            Col("Codigo",       "Cód.",               40,  DataGridViewContentAlignment.MiddleCenter);
+            Col("Nome",         "Nome / Razão Social", 220);
+            Col("Celular",      "Celular",             110,  DataGridViewContentAlignment.MiddleCenter);
+            Col("Email",        "E-mail",              180);
+            Col("Cidade",       "Cidade",              110);
+            Col("TotalPedidos", "Pedidos",              60,  DataGridViewContentAlignment.MiddleCenter);
+            Col("TotalGasto",   "Total Gasto",          80,  DataGridViewContentAlignment.MiddleRight);
 
             // Formata TotalGasto com R$
             foreach (DataGridViewRow row in grid.Rows)

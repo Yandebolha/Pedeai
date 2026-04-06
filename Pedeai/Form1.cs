@@ -50,6 +50,19 @@ namespace Pedeai
             NavIniciarPrimeiro();
             _timer.Start();
             Logger.Log("Login", $"Usu\u00e1rio: {UsuarioSessao.NomeAtual}");
+            BeginInvoke(new Action(VerificarAvisosIniciais));
+        }
+
+        private void VerificarAvisosIniciais()
+        {
+            try
+            {
+                int count = _entradaBLL.ContarParcelasVencendo(1);
+                if (count > 0)
+                    using (var frm = new Forms.frmAvisos())
+                        frm.ShowDialog(this);
+            }
+            catch { }
         }
 
         private Button BotaoNav(string texto, int y, Action onClick)
@@ -1102,7 +1115,7 @@ namespace Pedeai
                                                out decimal din, out decimal car, out decimal pix,
                                                out string autNome))
                     {
-                        var eF = _pedidoBLL.FinalizarPedido(cod, novaSit, vPago, trans, din, car, pix);
+                        var eF = _pedidoBLL.FinalizarPedido(cod, novaSit, vPago, trans, din, car, pix, autNome);
                         if (!string.IsNullOrEmpty(eF)) MessageBox.Show("Erro: " + eF);
                         else
                         {
@@ -1518,13 +1531,13 @@ namespace Pedeai
                 // ── 9 cards ──
                 _pnlFinCards.Controls.Clear();
                 CriarCardFin("Total de Pedidos",    pedidos.ToString("N0"),    Color.FromArgb(176, 110, 42));
-                CriarCardFin("Vendas",              totalBruto.ToString("C"),  Color.FromArgb(115, 140, 50));
-                CriarCardFin("Compras/Entradas",    totalCompras.ToString("C"),Color.FromArgb(180, 70, 55));
-                CriarCardFin("Gastos Material",     gastosMaterial.ToString("C"), Color.FromArgb(160, 100, 38));
-                CriarCardFin("Taxa de Entrega",     taxaEnt.ToString("C"),     Color.FromArgb(130, 100, 48));
-                CriarCardFin("Lucro Estimado",      lucroFinal.ToString("C"),
-                    lucroFinal >= 0 ? Color.FromArgb(115, 140, 50) : Color.FromArgb(180, 70, 55));
-                // Conciliação por forma de pagamento
+                CriarCardFin("Venda Bruta",          totalBruto.ToString("C"),  Color.FromArgb(115, 140, 50));
+                CriarCardFin("Compras",              totalCompras.ToString("C"),Color.FromArgb(180, 70, 55));
+                CriarCardFin("Outros Gastos",        gastosMaterial.ToString("C"), Color.FromArgb(160, 100, 38));
+                CriarCardFin("Taxa de Entrega",      taxaEnt.ToString("C"),     Color.FromArgb(130, 100, 48));
+                CriarCardFin("Venda L\u00edquida",   fatLiquido.ToString("C"),
+                    fatLiquido >= 0 ? Color.FromArgb(115, 140, 50) : Color.FromArgb(180, 70, 55));
+                // Movimentação por forma de pagamento
                 CriarCardFin("Dinheiro",            totalDinheiro.ToString("C"), Color.FromArgb(155, 130, 48));
                 CriarCardFin("Cart\u00e3o",         totalCartao.ToString("C"),   Color.FromArgb(73, 110, 160));
                 CriarCardFin("Pix",                 totalPix.ToString("C"),      Color.FromArgb(80, 130, 110));
@@ -1534,11 +1547,10 @@ namespace Pedeai
 
                 lblFinResumo.Text =
                     $"Período: {de:dd/MM/yyyy} a {ate:dd/MM/yyyy}  |  " +
-                    $"Entradas: {totalBruto:C}  |  " +
+                    $"Venda Bruta: {totalBruto:C}  |  " +
                     $"Compras: {totalCompras:C}  |  " +
-                    $"Gastos: {gastosMaterial:C}  |  " +
-                    $"Lucro estimado: {lucroFinal:C}  |  " +
-                    $"Fat. Líquido (- custo merc.): {fatLiquido:C}";
+                    $"Outros Gastos: {gastosMaterial:C}  |  " +
+                    $"Venda L\u00edquida (- custo merc.): {fatLiquido:C}";
             }
             catch (Exception ex) { MessageBox.Show("Erro ao carregar financeiro: " + ex.Message); }
         }

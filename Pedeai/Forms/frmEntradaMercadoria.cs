@@ -90,7 +90,7 @@ namespace Pedeai.Forms
         {
             gridParcelas.Columns.Clear();
             gridParcelas.Columns.Add(new DataGridViewTextBoxColumn { Name = "Num",        HeaderText = "#",           Width = 35, ReadOnly = true });
-            gridParcelas.Columns.Add(new DataGridViewTextBoxColumn { Name = "Vencimento", HeaderText = "Vencimento",  Width = 110, ReadOnly = true });
+            gridParcelas.Columns.Add(new DataGridViewTextBoxColumn { Name = "Vencimento", HeaderText = "Vencimento",  Width = 110, ReadOnly = false });
             gridParcelas.Columns.Add(new DataGridViewTextBoxColumn { Name = "Valor",      HeaderText = "Valor R$",    FillWeight = 100, ReadOnly = false });
             gridParcelas.Columns.Add(new DataGridViewTextBoxColumn { Name = "Obs",        HeaderText = "Observa\u00e7\u00e3o",  FillWeight = 100, ReadOnly = false });
             gridParcelas.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
@@ -131,6 +131,8 @@ namespace Pedeai.Forms
             txtProdNome.Leave += (_, __) => ResolverProdutoPorNome();
 
             btnAdicionarItem.Click    += BtnAdicionarItem_Click;
+            btnBuscarForn.Click       += (_, __) => AbrirBuscaFornecedor();
+            btnBuscarProd.Click       += (_, __) => AbrirBuscaProduto();
             btnRemoverItem.Click      += BtnRemoverItem_Click;
             btnConfirmarEntrada.Click += BtnConfirmarEntrada_Click;
             btnFecharForm.Click       += (_, __) => FecharNovaEntrada();
@@ -148,6 +150,17 @@ namespace Pedeai.Forms
                 }
                 else if (gridParcelas.Columns[ev.ColumnIndex].Name == "Obs")
                     _parcelas[ev.RowIndex].parObservacao = cell.Value?.ToString() ?? "";
+                else if (gridParcelas.Columns[ev.ColumnIndex].Name == "Vencimento")
+                {
+                    var val = cell.Value?.ToString() ?? "";
+                    if (DateTime.TryParseExact(val, new[]{ "dd/MM/yyyy", "d/M/yyyy", "dd/MM/yy" },
+                        System.Globalization.CultureInfo.InvariantCulture,
+                        System.Globalization.DateTimeStyles.None, out DateTime dt))
+                    {
+                        _parcelas[ev.RowIndex].parVencimento = dt;
+                        gridParcelas.Rows[ev.RowIndex].Cells["Vencimento"].Value = dt.ToString("dd/MM/yyyy");
+                    }
+                }
             };
         }
 
@@ -211,7 +224,6 @@ namespace Pedeai.Forms
             txtFornNome.Clear();
             dtpData.Value = DateTime.Today;
             txtNumDoc.Clear();
-            txtObservacoes.Clear();
             txtProdCod.Clear();
             txtProdNome.Clear();
             numQtde.Value = 1;
@@ -407,7 +419,7 @@ namespace Pedeai.Forms
                 entNome_Fornecedor = txtFornNome.Text.Trim(),
                 entData            = dtpData.Value.Date,
                 entNumeroDoc       = txtNumDoc.Text.Trim(),
-                entObservacoes     = txtObservacoes.Text.Trim(),
+                entObservacoes     = "",
                 entValorTotal      = 0,
             };
             // Calculate total
@@ -442,6 +454,98 @@ namespace Pedeai.Forms
             if (!string.IsNullOrEmpty(erro)) { MessageBox.Show("Erro: " + erro); return; }
             MessageBox.Show("Entrada cancelada e estoque revertido.", "Sucesso");
             CarregarGrid();
+        }
+
+        // ── Busca de fornecedor ──────────────────────────────────────────────
+        private void AbrirBuscaFornecedor()
+        {
+            if (_dtFornecedores == null) return;
+            using var dlg = new Form();
+            dlg.Text = "Selecionar Fornecedor";
+            dlg.StartPosition = FormStartPosition.CenterParent;
+            dlg.Size = new Size(520, 400);
+            dlg.FormBorderStyle = FormBorderStyle.FixedDialog;
+            dlg.MaximizeBox = dlg.MinimizeBox = false;
+            dlg.BackColor = Color.FromArgb(245, 237, 216);
+
+            var txtF = new TextBox { Dock = DockStyle.Top, Height = 28, BackColor = Color.White,
+                ForeColor = Color.FromArgb(50,50,50), Font = new Font("Segoe UI", 9.5F) };
+            var gridF = new DataGridView { Dock = DockStyle.Fill, ReadOnly = true,
+                AllowUserToAddRows = false, SelectionMode = DataGridViewSelectionMode.FullRowSelect,
+                RowHeadersVisible = false, AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill,
+                BackgroundColor = Color.White, Font = new Font("Segoe UI", 9F) };
+            gridF.DefaultCellStyle.SelectionBackColor = Color.FromArgb(224,113,42);
+            gridF.DefaultCellStyle.SelectionForeColor = Color.White;
+
+            var dtF = _dtFornecedores.Copy();
+            gridF.DataSource = dtF;
+            if (gridF.Columns.Contains("Situacao")) gridF.Columns["Situacao"].Visible = false;
+
+            txtF.TextChanged += (_, __) =>
+            {
+                var f = txtF.Text.Trim().Replace("'", "''");
+                dtF.DefaultView.RowFilter = string.IsNullOrEmpty(f) ? "" : $"RazaoSocial LIKE '%{f}%'";
+            };
+            gridF.DoubleClick += (_, __) =>
+            {
+                if (gridF.SelectedRows.Count == 0) return;
+                var row = gridF.SelectedRows[0];
+                _fornecedorCodigo = Convert.ToInt32(row.Cells["Codigo"].Value);
+                txtFornCod.Text  = _fornecedorCodigo.ToString();
+                txtFornNome.Text = row.Cells["RazaoSocial"].Value?.ToString() ?? "";
+                dlg.DialogResult = DialogResult.OK;
+            };
+            dlg.Controls.Add(gridF);
+            dlg.Controls.Add(txtF);
+            dlg.ShowDialog(this);
+        }
+
+        // ── Busca de produto ─────────────────────────────────────────────────
+        private void AbrirBuscaProduto()
+        {
+            if (_dtProdutos == null) return;
+            using var dlg = new Form();
+            dlg.Text = "Selecionar Produto";
+            dlg.StartPosition = FormStartPosition.CenterParent;
+            dlg.Size = new Size(520, 400);
+            dlg.FormBorderStyle = FormBorderStyle.FixedDialog;
+            dlg.MaximizeBox = dlg.MinimizeBox = false;
+            dlg.BackColor = Color.FromArgb(245, 237, 216);
+
+            var txtP = new TextBox { Dock = DockStyle.Top, Height = 28, BackColor = Color.White,
+                ForeColor = Color.FromArgb(50,50,50), Font = new Font("Segoe UI", 9.5F) };
+            var gridP = new DataGridView { Dock = DockStyle.Fill, ReadOnly = true,
+                AllowUserToAddRows = false, SelectionMode = DataGridViewSelectionMode.FullRowSelect,
+                RowHeadersVisible = false, AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill,
+                BackgroundColor = Color.White, Font = new Font("Segoe UI", 9F) };
+            gridP.DefaultCellStyle.SelectionBackColor = Color.FromArgb(224,113,42);
+            gridP.DefaultCellStyle.SelectionForeColor = Color.White;
+
+            var dtP = _dtProdutos.Copy();
+            gridP.DataSource = dtP;
+            if (gridP.Columns.Contains("Situacao"))    gridP.Columns["Situacao"].Visible = false;
+            if (gridP.Columns.Contains("EhProduto"))   gridP.Columns["EhProduto"].Visible = false;
+
+            txtP.TextChanged += (_, __) =>
+            {
+                var f = txtP.Text.Trim().Replace("'", "''");
+                dtP.DefaultView.RowFilter = string.IsNullOrEmpty(f) ? "" : $"Nome LIKE '%{f}%'";
+            };
+            gridP.DoubleClick += (_, __) =>
+            {
+                if (gridP.SelectedRows.Count == 0) return;
+                var row = gridP.SelectedRows[0];
+                _produtoAtualCodigo = Convert.ToInt32(row.Cells["Codigo"].Value);
+                txtProdCod.Text   = _produtoAtualCodigo.ToString();
+                txtProdNome.Text  = row.Cells["Nome"].Value?.ToString() ?? "";
+                var merc = _mercBLL.PesquisaCodigo(_produtoAtualCodigo);
+                if (merc != null && numCustoItem.Value == 0)
+                    numCustoItem.Value = merc.mercPreco_Custo;
+                dlg.DialogResult = DialogResult.OK;
+            };
+            dlg.Controls.Add(gridP);
+            dlg.Controls.Add(txtP);
+            dlg.ShowDialog(this);
         }
     }
 
