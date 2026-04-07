@@ -59,6 +59,8 @@ namespace Pedeai.Forms
             this.txtImpLblSubtotal = new System.Windows.Forms.TextBox();
             this.txtImpLblTaxa = new System.Windows.Forms.TextBox();
             this.txtImpLblTotalPagar = new System.Windows.Forms.TextBox();
+            this.txtImpLblDesconto   = new System.Windows.Forms.TextBox();
+            this.txtImpLblCupom      = new System.Windows.Forms.TextBox();
             this.txtImpLblAtendente = new System.Windows.Forms.TextBox();
             this.cmbImpressora = new System.Windows.Forms.ComboBox();
             this.numLargura = new System.Windows.Forms.NumericUpDown();
@@ -549,20 +551,40 @@ namespace Pedeai.Forms
             this.txtImpLblTotalPagar.BackColor = System.Drawing.Color.White;
             this.txtImpLblTotalPagar.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.txtImpLblTotalPagar.ForeColor = System.Drawing.Color.FromArgb(50, 50, 50);
-            this.txtImpLblTotalPagar.Location = new System.Drawing.Point(208, 460);
+            this.txtImpLblTotalPagar.Location = new System.Drawing.Point(208, 524);
             this.txtImpLblTotalPagar.Name = "txtImpLblTotalPagar";
             this.txtImpLblTotalPagar.Size = new System.Drawing.Size(200, 25);
-            this.txtImpLblTotalPagar.TabIndex = 12;
+            this.txtImpLblTotalPagar.TabIndex = 14;
+            // 
+            // txtImpLblDesconto
+            // 
+            this.txtImpLblDesconto.BackColor = System.Drawing.Color.White;
+            this.txtImpLblDesconto.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.txtImpLblDesconto.ForeColor = System.Drawing.Color.FromArgb(50, 50, 50);
+            this.txtImpLblDesconto.Location = new System.Drawing.Point(208, 460);
+            this.txtImpLblDesconto.Name = "txtImpLblDesconto";
+            this.txtImpLblDesconto.Size = new System.Drawing.Size(200, 25);
+            this.txtImpLblDesconto.TabIndex = 12;
+            // 
+            // txtImpLblCupom
+            // 
+            this.txtImpLblCupom.BackColor = System.Drawing.Color.White;
+            this.txtImpLblCupom.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.txtImpLblCupom.ForeColor = System.Drawing.Color.FromArgb(50, 50, 50);
+            this.txtImpLblCupom.Location = new System.Drawing.Point(208, 492);
+            this.txtImpLblCupom.Name = "txtImpLblCupom";
+            this.txtImpLblCupom.Size = new System.Drawing.Size(200, 25);
+            this.txtImpLblCupom.TabIndex = 13;
             // 
             // txtImpLblAtendente
             // 
             this.txtImpLblAtendente.BackColor = System.Drawing.Color.White;
             this.txtImpLblAtendente.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.txtImpLblAtendente.ForeColor = System.Drawing.Color.FromArgb(50, 50, 50);
-            this.txtImpLblAtendente.Location = new System.Drawing.Point(208, 492);
+            this.txtImpLblAtendente.Location = new System.Drawing.Point(208, 556);
             this.txtImpLblAtendente.Name = "txtImpLblAtendente";
             this.txtImpLblAtendente.Size = new System.Drawing.Size(200, 25);
-            this.txtImpLblAtendente.TabIndex = 13;
+            this.txtImpLblAtendente.TabIndex = 15;
             // 
             // cmbImpressora
             // 
@@ -571,7 +593,7 @@ namespace Pedeai.Forms
             this.cmbImpressora.ForeColor = System.Drawing.Color.FromArgb(50, 50, 50);
             this.cmbImpressora.Items.AddRange(new object[] {
             "(Impressora padr�o do sistema)"});
-            this.cmbImpressora.Location = new System.Drawing.Point(208, 530);
+            this.cmbImpressora.Location = new System.Drawing.Point(208, 594);
             this.cmbImpressora.Name = "cmbImpressora";
             this.cmbImpressora.Size = new System.Drawing.Size(400, 25);
             this.cmbImpressora.TabIndex = 14;
@@ -580,7 +602,7 @@ namespace Pedeai.Forms
             // 
             this.numLargura.BackColor = System.Drawing.Color.White;
             this.numLargura.ForeColor = System.Drawing.Color.FromArgb(50, 50, 50);
-            this.numLargura.Location = new System.Drawing.Point(208, 562);
+            this.numLargura.Location = new System.Drawing.Point(208, 626);
             this.numLargura.Maximum = new decimal(new int[] {
             120,
             0,
@@ -712,6 +734,8 @@ namespace Pedeai.Forms
             this.tabImp.Controls.Add(this.txtImpLblColTotal);
             this.tabImp.Controls.Add(this.txtImpLblSubtotal);
             this.tabImp.Controls.Add(this.txtImpLblTaxa);
+            this.tabImp.Controls.Add(this.txtImpLblDesconto);
+            this.tabImp.Controls.Add(this.txtImpLblCupom);
             this.tabImp.Controls.Add(this.txtImpLblTotalPagar);
             this.tabImp.Controls.Add(this.txtImpLblAtendente);
             this.tabImp.Controls.Add(this.cmbImpressora);
@@ -730,6 +754,8 @@ namespace Pedeai.Forms
             this.tabImp.Controls.Add(this.lblImpColTotal);
             this.tabImp.Controls.Add(this.lblImpSubtotal);
             this.tabImp.Controls.Add(this.lblImpTaxa);
+            this.tabImp.Controls.Add(this.lblImpDesconto);
+            this.tabImp.Controls.Add(this.lblImpCupom);
             this.tabImp.Controls.Add(this.lblImpTotalPagar);
             this.tabImp.Controls.Add(this.lblImpAtendente);
             this.tabImp.Controls.Add(this.lblImpressora);
@@ -750,7 +776,7 @@ namespace Pedeai.Forms
             this.btnSalvImp.FlatAppearance.BorderSize = 0;
             this.btnSalvImp.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnSalvImp.ForeColor = System.Drawing.Color.White;
-            this.btnSalvImp.Location = new System.Drawing.Point(208, 600);
+            this.btnSalvImp.Location = new System.Drawing.Point(208, 664);
             this.btnSalvImp.Name = "btnSalvImp";
             this.btnSalvImp.Size = new System.Drawing.Size(200, 32);
             this.btnSalvImp.TabIndex = 16;
@@ -765,7 +791,7 @@ namespace Pedeai.Forms
             this.btnTesteImp.FlatAppearance.BorderSize = 0;
             this.btnTesteImp.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnTesteImp.ForeColor = System.Drawing.Color.White;
-            this.btnTesteImp.Location = new System.Drawing.Point(416, 600);
+            this.btnTesteImp.Location = new System.Drawing.Point(416, 664);
             this.btnTesteImp.Name = "btnTesteImp";
             this.btnTesteImp.Size = new System.Drawing.Size(140, 32);
             this.btnTesteImp.TabIndex = 17;
@@ -824,7 +850,7 @@ namespace Pedeai.Forms
             // frmEmpresa
             // 
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(13)))), ((int)(((byte)(19)))), ((int)(((byte)(40)))));
-            this.ClientSize = new System.Drawing.Size(1004, 676);
+            this.ClientSize = new System.Drawing.Size(1004, 740);
             this.Controls.Add(this.tabControl);
             this.Font = new System.Drawing.Font("Segoe UI", 9.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.ForeColor = System.Drawing.Color.FromArgb(60, 60, 60);
@@ -897,6 +923,8 @@ namespace Pedeai.Forms
         internal System.Windows.Forms.TextBox        txtImpLblColTotal;
         internal System.Windows.Forms.TextBox        txtImpLblSubtotal;
         internal System.Windows.Forms.TextBox        txtImpLblTaxa;
+        internal System.Windows.Forms.TextBox        txtImpLblDesconto;
+        internal System.Windows.Forms.TextBox        txtImpLblCupom;
         internal System.Windows.Forms.TextBox        txtImpLblTotalPagar;
         internal System.Windows.Forms.TextBox        txtImpLblAtendente;
         internal System.Windows.Forms.ComboBox       cmbImpressora;
@@ -944,9 +972,11 @@ namespace Pedeai.Forms
         private System.Windows.Forms.Label lblImpColTotal  = new System.Windows.Forms.Label { Text = "Col. Total:",         AutoSize = true, Left = 22, Top = 370, ForeColor = System.Drawing.Color.FromArgb(70,70,70) };
         private System.Windows.Forms.Label lblImpSubtotal  = new System.Windows.Forms.Label { Text = "Subtotal:",           AutoSize = true, Left = 22, Top = 402, ForeColor = System.Drawing.Color.FromArgb(70,70,70) };
         private System.Windows.Forms.Label lblImpTaxa      = new System.Windows.Forms.Label { Text = "Taxa entrega:",       AutoSize = true, Left = 22, Top = 434, ForeColor = System.Drawing.Color.FromArgb(70,70,70) };
-        private System.Windows.Forms.Label lblImpTotalPagar= new System.Windows.Forms.Label { Text = "Total a pagar:",      AutoSize = true, Left = 22, Top = 466, ForeColor = System.Drawing.Color.FromArgb(70,70,70) };
-        private System.Windows.Forms.Label lblImpAtendente = new System.Windows.Forms.Label { Text = "Atendente:",          AutoSize = true, Left = 22, Top = 498, ForeColor = System.Drawing.Color.FromArgb(70,70,70) };
-        private System.Windows.Forms.Label lblImpressora   = new System.Windows.Forms.Label { Text = "Impressora:",         AutoSize = true, Left = 22, Top = 536, ForeColor = System.Drawing.Color.FromArgb(70,70,70) };
-        private System.Windows.Forms.Label lblLargura      = new System.Windows.Forms.Label { Text = "Largura (chars):",    AutoSize = true, Left = 22, Top = 568, ForeColor = System.Drawing.Color.FromArgb(70,70,70) };
+        private System.Windows.Forms.Label lblImpDesconto  = new System.Windows.Forms.Label { Text = "Desconto:",            AutoSize = true, Left = 22, Top = 466, ForeColor = System.Drawing.Color.FromArgb(70,70,70) };
+        private System.Windows.Forms.Label lblImpCupom     = new System.Windows.Forms.Label { Text = "Cupom:",               AutoSize = true, Left = 22, Top = 498, ForeColor = System.Drawing.Color.FromArgb(70,70,70) };
+        private System.Windows.Forms.Label lblImpTotalPagar= new System.Windows.Forms.Label { Text = "Total a pagar:",       AutoSize = true, Left = 22, Top = 530, ForeColor = System.Drawing.Color.FromArgb(70,70,70) };
+        private System.Windows.Forms.Label lblImpAtendente = new System.Windows.Forms.Label { Text = "Atendente:",           AutoSize = true, Left = 22, Top = 562, ForeColor = System.Drawing.Color.FromArgb(70,70,70) };
+        private System.Windows.Forms.Label lblImpressora   = new System.Windows.Forms.Label { Text = "Impressora:",          AutoSize = true, Left = 22, Top = 600, ForeColor = System.Drawing.Color.FromArgb(70,70,70) };
+        private System.Windows.Forms.Label lblLargura      = new System.Windows.Forms.Label { Text = "Largura (chars):",     AutoSize = true, Left = 22, Top = 632, ForeColor = System.Drawing.Color.FromArgb(70,70,70) };
     }
 }

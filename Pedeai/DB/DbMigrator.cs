@@ -79,6 +79,9 @@ namespace Pedeai.DB
                 AddColumnIfNotExists(conn, db, "pedido_web", "Codigo_Cliente",
                     "INT NULL DEFAULT NULL");
 
+                AddColumnIfNotExists(conn, db, "pedido_web", "pediCodigo_Cupom",
+                    "VARCHAR(50) NOT NULL DEFAULT ''");
+
                 // Colunas de pagamento fracionado (multiplas formas no mesmo pedido)
                 AddColumnIfNotExists(conn, db, "pedido_web", "pediPago_Dinheiro",
                     "DECIMAL(10,2) NOT NULL DEFAULT 0");
@@ -142,6 +145,11 @@ namespace Pedeai.DB
                 Exec(conn, @"
                     INSERT IGNORE INTO config_impressao (Codigo)
                     VALUES (1)");
+
+                AddColumnIfNotExists(conn, db, "config_impressao", "lblDesconto",
+                    "VARCHAR(50) NOT NULL DEFAULT '- DESCONTO:'");
+                AddColumnIfNotExists(conn, db, "config_impressao", "lblCupom",
+                    "VARCHAR(50) NOT NULL DEFAULT '- CUPOM:'");
 
                 // ── 8. Tabela: entrada_mercadoria ─────────────────────────────
                 Exec(conn, @"

@@ -18,6 +18,7 @@ namespace Pedeai.Modelo
         public decimal pediSubtotal { get; set; }
         public decimal pediTaxa_Entrega { get; set; }
         public decimal pediDesconto { get; set; }
+        public string pediCodigo_Cupom { get; set; } = "";  // preenchido quando desconto veio de cupom
         public decimal pediValor_Total { get; set; }
         public decimal? pediTroco_Para { get; set; }
         public string pediEndereco_Entrega { get; set; } = "";

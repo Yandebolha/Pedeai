@@ -36,6 +36,12 @@ namespace Pedeai.Modelo
         // Etiqueta taxa de entrega
         public string lblTaxaEntrega    { get; set; } = "+ ENTREGA:";
 
+        // Etiqueta desconto
+        public string lblDesconto       { get; set; } = "- DESCONTO:";
+
+        // Etiqueta cupom
+        public string lblCupom          { get; set; } = "- CUPOM:";
+
         // Etiqueta total a pagar
         public string lblTotalPagar     { get; set; } = "= TOTAL A PAGAR:";
 

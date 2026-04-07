@@ -270,6 +270,8 @@ namespace Pedeai.Forms
             txtImpLblColTotal.Text  = cfg.lblColunaTotal;
             txtImpLblSubtotal.Text  = cfg.lblSubtotal;
             txtImpLblTaxa.Text      = cfg.lblTaxaEntrega;
+            txtImpLblDesconto.Text  = cfg.lblDesconto;
+            txtImpLblCupom.Text     = cfg.lblCupom;
             txtImpLblTotalPagar.Text= cfg.lblTotalPagar;
             txtImpLblAtendente.Text = cfg.lblAtendente;
             numLargura.Value        = System.Math.Max(20, cfg.larguraCaracteres);
@@ -305,6 +307,8 @@ namespace Pedeai.Forms
                 lblColunaTotal    = txtImpLblColTotal.Text.Trim(),
                 lblSubtotal       = txtImpLblSubtotal.Text.Trim(),
                 lblTaxaEntrega    = txtImpLblTaxa.Text.Trim(),
+                lblDesconto       = txtImpLblDesconto.Text.Trim(),
+                lblCupom          = txtImpLblCupom.Text.Trim(),
                 lblTotalPagar     = txtImpLblTotalPagar.Text.Trim(),
                 lblAtendente      = txtImpLblAtendente.Text.Trim(),
                 larguraCaracteres = (int)numLargura.Value,

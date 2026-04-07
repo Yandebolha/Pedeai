@@ -148,9 +148,10 @@ namespace Pedeai.DAL
                     (auxCodigo, Codigo, pediNumero, pediNome_Cliente, pediTelefone_Cliente,
                      pediSituacao, pediTipo_Entrega, pediForma_Pagamento, pediOrigem,
                      pediSubtotal, pediTaxa_Entrega, pediDesconto, pediValor_Total, pediTroco_Para,
-                     pediEndereco_Entrega, pediObservacoes, pediData_Lancamento, Situacao, Info, Codigo_Cliente)
+                     pediEndereco_Entrega, pediObservacoes, pediData_Lancamento, Situacao, Info,
+                     Codigo_Cliente, pediCodigo_Cupom)
                     VALUES(@aux,@cod,@num,@nome,@tel,@sit,@tent,@fpag,3,
-                           @sub,@taxa,0,@total,@troco,@end,@obs,@dt,'A','',@cliCod)";
+                           @sub,@taxa,0,@total,@troco,@end,@obs,@dt,'A','',@cliCod,@cupomCod)";
                 using var cmdP = new MySqlCommand(sqlP, conn, trans);
                 cmdP.Parameters.AddWithValue("@aux",   pedido.auxCodigo);
                 cmdP.Parameters.AddWithValue("@cod",   pedido.Codigo);
@@ -168,6 +169,7 @@ namespace Pedeai.DAL
                 cmdP.Parameters.AddWithValue("@obs",   pedido.pediObservacoes ?? "");
                 cmdP.Parameters.AddWithValue("@dt",    pedido.pediData_Lancamento);
                 cmdP.Parameters.AddWithValue("@cliCod", pedido.Codigo_Cliente > 0 ? (object)pedido.Codigo_Cliente : DBNull.Value);
+                cmdP.Parameters.AddWithValue("@cupomCod", pedido.pediCodigo_Cupom ?? "");
                 cmdP.ExecuteNonQuery();
 
                 // Itens
@@ -446,6 +448,7 @@ namespace Pedeai.DAL
                 pediOrigem            = r["pediOrigem"] == DBNull.Value ? 0 : Convert.ToInt32(r["pediOrigem"]),
                 pediData_Lancamento   = Convert.ToDateTime(r["pediData_Lancamento"]),
                 pediCancelado_Por     = r["pediCancelado_Por"] == DBNull.Value ? null : r["pediCancelado_Por"]?.ToString(),
+                pediCodigo_Cupom      = r["pediCodigo_Cupom"] == DBNull.Value ? "" : r["pediCodigo_Cupom"]?.ToString() ?? "",
                 Info                  = r["Info"]?.ToString() ?? "",
             };
         }

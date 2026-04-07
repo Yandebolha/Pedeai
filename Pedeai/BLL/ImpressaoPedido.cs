@@ -170,9 +170,6 @@ namespace Pedeai.BLL
                 linhas.Add("(Retirada no balcao)");
             }
 
-            if (!string.IsNullOrWhiteSpace(atendente))
-                linhas.Add("Entregador: " + atendente);
-
             linhas.Add("");
             linhas.Add("ABERTO EM " + pedido.pediData_Lancamento.ToString("dd/MM/yyyy HH:mm"));
             linhas.Add("");
@@ -207,6 +204,24 @@ namespace Pedeai.BLL
             string tot  = pedido.pediValor_Total.ToString("0.00");
 
             linhas.Add(cfg.lblSubtotal + PreencharDir(sub, larg - cfg.lblSubtotal.Length));
+            if (pedido.pediDesconto > 0)
+            {
+                string valDesc = pedido.pediDesconto.ToString("0.00");
+                bool ehCupom = !string.IsNullOrWhiteSpace(pedido.pediCodigo_Cupom);
+                string lblDesc;
+                if (ehCupom)
+                {
+                    string lblBase = string.IsNullOrWhiteSpace(cfg.lblCupom) ? "- CUPOM:" : cfg.lblCupom;
+                    lblDesc = lblBase + " " + pedido.pediCodigo_Cupom;
+                }
+                else
+                {
+                    lblDesc = string.IsNullOrWhiteSpace(cfg.lblDesconto) ? "- DESCONTO:" : cfg.lblDesconto;
+                }
+                if (lblDesc.Length + valDesc.Length + 1 > larg)
+                    lblDesc = (ehCupom ? "- CUPOM:" : "- DESCONTO:");
+                linhas.Add(lblDesc + PreencharDir(valDesc, larg - lblDesc.Length));
+            }
             if (entrega)
                 linhas.Add(cfg.lblTaxaEntrega + PreencharDir(taxa, larg - cfg.lblTaxaEntrega.Length));
             linhas.Add("§B§" + cfg.lblTotalPagar + PreencharDir(tot, larg - cfg.lblTotalPagar.Length));

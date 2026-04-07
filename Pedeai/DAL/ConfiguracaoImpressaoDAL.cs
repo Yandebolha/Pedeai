@@ -27,6 +27,8 @@ namespace Pedeai.DAL
                 lblColunaTotal    = r["lblColunaTotal"]?.ToString()     ?? "Total",
                 lblSubtotal       = r["lblSubtotal"]?.ToString()        ?? "TOTAL:",
                 lblTaxaEntrega    = r["lblTaxaEntrega"]?.ToString()     ?? "+ ENTREGA:",
+                lblDesconto       = r["lblDesconto"]?.ToString()        ?? "- DESCONTO:",
+                lblCupom          = r["lblCupom"]?.ToString()           ?? "- CUPOM:",
                 lblTotalPagar     = r["lblTotalPagar"]?.ToString()      ?? "= TOTAL A PAGAR:",
                 lblAtendente      = r["lblAtendente"]?.ToString()       ?? "Atendente:",
                 larguraCaracteres = r["larguraCaracteres"] == DBNull.Value
@@ -45,13 +47,15 @@ namespace Pedeai.DAL
                         (Codigo, cabNomeEmpresa, cabEndereco, cabTelefone, cabCNPJ,
                          separador, rodapeAvisoFiscal, rodapeTextoLivre,
                          lblNumeroPedido, lblColunaItem, lblColunaTotal,
-                         lblSubtotal, lblTaxaEntrega, lblTotalPagar, lblAtendente,
+                         lblSubtotal, lblTaxaEntrega, lblDesconto, lblCupom,
+                         lblTotalPagar, lblAtendente,
                          larguraCaracteres, impressoraNome)
                     VALUES
                         (1,@nome,@end,@tel,@cnpj,
                          @sep,@aviso,@livre,
                          @num,@col,@ctot,
-                         @sub,@taxa,@total,@atend,
+                         @sub,@taxa,@desc,@cupom,
+                         @total,@atend,
                          @larg,@impr)
                     ON DUPLICATE KEY UPDATE
                         cabNomeEmpresa    = VALUES(cabNomeEmpresa),
@@ -66,6 +70,8 @@ namespace Pedeai.DAL
                         lblColunaTotal    = VALUES(lblColunaTotal),
                         lblSubtotal       = VALUES(lblSubtotal),
                         lblTaxaEntrega    = VALUES(lblTaxaEntrega),
+                        lblDesconto       = VALUES(lblDesconto),
+                        lblCupom          = VALUES(lblCupom),
                         lblTotalPagar     = VALUES(lblTotalPagar),
                         lblAtendente      = VALUES(lblAtendente),
                         larguraCaracteres = VALUES(larguraCaracteres),
@@ -84,6 +90,8 @@ namespace Pedeai.DAL
                 cmd.Parameters.AddWithValue("@ctot",  obj.lblColunaTotal ?? "Total");
                 cmd.Parameters.AddWithValue("@sub",   obj.lblSubtotal ?? "TOTAL:");
                 cmd.Parameters.AddWithValue("@taxa",  obj.lblTaxaEntrega ?? "+ ENTREGA:");
+                cmd.Parameters.AddWithValue("@desc",  obj.lblDesconto ?? "- DESCONTO:");
+                cmd.Parameters.AddWithValue("@cupom", obj.lblCupom    ?? "- CUPOM:");
                 cmd.Parameters.AddWithValue("@total", obj.lblTotalPagar ?? "= TOTAL A PAGAR:");
                 cmd.Parameters.AddWithValue("@atend", obj.lblAtendente ?? "Atendente:");
                 cmd.Parameters.AddWithValue("@larg",  obj.larguraCaracteres);

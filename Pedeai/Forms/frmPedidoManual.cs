@@ -318,6 +318,7 @@ namespace Pedeai.Forms
                 pediSubtotal         = sub,
                 pediTaxa_Entrega     = taxa,
                 pediDesconto         = _descontoCupom,
+                pediCodigo_Cupom     = _cupomAplicado != null ? (_cupomAplicado.cupomCodigo ?? "") : "",
                 pediValor_Total      = total,
                 pediTroco_Para       = cmbPagamento.SelectedIndex == 0 && numTroco.Value > 0 ? numTroco.Value : (decimal?)null,
                 pediEndereco_Entrega = ehEntrega ? txtEndereco.Text.Trim() : "",

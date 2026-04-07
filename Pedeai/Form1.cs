@@ -1520,7 +1520,7 @@ namespace Pedeai
                 // ── Totais de compras (entradas de mercadoria) ──
                 decimal totalCompras = _entradaBLL.TotalPeriodo(de, ate);
 
-                decimal fatLiquido = totalBruto - custoMerc - taxaEnt;
+                decimal fatLiquido = totalBruto - custoMerc;
                 decimal lucroReal  = totalBruto - totalCompras;
                 decimal saidas     = custoMerc + totalCompras;
 
@@ -1550,7 +1550,7 @@ namespace Pedeai
                     $"Venda Bruta: {totalBruto:C}  |  " +
                     $"Compras: {totalCompras:C}  |  " +
                     $"Outros Gastos: {gastosMaterial:C}  |  " +
-                    $"Venda L\u00edquida (- custo merc. - taxa entrega): {fatLiquido:C}";
+                    $"Venda L\u00edquida (Bruta - Custo Merc.): {fatLiquido:C}";
             }
             catch (Exception ex) { MessageBox.Show("Erro ao carregar financeiro: " + ex.Message); }
         }
@@ -1607,6 +1607,20 @@ namespace Pedeai
         // Reconstroi os botoes do sidebar conforme permissoes da sessao atual
         public void ReconstruirSidebar()
         {
+            // Atualizar rodapé com nome da empresa e usuário logado
+            try
+            {
+                var emp = _empBLL.Carregar();
+                string nomeEmp = !string.IsNullOrWhiteSpace(emp?.empNome_Fantasia)
+                    ? emp.empNome_Fantasia
+                    : emp?.empNome ?? "";
+                lblFooterEmpresa.Text = "\U0001F3E2  " + nomeEmp;
+            }
+            catch { }
+            lblFooterUsuario.Text = "\U0001F464  " + UsuarioSessao.NomeAtual;
+            // Reposicionar label direito no footer
+            lblFooterUsuario.Left = pnlFooter.Width - lblFooterUsuario.PreferredWidth - 12;
+
             // Manter apenas o primeiro controle (accent bar)
             while (pnlSidebar.Controls.Count > 1)
                 pnlSidebar.Controls.RemoveAt(1);

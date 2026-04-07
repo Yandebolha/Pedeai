@@ -8,8 +8,16 @@ namespace Pedeai
     {
         private static readonly object _lock = new object();
 
-        private static string FilePath =>
-            Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Log_sistema.txt");
+        private static string FilePath
+        {
+            get
+            {
+                string dir = @"C:\Pedeai";
+                if (!Directory.Exists(dir))
+                    Directory.CreateDirectory(dir);
+                return Path.Combine(dir, "Log_sistema.txt");
+            }
+        }
 
         public static void Log(string acao, string detalhe = "")
         {
