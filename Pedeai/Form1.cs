@@ -1237,7 +1237,7 @@ namespace Pedeai
 
                     if (pedido.pediForma_Pagamento == 1) numCar.Value = total;
                     else if (pedido.pediForma_Pagamento == 2) numPix.Value = total;
-                    else numDin.Value = total;
+                    else numDin.Value = total;  // 0=Dinheiro ou qualquer outro (ex: -1 de pedidos externos)
 
                     Lbl("C\u00f3d. Transa\u00e7\u00e3o (cart\u00e3o/Pix):", 12, 188);
                     var txtTrans = new TextBox { Left = 240, Top = 184, Width = 164,

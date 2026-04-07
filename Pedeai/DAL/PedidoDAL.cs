@@ -35,7 +35,7 @@ namespace Pedeai.DAL
                                    WHEN 0 THEN 'Dinheiro'
                                    WHEN 1 THEN 'Cartão'
                                    WHEN 2 THEN 'Pix'
-                                   ELSE CAST(p.pediForma_Pagamento AS CHAR)
+                                   ELSE 'Outro'
                                END                          AS Pagamento,
                                CASE p.pediTipo_Entrega
                                    WHEN 0 THEN 'Retirada'
@@ -151,7 +151,7 @@ namespace Pedeai.DAL
                      pediEndereco_Entrega, pediObservacoes, pediData_Lancamento, Situacao, Info,
                      Codigo_Cliente, pediCodigo_Cupom)
                     VALUES(@aux,@cod,@num,@nome,@tel,@sit,@tent,@fpag,3,
-                           @sub,@taxa,0,@total,@troco,@end,@obs,@dt,'A','',@cliCod,@cupomCod)";
+                           @sub,@taxa,@desc,@total,@troco,@end,@obs,@dt,'A','',@cliCod,@cupomCod)";
                 using var cmdP = new MySqlCommand(sqlP, conn, trans);
                 cmdP.Parameters.AddWithValue("@aux",   pedido.auxCodigo);
                 cmdP.Parameters.AddWithValue("@cod",   pedido.Codigo);
@@ -163,6 +163,7 @@ namespace Pedeai.DAL
                 cmdP.Parameters.AddWithValue("@fpag",  pedido.pediForma_Pagamento);
                 cmdP.Parameters.AddWithValue("@sub",   pedido.pediSubtotal);
                 cmdP.Parameters.AddWithValue("@taxa",  pedido.pediTaxa_Entrega);
+                cmdP.Parameters.AddWithValue("@desc",  pedido.pediDesconto);
                 cmdP.Parameters.AddWithValue("@total", pedido.pediValor_Total);
                 cmdP.Parameters.AddWithValue("@troco", pedido.pediTroco_Para ?? (object)DBNull.Value);
                 cmdP.Parameters.AddWithValue("@end",   pedido.pediEndereco_Entrega ?? "");

@@ -7,8 +7,7 @@ using Pedeai.Modelo;
 namespace Pedeai.Forms
 {
     /// <summary>
-    /// Dialog de autorizacao: solicita credenciais de um usuario com permissao
-    /// para cancelar pedidos (Gerente, Admin ou com modulo "CancelarPedidos").
+    /// Dialog de autorizacao: solicita credenciais de um usuario Gerente ou Admin (nivel >= 2).
     /// </summary>
     public partial class frmAutorizacao : Form
     {
@@ -87,9 +86,9 @@ namespace Pedeai.Forms
                 return;
             }
 
-            if (usu.usuNivel < 2 && !TemPermissao(usu, "CancelarPedidos"))
+            if (usu.usuNivel < 2)
             {
-                lblMsg.Text = "Usuario sem permissao para cancelar pedidos.";
+                lblMsg.Text = "Usuário não possui essa permissão.";
                 txtSenha.Clear();
                 return;
             }
