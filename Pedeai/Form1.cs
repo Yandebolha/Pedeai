@@ -208,13 +208,13 @@ namespace Pedeai
                 filtC.Controls.Add(bp);
             }
             filtC.Height = 34;
-            _dtpIniCanal = new DateTimePicker { Left = 330, Top = 5, Width = 90, Height = 24, Format = DateTimePickerFormat.Short, Value = DateTime.Today.AddDays(-30) };
-            _dtpFimCanal = new DateTimePicker { Left = 450, Top = 5, Width = 90, Height = 24, Format = DateTimePickerFormat.Short, Value = DateTime.Today };
+            _dtpIniCanal = new DateTimePicker { Left = 344, Top = 5, Width = 90, Height = 24, Format = DateTimePickerFormat.Short, Value = DateTime.Today.AddDays(-30) };
+            _dtpFimCanal = new DateTimePicker { Left = 472, Top = 5, Width = 90, Height = 24, Format = DateTimePickerFormat.Short, Value = DateTime.Today };
             filtC.Controls.Add(new Label { Text = "De:",  ForeColor = Color.FromArgb(80, 60, 40), Font = new Font("Segoe UI", 8f), Left = 308, Top = 9, AutoSize = true });
             filtC.Controls.Add(_dtpIniCanal);
-            filtC.Controls.Add(new Label { Text = "Até:", ForeColor = Color.FromArgb(80, 60, 40), Font = new Font("Segoe UI", 8f), Left = 426, Top = 9, AutoSize = true });
+            filtC.Controls.Add(new Label { Text = "Até:", ForeColor = Color.FromArgb(80, 60, 40), Font = new Font("Segoe UI", 8f), Left = 440, Top = 9, AutoSize = true });
             filtC.Controls.Add(_dtpFimCanal);
-            var btnFiltrarC = new Button { Text = "Filtrar", Left = 546, Top = 5, Width = 62, Height = 24, BackColor = CorBotaoAtivo, ForeColor = Color.White, FlatStyle = FlatStyle.Flat, Cursor = Cursors.Hand };
+            var btnFiltrarC = new Button { Text = "Filtrar", Left = 568, Top = 5, Width = 62, Height = 24, BackColor = CorBotaoAtivo, ForeColor = Color.White, FlatStyle = FlatStyle.Flat, Cursor = Cursors.Hand };
             btnFiltrarC.FlatAppearance.BorderSize = 0;
             btnFiltrarC.Click += (_, __) =>
             {
@@ -261,13 +261,13 @@ namespace Pedeai
                 filtP.Controls.Add(bp);
             }
             filtP.Height = 34;
-            _dtpIniProd = new DateTimePicker { Left = 330, Top = 5, Width = 90, Height = 24, Format = DateTimePickerFormat.Short, Value = DateTime.Today.AddDays(-30) };
-            _dtpFimProd = new DateTimePicker { Left = 450, Top = 5, Width = 90, Height = 24, Format = DateTimePickerFormat.Short, Value = DateTime.Today };
+            _dtpIniProd = new DateTimePicker { Left = 344, Top = 5, Width = 90, Height = 24, Format = DateTimePickerFormat.Short, Value = DateTime.Today.AddDays(-30) };
+            _dtpFimProd = new DateTimePicker { Left = 472, Top = 5, Width = 90, Height = 24, Format = DateTimePickerFormat.Short, Value = DateTime.Today };
             filtP.Controls.Add(new Label { Text = "De:",  ForeColor = Color.FromArgb(80, 60, 40), Font = new Font("Segoe UI", 8f), Left = 308, Top = 9, AutoSize = true });
             filtP.Controls.Add(_dtpIniProd);
-            filtP.Controls.Add(new Label { Text = "Até:", ForeColor = Color.FromArgb(80, 60, 40), Font = new Font("Segoe UI", 8f), Left = 426, Top = 9, AutoSize = true });
+            filtP.Controls.Add(new Label { Text = "Até:", ForeColor = Color.FromArgb(80, 60, 40), Font = new Font("Segoe UI", 8f), Left = 440, Top = 9, AutoSize = true });
             filtP.Controls.Add(_dtpFimProd);
-            var btnFiltrarP = new Button { Text = "Filtrar", Left = 546, Top = 5, Width = 62, Height = 24, BackColor = CorBotaoAtivo, ForeColor = Color.White, FlatStyle = FlatStyle.Flat, Cursor = Cursors.Hand };
+            var btnFiltrarP = new Button { Text = "Filtrar", Left = 568, Top = 5, Width = 62, Height = 24, BackColor = CorBotaoAtivo, ForeColor = Color.White, FlatStyle = FlatStyle.Flat, Cursor = Cursors.Hand };
             btnFiltrarP.FlatAppearance.BorderSize = 0;
             btnFiltrarP.Click += (_, __) =>
             {
@@ -314,13 +314,13 @@ namespace Pedeai
                 filtD.Controls.Add(bp);
             }
             filtD.Height = 34;
-            _dtpIniDias = new DateTimePicker { Left = 330, Top = 5, Width = 90, Height = 24, Format = DateTimePickerFormat.Short, Value = DateTime.Today.AddDays(-30) };
-            _dtpFimDias = new DateTimePicker { Left = 450, Top = 5, Width = 90, Height = 24, Format = DateTimePickerFormat.Short, Value = DateTime.Today };
+            _dtpIniDias = new DateTimePicker { Left = 344, Top = 5, Width = 90, Height = 24, Format = DateTimePickerFormat.Short, Value = DateTime.Today.AddDays(-30) };
+            _dtpFimDias = new DateTimePicker { Left = 472, Top = 5, Width = 90, Height = 24, Format = DateTimePickerFormat.Short, Value = DateTime.Today };
             filtD.Controls.Add(new Label { Text = "De:",  ForeColor = Color.FromArgb(80, 60, 40), Font = new Font("Segoe UI", 8f), Left = 308, Top = 9, AutoSize = true });
             filtD.Controls.Add(_dtpIniDias);
-            filtD.Controls.Add(new Label { Text = "Até:", ForeColor = Color.FromArgb(80, 60, 40), Font = new Font("Segoe UI", 8f), Left = 426, Top = 9, AutoSize = true });
+            filtD.Controls.Add(new Label { Text = "Até:", ForeColor = Color.FromArgb(80, 60, 40), Font = new Font("Segoe UI", 8f), Left = 440, Top = 9, AutoSize = true });
             filtD.Controls.Add(_dtpFimDias);
-            var btnFiltrarD = new Button { Text = "Filtrar", Left = 546, Top = 5, Width = 62, Height = 24, BackColor = CorBotaoAtivo, ForeColor = Color.White, FlatStyle = FlatStyle.Flat, Cursor = Cursors.Hand };
+            var btnFiltrarD = new Button { Text = "Filtrar", Left = 568, Top = 5, Width = 62, Height = 24, BackColor = CorBotaoAtivo, ForeColor = Color.White, FlatStyle = FlatStyle.Flat, Cursor = Cursors.Hand };
             btnFiltrarD.FlatAppearance.BorderSize = 0;
             btnFiltrarD.Click += (_, __) =>
             {

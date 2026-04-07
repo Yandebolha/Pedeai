@@ -57,9 +57,10 @@ namespace Pedeai.DAL
                          estoFracao_Saida, estoFracao_Saida_Unidade, Codigo_Grupo,
                          Codigo_Mercadoria, Situacao, estoData_Cadastro)
                     VALUES (@nome, @un, @qtde, @custo, @ehprod, @fracent, @fracentun,
-                            @fracsai, @fracsaiun, @codgrupo, @codmerc, 'A', NOW())", conn);
+                            @fracsai, @fracsaiun, @codgrupo, @codmerc, 'A', NOW());
+                    SELECT LAST_INSERT_ID();", conn);
                 Bind(cmd, obj);
-                cmd.ExecuteNonQuery();
+                obj.Codigo = Convert.ToInt32(cmd.ExecuteScalar());
                 return "";
             }
             catch (Exception ex) { return ex.Message; }

@@ -27,6 +27,7 @@ namespace Pedeai.Forms
                 CarregarEmpresa();
                 CarregarUsuarios();
                 CarregarConfiguracaoImpressao();
+                AjustarNiveisCombo(isUsuario1: false);
                 SetModoEdicao(false);
                 // Aba "Sistema" visível apenas para Admin (nivel 9)
                 if (!UsuarioSessao.TemNivel(9))
@@ -89,6 +90,16 @@ namespace Pedeai.Forms
         private string LabelNivel(int nivel)
             => nivel switch { 9 => "Admin", 2 => "Gerente", _ => "Operador" };
 
+        /// Garante que "Admin" só aparece no combo quando editando o usuário 1.
+        private void AjustarNiveisCombo(bool isUsuario1)
+        {
+            bool temAdmin = cmbUsrNivel.Items.Count == 3;
+            if (isUsuario1 && !temAdmin)
+                cmbUsrNivel.Items.Add("Admin");
+            else if (!isUsuario1 && temAdmin)
+                cmbUsrNivel.Items.RemoveAt(2);
+        }
+
         private void TxtPesquisa_TextChanged(object sender, EventArgs e)
             => FiltrarLista(txtPesquisa.Text.Trim());
 
@@ -106,6 +117,7 @@ namespace Pedeai.Forms
             txtUsrLogin.Text     = _usuarioEditando.usuLogin;
             txtUsrSenha.Text     = "";
             txtUsrSenhaConf.Text = "";
+            AjustarNiveisCombo(isUsuario1: _usuarioEditando.Codigo == 1);
             cmbUsrNivel.SelectedIndex = _usuarioEditando.usuNivel == 9 ? 2
                                       : _usuarioEditando.usuNivel == 2 ? 1 : 0;
             cmbUsrSit.SelectedIndex = _usuarioEditando.Situacao == "A" ? 0 : 1;
@@ -125,6 +137,7 @@ namespace Pedeai.Forms
         private void BtnNovoUsuario_Click(object sender, EventArgs e)
         {
             _usuarioEditando = null;
+            AjustarNiveisCombo(isUsuario1: false);
             LimparFormUsuario();
             SetModoEdicao(true);
             txtUsrNome.Focus();

@@ -169,7 +169,7 @@ namespace Pedeai.Forms
             this.txtUsrSenha.ForeColor = System.Drawing.Color.FromArgb(50, 50, 50);
             this.txtUsrSenha.Location = new System.Drawing.Point(168, 100);
             this.txtUsrSenha.Name = "txtUsrSenha";
-            this.txtUsrSenha.PasswordChar = '?';
+            this.txtUsrSenha.PasswordChar = '*';
             this.txtUsrSenha.Size = new System.Drawing.Size(280, 25);
             this.txtUsrSenha.TabIndex = 2;
             // 
@@ -180,7 +180,7 @@ namespace Pedeai.Forms
             this.txtUsrSenhaConf.ForeColor = System.Drawing.Color.FromArgb(50, 50, 50);
             this.txtUsrSenhaConf.Location = new System.Drawing.Point(168, 140);
             this.txtUsrSenhaConf.Name = "txtUsrSenhaConf";
-            this.txtUsrSenhaConf.PasswordChar = '?';
+            this.txtUsrSenhaConf.PasswordChar = '*';
             this.txtUsrSenhaConf.Size = new System.Drawing.Size(280, 25);
             this.txtUsrSenhaConf.TabIndex = 3;
             // 
@@ -288,7 +288,7 @@ namespace Pedeai.Forms
             this.btnSalvUsr.Name = "btnSalvUsr";
             this.btnSalvUsr.Size = new System.Drawing.Size(128, 32);
             this.btnSalvUsr.TabIndex = 20;
-            this.btnSalvUsr.Text = "?  Salvar";
+            this.btnSalvUsr.Text = "Salvar";
             this.btnSalvUsr.UseVisualStyleBackColor = false;
             this.btnSalvUsr.Visible = false;
             this.btnSalvUsr.Click += new System.EventHandler(this.BtnSalvarUsuario_Click);
