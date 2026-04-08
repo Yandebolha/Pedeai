@@ -201,9 +201,17 @@ namespace Pedeai.BLL
             // ── Totais ───────────────────────────────────────────────────
             string sub  = pedido.pediSubtotal.ToString("0.00");
             string taxa = pedido.pediTaxa_Entrega.ToString("0.00");
-            string tot  = pedido.pediValor_Total.ToString("0.00");
+
+            // Se o pedido já foi finalizado com desconto no pagamento, usa pediValor_Pago como total final
+            decimal totalFinal = (pedido.pediValor_Pago.HasValue && pedido.pediValor_Pago.Value > 0 &&
+                                  pedido.pediValor_Pago.Value <= pedido.pediValor_Total)
+                ? pedido.pediValor_Pago.Value
+                : pedido.pediValor_Total;
+            string tot = totalFinal.ToString("0.00");
 
             linhas.Add(cfg.lblSubtotal + PreencharDir(sub, larg - cfg.lblSubtotal.Length));
+
+            // Desconto de cupom ou desconto definido no pedido
             if (pedido.pediDesconto > 0)
             {
                 string valDesc = pedido.pediDesconto.ToString("0.00");
@@ -222,8 +230,26 @@ namespace Pedeai.BLL
                     lblDesc = (ehCupom ? "- CUPOM:" : "- DESCONTO:");
                 linhas.Add(lblDesc + PreencharDir(valDesc, larg - lblDesc.Length));
             }
+
             if (entrega)
                 linhas.Add(cfg.lblTaxaEntrega + PreencharDir(taxa, larg - cfg.lblTaxaEntrega.Length));
+
+            // Desconto autorizado no pagamento (diferença entre total e valor efetivamente pago)
+            if (pedido.pediValor_Pago.HasValue && pedido.pediValor_Pago.Value > 0)
+            {
+                decimal discPgto = pedido.pediValor_Total - pedido.pediValor_Pago.Value;
+                if (discPgto > 0.009m)
+                {
+                    string valDiscPgto = discPgto.ToString("0.00");
+                    string lblDiscPgto = "- DESC. AUTORIZADO:";
+                    if (!string.IsNullOrWhiteSpace(pedido.pediAutorizador))
+                        lblDiscPgto = "- DESC. (" + pedido.pediAutorizador + "):";
+                    if (lblDiscPgto.Length + valDiscPgto.Length + 1 > larg)
+                        lblDiscPgto = string.IsNullOrWhiteSpace(cfg.lblDesconto) ? "- DESCONTO:" : cfg.lblDesconto;
+                    linhas.Add(lblDiscPgto + PreencharDir(valDiscPgto, larg - lblDiscPgto.Length));
+                }
+            }
+
             linhas.Add("§B§" + cfg.lblTotalPagar + PreencharDir(tot, larg - cfg.lblTotalPagar.Length));
             linhas.Add("");
 

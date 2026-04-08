@@ -1124,6 +1124,9 @@ namespace Pedeai
                                 logExtra += $" | DESCONTO R$ {(pedido.pediValor_Total - vPago):N2} autorizado por {autNome}";
                             Logger.Log("Pedido finalizado", logExtra);
                             CarregarPedidos();
+                            // Reimprimir cupom quando há desconto autorizado no pagamento
+                            if (!string.IsNullOrEmpty(autNome))
+                                ImprimirCupomPedido(cod);
                             // Verificar fidelização
                             if (pedido.Codigo_Cliente > 0)
                             {
