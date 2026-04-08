@@ -38,8 +38,13 @@ namespace Pedeai.Forms
             this.numQtde           = new System.Windows.Forms.NumericUpDown();
             this.txtUnidEntrada    = new System.Windows.Forms.TextBox();
             this.lblIgual          = new System.Windows.Forms.Label();
+            this.lblFracEntrada    = new System.Windows.Forms.Label();
+            this.numFracEntrada    = new System.Windows.Forms.NumericUpDown();
             this.numFracao         = new System.Windows.Forms.NumericUpDown();
             this.txtUnidSaida      = new System.Windows.Forms.TextBox();
+            this.lblUnidadesEntrada = new System.Windows.Forms.Label();
+            this.lblValor          = new System.Windows.Forms.Label();
+            this.numValorTotal     = new System.Windows.Forms.NumericUpDown();
             this.chkFracionado     = new System.Windows.Forms.CheckBox();
             this.numCustoItem      = new System.Windows.Forms.NumericUpDown();
             this.chkAtualizarCusto = new System.Windows.Forms.CheckBox();
@@ -150,51 +155,70 @@ namespace Pedeai.Forms
             this.lblQtde.ForeColor=System.Drawing.Color.FromArgb(50,50,50);
             this.numQtde.Left=395; this.numQtde.Top=7; this.numQtde.Width=65;
             this.numQtde.DecimalPlaces=2; this.numQtde.Minimum=0.01m; this.numQtde.Maximum=99999; this.numQtde.Value=1;
-            // Unidade de entrada (oculto por padrão)
-            this.txtUnidEntrada.Left=522; this.txtUnidEntrada.Top=7; this.txtUnidEntrada.Width=40;
+            // Checkbox Fracionado (linha 1)
+            this.chkFracionado.Text="Frac."; this.chkFracionado.Left=464; this.chkFracionado.Top=9; this.chkFracionado.AutoSize=true;
+            this.chkFracionado.ForeColor=System.Drawing.Color.FromArgb(100,80,50);
+            this.chkFracionado.Font=new System.Drawing.Font("Segoe UI",8.5F);
+            this.chkFracionado.Checked=false;
+            // Valor total pago (linha 1, sempre visível)
+            this.lblValor.Text="Valor R$:"; this.lblValor.Left=518; this.lblValor.Top=11; this.lblValor.AutoSize=true;
+            this.lblValor.ForeColor=System.Drawing.Color.FromArgb(50,50,50);
+            this.numValorTotal.Left=578; this.numValorTotal.Top=7; this.numValorTotal.Width=85;
+            this.numValorTotal.DecimalPlaces=2; this.numValorTotal.Maximum=9999999;
+            // Custo calculado readonly (linha 1)
+            this.lblCusto.Text="Custo:"; this.lblCusto.Left=667; this.lblCusto.Top=11; this.lblCusto.AutoSize=true;
+            this.lblCusto.ForeColor=System.Drawing.Color.FromArgb(50,50,50);
+            this.numCustoItem.Left=709; this.numCustoItem.Top=7; this.numCustoItem.Width=80;
+            this.numCustoItem.DecimalPlaces=2; this.numCustoItem.Maximum=99999; this.numCustoItem.ReadOnly=true;
+            this.numCustoItem.BackColor=System.Drawing.Color.FromArgb(238,232,215);
+            this.chkAtualizarCusto.Text="At. custo"; this.chkAtualizarCusto.Left=794; this.chkAtualizarCusto.Top=9; this.chkAtualizarCusto.AutoSize=true;
+            this.chkAtualizarCusto.ForeColor=System.Drawing.Color.FromArgb(50,50,50); this.chkAtualizarCusto.Checked=true;
+            this.btnAdicionarItem.Text="+ Adicionar"; this.btnAdicionarItem.Left=1060; this.btnAdicionarItem.Top=7; this.btnAdicionarItem.Width=85; this.btnAdicionarItem.Height=22;
+            this.btnAdicionarItem.BackColor=System.Drawing.Color.FromArgb(87,120,38); this.btnAdicionarItem.ForeColor=System.Drawing.Color.White;
+            this.btnAdicionarItem.FlatStyle=System.Windows.Forms.FlatStyle.Flat; this.btnAdicionarItem.FlatAppearance.BorderSize=0;
+            // Linha 2 — campos de fração (ocultos por padrão, Top=38)
+            this.lblFracEntrada.Text="Ent.:"; this.lblFracEntrada.Left=4; this.lblFracEntrada.Top=41; this.lblFracEntrada.AutoSize=true;
+            this.lblFracEntrada.Font=new System.Drawing.Font("Segoe UI",8.5F);
+            this.lblFracEntrada.ForeColor=System.Drawing.Color.FromArgb(100,80,50);
+            this.lblFracEntrada.Visible=false;
+            this.numFracEntrada.Left=42; this.numFracEntrada.Top=38; this.numFracEntrada.Width=58;
+            this.numFracEntrada.DecimalPlaces=2; this.numFracEntrada.Minimum=0.01m; this.numFracEntrada.Maximum=99999; this.numFracEntrada.Value=1;
+            this.numFracEntrada.Visible=false;
+            this.txtUnidEntrada.Left=104; this.txtUnidEntrada.Top=38; this.txtUnidEntrada.Width=36;
             this.txtUnidEntrada.Font=new System.Drawing.Font("Segoe UI",9F);
             this.txtUnidEntrada.BorderStyle=System.Windows.Forms.BorderStyle.FixedSingle;
             this.txtUnidEntrada.MaxLength=10;
             this.txtUnidEntrada.CharacterCasing=System.Windows.Forms.CharacterCasing.Upper;
             this.txtUnidEntrada.Visible=false;
-            // '=' separador (oculto por padrão)
-            this.lblIgual.Text="="; this.lblIgual.Left=565; this.lblIgual.Top=10;
+            this.lblIgual.Text="×"; this.lblIgual.Left=144; this.lblIgual.Top=41;
             this.lblIgual.AutoSize=true; this.lblIgual.Font=new System.Drawing.Font("Segoe UI",9F,System.Drawing.FontStyle.Bold);
             this.lblIgual.ForeColor=System.Drawing.Color.FromArgb(100,80,50);
             this.lblIgual.Visible=false;
-            // Fração (oculto por padrão)
-            this.numFracao.Left=580; this.numFracao.Top=7; this.numFracao.Width=60;
+            this.numFracao.Left=154; this.numFracao.Top=38; this.numFracao.Width=62;
             this.numFracao.DecimalPlaces=4; this.numFracao.Minimum=0.0001m; this.numFracao.Maximum=99999; this.numFracao.Value=1;
             this.numFracao.Visible=false;
-            // Unidade de saída (oculto por padrão)
-            this.txtUnidSaida.Left=643; this.txtUnidSaida.Top=7; this.txtUnidSaida.Width=40;
+            this.txtUnidSaida.Left=220; this.txtUnidSaida.Top=38; this.txtUnidSaida.Width=36;
             this.txtUnidSaida.Font=new System.Drawing.Font("Segoe UI",9F);
             this.txtUnidSaida.BorderStyle=System.Windows.Forms.BorderStyle.FixedSingle;
             this.txtUnidSaida.MaxLength=10;
             this.txtUnidSaida.CharacterCasing=System.Windows.Forms.CharacterCasing.Upper;
             this.txtUnidSaida.Visible=false;
-            // Checkbox Fracionado
-            this.chkFracionado.Text="Frac."; this.chkFracionado.Left=463; this.chkFracionado.Top=9; this.chkFracionado.AutoSize=true;
-            this.chkFracionado.ForeColor=System.Drawing.Color.FromArgb(100,80,50);
-            this.chkFracionado.Font=new System.Drawing.Font("Segoe UI",8.5F);
-            this.chkFracionado.Checked=false;
-            this.lblCusto.Text="Custo R$:"; this.lblCusto.Left=686; this.lblCusto.Top=11; this.lblCusto.AutoSize=true;
-            this.lblCusto.ForeColor=System.Drawing.Color.FromArgb(50,50,50);
-            this.numCustoItem.Left=750; this.numCustoItem.Top=7; this.numCustoItem.Width=90;
-            this.numCustoItem.DecimalPlaces=2; this.numCustoItem.Maximum=99999;
-            this.chkAtualizarCusto.Text="Atualizar custo"; this.chkAtualizarCusto.Left=844; this.chkAtualizarCusto.Top=9; this.chkAtualizarCusto.AutoSize=true;
-            this.chkAtualizarCusto.ForeColor=System.Drawing.Color.FromArgb(50,50,50); this.chkAtualizarCusto.Checked=true;
-            this.btnAdicionarItem.Text="+ Adicionar"; this.btnAdicionarItem.Left=955; this.btnAdicionarItem.Top=7; this.btnAdicionarItem.Width=90; this.btnAdicionarItem.Height=26;
-            this.btnAdicionarItem.BackColor=System.Drawing.Color.FromArgb(87,120,38); this.btnAdicionarItem.ForeColor=System.Drawing.Color.White;
-            this.btnAdicionarItem.FlatStyle=System.Windows.Forms.FlatStyle.Flat; this.btnAdicionarItem.FlatAppearance.BorderSize=0;
+            this.lblUnidadesEntrada.Text="= 0 UN"; this.lblUnidadesEntrada.Left=260; this.lblUnidadesEntrada.Top=41; this.lblUnidadesEntrada.Width=110; this.lblUnidadesEntrada.AutoSize=false;
+            this.lblUnidadesEntrada.Font=new System.Drawing.Font("Segoe UI",8.5F,System.Drawing.FontStyle.Bold);
+            this.lblUnidadesEntrada.ForeColor=System.Drawing.Color.FromArgb(87,120,38);
+            this.lblUnidadesEntrada.Visible=false;
             this.pnlAddItem.Controls.Add(this.lblProduto); this.pnlAddItem.Controls.Add(this.txtProdCod); this.pnlAddItem.Controls.Add(this.txtProdNome);
             this.pnlAddItem.Controls.Add(this.btnBuscarProd);
             this.pnlAddItem.Controls.Add(this.lblQtde);    this.pnlAddItem.Controls.Add(this.numQtde);
             this.pnlAddItem.Controls.Add(this.chkFracionado);
+            this.pnlAddItem.Controls.Add(this.lblFracEntrada);
+            this.pnlAddItem.Controls.Add(this.numFracEntrada);
             this.pnlAddItem.Controls.Add(this.txtUnidEntrada);
             this.pnlAddItem.Controls.Add(this.lblIgual);
             this.pnlAddItem.Controls.Add(this.numFracao);
             this.pnlAddItem.Controls.Add(this.txtUnidSaida);
+            this.pnlAddItem.Controls.Add(this.lblUnidadesEntrada);
+            this.pnlAddItem.Controls.Add(this.lblValor); this.pnlAddItem.Controls.Add(this.numValorTotal);
             this.pnlAddItem.Controls.Add(this.lblCusto);   this.pnlAddItem.Controls.Add(this.numCustoItem);
             this.pnlAddItem.Controls.Add(this.chkAtualizarCusto); this.pnlAddItem.Controls.Add(this.btnAdicionarItem);
             // gridItens (fill)
@@ -274,8 +298,8 @@ namespace Pedeai.Forms
             // Form
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1050, 680);
-            this.MinimumSize = new System.Drawing.Size(900, 580);
+            this.ClientSize = new System.Drawing.Size(1150, 680);
+            this.MinimumSize = new System.Drawing.Size(1000, 580);
             this.BackColor = System.Drawing.Color.FromArgb(245, 237, 216);
             this.ForeColor = System.Drawing.Color.FromArgb(60, 60, 60);
             this.Font = new System.Drawing.Font("Segoe UI", 9F);
@@ -313,8 +337,13 @@ namespace Pedeai.Forms
         internal System.Windows.Forms.NumericUpDown  numQtde;
         internal System.Windows.Forms.TextBox        txtUnidEntrada;
         private  System.Windows.Forms.Label          lblIgual;
+        private  System.Windows.Forms.Label          lblFracEntrada;
+        internal System.Windows.Forms.NumericUpDown  numFracEntrada;
         internal System.Windows.Forms.NumericUpDown  numFracao;
         internal System.Windows.Forms.TextBox        txtUnidSaida;
+        private  System.Windows.Forms.Label          lblUnidadesEntrada;
+        private  System.Windows.Forms.Label          lblValor;
+        internal System.Windows.Forms.NumericUpDown  numValorTotal;
         internal System.Windows.Forms.CheckBox       chkFracionado;
         internal System.Windows.Forms.NumericUpDown  numCustoItem;
         internal System.Windows.Forms.CheckBox       chkAtualizarCusto;

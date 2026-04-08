@@ -135,6 +135,10 @@ namespace Pedeai.Forms
 
             btnAdicionarItem.Click    += BtnAdicionarItem_Click;
             chkFracionado.CheckedChanged += (_, __) => AtualizarVisibilidadeFracao();
+            numQtde.ValueChanged      += (_, __) => { AtualizarLblUnidades(); RecalcularCusto(); };
+            numFracao.ValueChanged    += (_, __) => { AtualizarLblUnidades(); RecalcularCusto(); };
+            txtUnidSaida.TextChanged  += (_, __) => AtualizarLblUnidades();
+            numValorTotal.ValueChanged += (_, __) => RecalcularCusto();
             btnBuscarForn.Click       += (_, __) => AbrirBuscaFornecedor();
             btnBuscarProd.Click       += (_, __) => AbrirBuscaProduto();
             btnRemoverItem.Click      += BtnRemoverItem_Click;
@@ -219,13 +223,38 @@ namespace Pedeai.Forms
         }
 
         // ── Nova Entrada ─────────────────────────────────────────────────────
+        private void AtualizarLblUnidades()
+        {
+            if (!chkFracionado.Checked) return;
+            decimal total = numQtde.Value * numFracao.Value;
+            string un = string.IsNullOrWhiteSpace(txtUnidSaida.Text) ? "UN" : txtUnidSaida.Text.Trim().ToUpper();
+            lblUnidadesEntrada.Text = $"= {total:N2} {un}";
+        }
+
+        private void RecalcularCusto()
+        {
+            if (numValorTotal.Value <= 0) { numCustoItem.Value = 0; return; }
+            decimal totalUnid = chkFracionado.Checked
+                ? numQtde.Value * numFracao.Value
+                : numQtde.Value;
+            if (totalUnid <= 0) { numCustoItem.Value = 0; return; }
+            var custo = numValorTotal.Value / totalUnid;
+            numCustoItem.Value = custo > numCustoItem.Maximum ? numCustoItem.Maximum : custo;
+        }
+
         private void AtualizarVisibilidadeFracao()
         {
             bool frac = chkFracionado.Checked;
-            txtUnidEntrada.Visible = frac;
-            lblIgual.Visible       = frac;
-            numFracao.Visible      = frac;
-            txtUnidSaida.Visible   = frac;
+            lblFracEntrada.Visible     = frac;
+            numFracEntrada.Visible     = frac;
+            txtUnidEntrada.Visible     = frac;
+            lblIgual.Visible           = frac;
+            numFracao.Visible          = frac;
+            txtUnidSaida.Visible       = frac;
+            lblUnidadesEntrada.Visible = frac;
+            pnlAddItem.Height          = frac ? 66 : 36;
+            if (frac) AtualizarLblUnidades();
+            RecalcularCusto();
         }
 
         private void AbrirNovaEntrada()
@@ -241,9 +270,11 @@ namespace Pedeai.Forms
             txtProdCod.Clear();
             txtProdNome.Clear();
             numQtde.Value = 1;
+            numValorTotal.Value = 0;
             numCustoItem.Value = 0;
             chkAtualizarCusto.Checked = true;
             chkFracionado.Checked = false;
+            numFracEntrada.Value = 1;
             AtualizarVisibilidadeFracao();
 
             AtualizarGridItens();
@@ -327,7 +358,8 @@ namespace Pedeai.Forms
             var unidEnt  = chkFracionado.Checked ? txtUnidEntrada.Text.Trim() : "";
             var unidSai  = chkFracionado.Checked ? txtUnidSaida.Text.Trim() : "";
             var custo    = numCustoItem.Value;
-            var subtotal = qtde * custo;
+            decimal totalUnid = chkFracionado.Checked ? qtde * fracao : qtde;
+            var subtotal = totalUnid * custo;
 
             var item = new ItemEntradaMercadoria
             {
@@ -349,9 +381,11 @@ namespace Pedeai.Forms
             txtProdCod.Clear();
             txtProdNome.Clear();
             numQtde.Value = 1;
+            numFracEntrada.Value = 1;
             numFracao.Value = 1;
             txtUnidEntrada.Clear();
             txtUnidSaida.Clear();
+            numValorTotal.Value = 0;
             numCustoItem.Value = 0;
             chkFracionado.Checked = false;
             AtualizarVisibilidadeFracao();

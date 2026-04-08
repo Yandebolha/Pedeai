@@ -76,7 +76,7 @@ namespace Pedeai.Forms
             this.pnlTop.Dock = System.Windows.Forms.DockStyle.Top;
             this.pnlTop.Location = new System.Drawing.Point(0, 0);
             this.pnlTop.Name = "pnlTop";
-            this.pnlTop.Size = new System.Drawing.Size(963, 48);
+            this.pnlTop.Size = new System.Drawing.Size(960, 48);
             this.pnlTop.TabIndex = 3;
             // 
             // lblTitulo
@@ -106,7 +106,7 @@ namespace Pedeai.Forms
             this.pnlBusca.Dock = System.Windows.Forms.DockStyle.Top;
             this.pnlBusca.Location = new System.Drawing.Point(0, 48);
             this.pnlBusca.Name = "pnlBusca";
-            this.pnlBusca.Size = new System.Drawing.Size(963, 56);
+            this.pnlBusca.Size = new System.Drawing.Size(960, 56);
             this.pnlBusca.TabIndex = 2;
             // 
             // lblDe
@@ -114,7 +114,7 @@ namespace Pedeai.Forms
             this.lblDe.AutoSize = true;
             this.lblDe.Font = new System.Drawing.Font("Segoe UI", 9.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.lblDe.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(50)))), ((int)(((byte)(35)))));
-            this.lblDe.Location = new System.Drawing.Point(8, 19);
+            this.lblDe.Location = new System.Drawing.Point(3, 19);
             this.lblDe.Name = "lblDe";
             this.lblDe.Size = new System.Drawing.Size(27, 17);
             this.lblDe.TabIndex = 0;
@@ -124,7 +124,7 @@ namespace Pedeai.Forms
             // 
             this.dtpDe.CustomFormat = "dd/MM/yyyy";
             this.dtpDe.Format = System.Windows.Forms.DateTimePickerFormat.Custom;
-            this.dtpDe.Location = new System.Drawing.Point(32, 15);
+            this.dtpDe.Location = new System.Drawing.Point(32, 16);
             this.dtpDe.Name = "dtpDe";
             this.dtpDe.Size = new System.Drawing.Size(102, 23);
             this.dtpDe.TabIndex = 1;
@@ -134,7 +134,7 @@ namespace Pedeai.Forms
             this.lblAte.AutoSize = true;
             this.lblAte.Font = new System.Drawing.Font("Segoe UI", 9.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.lblAte.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(50)))), ((int)(((byte)(35)))));
-            this.lblAte.Location = new System.Drawing.Point(140, 19);
+            this.lblAte.Location = new System.Drawing.Point(138, 17);
             this.lblAte.Name = "lblAte";
             this.lblAte.Size = new System.Drawing.Size(30, 17);
             this.lblAte.TabIndex = 2;
@@ -144,7 +144,7 @@ namespace Pedeai.Forms
             // 
             this.dtpAte.CustomFormat = "dd/MM/yyyy";
             this.dtpAte.Format = System.Windows.Forms.DateTimePickerFormat.Custom;
-            this.dtpAte.Location = new System.Drawing.Point(166, 15);
+            this.dtpAte.Location = new System.Drawing.Point(170, 15);
             this.dtpAte.Name = "dtpAte";
             this.dtpAte.Size = new System.Drawing.Size(102, 23);
             this.dtpAte.TabIndex = 3;
@@ -154,7 +154,7 @@ namespace Pedeai.Forms
             this.lblCapCliente2.AutoSize = true;
             this.lblCapCliente2.Font = new System.Drawing.Font("Segoe UI", 9.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.lblCapCliente2.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(50)))), ((int)(((byte)(35)))));
-            this.lblCapCliente2.Location = new System.Drawing.Point(278, 19);
+            this.lblCapCliente2.Location = new System.Drawing.Point(277, 17);
             this.lblCapCliente2.Name = "lblCapCliente2";
             this.lblCapCliente2.Size = new System.Drawing.Size(50, 17);
             this.lblCapCliente2.TabIndex = 4;
@@ -176,7 +176,7 @@ namespace Pedeai.Forms
             this.lblLblNum.AutoSize = true;
             this.lblLblNum.Font = new System.Drawing.Font("Segoe UI", 9.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.lblLblNum.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(50)))), ((int)(((byte)(35)))));
-            this.lblLblNum.Location = new System.Drawing.Point(488, 19);
+            this.lblLblNum.Location = new System.Drawing.Point(482, 19);
             this.lblLblNum.Name = "lblLblNum";
             this.lblLblNum.Size = new System.Drawing.Size(27, 17);
             this.lblLblNum.TabIndex = 6;
@@ -187,7 +187,7 @@ namespace Pedeai.Forms
             this.txtNumPedido.BackColor = System.Drawing.Color.White;
             this.txtNumPedido.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.txtNumPedido.Font = new System.Drawing.Font("Segoe UI", 9.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.txtNumPedido.Location = new System.Drawing.Point(506, 15);
+            this.txtNumPedido.Location = new System.Drawing.Point(512, 15);
             this.txtNumPedido.Name = "txtNumPedido";
             this.txtNumPedido.Size = new System.Drawing.Size(92, 24);
             this.txtNumPedido.TabIndex = 7;
@@ -232,7 +232,7 @@ namespace Pedeai.Forms
             this.pnlFoot.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.pnlFoot.Location = new System.Drawing.Point(0, 656);
             this.pnlFoot.Name = "pnlFoot";
-            this.pnlFoot.Size = new System.Drawing.Size(963, 44);
+            this.pnlFoot.Size = new System.Drawing.Size(960, 44);
             this.pnlFoot.TabIndex = 1;
             // 
             // btnFechar
@@ -269,7 +269,7 @@ namespace Pedeai.Forms
             this.splitMain.Panel2.Controls.Add(this.lblItensTitle);
             this.splitMain.Panel2.Controls.Add(this.pnlInfo);
             this.splitMain.Panel2MinSize = 80;
-            this.splitMain.Size = new System.Drawing.Size(963, 552);
+            this.splitMain.Size = new System.Drawing.Size(960, 552);
             this.splitMain.SplitterDistance = 170;
             this.splitMain.TabIndex = 0;
             // 
@@ -311,7 +311,7 @@ namespace Pedeai.Forms
             this.gridPedidos.RowHeadersVisible = false;
             this.gridPedidos.RowTemplate.Height = 26;
             this.gridPedidos.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.gridPedidos.Size = new System.Drawing.Size(963, 88);
+            this.gridPedidos.Size = new System.Drawing.Size(960, 170);
             this.gridPedidos.TabIndex = 0;
             this.gridPedidos.DataError += new System.Windows.Forms.DataGridViewDataErrorEventHandler(this.Grid_DataError);
             this.gridPedidos.SelectionChanged += new System.EventHandler(this.GridPedidos_SelectionChanged);
@@ -354,7 +354,7 @@ namespace Pedeai.Forms
             this.gridItens.RowHeadersVisible = false;
             this.gridItens.RowTemplate.Height = 26;
             this.gridItens.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.gridItens.Size = new System.Drawing.Size(963, 264);
+            this.gridItens.Size = new System.Drawing.Size(960, 182);
             this.gridItens.TabIndex = 0;
             this.gridItens.DataError += new System.Windows.Forms.DataGridViewDataErrorEventHandler(this.Grid_DataError);
             // 
@@ -367,7 +367,7 @@ namespace Pedeai.Forms
             this.lblItensTitle.Location = new System.Drawing.Point(0, 168);
             this.lblItensTitle.Name = "lblItensTitle";
             this.lblItensTitle.Padding = new System.Windows.Forms.Padding(4, 6, 0, 0);
-            this.lblItensTitle.Size = new System.Drawing.Size(963, 28);
+            this.lblItensTitle.Size = new System.Drawing.Size(960, 28);
             this.lblItensTitle.TabIndex = 1;
             this.lblItensTitle.Text = "Itens do Pedido";
             // 
@@ -393,7 +393,7 @@ namespace Pedeai.Forms
             this.pnlInfo.Dock = System.Windows.Forms.DockStyle.Top;
             this.pnlInfo.Location = new System.Drawing.Point(0, 0);
             this.pnlInfo.Name = "pnlInfo";
-            this.pnlInfo.Size = new System.Drawing.Size(963, 168);
+            this.pnlInfo.Size = new System.Drawing.Size(960, 168);
             this.pnlInfo.TabIndex = 2;
             this.pnlInfo.Visible = false;
             // 
