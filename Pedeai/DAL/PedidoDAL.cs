@@ -240,6 +240,18 @@ namespace Pedeai.DAL
                 }
 
                 trans.Commit();
+
+                // Increment coupon usage counter atomically if a coupon was applied
+                if (!string.IsNullOrWhiteSpace(pedido.pediCodigo_Cupom))
+                {
+                    using var connCup = AbrirConexao();
+                    using var cmdCup = new MySqlCommand(
+                        "UPDATE cupom SET cupomUsos_Realizados = cupomUsos_Realizados + 1 WHERE cupomCodigo = @c",
+                        connCup);
+                    cmdCup.Parameters.AddWithValue("@c", pedido.pediCodigo_Cupom);
+                    cmdCup.ExecuteNonQuery();
+                }
+
                 return "";
             }
             catch (Exception ex) { return ex.Message; }
@@ -250,6 +262,27 @@ namespace Pedeai.DAL
         {
             using var conn = AbrirConexao();
             using var trans = conn.BeginTransaction();
+
+            // When cancelling (situação 6), decrement coupon usage if one was applied
+            if (novaSituacao == 6)
+            {
+                string cupomCod = null;
+                using (var cmdGC = new MySqlCommand(
+                    "SELECT pediCodigo_Cupom FROM pedido_web WHERE Codigo=@cod LIMIT 1", conn, trans))
+                {
+                    cmdGC.Parameters.AddWithValue("@cod", codigo);
+                    var r = cmdGC.ExecuteScalar();
+                    cupomCod = r == DBNull.Value ? null : r?.ToString();
+                }
+                if (!string.IsNullOrWhiteSpace(cupomCod))
+                {
+                    using var cmdDec = new MySqlCommand(
+                        "UPDATE cupom SET cupomUsos_Realizados = GREATEST(0, cupomUsos_Realizados - 1) WHERE cupomCodigo = @c",
+                        conn, trans);
+                    cmdDec.Parameters.AddWithValue("@c", cupomCod);
+                    cmdDec.ExecuteNonQuery();
+                }
+            }
 
             string sql;
             if (novaSituacao == 6 && canceladoPor != null)

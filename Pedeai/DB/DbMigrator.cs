@@ -318,6 +318,38 @@ namespace Pedeai.DB
                 AddColumnIfNotExists(conn, db, "fornecedor", "fornObservacoes",
                     "VARCHAR(500) NOT NULL DEFAULT ''");
 
+                // ── config_fidelizacao ────────────────────────────────────────
+                Exec(conn, @"
+                    CREATE TABLE IF NOT EXISTS config_fidelizacao (
+                        Codigo            INT           NOT NULL DEFAULT 1 PRIMARY KEY,
+                        fidAtivo          TINYINT(1)    NOT NULL DEFAULT 0,
+                        fidMeta_Gasto     DECIMAL(10,2) NOT NULL DEFAULT 500.00,
+                        fidPremio_Tipo    VARCHAR(20)   NOT NULL DEFAULT 'CUPOM',
+                        fidCupom_Tipo     VARCHAR(20)   NOT NULL DEFAULT 'PERCENTUAL',
+                        fidCupom_Valor    DECIMAL(10,2) NOT NULL DEFAULT 10.00,
+                        fidCupom_Minimo   DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+                        fidCupom_Validade INT           NOT NULL DEFAULT 30,
+                        fidProduto_Codigo INT           NULL DEFAULT NULL,
+                        fidProduto_Nome   VARCHAR(150)  NOT NULL DEFAULT '',
+                        fidMensagem       TEXT          NOT NULL,
+                        Info              VARCHAR(255)  NOT NULL DEFAULT ''
+                    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+                Exec(conn, @"INSERT IGNORE INTO config_fidelizacao
+                    (Codigo, fidMensagem)
+                    VALUES (1, 'Parabéns {Nome}! Você atingiu R$ {Meta} em compras e ganhou um cupom {CupomCodigo} válido até {Validade}.')");
+
+                // ── historico_fidelizacao ─────────────────────────────────────
+                Exec(conn, @"
+                    CREATE TABLE IF NOT EXISTS historico_fidelizacao (
+                        Codigo         INT          NOT NULL AUTO_INCREMENT PRIMARY KEY,
+                        Codigo_Cliente INT          NOT NULL,
+                        Codigo_Pedido  INT          NOT NULL,
+                        fidData        DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                        fidCupomCodigo VARCHAR(50)  NOT NULL DEFAULT '',
+                        fidDescricao   VARCHAR(200) NOT NULL DEFAULT '',
+                        fidTelefone    VARCHAR(20)  NOT NULL DEFAULT ''
+                    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+
                 return true;
             }
             catch (Exception ex)

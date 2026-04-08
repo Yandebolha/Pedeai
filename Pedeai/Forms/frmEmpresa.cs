@@ -217,6 +217,7 @@ namespace Pedeai.Forms
             if (chkModAvisos.Checked)           mods.Add("Avisos");
             if (chkModTurno.Checked)            mods.Add("Turno");
             if (chkModConsultarPedido.Checked)  mods.Add("ConsultarPedido");
+            if (chkModFidelizacao.Checked)       mods.Add("Fidelizacao");
             return string.Join(",", mods);
         }
 
@@ -241,6 +242,7 @@ namespace Pedeai.Forms
             chkModAvisos.Checked            = tem("Avisos");
             chkModTurno.Checked             = tem("Turno");
             chkModConsultarPedido.Checked    = tem("ConsultarPedido");
+            chkModFidelizacao.Checked        = tem("Fidelizacao");
         }
 
         private void LimparFormUsuario()

@@ -1124,6 +1124,19 @@ namespace Pedeai
                                 logExtra += $" | DESCONTO R$ {(pedido.pediValor_Total - vPago):N2} autorizado por {autNome}";
                             Logger.Log("Pedido finalizado", logExtra);
                             CarregarPedidos();
+                            // Verificar fidelização
+                            if (pedido.Codigo_Cliente > 0)
+                            {
+                                try
+                                {
+                                    var _clienteBllFid = new BLL.ClienteBLL();
+                                    _clienteBllFid.IncrementarTotais(pedido.Codigo_Cliente, vPago);
+                                    var premioMsg = new BLL.FidelizacaoBLL().VerificarEDispararPremio(pedido.Codigo_Cliente, cod);
+                                    if (!string.IsNullOrEmpty(premioMsg))
+                                        MessageBox.Show(premioMsg, "Fidelização", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                                }
+                                catch { }
+                            }
                         }
                     }
                     return;
@@ -1702,6 +1715,7 @@ namespace Pedeai
                 NavSe("Dashboard",       "\U0001F3E0  Dashboard",        MostrarDashboard);
                 NavSe("Pedidos",         "\U0001F4CB  Pedidos",           MostrarPedidos);
                 NavSe("ConsultarPedido", "\U0001F50D  Consultar Pedido",  () => AbrirForm(new Forms.frmConsultarPedido()));
+                NavSe("Fidelizacao",     "\U0001F91D  Fidelização",         () => AbrirForm(new Forms.frmFidelizacao()));
                 NavSe("Financeiro",      "\U0001F4B0  Financeiro",        MostrarFinanceiro);
                 NavSe("Turno",           "\U0001F551  Turno de Caixa",    () => AbrirForm(new Forms.frmTurno()));
             }

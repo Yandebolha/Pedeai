@@ -47,6 +47,7 @@ namespace Pedeai.Forms
             this.chkModAvisos = new System.Windows.Forms.CheckBox();
             this.chkModTurno = new System.Windows.Forms.CheckBox();
             this.chkModConsultarPedido = new System.Windows.Forms.CheckBox();
+            this.chkModFidelizacao = new System.Windows.Forms.CheckBox();
             this.txtImpNomeEmpresa = new System.Windows.Forms.TextBox();
             this.txtImpEndereco = new System.Windows.Forms.TextBox();
             this.txtImpTelefone = new System.Windows.Forms.TextBox();
@@ -435,6 +436,15 @@ namespace Pedeai.Forms
             this.chkModConsultarPedido.Text = "Consultar Pedido";
             this.chkModConsultarPedido.ForeColor = System.Drawing.Color.FromArgb(50, 50, 50);
             // 
+            // chkModFidelizacao
+            // 
+            this.chkModFidelizacao.Location = new System.Drawing.Point(168, 388);
+            this.chkModFidelizacao.Name = "chkModFidelizacao";
+            this.chkModFidelizacao.Size = new System.Drawing.Size(120, 22);
+            this.chkModFidelizacao.TabIndex = 27;
+            this.chkModFidelizacao.Text = "Fidelização";
+            this.chkModFidelizacao.ForeColor = System.Drawing.Color.FromArgb(50, 50, 50);
+            // 
             // txtImpNomeEmpresa
             // 
             this.txtImpNomeEmpresa.BackColor = System.Drawing.Color.White;
@@ -711,6 +721,7 @@ namespace Pedeai.Forms
             this.tabUsr.Controls.Add(this.chkModAvisos);
             this.tabUsr.Controls.Add(this.chkModTurno);
             this.tabUsr.Controls.Add(this.chkModConsultarPedido);
+            this.tabUsr.Controls.Add(this.chkModFidelizacao);
             this.tabUsr.Controls.Add(this.btnNovoUsr);
             this.tabUsr.Controls.Add(this.btnPesquisarUsr);
             this.tabUsr.Controls.Add(this.btnSalvUsr);
@@ -922,6 +933,7 @@ namespace Pedeai.Forms
         internal System.Windows.Forms.CheckBox chkModAvisos;
         internal System.Windows.Forms.CheckBox chkModTurno;
         internal System.Windows.Forms.CheckBox chkModConsultarPedido;
+        internal System.Windows.Forms.CheckBox chkModFidelizacao;
         // Impressao
         internal System.Windows.Forms.TextBox        txtImpNomeEmpresa;
         internal System.Windows.Forms.TextBox        txtImpEndereco;
