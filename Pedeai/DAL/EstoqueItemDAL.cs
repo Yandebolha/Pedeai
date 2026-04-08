@@ -11,13 +11,17 @@ namespace Pedeai.DAL
         {
             var dt = new DataTable();
             using var conn = AbrirConexao();
-            var where = string.IsNullOrWhiteSpace(filtro) ? "" : " AND estoNome LIKE @f";
-            var sql = $@"SELECT Codigo, estoNome AS Nome, estoUnidade AS Unidade,
-                               estoQtde_Atual AS Qtde, estoPreco_Custo AS Custo,
-                               estoEh_Produto AS EhProduto, Situacao
-                        FROM estoque_item
-                        WHERE Situacao = 'A'{where}
-                        ORDER BY estoNome";
+            var where = string.IsNullOrWhiteSpace(filtro) ? "" : " AND e.estoNome LIKE @f";
+            var sql = $@"SELECT e.Codigo,
+                               e.estoNome AS Nome,
+                               e.estoUnidade AS Unidade,
+                               COALESCE(m.mercEstoque_Atual, e.estoQtde_Atual) AS Qtde,
+                               COALESCE(m.mercPreco_Custo,   e.estoPreco_Custo)  AS Custo,
+                               e.estoEh_Produto AS EhProduto, e.Situacao
+                        FROM estoque_item e
+                        LEFT JOIN mercadoria m ON m.Codigo = e.Codigo_Mercadoria
+                        WHERE e.Situacao = 'A'{where}
+                        ORDER BY e.estoNome";
             using var cmd = new MySqlCommand(sql, conn);
             if (!string.IsNullOrWhiteSpace(filtro))
                 cmd.Parameters.AddWithValue("@f", "%" + filtro + "%");

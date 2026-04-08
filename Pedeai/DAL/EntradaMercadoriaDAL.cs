@@ -128,12 +128,22 @@ namespace Pedeai.DAL
                     {
                         decimal fracao = item.itmFracao <= 0 ? 1m : item.itmFracao;
                         decimal deltaEstoque = item.itmQtde * fracao;
+
+                        // Atualiza mercadoria
                         using var cmdEst = new MySqlCommand(
                             "UPDATE mercadoria SET mercEstoque_Atual = mercEstoque_Atual + @qtde WHERE Codigo=@merc",
                             conn, trans);
                         cmdEst.Parameters.AddWithValue("@qtde", deltaEstoque);
                         cmdEst.Parameters.AddWithValue("@merc", item.Codigo_Mercadoria);
                         cmdEst.ExecuteNonQuery();
+
+                        // Sincroniza estoque_item (Controle de Estoque) para manter consistência
+                        using var cmdEstItem = new MySqlCommand(
+                            "UPDATE estoque_item SET estoQtde_Atual = estoQtde_Atual + @delta WHERE Codigo_Mercadoria = @merc",
+                            conn, trans);
+                        cmdEstItem.Parameters.AddWithValue("@delta", deltaEstoque);
+                        cmdEstItem.Parameters.AddWithValue("@merc",  item.Codigo_Mercadoria);
+                        cmdEstItem.ExecuteNonQuery();
 
                         // Atualiza custo se solicitado
                         if (item.itmAtualizar_Custo && item.itmPreco_Custo > 0)
@@ -194,6 +204,15 @@ namespace Pedeai.DAL
                 cmdRev.Parameters.AddWithValue("@cod", codigo);
                 cmdRev.ExecuteNonQuery();
 
+                // Sincroniza estoque_item (Controle de Estoque)
+                using var cmdRevItem = new MySqlCommand(@"
+                    UPDATE estoque_item e
+                    JOIN item_entrada_mercadoria i ON i.Codigo_Mercadoria = e.Codigo_Mercadoria
+                    SET e.estoQtde_Atual = e.estoQtde_Atual - (i.itmQtde * COALESCE(i.itmFracao, 1))
+                    WHERE i.Codigo_Entrada = @cod", conn, trans);
+                cmdRevItem.Parameters.AddWithValue("@cod", codigo);
+                cmdRevItem.ExecuteNonQuery();
+
                 using var cmdSit = new MySqlCommand(
                     "UPDATE entrada_mercadoria SET Situacao='C' WHERE Codigo=@cod", conn, trans);
                 cmdSit.Parameters.AddWithValue("@cod", codigo);
@@ -208,15 +227,33 @@ namespace Pedeai.DAL
         public decimal TotalPeriodo(DateTime de, DateTime ate)
         {
             using var conn = AbrirConexao();
-            using var cmd  = new MySqlCommand(
-                @"SELECT COALESCE(SUM(entValorTotal), 0)
-                  FROM entrada_mercadoria
-                  WHERE Situacao = 'A'
-                    AND entData >= @de
-                    AND entData <= @ate", conn);
-            cmd.Parameters.AddWithValue("@de",  de.Date);
-            cmd.Parameters.AddWithValue("@ate", ate.Date);
-            return Convert.ToDecimal(cmd.ExecuteScalar());
+            // Sum parcelas whose vencimento falls in the period
+            // Plus entries that have no parcelas (paid upfront), using their entData
+            using var cmd = new MySqlCommand(
+                @"SELECT COALESCE(SUM(p.parValor), 0)
+                  FROM parcela_entrada_mercadoria p
+                  JOIN entrada_mercadoria e ON e.Codigo = p.Codigo_Entrada
+                  WHERE e.Situacao = 'A'
+                    AND p.parVencimento >= @de1
+                    AND p.parVencimento <= @ate1
+                  UNION ALL
+                  SELECT COALESCE(SUM(e.entValorTotal), 0)
+                  FROM entrada_mercadoria e
+                  WHERE e.Situacao = 'A'
+                    AND e.entData >= @de2
+                    AND e.entData <= @ate2
+                    AND NOT EXISTS (
+                        SELECT 1 FROM parcela_entrada_mercadoria p2
+                        WHERE p2.Codigo_Entrada = e.Codigo
+                    )", conn);
+            cmd.Parameters.AddWithValue("@de1",  de.Date);
+            cmd.Parameters.AddWithValue("@ate1", ate.Date);
+            cmd.Parameters.AddWithValue("@de2",  de.Date);
+            cmd.Parameters.AddWithValue("@ate2", ate.Date);
+            decimal total = 0;
+            using var r = cmd.ExecuteReader();
+            while (r.Read()) total += r[0] == DBNull.Value ? 0m : Convert.ToDecimal(r[0]);
+            return total;
         }
 
         // ── Mapear ───────────────────────────────────────────────────────────

@@ -143,7 +143,15 @@ namespace Pedeai.DAL
             {
                 using var conn = AbrirConexao();
                 using var cmd  = new MySqlCommand(
-                    "UPDATE parcela_entrada_mercadoria SET Situacao='P', parData_Pagamento=CURDATE() WHERE Codigo=@cod", conn);
+                    @"UPDATE parcela_entrada_mercadoria
+                      SET Situacao           = 'P',
+                          parData_Pagamento  = CURDATE(),
+                          parObservacao      = CASE
+                              WHEN parObservacao IS NULL OR TRIM(parObservacao) = ''
+                                  THEN CONCAT('Pago em ', DATE_FORMAT(CURDATE(),'%d/%m/%Y'))
+                              ELSE CONCAT(parObservacao, ' | Pago em ', DATE_FORMAT(CURDATE(),'%d/%m/%Y'))
+                          END
+                      WHERE Codigo = @cod", conn);
                 cmd.Parameters.AddWithValue("@cod", codigo);
                 cmd.ExecuteNonQuery();
                 return "";

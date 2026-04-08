@@ -77,12 +77,15 @@ namespace Pedeai.Forms
         private void ConfigurarGridItens()
         {
             gridItens.Columns.Clear();
-            gridItens.Columns.Add(new DataGridViewTextBoxColumn { Name = "Codigo",     HeaderText = "C\u00f3d.",      Width = 55,  ReadOnly = true });
-            gridItens.Columns.Add(new DataGridViewTextBoxColumn { Name = "Nome",        HeaderText = "Produto",   FillWeight = 100, ReadOnly = true });
-            gridItens.Columns.Add(new DataGridViewTextBoxColumn { Name = "Qtde",        HeaderText = "Qtde",      Width = 80,  ReadOnly = true });
-            gridItens.Columns.Add(new DataGridViewTextBoxColumn { Name = "Custo",       HeaderText = "Custo R$",  Width = 100, ReadOnly = true });
-            gridItens.Columns.Add(new DataGridViewTextBoxColumn { Name = "Subtotal",    HeaderText = "Subtotal",  Width = 110, ReadOnly = true });
-            gridItens.Columns.Add(new DataGridViewTextBoxColumn { Name = "AtuCusto",    HeaderText = "At.Custo",  Width = 75,  ReadOnly = true });
+            gridItens.Columns.Add(new DataGridViewTextBoxColumn { Name = "Codigo",     HeaderText = "C\u00f3d.",        Width = 50,  ReadOnly = true });
+            gridItens.Columns.Add(new DataGridViewTextBoxColumn { Name = "Nome",       HeaderText = "Produto",      FillWeight = 100, ReadOnly = true });
+            gridItens.Columns.Add(new DataGridViewTextBoxColumn { Name = "Qtde",       HeaderText = "Qtde",         Width = 65,  ReadOnly = true });
+            gridItens.Columns.Add(new DataGridViewTextBoxColumn { Name = "UnidEnt",    HeaderText = "Ent.",         Width = 45,  ReadOnly = true });
+            gridItens.Columns.Add(new DataGridViewTextBoxColumn { Name = "Fracao",     HeaderText = "Fra\u00e7\u00e3o",       Width = 55,  ReadOnly = true });
+            gridItens.Columns.Add(new DataGridViewTextBoxColumn { Name = "UnidSai",    HeaderText = "Sa\u00edda",        Width = 45,  ReadOnly = true });
+            gridItens.Columns.Add(new DataGridViewTextBoxColumn { Name = "Custo",      HeaderText = "Custo R$",     Width = 90,  ReadOnly = true });
+            gridItens.Columns.Add(new DataGridViewTextBoxColumn { Name = "Subtotal",   HeaderText = "Subtotal",     Width = 100, ReadOnly = true });
+            gridItens.Columns.Add(new DataGridViewTextBoxColumn { Name = "AtuCusto",   HeaderText = "At.Custo",     Width = 70,  ReadOnly = true });
             gridItens.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
         }
 
@@ -131,6 +134,7 @@ namespace Pedeai.Forms
             txtProdNome.Leave += (_, __) => ResolverProdutoPorNome();
 
             btnAdicionarItem.Click    += BtnAdicionarItem_Click;
+            chkFracionado.CheckedChanged += (_, __) => AtualizarVisibilidadeFracao();
             btnBuscarForn.Click       += (_, __) => AbrirBuscaFornecedor();
             btnBuscarProd.Click       += (_, __) => AbrirBuscaProduto();
             btnRemoverItem.Click      += BtnRemoverItem_Click;
@@ -206,14 +210,24 @@ namespace Pedeai.Forms
             var row = gridEntradas.Rows[e.RowIndex];
             if (row.DataBoundItem == null) return;
             var dtRow = ((System.Data.DataRowView)row.DataBoundItem).Row;
-            var cod  = Convert.ToInt32(dtRow["Codigo"]);
+            var cod   = Convert.ToInt32(dtRow["Codigo"]);
             var itens = _bll.ListarItens(cod);
+            var parcelas = _bll.ListarParcelas(cod);
 
-            using var dlg = new frmDetalheEntrada(cod, dtRow, itens);
+            using var dlg = new frmDetalheEntrada(cod, dtRow, itens, parcelas, _bll);
             dlg.ShowDialog(this);
         }
 
         // ── Nova Entrada ─────────────────────────────────────────────────────
+        private void AtualizarVisibilidadeFracao()
+        {
+            bool frac = chkFracionado.Checked;
+            txtUnidEntrada.Visible = frac;
+            lblIgual.Visible       = frac;
+            numFracao.Visible      = frac;
+            txtUnidSaida.Visible   = frac;
+        }
+
         private void AbrirNovaEntrada()
         {
             _itens.Clear();
@@ -229,6 +243,8 @@ namespace Pedeai.Forms
             numQtde.Value = 1;
             numCustoItem.Value = 0;
             chkAtualizarCusto.Checked = true;
+            chkFracionado.Checked = false;
+            AtualizarVisibilidadeFracao();
 
             AtualizarGridItens();
             pnlNovaEntrada.Visible = true;
@@ -306,9 +322,11 @@ namespace Pedeai.Forms
             if (string.IsNullOrWhiteSpace(nome)) { MessageBox.Show("Informe o produto."); txtProdNome.Focus(); return; }
             if (numQtde.Value <= 0) { MessageBox.Show("Informe uma quantidade válida."); numQtde.Focus(); return; }
 
-            var qtde    = numQtde.Value;
-            var fracao  = numFracao.Value <= 0 ? 1m : numFracao.Value;
-            var custo   = numCustoItem.Value;
+            var qtde     = numQtde.Value;
+            var fracao   = (chkFracionado.Checked && numFracao.Value > 0) ? numFracao.Value : 1m;
+            var unidEnt  = chkFracionado.Checked ? txtUnidEntrada.Text.Trim() : "";
+            var unidSai  = chkFracionado.Checked ? txtUnidSaida.Text.Trim() : "";
+            var custo    = numCustoItem.Value;
             var subtotal = qtde * custo;
 
             var item = new ItemEntradaMercadoria
@@ -317,8 +335,8 @@ namespace Pedeai.Forms
                 itmNome_Mercadoria = nome,
                 itmQtde            = qtde,
                 itmFracao          = fracao,
-                itmUnid_Entrada    = txtUnidEntrada.Text.Trim(),
-                itmUnid_Saida      = txtUnidSaida.Text.Trim(),
+                itmUnid_Entrada    = unidEnt,
+                itmUnid_Saida      = unidSai,
                 itmPreco_Custo     = custo,
                 itmSubtotal        = subtotal,
                 itmAtualizar_Custo = chkAtualizarCusto.Checked,
@@ -335,6 +353,8 @@ namespace Pedeai.Forms
             txtUnidEntrada.Clear();
             txtUnidSaida.Clear();
             numCustoItem.Value = 0;
+            chkFracionado.Checked = false;
+            AtualizarVisibilidadeFracao();
             _produtoAtualCodigo = 0;
             txtProdCod.Focus();
         }
@@ -562,79 +582,205 @@ namespace Pedeai.Forms
     // ── Detalhe leitura de entrada já registrada ────────────────────────────
     public partial class frmDetalheEntrada : Form
     {
-        public frmDetalheEntrada(int codigo, System.Data.DataRow row, List<ItemEntradaMercadoria> itens)
+        private readonly EntradaMercadoriaBLL _bll;
+        private readonly int _codigoEntrada;
+        private DataGridView _gridParcelas;
+
+        public frmDetalheEntrada(int codigo, System.Data.DataRow row, List<ItemEntradaMercadoria> itens,
+            List<ParcelaEntradaMercadoria> parcelas, EntradaMercadoriaBLL bll)
         {
-            var corFundo = Color.FromArgb(15, 22, 45);
-            var corCard  = Color.FromArgb(28, 37, 65);
-            var corTopBar= Color.FromArgb(36, 48, 82);
-            var corGrid  = Color.FromArgb(20, 28, 55);
+            _bll            = bll;
+            _codigoEntrada  = codigo;
 
-            Text = $"Entrada #{codigo} — Detalhes";
-            BackColor    = corFundo;
-            ForeColor    = Color.White;
-            Font         = new Font("Segoe UI", 9F);
-            ClientSize   = new Size(700, 460);
-            StartPosition= FormStartPosition.CenterParent;
+            var corFundo  = Color.FromArgb(245, 237, 216);
+            var corHeader = Color.FromArgb(176, 110, 42);
 
-            var pnlTop = new Panel { Dock = DockStyle.Top, Height = 44, BackColor = corTopBar };
-            var info   = new Label
+            Text          = $"Entrada #{codigo} \u2014 Detalhes";
+            BackColor     = corFundo;
+            ForeColor     = Color.FromArgb(50, 40, 20);
+            Font          = new Font("Segoe UI", 9F);
+            ClientSize    = new Size(860, 540);
+            StartPosition = FormStartPosition.CenterParent;
+            MinimumSize   = new Size(720, 440);
+
+            // Top bar
+            var pnlTop  = new Panel { Dock = DockStyle.Top, Height = 40, BackColor = corHeader };
+            var lblInfo = new Label
             {
                 Text = $"  Fornecedor: {row["Fornecedor"]}   |   Data: {Convert.ToDateTime(row["entData"]):dd/MM/yyyy}   |   Documento: {row["Documento"]}",
                 Dock = DockStyle.Fill, TextAlign = ContentAlignment.MiddleLeft,
                 Font = new Font("Segoe UI", 9.5F, FontStyle.Bold), ForeColor = Color.White
             };
-            pnlTop.Controls.Add(info);
+            pnlTop.Controls.Add(lblInfo);
 
-            var grid = new DataGridView
+            // Items section label
+            var lblItens = new Label { Text = "  Itens da Entrada", Dock = DockStyle.Top, Height = 24,
+                Font = new Font("Segoe UI", 9F, FontStyle.Bold), ForeColor = Color.FromArgb(120, 80, 30),
+                TextAlign = ContentAlignment.MiddleLeft, BackColor = Color.FromArgb(235, 226, 208) };
+
+            var gridItens = new DataGridView
+            {
+                Dock = DockStyle.Top, Height = 155,
+                ReadOnly = true, AllowUserToAddRows = false,
+                SelectionMode = DataGridViewSelectionMode.FullRowSelect,
+                RowHeadersVisible = false, BackgroundColor = Color.White,
+                DefaultCellStyle    = { BackColor = Color.White, ForeColor = Color.FromArgb(50,40,20) },
+                AlternatingRowsDefaultCellStyle = { BackColor = Color.FromArgb(250,247,242) },
+                ColumnHeadersDefaultCellStyle   = { BackColor = corHeader, ForeColor = Color.White, Font = new Font("Segoe UI",9F,FontStyle.Bold) },
+                GridColor = Color.FromArgb(200,185,160), BorderStyle = BorderStyle.None,
+                AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill,
+                ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.DisableResizing,
+                ColumnHeadersHeight = 30, RowTemplate = { Height = 24 },
+            };
+            gridItens.DataError += (_, ev) => ev.ThrowException = false;
+
+            decimal totalItens = 0;
+            var dtItens = new System.Data.DataTable();
+            dtItens.Columns.AddRange(new[] {
+                new System.Data.DataColumn("C\u00f3d."),
+                new System.Data.DataColumn("Produto"),
+                new System.Data.DataColumn("Qtde"),
+                new System.Data.DataColumn("Ent."),
+                new System.Data.DataColumn("Fra\u00e7\u00e3o"),
+                new System.Data.DataColumn("Sa\u00edda"),
+                new System.Data.DataColumn("Custo R$"),
+                new System.Data.DataColumn("Subtotal"),
+                new System.Data.DataColumn("At.Custo"),
+            });
+            foreach (var it in itens)
+            {
+                dtItens.Rows.Add(
+                    it.Codigo_Mercadoria > 0 ? it.Codigo_Mercadoria.ToString() : "-",
+                    it.itmNome_Mercadoria,
+                    it.itmQtde.ToString("N2"),
+                    string.IsNullOrEmpty(it.itmUnid_Entrada) ? "UN" : it.itmUnid_Entrada.ToUpper(),
+                    it.itmFracao == 1m ? "1" : it.itmFracao.ToString("N4").TrimEnd('0').TrimEnd('.'),
+                    string.IsNullOrEmpty(it.itmUnid_Saida)   ? "UN" : it.itmUnid_Saida.ToUpper(),
+                    it.itmPreco_Custo.ToString("N2"),
+                    it.itmSubtotal.ToString("N2"),
+                    it.itmAtualizar_Custo ? "Sim" : "N\u00e3o");
+                totalItens += it.itmSubtotal;
+            }
+            gridItens.DataSource = dtItens;
+
+            var pnlTotalItens = new Panel { Dock = DockStyle.Top, Height = 24, BackColor = Color.FromArgb(235,226,208) };
+            var lblTot = new Label { Text = $"  Total: R$ {totalItens:N2}",
+                Font = new Font("Segoe UI",9.5F,FontStyle.Bold), ForeColor = Color.FromArgb(87,120,38),
+                Dock = DockStyle.Fill, TextAlign = ContentAlignment.MiddleLeft };
+            pnlTotalItens.Controls.Add(lblTot);
+
+            // Parcelas section label
+            var lblParc = new Label { Text = "  Parcelas", Dock = DockStyle.Top, Height = 24,
+                Font = new Font("Segoe UI", 9F, FontStyle.Bold), ForeColor = Color.FromArgb(120, 80, 30),
+                TextAlign = ContentAlignment.MiddleLeft, BackColor = Color.FromArgb(235, 226, 208) };
+
+            _gridParcelas = new DataGridView
             {
                 Dock = DockStyle.Fill,
                 ReadOnly = true, AllowUserToAddRows = false,
                 SelectionMode = DataGridViewSelectionMode.FullRowSelect,
-                RowHeadersVisible = false, BackgroundColor = corGrid,
-                DefaultCellStyle = { BackColor = corGrid, ForeColor = Color.White },
-                GridColor = Color.FromArgb(40, 55, 90), BorderStyle = BorderStyle.None,
-                ColumnHeadersDefaultCellStyle = { BackColor = corTopBar, ForeColor = Color.White },
+                RowHeadersVisible = false, BackgroundColor = Color.White,
+                DefaultCellStyle    = { BackColor = Color.White, ForeColor = Color.FromArgb(50,40,20) },
+                AlternatingRowsDefaultCellStyle = { BackColor = Color.FromArgb(250,247,242) },
+                ColumnHeadersDefaultCellStyle   = { BackColor = corHeader, ForeColor = Color.White, Font = new Font("Segoe UI",9F,FontStyle.Bold) },
+                GridColor = Color.FromArgb(200,185,160), BorderStyle = BorderStyle.None,
                 AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill,
+                ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.DisableResizing,
+                ColumnHeadersHeight = 30, RowTemplate = { Height = 24 },
             };
-            grid.DataError += (_, e) => e.ThrowException = false;
+            _gridParcelas.DataError += (_, ev) => ev.ThrowException = false;
+            CarregarParcelasGrid(parcelas);
 
-            var pnlFoot = new Panel { Dock = DockStyle.Bottom, Height = 42, BackColor = corCard };
-            decimal total = 0; foreach (var it in itens) total += it.itmSubtotal;
-            var lblTot = new Label
+            // Footer
+            var pnlFoot = new Panel { Dock = DockStyle.Bottom, Height = 44,
+                BackColor = Color.FromArgb(235, 226, 208) };
+            var btnMarcarPago = new Button
             {
-                Text = $"  Total: R$ {total:N2}", Dock = DockStyle.Left, Width = 250,
-                Font = new Font("Segoe UI", 11F, FontStyle.Bold), ForeColor = Color.FromArgb(39, 174, 96),
-                TextAlign = ContentAlignment.MiddleLeft
+                Text = "\u2714 Marcar Parcela como Paga", Left = 12, Top = 8, Width = 200, Height = 28,
+                BackColor = Color.FromArgb(87, 120, 38), ForeColor = Color.White,
+                FlatStyle = FlatStyle.Flat, Font = new Font("Segoe UI",9F,FontStyle.Bold), Cursor = Cursors.Hand
             };
-            var btnFech = new Button
+            btnMarcarPago.FlatAppearance.BorderSize = 0;
+            btnMarcarPago.Click += BtnMarcarPago_Click;
+            var btnFechar = new Button
             {
-                Text = "Fechar", Dock = DockStyle.Right, Width = 100,
-                BackColor = Color.FromArgb(80, 95, 130), ForeColor = Color.White, FlatStyle = FlatStyle.Flat
+                Text = "Fechar", Left = 224, Top = 8, Width = 90, Height = 28,
+                BackColor = Color.FromArgb(224, 113, 42), ForeColor = Color.White,
+                FlatStyle = FlatStyle.Flat, Cursor = Cursors.Hand
             };
-            btnFech.FlatAppearance.BorderSize = 0;
-            btnFech.Click += (_, __) => Close();
-            pnlFoot.Controls.AddRange(new Control[] { lblTot, btnFech });
+            btnFechar.FlatAppearance.BorderSize = 0;
+            btnFechar.Click += (_, __) => Close();
+            pnlFoot.Controls.AddRange(new Control[] { btnMarcarPago, btnFechar });
 
-            Controls.Add(grid);
+            // Layout: add in reverse Dock order (Fill last)
+            Controls.Add(_gridParcelas);
+            Controls.Add(lblParc);
+            Controls.Add(pnlTotalItens);
+            Controls.Add(gridItens);
+            Controls.Add(lblItens);
             Controls.Add(pnlFoot);
             Controls.Add(pnlTop);
+        }
 
-            // Bind
+        private void CarregarParcelasGrid(List<ParcelaEntradaMercadoria> parcelas)
+        {
             var dt = new System.Data.DataTable();
-            dt.Columns.AddRange(new[] {
+            dt.Columns.AddRange(new[]
+            {
                 new System.Data.DataColumn("Codigo"),
-                new System.Data.DataColumn("Produto"),
-                new System.Data.DataColumn("Qtde"),
-                new System.Data.DataColumn("Custo R$"),
-                new System.Data.DataColumn("Subtotal"),
-                new System.Data.DataColumn("Atualiza Custo"),
+                new System.Data.DataColumn("#"),
+                new System.Data.DataColumn("Vencimento"),
+                new System.Data.DataColumn("Valor R$"),
+                new System.Data.DataColumn("Situa\u00e7\u00e3o"),
+                new System.Data.DataColumn("Dt. Pagamento"),
+                new System.Data.DataColumn("Observa\u00e7\u00e3o"),
             });
-            foreach (var it in itens)
-                dt.Rows.Add(it.Codigo_Mercadoria > 0 ? it.Codigo_Mercadoria.ToString() : "-",
-                    it.itmNome_Mercadoria, it.itmQtde.ToString("N3"),
-                    it.itmPreco_Custo.ToString("N4"), it.itmSubtotal.ToString("N2"),
-                    it.itmAtualizar_Custo ? "Sim" : "Não");
-            grid.DataSource = dt;
+            foreach (var p in parcelas)
+            {
+                dt.Rows.Add(
+                    p.Codigo.ToString(),
+                    p.parNumero.ToString(),
+                    p.parVencimento.ToString("dd/MM/yyyy"),
+                    p.parValor.ToString("N2"),
+                    p.Situacao == "P" ? "Paga" : "Em aberto",
+                    p.parData_Pagamento.HasValue ? p.parData_Pagamento.Value.ToString("dd/MM/yyyy") : "-",
+                    p.parObservacao ?? ""
+                );
+            }
+            _gridParcelas.DataSource = dt;
+            if (_gridParcelas.Columns.Contains("Codigo"))
+                _gridParcelas.Columns["Codigo"].Visible = false;
+            ColorirLinhasParcelas();
+        }
+
+        private void ColorirLinhasParcelas()
+        {
+            foreach (DataGridViewRow row in _gridParcelas.Rows)
+            {
+                if (row.DataBoundItem == null) continue;
+                var dr = ((System.Data.DataRowView)row.DataBoundItem).Row;
+                if (dr["Situa\u00e7\u00e3o"]?.ToString() == "Paga")
+                {
+                    row.DefaultCellStyle.BackColor = Color.FromArgb(220, 240, 210);
+                    row.DefaultCellStyle.ForeColor = Color.FromArgb(45, 105, 45);
+                }
+            }
+        }
+
+        private void BtnMarcarPago_Click(object sender, EventArgs e)
+        {
+            if (_gridParcelas.SelectedRows.Count == 0)
+            { MessageBox.Show("Selecione uma parcela para marcar como paga."); return; }
+            var dr = ((System.Data.DataRowView)_gridParcelas.SelectedRows[0].DataBoundItem).Row;
+            if (dr["Situa\u00e7\u00e3o"]?.ToString() == "Paga")
+            { MessageBox.Show("Esta parcela j\u00e1 est\u00e1 paga."); return; }
+            int cod = Convert.ToInt32(dr["Codigo"]);
+            if (MessageBox.Show("Confirmar pagamento desta parcela?", "Confirmar",
+                    MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes) return;
+            var erro = _bll.MarcarParcelaPaga(cod);
+            if (!string.IsNullOrEmpty(erro)) { MessageBox.Show("Erro: " + erro); return; }
+            var parcelas = _bll.ListarParcelas(_codigoEntrada);
+            CarregarParcelasGrid(parcelas);
         }
     }
 }
