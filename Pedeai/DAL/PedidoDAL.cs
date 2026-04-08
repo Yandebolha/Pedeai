@@ -443,6 +443,7 @@ namespace Pedeai.DAL
                 pediTipo_Entrega      = r["pediTipo_Entrega"] == DBNull.Value ? 0 : Convert.ToInt32(r["pediTipo_Entrega"]),
                 pediSubtotal          = r["pediSubtotal"] == DBNull.Value ? 0m : Convert.ToDecimal(r["pediSubtotal"]),
                 pediTaxa_Entrega      = r["pediTaxa_Entrega"] == DBNull.Value ? 0m : Convert.ToDecimal(r["pediTaxa_Entrega"]),
+                pediDesconto          = r["pediDesconto"] == DBNull.Value ? 0m : Convert.ToDecimal(r["pediDesconto"]),
                 pediValor_Total       = Convert.ToDecimal(r["pediValor_Total"]),
                 pediEndereco_Entrega  = r["pediEndereco_Entrega"]?.ToString() ?? "",
                 pediObservacoes       = r["pediObservacoes"]?.ToString() ?? "",

@@ -242,7 +242,7 @@ namespace Pedeai.Forms
         private void GridItens_CellClick(object sender, DataGridViewCellEventArgs e)
         {
             if (e.RowIndex < 0) return;
-            if (gridItens.Columns[e.ColumnIndex].Name != "Remover") return;
+            if (gridItens.Columns[e.ColumnIndex].Name != "colRemover") return;
             _itens.RemoveAt(e.RowIndex);
             gridItens.Rows.RemoveAt(e.RowIndex);
             AtualizarTotal();
