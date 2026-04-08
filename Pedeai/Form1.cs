@@ -1663,29 +1663,16 @@ namespace Pedeai
 
             // -- Logo no topo do sidebar --
             var pnlLogo = new Panel { Left = 0, Top = 5, Width = 245, Height = 72, BackColor = Color.Transparent };
-            var lblIcon  = new Label
-            {
-                Text      = "\U0001F37D",
-                Font      = new Font("Segoe UI", 22),
-                AutoSize  = false,
-                Width     = 46,
-                Height    = 46,
-                Left      = 12,
-                Top       = 12,
-                TextAlign = ContentAlignment.MiddleCenter,
-                ForeColor = Color.FromArgb(200, 165, 110)
-            };
             var lblLogoSide = new Label
             {
                 Text      = "RanGoFood",
                 Font      = new Font("Segoe UI", 13, FontStyle.Bold),
                 AutoSize  = true,
-                Left      = 62,
+                Left      = 16,
                 Top       = 20,
                 ForeColor = Color.FromArgb(210, 185, 140)
             };
             var sepLogo = new Panel { Left = 0, Top = 66, Width = 245, Height = 1, BackColor = Color.FromArgb(40, 42, 52) };
-            pnlLogo.Controls.Add(lblIcon);
             pnlLogo.Controls.Add(lblLogoSide);
             pnlLogo.Controls.Add(sepLogo);
             pnlSidebar.Controls.Add(pnlLogo);

@@ -106,14 +106,19 @@ namespace Pedeai.Forms
                 lblTaxaEnt.Text = pedido.pediTaxa_Entrega.ToString("C");
 
                 // Condição de pagamento
-                string condPgto;
-                switch (pedido.pediForma_Pagamento)
-                {
-                    case 0:  condPgto = "Dinheiro"; break;
-                    case 1:  condPgto = "Cart\u00e3o"; break;
-                    case 2:  condPgto = "Pix"; break;
-                    default: condPgto = "Outro"; break;
-                }
+                var formasPgto = new System.Collections.Generic.List<string>();
+                if (pedido.pediPago_Dinheiro > 0) formasPgto.Add($"Dinheiro: {pedido.pediPago_Dinheiro:C}");
+                if (pedido.pediPago_Cartao   > 0) formasPgto.Add($"Cart\u00e3o: {pedido.pediPago_Cartao:C}");
+                if (pedido.pediPago_Pix      > 0) formasPgto.Add($"Pix: {pedido.pediPago_Pix:C}");
+                string condPgto = formasPgto.Count > 0
+                    ? string.Join(" + ", formasPgto)
+                    : pedido.pediForma_Pagamento switch
+                      {
+                          0 => "Dinheiro",
+                          1 => "Cart\u00e3o",
+                          2 => "Pix",
+                          _ => "Outro"
+                      };
                 condPgto += pedido.pediTipo_Entrega == 0 ? " \u00b7 Retirada" : " \u00b7 Entrega";
                 lblCondPgto.Text = condPgto;
 

@@ -25,6 +25,9 @@ namespace Pedeai.Modelo
         public string pediObservacoes { get; set; } = "";
         public decimal? pediValor_Pago { get; set; }
         public string pediCodigo_Transacao { get; set; } = "";
+        public decimal pediPago_Dinheiro { get; set; }
+        public decimal pediPago_Cartao   { get; set; }
+        public decimal pediPago_Pix      { get; set; }
         public string pediCancelado_Por { get; set; }  // nome do usuario que autorizou o cancelamento
         public string pediAutorizador { get; set; }    // nome do usuario que autorizou desconto no pagamento
         public DateTime pediData_Lancamento { get; set; }

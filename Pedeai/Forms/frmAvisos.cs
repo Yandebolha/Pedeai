@@ -139,7 +139,7 @@ namespace Pedeai.Forms
             var dr  = ((System.Data.DataRowView)row.DataBoundItem).Row;
             var cod = Convert.ToInt32(dr["Codigo"]);
             var sit = dr["Situacao"]?.ToString();
-            if (sit == "P") { MessageBox.Show("Esta parcela jÃ¡ estÃ¡ paga."); return; }
+            if (sit == "P") { MessageBox.Show("Esta parcela j\u00e1 est\u00e1 paga."); return; }
             if (MessageBox.Show("Confirmar pagamento desta parcela?", "Confirmar",
                     MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes) return;
             var erro = _bll.MarcarParcelaPaga(cod);

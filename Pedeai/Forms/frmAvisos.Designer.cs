@@ -58,6 +58,8 @@ namespace Pedeai.Forms
             this.cmbFiltro.Name = "cmbFiltro";
             this.cmbFiltro.Size = new System.Drawing.Size(160, 23);
             this.cmbFiltro.TabIndex = 0;
+            this.cmbFiltro.SelectedIndex = 0;
+            this.cmbFiltro.SelectedIndexChanged += new System.EventHandler(this.CmbFiltro_SelectedIndexChanged);
             // 
             // btnAtualizar
             // 
@@ -73,8 +75,7 @@ namespace Pedeai.Forms
             this.btnAtualizar.TabIndex = 1;
             this.btnAtualizar.Text = "⟳ Atualizar";
             this.btnAtualizar.UseVisualStyleBackColor = false;
-            // 
-            // lblTit
+            this.btnAtualizar.Click += new System.EventHandler(this.BtnAtualizar_Click);
             // 
             this.lblTit.AutoSize = true;
             this.lblTit.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
@@ -139,6 +140,7 @@ namespace Pedeai.Forms
             this.grid.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
             this.grid.Size = new System.Drawing.Size(950, 466);
             this.grid.TabIndex = 0;
+            this.grid.DataError += new System.Windows.Forms.DataGridViewDataErrorEventHandler(this.Grid_DataError);
             // 
             // pnlFoot
             // 
@@ -164,8 +166,7 @@ namespace Pedeai.Forms
             this.btnPago.TabIndex = 0;
             this.btnPago.Text = "✔ Marcar como Pago";
             this.btnPago.UseVisualStyleBackColor = false;
-            // 
-            // frmAvisos
+            this.btnPago.Click += new System.EventHandler(this.BtnPago_Click);
             // 
             this.BackColor = System.Drawing.Color.FromArgb(245, 237, 216);
             this.ClientSize = new System.Drawing.Size(950, 600);

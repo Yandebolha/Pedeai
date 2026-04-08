@@ -31,12 +31,19 @@ namespace Pedeai.DAL
                                    ELSE CAST(p.pediSituacao AS CHAR)
                                END                          AS Status,
                                (SELECT COUNT(*) FROM itens_pedido_web i WHERE i.Codigo_Pedido = p.Codigo) AS Itens,
-                               CASE p.pediForma_Pagamento
-                                   WHEN 0 THEN 'Dinheiro'
-                                   WHEN 1 THEN 'Cartão'
-                                   WHEN 2 THEN 'Pix'
-                                   ELSE 'Outro'
-                               END                          AS Pagamento,
+                               COALESCE(
+                                   NULLIF(CONCAT_WS(' + ',
+                                       IF(COALESCE(p.pediPago_Dinheiro,0)>0,'Dinheiro',NULL),
+                                       IF(COALESCE(p.pediPago_Cartao  ,0)>0,'Cartão'  ,NULL),
+                                       IF(COALESCE(p.pediPago_Pix     ,0)>0,'Pix'     ,NULL)
+                                   ),''),
+                                   CASE p.pediForma_Pagamento
+                                       WHEN 0 THEN 'Dinheiro'
+                                       WHEN 1 THEN 'Cartão'
+                                       WHEN 2 THEN 'Pix'
+                                       ELSE 'Outro'
+                                   END
+                               )                            AS Pagamento,
                                CASE p.pediTipo_Entrega
                                    WHEN 0 THEN 'Retirada'
                                    WHEN 1 THEN 'Entrega'
@@ -361,6 +368,7 @@ namespace Pedeai.DAL
             var sql = @"UPDATE pedido_web
                         SET pediSituacao          = @sit,
                             pediValor_Pago        = @pago,
+                            pediDesconto          = CASE WHEN @pago < pediValor_Total THEN pediValor_Total - @pago ELSE pediDesconto END,
                             pediCodigo_Transacao  = @trans,
                             pediPago_Dinheiro     = @din,
                             pediPago_Cartao       = @car,
@@ -522,6 +530,9 @@ namespace Pedeai.DAL
                 pediObservacoes       = r["pediObservacoes"]?.ToString() ?? "",
                 pediOrigem            = r["pediOrigem"] == DBNull.Value ? 0 : Convert.ToInt32(r["pediOrigem"]),
                 pediValor_Pago        = r["pediValor_Pago"] == DBNull.Value ? (decimal?)null : Convert.ToDecimal(r["pediValor_Pago"]),
+                pediPago_Dinheiro     = r["pediPago_Dinheiro"] == DBNull.Value ? 0m : Convert.ToDecimal(r["pediPago_Dinheiro"]),
+                pediPago_Cartao       = r["pediPago_Cartao"]   == DBNull.Value ? 0m : Convert.ToDecimal(r["pediPago_Cartao"]),
+                pediPago_Pix          = r["pediPago_Pix"]      == DBNull.Value ? 0m : Convert.ToDecimal(r["pediPago_Pix"]),
                 pediData_Lancamento   = Convert.ToDateTime(r["pediData_Lancamento"]),
                 pediCancelado_Por     = r["pediCancelado_Por"] == DBNull.Value ? null : r["pediCancelado_Por"]?.ToString(),
                 pediAutorizador       = r["pediAutorizador"] == DBNull.Value ? null : r["pediAutorizador"]?.ToString(),

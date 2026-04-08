@@ -147,32 +147,34 @@ namespace Pedeai.Forms
             this.btnBuscarProd.Font=new System.Drawing.Font("Segoe UI",8F);
             this.lblQtde.Text="Qtde:"; this.lblQtde.Left=364; this.lblQtde.Top=11; this.lblQtde.AutoSize=true;
             this.lblQtde.ForeColor=System.Drawing.Color.FromArgb(50,50,50);
-            this.numQtde.Left=400; this.numQtde.Top=7; this.numQtde.Width=75;
+            this.numQtde.Left=395; this.numQtde.Top=7; this.numQtde.Width=65;
             this.numQtde.DecimalPlaces=2; this.numQtde.Minimum=0.01m; this.numQtde.Maximum=99999; this.numQtde.Value=1;
             // Unidade de entrada
-            this.txtUnidEntrada.Left=478; this.txtUnidEntrada.Top=7; this.txtUnidEntrada.Width=40;
+            this.txtUnidEntrada.Left=463; this.txtUnidEntrada.Top=7; this.txtUnidEntrada.Width=40;
             this.txtUnidEntrada.Font=new System.Drawing.Font("Segoe UI",9F);
             this.txtUnidEntrada.BorderStyle=System.Windows.Forms.BorderStyle.FixedSingle;
             this.txtUnidEntrada.MaxLength=10;
+            this.txtUnidEntrada.CharacterCasing=System.Windows.Forms.CharacterCasing.Upper;
             // '=' separador
-            this.lblIgual.Text="="; this.lblIgual.Left=521; this.lblIgual.Top=10;
+            this.lblIgual.Text="="; this.lblIgual.Left=506; this.lblIgual.Top=10;
             this.lblIgual.AutoSize=true; this.lblIgual.Font=new System.Drawing.Font("Segoe UI",9F,System.Drawing.FontStyle.Bold);
             this.lblIgual.ForeColor=System.Drawing.Color.FromArgb(100,80,50);
             // Fração
-            this.numFracao.Left=536; this.numFracao.Top=7; this.numFracao.Width=62;
+            this.numFracao.Left=520; this.numFracao.Top=7; this.numFracao.Width=60;
             this.numFracao.DecimalPlaces=4; this.numFracao.Minimum=0.0001m; this.numFracao.Maximum=99999; this.numFracao.Value=1;
             // Unidade de saída
-            this.txtUnidSaida.Left=601; this.txtUnidSaida.Top=7; this.txtUnidSaida.Width=40;
+            this.txtUnidSaida.Left=583; this.txtUnidSaida.Top=7; this.txtUnidSaida.Width=40;
             this.txtUnidSaida.Font=new System.Drawing.Font("Segoe UI",9F);
             this.txtUnidSaida.BorderStyle=System.Windows.Forms.BorderStyle.FixedSingle;
             this.txtUnidSaida.MaxLength=10;
-            this.lblCusto.Text="Custo R$:"; this.lblCusto.Left=648; this.lblCusto.Top=11; this.lblCusto.AutoSize=true;
+            this.txtUnidSaida.CharacterCasing=System.Windows.Forms.CharacterCasing.Upper;
+            this.lblCusto.Text="Custo R$:"; this.lblCusto.Left=628; this.lblCusto.Top=11; this.lblCusto.AutoSize=true;
             this.lblCusto.ForeColor=System.Drawing.Color.FromArgb(50,50,50);
-            this.numCustoItem.Left=711; this.numCustoItem.Top=7; this.numCustoItem.Width=90;
+            this.numCustoItem.Left=690; this.numCustoItem.Top=7; this.numCustoItem.Width=90;
             this.numCustoItem.DecimalPlaces=2; this.numCustoItem.Maximum=99999;
-            this.chkAtualizarCusto.Text="Atualizar custo"; this.chkAtualizarCusto.Left=808; this.chkAtualizarCusto.Top=9; this.chkAtualizarCusto.AutoSize=true;
+            this.chkAtualizarCusto.Text="Atualizar custo"; this.chkAtualizarCusto.Left=784; this.chkAtualizarCusto.Top=9; this.chkAtualizarCusto.AutoSize=true;
             this.chkAtualizarCusto.ForeColor=System.Drawing.Color.FromArgb(50,50,50); this.chkAtualizarCusto.Checked=true;
-            this.btnAdicionarItem.Text="+ Adicionar"; this.btnAdicionarItem.Left=924; this.btnAdicionarItem.Top=7; this.btnAdicionarItem.Width=95; this.btnAdicionarItem.Height=26;
+            this.btnAdicionarItem.Text="+ Adicionar"; this.btnAdicionarItem.Left=900; this.btnAdicionarItem.Top=7; this.btnAdicionarItem.Width=90; this.btnAdicionarItem.Height=26;
             this.btnAdicionarItem.BackColor=System.Drawing.Color.FromArgb(87,120,38); this.btnAdicionarItem.ForeColor=System.Drawing.Color.White;
             this.btnAdicionarItem.FlatStyle=System.Windows.Forms.FlatStyle.Flat; this.btnAdicionarItem.FlatAppearance.BorderSize=0;
             this.pnlAddItem.Controls.Add(this.lblProduto); this.pnlAddItem.Controls.Add(this.txtProdCod); this.pnlAddItem.Controls.Add(this.txtProdNome);

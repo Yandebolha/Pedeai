@@ -86,7 +86,7 @@ namespace Pedeai
             this.lblLogoTopBar.Name = "lblLogoTopBar";
             this.lblLogoTopBar.Size = new System.Drawing.Size(178, 31);
             this.lblLogoTopBar.TabIndex = 1;
-            this.lblLogoTopBar.Text = "🍴 RanGoFood";
+            this.lblLogoTopBar.Text = "RanGoFood";
             this.lblLogoTopBar.MouseDown += new System.Windows.Forms.MouseEventHandler(this.TopBar_MouseDown);
             this.lblLogoTopBar.MouseMove += new System.Windows.Forms.MouseEventHandler(this.TopBar_MouseMove);
             this.lblLogoTopBar.MouseUp += new System.Windows.Forms.MouseEventHandler(this.TopBar_MouseUp);
