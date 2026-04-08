@@ -19,6 +19,9 @@ namespace Pedeai.BLL
         public PedidoWeb PesquisaCodigo(int codigo)
             => _dal.PesquisaCodigo(codigo);
 
+        public PedidoWeb PesquisaPorNumero(string numero)
+            => _dal.PesquisaPorNumero(numero);
+
         public DataTable ListarItens(int codigoPedido)
             => _dal.ListarItens(codigoPedido);
 

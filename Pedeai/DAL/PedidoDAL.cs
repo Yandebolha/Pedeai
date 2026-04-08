@@ -448,11 +448,25 @@ namespace Pedeai.DAL
                 pediEndereco_Entrega  = r["pediEndereco_Entrega"]?.ToString() ?? "",
                 pediObservacoes       = r["pediObservacoes"]?.ToString() ?? "",
                 pediOrigem            = r["pediOrigem"] == DBNull.Value ? 0 : Convert.ToInt32(r["pediOrigem"]),
+                pediValor_Pago        = r["pediValor_Pago"] == DBNull.Value ? (decimal?)null : Convert.ToDecimal(r["pediValor_Pago"]),
                 pediData_Lancamento   = Convert.ToDateTime(r["pediData_Lancamento"]),
                 pediCancelado_Por     = r["pediCancelado_Por"] == DBNull.Value ? null : r["pediCancelado_Por"]?.ToString(),
+                pediAutorizador       = r["pediAutorizador"] == DBNull.Value ? null : r["pediAutorizador"]?.ToString(),
                 pediCodigo_Cupom      = r["pediCodigo_Cupom"] == DBNull.Value ? "" : r["pediCodigo_Cupom"]?.ToString() ?? "",
                 Info                  = r["Info"]?.ToString() ?? "",
             };
+        }
+
+        /// <summary>Busca um pedido completo pelo número visível (pediNumero).</summary>
+        public PedidoWeb PesquisaPorNumero(string numero)
+        {
+            using var conn = AbrirConexao();
+            using var cmd = new MySqlCommand(
+                "SELECT * FROM pedido_web WHERE pediNumero = @num ORDER BY Codigo DESC LIMIT 1", conn);
+            cmd.Parameters.AddWithValue("@num", numero);
+            using var r = cmd.ExecuteReader();
+            if (!r.Read()) return null;
+            return MapearPedido(r);
         }
     }
 }

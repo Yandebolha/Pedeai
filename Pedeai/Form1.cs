@@ -1699,10 +1699,11 @@ namespace Pedeai
             if (temOperacional)
             {
                 Secao("OPERACIONAL");
-                NavSe("Dashboard",  "\U0001F3E0  Dashboard",     MostrarDashboard);
-                NavSe("Pedidos",    "\U0001F4CB  Pedidos",        MostrarPedidos);
-                NavSe("Financeiro", "\U0001F4B0  Financeiro",     MostrarFinanceiro);
-                NavSe("Turno",      "\U0001F551  Turno de Caixa", () => AbrirForm(new Forms.frmTurno()));
+                NavSe("Dashboard",       "\U0001F3E0  Dashboard",        MostrarDashboard);
+                NavSe("Pedidos",         "\U0001F4CB  Pedidos",           MostrarPedidos);
+                NavSe("ConsultarPedido", "\U0001F50D  Consultar Pedido",  () => AbrirForm(new Forms.frmConsultarPedido()));
+                NavSe("Financeiro",      "\U0001F4B0  Financeiro",        MostrarFinanceiro);
+                NavSe("Turno",           "\U0001F551  Turno de Caixa",    () => AbrirForm(new Forms.frmTurno()));
             }
 
             bool temCadastros = UsuarioSessao.TemModulo("Produtos")
