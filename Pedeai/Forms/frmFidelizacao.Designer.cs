@@ -20,7 +20,14 @@ namespace Pedeai.Forms
             this.tabHistorico    = new System.Windows.Forms.TabPage();
 
             // Tab 1 – Configuração
+            this.pnlLista        = new System.Windows.Forms.Panel();
+            this.gridConfigs     = new System.Windows.Forms.DataGridView();
+            this.pnlListaBotoes  = new System.Windows.Forms.Panel();
+            this.btnNovaRegra    = new System.Windows.Forms.Button();
+            this.btnExcluirRegra = new System.Windows.Forms.Button();
             this.chkAtivo        = new System.Windows.Forms.CheckBox();
+            this.lblNomeRegra    = new System.Windows.Forms.Label();
+            this.txtNomeRegra    = new System.Windows.Forms.TextBox();
             this.lblMeta         = new System.Windows.Forms.Label();
             this.numMeta         = new System.Windows.Forms.NumericUpDown();
             this.lblPremio       = new System.Windows.Forms.Label();
@@ -61,6 +68,7 @@ namespace Pedeai.Forms
             ((System.ComponentModel.ISupportInitialize)(this.numCupomMin)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numCupomValidade)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridHistorico)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.gridConfigs)).BeginInit();
             this.SuspendLayout();
 
             // ── pnlTop ──────────────────────────────────────────────────────
@@ -97,6 +105,8 @@ namespace Pedeai.Forms
             this.tabConfig.Padding = new System.Windows.Forms.Padding(8);
             this.tabConfig.Text = "Configuração";
             this.tabConfig.Controls.Add(this.chkAtivo);
+            this.tabConfig.Controls.Add(this.lblNomeRegra);
+            this.tabConfig.Controls.Add(this.txtNomeRegra);
             this.tabConfig.Controls.Add(this.lblMeta);
             this.tabConfig.Controls.Add(this.numMeta);
             this.tabConfig.Controls.Add(this.lblPremio);
@@ -108,6 +118,79 @@ namespace Pedeai.Forms
             this.tabConfig.Controls.Add(this.txtMsg);
             this.tabConfig.Controls.Add(this.lblTags);
             this.tabConfig.Controls.Add(this.btnSalvar);
+            this.tabConfig.Controls.Add(this.pnlListaBotoes);
+            this.tabConfig.Controls.Add(this.pnlLista);
+
+            // ── pnlLista (grid of configs at top of tabConfig) ────────────
+            this.pnlLista.Dock = System.Windows.Forms.DockStyle.Top;
+            this.pnlLista.Height = 100;
+            this.pnlLista.Name = "pnlLista";
+            this.pnlLista.BackColor = System.Drawing.Color.FromArgb(248, 245, 240);
+            this.pnlLista.Controls.Add(this.gridConfigs);
+
+            // ── gridConfigs ──────────────────────────────────────────
+            this.gridConfigs.AllowUserToAddRows = false;
+            this.gridConfigs.AllowUserToDeleteRows = false;
+            this.gridConfigs.AllowUserToResizeRows = false;
+            this.gridConfigs.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
+            this.gridConfigs.BackgroundColor = System.Drawing.Color.White;
+            this.gridConfigs.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.gridConfigs.ColumnHeadersDefaultCellStyle.BackColor = System.Drawing.Color.FromArgb(36, 48, 82);
+            this.gridConfigs.ColumnHeadersDefaultCellStyle.ForeColor = System.Drawing.Color.White;
+            this.gridConfigs.ColumnHeadersDefaultCellStyle.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
+            this.gridConfigs.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
+            this.gridConfigs.ColumnHeadersHeight = 30;
+            this.gridConfigs.DefaultCellStyle.BackColor = System.Drawing.Color.White;
+            this.gridConfigs.DefaultCellStyle.ForeColor = System.Drawing.Color.FromArgb(50, 40, 30);
+            this.gridConfigs.DefaultCellStyle.SelectionBackColor = System.Drawing.Color.FromArgb(176, 110, 42);
+            this.gridConfigs.DefaultCellStyle.SelectionForeColor = System.Drawing.Color.White;
+            this.gridConfigs.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.gridConfigs.MultiSelect = false;
+            this.gridConfigs.Name = "gridConfigs";
+            this.gridConfigs.ReadOnly = true;
+            this.gridConfigs.RowHeadersVisible = false;
+            this.gridConfigs.RowTemplate.Height = 24;
+            this.gridConfigs.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
+            this.gridConfigs.SelectionChanged += new System.EventHandler(this.GridConfigs_SelectionChanged);
+            this.gridConfigs.DataError += new System.Windows.Forms.DataGridViewDataErrorEventHandler(this.Grid_DataError);
+
+            // ── pnlListaBotoes ──────────────────────────────────────
+            this.pnlListaBotoes.Dock = System.Windows.Forms.DockStyle.Top;
+            this.pnlListaBotoes.Height = 32;
+            this.pnlListaBotoes.Name = "pnlListaBotoes";
+            this.pnlListaBotoes.BackColor = System.Drawing.Color.FromArgb(240, 236, 224);
+            this.pnlListaBotoes.Controls.Add(this.btnNovaRegra);
+            this.pnlListaBotoes.Controls.Add(this.btnExcluirRegra);
+
+            this.btnNovaRegra.Text = "+ Nova Regra";
+            this.btnNovaRegra.Left = 8;
+            this.btnNovaRegra.Top = 4;
+            this.btnNovaRegra.Width = 110;
+            this.btnNovaRegra.Height = 24;
+            this.btnNovaRegra.BackColor = System.Drawing.Color.FromArgb(87, 120, 38);
+            this.btnNovaRegra.ForeColor = System.Drawing.Color.White;
+            this.btnNovaRegra.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnNovaRegra.FlatAppearance.BorderSize = 0;
+            this.btnNovaRegra.Font = new System.Drawing.Font("Segoe UI", 9F);
+            this.btnNovaRegra.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.btnNovaRegra.Name = "btnNovaRegra";
+            this.btnNovaRegra.Click += new System.EventHandler(this.BtnNovaRegra_Click);
+
+            this.btnExcluirRegra.Text = "Excluir Selecionada";
+            this.btnExcluirRegra.Left = 126;
+            this.btnExcluirRegra.Top = 4;
+            this.btnExcluirRegra.Width = 142;
+            this.btnExcluirRegra.Height = 24;
+            this.btnExcluirRegra.BackColor = System.Drawing.Color.FromArgb(192, 57, 43);
+            this.btnExcluirRegra.ForeColor = System.Drawing.Color.White;
+            this.btnExcluirRegra.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnExcluirRegra.FlatAppearance.BorderSize = 0;
+            this.btnExcluirRegra.Font = new System.Drawing.Font("Segoe UI", 9F);
+            this.btnExcluirRegra.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.btnExcluirRegra.Name = "btnExcluirRegra";
+            this.btnExcluirRegra.Click += new System.EventHandler(this.BtnExcluirRegra_Click);
+
+            // ── edit controls (all Y += 132 from original) ────────────────
 
             // ── tabHistorico ─────────────────────────────────────────────────
             this.tabHistorico.BackColor = System.Drawing.Color.FromArgb(248, 245, 240);
@@ -120,23 +203,39 @@ namespace Pedeai.Forms
             // ── chkAtivo ────────────────────────────────────────────────────
             this.chkAtivo.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.chkAtivo.ForeColor = System.Drawing.Color.FromArgb(50, 50, 50);
-            this.chkAtivo.Location = new System.Drawing.Point(16, 20);
+            this.chkAtivo.Location = new System.Drawing.Point(16, 152);
             this.chkAtivo.Name = "chkAtivo";
             this.chkAtivo.Size = new System.Drawing.Size(220, 26);
             this.chkAtivo.TabIndex = 0;
-            this.chkAtivo.Text = "Ativar Fidelização";
+            this.chkAtivo.Text = "Ativar esta Regra";
             this.chkAtivo.CheckedChanged += new System.EventHandler(this.ChkAtivo_CheckedChanged);
+
+            // ── lblNomeRegra / txtNomeRegra ─────────────────────────────────
+            this.lblNomeRegra.AutoSize = true;
+            this.lblNomeRegra.ForeColor = System.Drawing.Color.FromArgb(50, 50, 50);
+            this.lblNomeRegra.Location = new System.Drawing.Point(300, 156);
+            this.lblNomeRegra.Name = "lblNomeRegra";
+            this.lblNomeRegra.Text = "Nome da Regra:";
+
+            this.txtNomeRegra.BackColor = System.Drawing.Color.White;
+            this.txtNomeRegra.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.txtNomeRegra.ForeColor = System.Drawing.Color.FromArgb(50, 50, 50);
+            this.txtNomeRegra.Location = new System.Drawing.Point(412, 152);
+            this.txtNomeRegra.MaxLength = 100;
+            this.txtNomeRegra.Name = "txtNomeRegra";
+            this.txtNomeRegra.Size = new System.Drawing.Size(260, 26);
+            this.txtNomeRegra.TabIndex = 1;
 
             // ── lblMeta ──────────────────────────────────────────────────────
             this.lblMeta.AutoSize = true;
             this.lblMeta.ForeColor = System.Drawing.Color.FromArgb(50, 50, 50);
-            this.lblMeta.Location = new System.Drawing.Point(16, 60);
+            this.lblMeta.Location = new System.Drawing.Point(16, 192);
             this.lblMeta.Name = "lblMeta";
             this.lblMeta.Text = "Meta de Gasto (R$):";
 
             // ── numMeta ──────────────────────────────────────────────────────
             this.numMeta.DecimalPlaces = 2;
-            this.numMeta.Location = new System.Drawing.Point(164, 56);
+            this.numMeta.Location = new System.Drawing.Point(164, 188);
             this.numMeta.Maximum = new decimal(new int[] { 999999, 0, 0, 0 });
             this.numMeta.Minimum = new decimal(new int[] { 1, 0, 0, 0 });
             this.numMeta.Name = "numMeta";
@@ -148,7 +247,7 @@ namespace Pedeai.Forms
             // ── lblPremio ─────────────────────────────────────────────────────
             this.lblPremio.AutoSize = true;
             this.lblPremio.ForeColor = System.Drawing.Color.FromArgb(50, 50, 50);
-            this.lblPremio.Location = new System.Drawing.Point(16, 100);
+            this.lblPremio.Location = new System.Drawing.Point(16, 232);
             this.lblPremio.Name = "lblPremio";
             this.lblPremio.Text = "Tipo de Prêmio:";
 
@@ -156,7 +255,7 @@ namespace Pedeai.Forms
             this.rdCupom.AutoSize = true;
             this.rdCupom.Checked = true;
             this.rdCupom.ForeColor = System.Drawing.Color.FromArgb(50, 50, 50);
-            this.rdCupom.Location = new System.Drawing.Point(164, 98);
+            this.rdCupom.Location = new System.Drawing.Point(164, 230);
             this.rdCupom.Name = "rdCupom";
             this.rdCupom.Size = new System.Drawing.Size(140, 23);
             this.rdCupom.TabIndex = 2;
@@ -167,7 +266,7 @@ namespace Pedeai.Forms
             // ── rdProduto ─────────────────────────────────────────────────────
             this.rdProduto.AutoSize = true;
             this.rdProduto.ForeColor = System.Drawing.Color.FromArgb(50, 50, 50);
-            this.rdProduto.Location = new System.Drawing.Point(320, 98);
+            this.rdProduto.Location = new System.Drawing.Point(320, 230);
             this.rdProduto.Name = "rdProduto";
             this.rdProduto.Size = new System.Drawing.Size(100, 23);
             this.rdProduto.TabIndex = 3;
@@ -176,7 +275,7 @@ namespace Pedeai.Forms
 
             // ── pnlCupom ──────────────────────────────────────────────────────
             this.pnlCupom.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.pnlCupom.Location = new System.Drawing.Point(16, 134);
+            this.pnlCupom.Location = new System.Drawing.Point(16, 266);
             this.pnlCupom.Name = "pnlCupom";
             this.pnlCupom.Size = new System.Drawing.Size(750, 112);
             this.pnlCupom.BackColor = System.Drawing.Color.FromArgb(240, 236, 224);
@@ -258,7 +357,7 @@ namespace Pedeai.Forms
 
             // ── pnlProduto ─────────────────────────────────────────────────────
             this.pnlProduto.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.pnlProduto.Location = new System.Drawing.Point(16, 134);
+            this.pnlProduto.Location = new System.Drawing.Point(16, 266);
             this.pnlProduto.Name = "pnlProduto";
             this.pnlProduto.Size = new System.Drawing.Size(750, 48);
             this.pnlProduto.BackColor = System.Drawing.Color.FromArgb(240, 236, 224);
@@ -286,15 +385,15 @@ namespace Pedeai.Forms
             // ── lblMsg ─────────────────────────────────────────────────────────
             this.lblMsg.AutoSize = true;
             this.lblMsg.ForeColor = System.Drawing.Color.FromArgb(50, 50, 50);
-            this.lblMsg.Location = new System.Drawing.Point(16, 258);
+            this.lblMsg.Location = new System.Drawing.Point(16, 390);
             this.lblMsg.Name = "lblMsg";
             this.lblMsg.Text = "Mensagem WhatsApp:";
 
-            // ── txtMsg ─────────────────────────────────────────────────────────
+            // ── txtMsg ─────────────────────────────────────────────────
             this.txtMsg.BackColor = System.Drawing.Color.White;
             this.txtMsg.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.txtMsg.ForeColor = System.Drawing.Color.FromArgb(50, 50, 50);
-            this.txtMsg.Location = new System.Drawing.Point(16, 280);
+            this.txtMsg.Location = new System.Drawing.Point(16, 412);
             this.txtMsg.MaxLength = 800;
             this.txtMsg.Multiline = true;
             this.txtMsg.Name = "txtMsg";
@@ -398,7 +497,7 @@ namespace Pedeai.Forms
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.FromArgb(248, 245, 240);
-            this.ClientSize = new System.Drawing.Size(800, 616);
+            this.ClientSize = new System.Drawing.Size(800, 720);
             this.Controls.Add(this.tabControl);
             this.Controls.Add(this.pnlTop);
             this.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
@@ -428,7 +527,14 @@ namespace Pedeai.Forms
         private System.Windows.Forms.TabControl   tabControl;
         private System.Windows.Forms.TabPage      tabConfig;
         private System.Windows.Forms.TabPage      tabHistorico;
+        private System.Windows.Forms.Panel        pnlLista;
+        internal System.Windows.Forms.DataGridView gridConfigs;
+        private System.Windows.Forms.Panel        pnlListaBotoes;
+        private System.Windows.Forms.Button       btnNovaRegra;
+        private System.Windows.Forms.Button       btnExcluirRegra;
         private System.Windows.Forms.CheckBox     chkAtivo;
+        private System.Windows.Forms.Label        lblNomeRegra;
+        private System.Windows.Forms.TextBox      txtNomeRegra;
         private System.Windows.Forms.Label        lblMeta;
         private System.Windows.Forms.NumericUpDown numMeta;
         private System.Windows.Forms.Label        lblPremio;

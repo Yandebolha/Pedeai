@@ -36,6 +36,10 @@ namespace Pedeai.Forms
             this.txtProdCod        = new System.Windows.Forms.TextBox();
             this.txtProdNome       = new System.Windows.Forms.TextBox();
             this.numQtde           = new System.Windows.Forms.NumericUpDown();
+            this.txtUnidEntrada    = new System.Windows.Forms.TextBox();
+            this.lblIgual          = new System.Windows.Forms.Label();
+            this.numFracao         = new System.Windows.Forms.NumericUpDown();
+            this.txtUnidSaida      = new System.Windows.Forms.TextBox();
             this.numCustoItem      = new System.Windows.Forms.NumericUpDown();
             this.chkAtualizarCusto = new System.Windows.Forms.CheckBox();
             this.btnAdicionarItem  = new System.Windows.Forms.Button();
@@ -145,18 +149,39 @@ namespace Pedeai.Forms
             this.lblQtde.ForeColor=System.Drawing.Color.FromArgb(50,50,50);
             this.numQtde.Left=400; this.numQtde.Top=7; this.numQtde.Width=75;
             this.numQtde.DecimalPlaces=2; this.numQtde.Minimum=0.01m; this.numQtde.Maximum=99999; this.numQtde.Value=1;
-            this.lblCusto.Text="Custo R$:"; this.lblCusto.Left=482; this.lblCusto.Top=11; this.lblCusto.AutoSize=true;
+            // Unidade de entrada
+            this.txtUnidEntrada.Left=478; this.txtUnidEntrada.Top=7; this.txtUnidEntrada.Width=40;
+            this.txtUnidEntrada.Font=new System.Drawing.Font("Segoe UI",9F);
+            this.txtUnidEntrada.BorderStyle=System.Windows.Forms.BorderStyle.FixedSingle;
+            this.txtUnidEntrada.MaxLength=10;
+            // '=' separador
+            this.lblIgual.Text="="; this.lblIgual.Left=521; this.lblIgual.Top=10;
+            this.lblIgual.AutoSize=true; this.lblIgual.Font=new System.Drawing.Font("Segoe UI",9F,System.Drawing.FontStyle.Bold);
+            this.lblIgual.ForeColor=System.Drawing.Color.FromArgb(100,80,50);
+            // Fração
+            this.numFracao.Left=536; this.numFracao.Top=7; this.numFracao.Width=62;
+            this.numFracao.DecimalPlaces=4; this.numFracao.Minimum=0.0001m; this.numFracao.Maximum=99999; this.numFracao.Value=1;
+            // Unidade de saída
+            this.txtUnidSaida.Left=601; this.txtUnidSaida.Top=7; this.txtUnidSaida.Width=40;
+            this.txtUnidSaida.Font=new System.Drawing.Font("Segoe UI",9F);
+            this.txtUnidSaida.BorderStyle=System.Windows.Forms.BorderStyle.FixedSingle;
+            this.txtUnidSaida.MaxLength=10;
+            this.lblCusto.Text="Custo R$:"; this.lblCusto.Left=648; this.lblCusto.Top=11; this.lblCusto.AutoSize=true;
             this.lblCusto.ForeColor=System.Drawing.Color.FromArgb(50,50,50);
-            this.numCustoItem.Left=545; this.numCustoItem.Top=7; this.numCustoItem.Width=90;
+            this.numCustoItem.Left=711; this.numCustoItem.Top=7; this.numCustoItem.Width=90;
             this.numCustoItem.DecimalPlaces=2; this.numCustoItem.Maximum=99999;
-            this.chkAtualizarCusto.Text="Atualizar custo"; this.chkAtualizarCusto.Left=642; this.chkAtualizarCusto.Top=9; this.chkAtualizarCusto.AutoSize=true;
+            this.chkAtualizarCusto.Text="Atualizar custo"; this.chkAtualizarCusto.Left=808; this.chkAtualizarCusto.Top=9; this.chkAtualizarCusto.AutoSize=true;
             this.chkAtualizarCusto.ForeColor=System.Drawing.Color.FromArgb(50,50,50); this.chkAtualizarCusto.Checked=true;
-            this.btnAdicionarItem.Text="+ Adicionar"; this.btnAdicionarItem.Left=756; this.btnAdicionarItem.Top=7; this.btnAdicionarItem.Width=95; this.btnAdicionarItem.Height=26;
+            this.btnAdicionarItem.Text="+ Adicionar"; this.btnAdicionarItem.Left=924; this.btnAdicionarItem.Top=7; this.btnAdicionarItem.Width=95; this.btnAdicionarItem.Height=26;
             this.btnAdicionarItem.BackColor=System.Drawing.Color.FromArgb(87,120,38); this.btnAdicionarItem.ForeColor=System.Drawing.Color.White;
             this.btnAdicionarItem.FlatStyle=System.Windows.Forms.FlatStyle.Flat; this.btnAdicionarItem.FlatAppearance.BorderSize=0;
             this.pnlAddItem.Controls.Add(this.lblProduto); this.pnlAddItem.Controls.Add(this.txtProdCod); this.pnlAddItem.Controls.Add(this.txtProdNome);
             this.pnlAddItem.Controls.Add(this.btnBuscarProd);
             this.pnlAddItem.Controls.Add(this.lblQtde);    this.pnlAddItem.Controls.Add(this.numQtde);
+            this.pnlAddItem.Controls.Add(this.txtUnidEntrada);
+            this.pnlAddItem.Controls.Add(this.lblIgual);
+            this.pnlAddItem.Controls.Add(this.numFracao);
+            this.pnlAddItem.Controls.Add(this.txtUnidSaida);
             this.pnlAddItem.Controls.Add(this.lblCusto);   this.pnlAddItem.Controls.Add(this.numCustoItem);
             this.pnlAddItem.Controls.Add(this.chkAtualizarCusto); this.pnlAddItem.Controls.Add(this.btnAdicionarItem);
             // gridItens (fill)
@@ -273,6 +298,10 @@ namespace Pedeai.Forms
         internal System.Windows.Forms.TextBox        txtProdCod;
         internal System.Windows.Forms.TextBox        txtProdNome;
         internal System.Windows.Forms.NumericUpDown  numQtde;
+        internal System.Windows.Forms.TextBox        txtUnidEntrada;
+        private  System.Windows.Forms.Label          lblIgual;
+        internal System.Windows.Forms.NumericUpDown  numFracao;
+        internal System.Windows.Forms.TextBox        txtUnidSaida;
         internal System.Windows.Forms.NumericUpDown  numCustoItem;
         internal System.Windows.Forms.CheckBox       chkAtualizarCusto;
         internal System.Windows.Forms.Button         btnAdicionarItem;

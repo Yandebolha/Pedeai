@@ -8,6 +8,9 @@ namespace Pedeai.Modelo
         public int      Codigo_Mercadoria   { get; set; }
         public string   itmNome_Mercadoria  { get; set; } = "";
         public decimal  itmQtde             { get; set; }
+        public decimal  itmFracao           { get; set; } = 1m;
+        public string   itmUnid_Entrada     { get; set; } = "";
+        public string   itmUnid_Saida       { get; set; } = "";
         public decimal  itmPreco_Custo      { get; set; }
         public decimal  itmSubtotal         { get; set; }
         public bool     itmAtualizar_Custo  { get; set; } = true;

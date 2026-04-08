@@ -13,16 +13,33 @@ namespace Pedeai.Forms
             InitializeComponent();
             if (System.ComponentModel.LicenseManager.UsageMode == System.ComponentModel.LicenseUsageMode.Designtime) return;
             _bll = new PedidoBLL();
+            dtpDe.Value  = DateTime.Today.AddDays(-30);
+            dtpAte.Value = DateTime.Today;
+            this.Load += new EventHandler(Form_Load);
+        }
+
+        private void Form_Load(object sender, EventArgs e)
+        {
+            CarregarLista();
         }
 
         private void BtnBuscar_Click(object sender, EventArgs e)
         {
-            BuscarPedido();
+            CarregarLista();
+        }
+
+        private void BtnTodos_Click(object sender, EventArgs e)
+        {
+            dtpDe.Value        = DateTime.Today.AddDays(-30);
+            dtpAte.Value       = DateTime.Today;
+            txtCliente.Text    = "";
+            txtNumPedido.Text  = "";
+            CarregarLista();
         }
 
         private void TxtNumPedido_KeyDown(object sender, KeyEventArgs e)
         {
-            if (e.KeyCode == Keys.Enter) BuscarPedido();
+            if (e.KeyCode == Keys.Enter) CarregarLista();
         }
 
         private void BtnFechar_Click(object sender, EventArgs e)
@@ -35,27 +52,52 @@ namespace Pedeai.Forms
             e.ThrowException = false;
         }
 
-        private void BuscarPedido()
+        private void GridPedidos_SelectionChanged(object sender, EventArgs e)
         {
-            string numero = txtNumPedido.Text.Trim();
-            if (string.IsNullOrEmpty(numero))
-            {
-                MessageBox.Show("Informe o n\u00famero do pedido.", "Consultar Pedido",
-                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                txtNumPedido.Focus();
-                return;
-            }
+            if (gridPedidos.SelectedRows.Count == 0) { LimparInfo(); return; }
+            var row = gridPedidos.SelectedRows[0];
+            if (row.Cells["Codigo"]?.Value == null || row.Cells["Codigo"].Value == DBNull.Value) { LimparInfo(); return; }
+            int cod = Convert.ToInt32(row.Cells["Codigo"].Value);
+            BuscarDetalhes(cod);
+        }
 
+        private void CarregarLista()
+        {
+            LimparInfo();
             try
             {
-                var pedido = _bll.PesquisaPorNumero(numero);
-                if (pedido == null)
-                {
-                    LimparInfo();
-                    MessageBox.Show($"Nenhum pedido encontrado com o n\u00famero '{numero}'.",
-                        "Consultar Pedido", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    return;
-                }
+                var dt = _bll.ListarConsulta(dtpDe.Value.Date, dtpAte.Value.Date,
+                    txtCliente.Text.Trim(), txtNumPedido.Text.Trim());
+                gridPedidos.DataSource = dt;
+                ConfigurarGridPedidos();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Erro ao carregar pedidos: " + ex.Message, "Erro",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void ConfigurarGridPedidos()
+        {
+            if (gridPedidos.Columns.Count == 0) return;
+            if (gridPedidos.Columns["Codigo"]   != null) { gridPedidos.Columns["Codigo"].Visible    = false; }
+            if (gridPedidos.Columns["Telefone"] != null) { gridPedidos.Columns["Telefone"].Visible  = false; }
+            if (gridPedidos.Columns["Numero"]   != null) { gridPedidos.Columns["Numero"].HeaderText   = "N\u00ba";       gridPedidos.Columns["Numero"].FillWeight   = 8; }
+            if (gridPedidos.Columns["Cliente"]  != null) { gridPedidos.Columns["Cliente"].HeaderText  = "Cliente";    gridPedidos.Columns["Cliente"].FillWeight  = 32; }
+            if (gridPedidos.Columns["Status"]   != null) { gridPedidos.Columns["Status"].HeaderText   = "Status";     gridPedidos.Columns["Status"].FillWeight   = 16; }
+            if (gridPedidos.Columns["Total"]    != null) { gridPedidos.Columns["Total"].HeaderText    = "Total R$";   gridPedidos.Columns["Total"].FillWeight    = 12;
+                                                            gridPedidos.Columns["Total"].DefaultCellStyle.Format = "C2"; }
+            if (gridPedidos.Columns["DataHora"] != null) { gridPedidos.Columns["DataHora"].HeaderText = "Data/Hora";  gridPedidos.Columns["DataHora"].FillWeight = 18;
+                                                            gridPedidos.Columns["DataHora"].DefaultCellStyle.Format = "dd/MM/yyyy HH:mm"; }
+        }
+
+        private void BuscarDetalhes(int codigoPedido)
+        {
+            try
+            {
+                var pedido = _bll.PesquisaCodigo(codigoPedido);
+                if (pedido == null) { LimparInfo(); return; }
 
                 // Cliente
                 lblCliente.Text = pedido.pediNome_Cliente;

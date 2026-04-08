@@ -10,66 +10,100 @@ namespace Pedeai.BLL
     {
         private readonly FidelizacaoDAL _dal = new FidelizacaoDAL();
 
-        public ConfigFidelizacao Carregar() => _dal.Carregar();
+        public ConfigFidelizacao Carregar(int codigo = 1) => _dal.Carregar(codigo);
 
-        public string Salvar(ConfigFidelizacao cfg)
+        public DataTable Listar() => _dal.Listar();
+
+        public string Incluir(ConfigFidelizacao cfg)
         {
             if (cfg == null) return "Configuração inválida.";
+            if (string.IsNullOrWhiteSpace(cfg.fidNome)) return "Informe o nome da regra.";
             if (cfg.fidMeta_Gasto <= 0) return "Meta de gasto deve ser maior que zero.";
             if (cfg.fidPremio_Tipo == "CUPOM" && cfg.fidCupom_Valor <= 0)
                 return "Valor do cupom deve ser maior que zero.";
             if (cfg.fidPremio_Tipo == "PRODUTO" && string.IsNullOrWhiteSpace(cfg.fidProduto_Nome))
                 return "Informe o produto prêmio.";
-            return _dal.Salvar(cfg);
+            return _dal.Incluir(cfg);
         }
+
+        public string Alterar(ConfigFidelizacao cfg)
+        {
+            if (cfg == null) return "Configuração inválida.";
+            if (cfg.Codigo <= 0) return "Código inválido.";
+            if (string.IsNullOrWhiteSpace(cfg.fidNome)) return "Informe o nome da regra.";
+            if (cfg.fidMeta_Gasto <= 0) return "Meta de gasto deve ser maior que zero.";
+            if (cfg.fidPremio_Tipo == "CUPOM" && cfg.fidCupom_Valor <= 0)
+                return "Valor do cupom deve ser maior que zero.";
+            if (cfg.fidPremio_Tipo == "PRODUTO" && string.IsNullOrWhiteSpace(cfg.fidProduto_Nome))
+                return "Informe o produto prêmio.";
+            return _dal.Alterar(cfg);
+        }
+
+        public string Excluir(int codigo) => _dal.Excluir(codigo);
+
+        [Obsolete("Use Incluir or Alterar instead")]
+        public string Salvar(ConfigFidelizacao cfg) => cfg.Codigo == 0 ? Incluir(cfg) : Alterar(cfg);
 
         public DataTable ListarHistorico(DateTime de, DateTime ate)
             => _dal.ListarHistorico(de, ate);
 
         /// <summary>
-        /// Verifica se o cliente atingiu um novo patamar de prêmio e, se sim, emite o prêmio.
+        /// Verifica se o cliente atingiu um novo patamar em qualquer regra ativa e, se sim, emite o prêmio.
         /// Retorna mensagem para exibir ao operador, ou string vazia se nada foi feito.
         /// </summary>
         public string VerificarEDispararPremio(int codigoCliente, int codigoPedido)
         {
             try
             {
-                var cfg = _dal.Carregar();
-                if (!cfg.fidAtivo || cfg.fidMeta_Gasto <= 0) return "";
-
                 var clienteDal = new ClienteDAL();
                 var cliente = clienteDal.PesquisaCodigo(codigoCliente);
                 if (cliente == null) return "";
 
-                int deveDar  = (int)(cliente.clieTotalGasto / cfg.fidMeta_Gasto);
-                int jaDeu    = _dal.ContarPremiosEnviados(codigoCliente);
-                if (deveDar <= jaDeu) return "";
+                var configs = _dal.Listar();
+                var mensagens = new System.Text.StringBuilder();
 
-                string descricao;
-                string cupomGerado = "";
-
-                if (cfg.fidPremio_Tipo == "PRODUTO")
+                foreach (DataRow row in configs.Rows)
                 {
-                    descricao = $"Prêmio produto: {cfg.fidProduto_Nome}";
+                    bool ativo = row["Ativo"] != DBNull.Value && Convert.ToBoolean(row["Ativo"]);
+                    if (!ativo) continue;
+
+                    int codigoConfig = Convert.ToInt32(row["Codigo"]);
+                    var cfg = _dal.Carregar(codigoConfig);
+                    if (cfg.fidMeta_Gasto <= 0) continue;
+
+                    int deveDar = (int)(cliente.clieTotalGasto / cfg.fidMeta_Gasto);
+                    int jaDeu   = _dal.ContarPremiosEnviados(codigoCliente, codigoConfig);
+                    if (deveDar <= jaDeu) continue;
+
+                    string descricao;
+                    string cupomGerado = "";
+
+                    if (cfg.fidPremio_Tipo == "PRODUTO")
+                    {
+                        descricao = $"Prêmio produto: {cfg.fidProduto_Nome}";
+                    }
+                    else
+                    {
+                        cupomGerado = GerarCodigoCupom(cliente.clieNome_RazaoSocial);
+                        _dal.CriarCupomFidelizacao(cupomGerado, cfg);
+                        descricao = $"Cupom {cupomGerado} ({cfg.fidCupom_Tipo} {cfg.fidCupom_Valor:N2})";
+                    }
+
+                    string telefone = !string.IsNullOrWhiteSpace(cliente.clieCelular)
+                        ? cliente.clieCelular : cliente.clieTelefone;
+                    AbrirWhatsApp(telefone, cfg, cliente.clieNome_RazaoSocial, cupomGerado,
+                                  cliente.clieTotalGasto, cfg.fidMeta_Gasto);
+
+                    _dal.RegistrarHistorico(codigoCliente, codigoPedido, codigoConfig,
+                                            cupomGerado, descricao, telefone);
+
+                    mensagens.AppendLine($"[{cfg.fidNome}] {descricao}");
                 }
-                else
-                {
-                    // Gerar código de cupom único
-                    cupomGerado = GerarCodigoCupom(cliente.clieNome_RazaoSocial);
-                    _dal.CriarCupomFidelizacao(cupomGerado, cfg);
-                    descricao = $"Cupom {cupomGerado} ({cfg.fidCupom_Tipo} {cfg.fidCupom_Valor:N2})";
-                }
 
-                // Obter telefone preferencial
-                string telefone = !string.IsNullOrWhiteSpace(cliente.clieCelular)
-                    ? cliente.clieCelular
-                    : cliente.clieTelefone;
-                AbrirWhatsApp(telefone, cfg, cliente.clieNome_RazaoSocial, cupomGerado,
-                              cliente.clieTotalGasto, cfg.fidMeta_Gasto);
-
-                _dal.RegistrarHistorico(codigoCliente, codigoPedido, cupomGerado, descricao, telefone);
-
-                return $"Fidelização: {cliente.clieNome_RazaoSocial} atingiu R$ {cliente.clieTotalGasto:N2} em compras. {descricao} enviado!";
+                string resultado = mensagens.ToString().Trim();
+                return string.IsNullOrEmpty(resultado)
+                    ? ""
+                    : $"Fidelização: {cliente.clieNome_RazaoSocial} atingiu R$ {cliente.clieTotalGasto:N2}. Prêmios emitidos:\n{resultado}";
             }
             catch (Exception ex)
             {
@@ -77,6 +111,7 @@ namespace Pedeai.BLL
             }
         }
 
+        // ─────────────────────────────────────────────────────────────────────
         // ─────────────────────────────────────────────────────────────────────
 
         private static string GerarCodigoCupom(string nomeCliente)

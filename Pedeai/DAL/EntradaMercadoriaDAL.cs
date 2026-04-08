@@ -100,11 +100,13 @@ namespace Pedeai.DAL
                     const string sqlI = @"
                         INSERT INTO item_entrada_mercadoria
                             (auxCodigo,Codigo,Codigo_Entrada,Codigo_Mercadoria,
-                             itmNome_Mercadoria,itmQtde,itmPreco_Custo,itmSubtotal,
+                             itmNome_Mercadoria,itmQtde,itmFracao,itmUnid_Entrada,itmUnid_Saida,
+                             itmPreco_Custo,itmSubtotal,
                              itmAtualizar_Custo,Situacao)
                         VALUES
                             (@aux,@cod,@ent,@merc,
-                             @nome,@qtde,@custo,@sub,
+                             @nome,@qtde,@fracao,@unidEnt,@unidSai,
+                             @custo,@sub,
                              @atualizar,'A')";
                     using var cmdI = new MySqlCommand(sqlI, conn, trans);
                     cmdI.Parameters.AddWithValue("@aux",      item.auxCodigo);
@@ -113,18 +115,23 @@ namespace Pedeai.DAL
                     cmdI.Parameters.AddWithValue("@merc",     item.Codigo_Mercadoria);
                     cmdI.Parameters.AddWithValue("@nome",     item.itmNome_Mercadoria ?? "");
                     cmdI.Parameters.AddWithValue("@qtde",     item.itmQtde);
+                    cmdI.Parameters.AddWithValue("@fracao",   item.itmFracao <= 0 ? 1m : item.itmFracao);
+                    cmdI.Parameters.AddWithValue("@unidEnt",  item.itmUnid_Entrada ?? "");
+                    cmdI.Parameters.AddWithValue("@unidSai",  item.itmUnid_Saida ?? "");
                     cmdI.Parameters.AddWithValue("@custo",    item.itmPreco_Custo);
                     cmdI.Parameters.AddWithValue("@sub",      item.itmSubtotal);
                     cmdI.Parameters.AddWithValue("@atualizar",item.itmAtualizar_Custo ? 1 : 0);
                     cmdI.ExecuteNonQuery();
 
-                    // Entrada no estoque
+                    // Entrada no estoque — aplica fração de conversão
                     if (item.Codigo_Mercadoria > 0)
                     {
+                        decimal fracao = item.itmFracao <= 0 ? 1m : item.itmFracao;
+                        decimal deltaEstoque = item.itmQtde * fracao;
                         using var cmdEst = new MySqlCommand(
                             "UPDATE mercadoria SET mercEstoque_Atual = mercEstoque_Atual + @qtde WHERE Codigo=@merc",
                             conn, trans);
-                        cmdEst.Parameters.AddWithValue("@qtde", item.itmQtde);
+                        cmdEst.Parameters.AddWithValue("@qtde", deltaEstoque);
                         cmdEst.Parameters.AddWithValue("@merc", item.Codigo_Mercadoria);
                         cmdEst.ExecuteNonQuery();
 
@@ -178,11 +185,11 @@ namespace Pedeai.DAL
                 using var conn  = AbrirConexao();
                 using var trans = conn.BeginTransaction();
 
-                // Reverte estoque dos itens
+                // Reverte estoque dos itens (aplica fração de conversão)
                 using var cmdRev = new MySqlCommand(@"
                     UPDATE mercadoria m
                     JOIN item_entrada_mercadoria i ON i.Codigo_Mercadoria = m.Codigo
-                    SET m.mercEstoque_Atual = m.mercEstoque_Atual - i.itmQtde
+                    SET m.mercEstoque_Atual = m.mercEstoque_Atual - (i.itmQtde * COALESCE(i.itmFracao, 1))
                     WHERE i.Codigo_Entrada = @cod", conn, trans);
                 cmdRev.Parameters.AddWithValue("@cod", codigo);
                 cmdRev.ExecuteNonQuery();
@@ -236,6 +243,9 @@ namespace Pedeai.DAL
             Codigo_Mercadoria  = r["Codigo_Mercadoria"] == DBNull.Value ? 0 : Convert.ToInt32(r["Codigo_Mercadoria"]),
             itmNome_Mercadoria = r["itmNome_Mercadoria"]?.ToString() ?? "",
             itmQtde            = r["itmQtde"]  == DBNull.Value ? 0m : Convert.ToDecimal(r["itmQtde"]),
+            itmFracao          = r["itmFracao"]      == DBNull.Value ? 1m : Convert.ToDecimal(r["itmFracao"]),
+            itmUnid_Entrada    = r["itmUnid_Entrada"] == DBNull.Value ? "" : r["itmUnid_Entrada"].ToString(),
+            itmUnid_Saida      = r["itmUnid_Saida"]   == DBNull.Value ? "" : r["itmUnid_Saida"].ToString(),
             itmPreco_Custo     = r["itmPreco_Custo"] == DBNull.Value ? 0m : Convert.ToDecimal(r["itmPreco_Custo"]),
             itmSubtotal        = r["itmSubtotal"] == DBNull.Value ? 0m : Convert.ToDecimal(r["itmSubtotal"]),
             itmAtualizar_Custo = r["itmAtualizar_Custo"] == DBNull.Value ? true : Convert.ToInt32(r["itmAtualizar_Custo"]) == 1,

@@ -307,6 +307,7 @@ namespace Pedeai.Forms
             if (numQtde.Value <= 0) { MessageBox.Show("Informe uma quantidade válida."); numQtde.Focus(); return; }
 
             var qtde    = numQtde.Value;
+            var fracao  = numFracao.Value <= 0 ? 1m : numFracao.Value;
             var custo   = numCustoItem.Value;
             var subtotal = qtde * custo;
 
@@ -315,6 +316,9 @@ namespace Pedeai.Forms
                 Codigo_Mercadoria  = _produtoAtualCodigo,
                 itmNome_Mercadoria = nome,
                 itmQtde            = qtde,
+                itmFracao          = fracao,
+                itmUnid_Entrada    = txtUnidEntrada.Text.Trim(),
+                itmUnid_Saida      = txtUnidSaida.Text.Trim(),
                 itmPreco_Custo     = custo,
                 itmSubtotal        = subtotal,
                 itmAtualizar_Custo = chkAtualizarCusto.Checked,
@@ -327,6 +331,9 @@ namespace Pedeai.Forms
             txtProdCod.Clear();
             txtProdNome.Clear();
             numQtde.Value = 1;
+            numFracao.Value = 1;
+            txtUnidEntrada.Clear();
+            txtUnidSaida.Clear();
             numCustoItem.Value = 0;
             _produtoAtualCodigo = 0;
             txtProdCod.Focus();
@@ -352,7 +359,10 @@ namespace Pedeai.Forms
                 gridItens.Rows.Add(
                     item.Codigo_Mercadoria > 0 ? item.Codigo_Mercadoria.ToString() : "-",
                     item.itmNome_Mercadoria,
-                    item.itmQtde.ToString("N3"),
+                    item.itmQtde.ToString("N2"),
+                    string.IsNullOrEmpty(item.itmUnid_Entrada) ? "UN" : item.itmUnid_Entrada.ToUpper(),
+                    item.itmFracao == 1m ? "1" : item.itmFracao.ToString("N4").TrimEnd('0').TrimEnd('.'),
+                    string.IsNullOrEmpty(item.itmUnid_Saida) ? "UN" : item.itmUnid_Saida.ToUpper(),
                     item.itmPreco_Custo.ToString("N2"),
                     item.itmSubtotal.ToString("N2"),
                     item.itmAtualizar_Custo ? "Sim" : "Não"

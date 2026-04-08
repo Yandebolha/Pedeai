@@ -273,6 +273,14 @@ namespace Pedeai.DB
                 // Remove coluna descontinuada de entrada_mercadoria
                 DropColumnIfExists(conn, db, "entrada_mercadoria", "entObservacoes");
 
+                // Frações de entrada em item_entrada_mercadoria
+                AddColumnIfNotExists(conn, db, "item_entrada_mercadoria", "itmFracao",
+                    "DECIMAL(12,4) NOT NULL DEFAULT 1.0000");
+                AddColumnIfNotExists(conn, db, "item_entrada_mercadoria", "itmUnid_Entrada",
+                    "VARCHAR(20) NOT NULL DEFAULT ''");
+                AddColumnIfNotExists(conn, db, "item_entrada_mercadoria", "itmUnid_Saida",
+                    "VARCHAR(20) NOT NULL DEFAULT ''");
+
                 // ── 12. Tabela: fornecedor ────────────────────────────────────
                 Exec(conn, @"
                     CREATE TABLE IF NOT EXISTS fornecedor (
@@ -338,6 +346,19 @@ namespace Pedeai.DB
                     (Codigo, fidMensagem)
                     VALUES (1, 'Parabéns {Nome}! Você atingiu R$ {Meta} em compras e ganhou um cupom {CupomCodigo} válido até {Validade}.')");
 
+                // Promote Codigo to AUTO_INCREMENT if not yet
+                {
+                    using var chk = new MySqlCommand(@"
+                        SELECT COLUMN_NAME FROM information_schema.COLUMNS
+                        WHERE TABLE_SCHEMA=@db AND TABLE_NAME='config_fidelizacao'
+                          AND COLUMN_NAME='Codigo' AND EXTRA LIKE '%auto_increment%' LIMIT 1", conn);
+                    chk.Parameters.AddWithValue("@db", db);
+                    if (chk.ExecuteScalar() == null)
+                        Exec(conn, "ALTER TABLE config_fidelizacao MODIFY Codigo INT NOT NULL AUTO_INCREMENT");
+                }
+                AddColumnIfNotExists(conn, db, "config_fidelizacao", "fidNome",
+                    "VARCHAR(100) NOT NULL DEFAULT 'Regra Padrão'");
+
                 // ── historico_fidelizacao ─────────────────────────────────────
                 Exec(conn, @"
                     CREATE TABLE IF NOT EXISTS historico_fidelizacao (
@@ -349,6 +370,8 @@ namespace Pedeai.DB
                         fidDescricao   VARCHAR(200) NOT NULL DEFAULT '',
                         fidTelefone    VARCHAR(20)  NOT NULL DEFAULT ''
                     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+                AddColumnIfNotExists(conn, db, "historico_fidelizacao", "Codigo_Config",
+                    "INT NULL DEFAULT NULL");
 
                 return true;
             }

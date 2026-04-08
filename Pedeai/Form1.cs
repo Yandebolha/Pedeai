@@ -1093,6 +1093,7 @@ namespace Pedeai
                 {
                     Logger.Log("Pedido cancelado", $"#{cod} | Autorizado por: {canceladoPor}");
                     CarregarPedidos();
+                    RestaurarSelecaoPedido(cod);
                 }
                 return;
             }
@@ -1124,6 +1125,7 @@ namespace Pedeai
                                 logExtra += $" | DESCONTO R$ {(pedido.pediValor_Total - vPago):N2} autorizado por {autNome}";
                             Logger.Log("Pedido finalizado", logExtra);
                             CarregarPedidos();
+                            RestaurarSelecaoPedido(cod);
                             // Reimprimir cupom quando há desconto autorizado no pagamento
                             if (!string.IsNullOrEmpty(autNome))
                                 ImprimirCupomPedido(cod);
@@ -1154,6 +1156,24 @@ namespace Pedeai
                 ImprimirCupomPedido(cod);
 
             CarregarPedidos();
+            RestaurarSelecaoPedido(cod);
+        }
+
+        private void RestaurarSelecaoPedido(int codigo)
+        {
+            if (gridPedidos == null || gridPedidos.Rows.Count == 0) return;
+            foreach (DataGridViewRow row in gridPedidos.Rows)
+            {
+                if (row.Cells["Codigo"] == null) break;
+                if (Convert.ToInt32(row.Cells["Codigo"].Value) == codigo)
+                {
+                    gridPedidos.ClearSelection();
+                    row.Selected = true;
+                    if (gridPedidos.FirstDisplayedScrollingRowIndex != row.Index)
+                        try { gridPedidos.FirstDisplayedScrollingRowIndex = row.Index; } catch { }
+                    break;
+                }
+            }
         }
 
         private void ImprimirCupomPedido(int codigoPedido)

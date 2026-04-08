@@ -78,6 +78,9 @@ namespace Pedeai.BLL
         public System.Data.DataTable GetFinanceiro(DateTime de, DateTime ate)
             => _dal.GetFinanceiro(de, ate);
 
+        public System.Data.DataTable ListarConsulta(DateTime de, DateTime ate, string cliente = "", string numero = "")
+            => _dal.ListarConsulta(de, ate, cliente, numero);
+
         public System.Data.DataTable GetComprasPorDia(DateTime de, DateTime ate)
             => _dal.GetComprasPorDia(de, ate);
 

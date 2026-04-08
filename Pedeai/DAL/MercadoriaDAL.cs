@@ -21,13 +21,12 @@ namespace Pedeai.DAL
                                m.Situacao
                         FROM mercadoria m
                         LEFT JOIN grupo_mercadoria g ON g.Codigo = m.Codigo_Grupo
-                        ORDER BY g.grmeOrdem, m.mercOrdem, m.mercMercadoria";
+                        ORDER BY m.mercMercadoria ASC";
             using var cmd = new MySqlCommand(sql, conn);
             new MySqlDataAdapter(cmd).Fill(dt);
             return dt;
         }
 
-        /// <summary>Busca mercadoria completa pelo Codigo.</summary>
         public Mercadoria PesquisaCodigo(int codigo)
         {
             using var conn = AbrirConexao();
@@ -128,7 +127,7 @@ namespace Pedeai.DAL
                         FROM mercadoria m
                         LEFT JOIN grupo_mercadoria g ON g.Codigo = m.Codigo_Grupo
                         WHERE m.mercControla_Estoque = 1{where}
-                        ORDER BY g.grmeOrdem, m.mercOrdem, m.mercMercadoria";
+                        ORDER BY m.mercMercadoria ASC";
             using var cmd = new MySqlCommand(sql, conn);
             if (!string.IsNullOrWhiteSpace(filtro))
                 cmd.Parameters.AddWithValue("@filtro", "%" + filtro + "%");

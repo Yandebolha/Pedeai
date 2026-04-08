@@ -27,7 +27,7 @@ namespace Pedeai.DAL
                         FROM cliente c WHERE 1=1";
             if (!string.IsNullOrWhiteSpace(busca))
                 sql += " AND (c.clieNome_RazaoSocial LIKE @b OR c.clieTelefone LIKE @b OR c.clieCelular LIKE @b)";
-            sql += " ORDER BY c.Codigo ASC LIMIT 200";
+            sql += " ORDER BY c.clieNome_RazaoSocial ASC LIMIT 200";
 
             using var cmd = new MySqlCommand(sql, conn);
             if (!string.IsNullOrWhiteSpace(busca)) cmd.Parameters.AddWithValue("@b", $"%{busca}%");

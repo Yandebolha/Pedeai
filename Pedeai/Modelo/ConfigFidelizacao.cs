@@ -2,7 +2,8 @@ namespace Pedeai.Modelo
 {
     public class ConfigFidelizacao
     {
-        public int     Codigo            { get; set; } = 1;
+        public int     Codigo            { get; set; }
+        public string  fidNome           { get; set; } = "Regra Padrão";
         public bool    fidAtivo          { get; set; } = false;
         public decimal fidMeta_Gasto     { get; set; } = 500m;   // R$ acumulado para ganhar prêmio
         public string  fidPremio_Tipo    { get; set; } = "CUPOM"; // CUPOM | PRODUTO

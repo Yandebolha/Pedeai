@@ -63,6 +63,46 @@ namespace Pedeai.DAL
             return dt;
         }
 
+        /// <summary>
+        /// Pesquisa pedidos por intervalo de datas, nome de cliente e/ou número — para a tela Consultar Pedido.
+        /// </summary>
+        public DataTable ListarConsulta(DateTime de, DateTime ate, string cliente = "", string numero = "")
+        {
+            var dt = new DataTable();
+            using var conn = AbrirConexao();
+            var sql = @"SELECT p.Codigo,
+                               p.pediNumero                AS Numero,
+                               p.pediNome_Cliente          AS Cliente,
+                               p.pediTelefone_Cliente      AS Telefone,
+                               CASE p.pediSituacao
+                                   WHEN 0 THEN 'Pendente'
+                                   WHEN 1 THEN 'Confirmado'
+                                   WHEN 2 THEN 'Em Preparo'
+                                   WHEN 3 THEN 'Pronto'
+                                   WHEN 4 THEN 'Saiu p/ Entrega'
+                                   WHEN 5 THEN 'Entregue'
+                                   WHEN 6 THEN 'Cancelado'
+                                   ELSE CAST(p.pediSituacao AS CHAR)
+                               END                          AS Status,
+                               p.pediValor_Total            AS Total,
+                               p.pediData_Lancamento        AS DataHora
+                        FROM pedido_web p
+                        WHERE DATE(p.pediData_Lancamento) BETWEEN @de AND @ate";
+            if (!string.IsNullOrWhiteSpace(cliente))
+                sql += " AND p.pediNome_Cliente LIKE @cli";
+            if (!string.IsNullOrWhiteSpace(numero))
+                sql += " AND p.pediNumero = @num";
+            sql += " ORDER BY p.pediData_Lancamento DESC LIMIT 500";
+
+            using var cmd = new MySqlCommand(sql, conn);
+            cmd.Parameters.AddWithValue("@de",  de.Date);
+            cmd.Parameters.AddWithValue("@ate", ate.Date);
+            if (!string.IsNullOrWhiteSpace(cliente)) cmd.Parameters.AddWithValue("@cli", $"%{cliente}%");
+            if (!string.IsNullOrWhiteSpace(numero))  cmd.Parameters.AddWithValue("@num", numero.Trim());
+            new MySqlDataAdapter(cmd).Fill(dt);
+            return dt;
+        }
+
         /// <summary>Busca um pedido completo pelo Codigo.</summary>
         public PedidoWeb PesquisaCodigo(int codigo)
         {
