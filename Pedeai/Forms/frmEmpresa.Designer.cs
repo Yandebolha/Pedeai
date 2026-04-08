@@ -312,135 +312,140 @@ namespace Pedeai.Forms
             this.btnCancelarUsr.UseVisualStyleBackColor = false;
             this.btnCancelarUsr.Visible = false;
             this.btnCancelarUsr.Click += new System.EventHandler(this.BtnCancelarUsuario_Click);
+            // ── Módulos Liberados — grade 4 colunas × 4 linhas ───────────────
+            // Linha 1 (y=260): Dashboard | Pedidos | Financeiro | Turno de Caixa
+            // Linha 2 (y=286): Produtos | Categorias | Clientes | Estoque
+            // Linha 3 (y=312): Fornecedores | Cupons | Empresa | Ent. Mercadoria
+            // Linha 4 (y=338): Cancelar Pedidos | Avisos | Consultar Pedido | Fidelização
             // 
             // chkModDashboard
             // 
             this.chkModDashboard.Location = new System.Drawing.Point(168, 260);
             this.chkModDashboard.Name = "chkModDashboard";
-            this.chkModDashboard.Size = new System.Drawing.Size(102, 22);
+            this.chkModDashboard.Size = new System.Drawing.Size(164, 22);
             this.chkModDashboard.TabIndex = 6;
             this.chkModDashboard.Text = "Dashboard";
             // 
             // chkModPedidos
             // 
-            this.chkModPedidos.Location = new System.Drawing.Point(274, 260);
+            this.chkModPedidos.Location = new System.Drawing.Point(342, 260);
             this.chkModPedidos.Name = "chkModPedidos";
-            this.chkModPedidos.Size = new System.Drawing.Size(102, 22);
+            this.chkModPedidos.Size = new System.Drawing.Size(164, 22);
             this.chkModPedidos.TabIndex = 7;
             this.chkModPedidos.Text = "Pedidos";
             // 
             // chkModFinanceiro
             // 
-            this.chkModFinanceiro.Location = new System.Drawing.Point(380, 260);
+            this.chkModFinanceiro.Location = new System.Drawing.Point(516, 260);
             this.chkModFinanceiro.Name = "chkModFinanceiro";
-            this.chkModFinanceiro.Size = new System.Drawing.Size(102, 22);
+            this.chkModFinanceiro.Size = new System.Drawing.Size(164, 22);
             this.chkModFinanceiro.TabIndex = 8;
             this.chkModFinanceiro.Text = "Financeiro";
+            // 
+            // chkModTurno
+            // 
+            this.chkModTurno.Location = new System.Drawing.Point(690, 260);
+            this.chkModTurno.Name = "chkModTurno";
+            this.chkModTurno.Size = new System.Drawing.Size(164, 22);
+            this.chkModTurno.TabIndex = 24;
+            this.chkModTurno.Text = "Turno de Caixa";
+            this.chkModTurno.ForeColor = System.Drawing.Color.FromArgb(50, 50, 50);
             // 
             // chkModProdutos
             // 
             this.chkModProdutos.Location = new System.Drawing.Point(168, 286);
             this.chkModProdutos.Name = "chkModProdutos";
-            this.chkModProdutos.Size = new System.Drawing.Size(102, 22);
+            this.chkModProdutos.Size = new System.Drawing.Size(164, 22);
             this.chkModProdutos.TabIndex = 9;
             this.chkModProdutos.Text = "Produtos";
             // 
             // chkModCategorias
             // 
-            this.chkModCategorias.Location = new System.Drawing.Point(274, 286);
+            this.chkModCategorias.Location = new System.Drawing.Point(342, 286);
             this.chkModCategorias.Name = "chkModCategorias";
-            this.chkModCategorias.Size = new System.Drawing.Size(102, 22);
+            this.chkModCategorias.Size = new System.Drawing.Size(164, 22);
             this.chkModCategorias.TabIndex = 10;
             this.chkModCategorias.Text = "Categorias";
             // 
             // chkModClientes
             // 
-            this.chkModClientes.Location = new System.Drawing.Point(380, 286);
+            this.chkModClientes.Location = new System.Drawing.Point(516, 286);
             this.chkModClientes.Name = "chkModClientes";
-            this.chkModClientes.Size = new System.Drawing.Size(102, 22);
+            this.chkModClientes.Size = new System.Drawing.Size(164, 22);
             this.chkModClientes.TabIndex = 11;
             this.chkModClientes.Text = "Clientes";
+            // 
+            // chkModEstoque
+            // 
+            this.chkModEstoque.Location = new System.Drawing.Point(690, 286);
+            this.chkModEstoque.Name = "chkModEstoque";
+            this.chkModEstoque.Size = new System.Drawing.Size(164, 22);
+            this.chkModEstoque.TabIndex = 25;
+            this.chkModEstoque.Text = "Estoque";
+            this.chkModEstoque.ForeColor = System.Drawing.Color.FromArgb(50, 50, 50);
             // 
             // chkModFornecedores
             // 
             this.chkModFornecedores.Location = new System.Drawing.Point(168, 312);
             this.chkModFornecedores.Name = "chkModFornecedores";
-            this.chkModFornecedores.Size = new System.Drawing.Size(102, 22);
+            this.chkModFornecedores.Size = new System.Drawing.Size(164, 22);
             this.chkModFornecedores.TabIndex = 12;
             this.chkModFornecedores.Text = "Fornecedores";
             // 
             // chkModCupons
             // 
-            this.chkModCupons.Location = new System.Drawing.Point(274, 312);
+            this.chkModCupons.Location = new System.Drawing.Point(342, 312);
             this.chkModCupons.Name = "chkModCupons";
-            this.chkModCupons.Size = new System.Drawing.Size(102, 22);
+            this.chkModCupons.Size = new System.Drawing.Size(164, 22);
             this.chkModCupons.TabIndex = 13;
             this.chkModCupons.Text = "Cupons";
             // 
             // chkModEmpresa
             // 
-            this.chkModEmpresa.Location = new System.Drawing.Point(380, 312);
+            this.chkModEmpresa.Location = new System.Drawing.Point(516, 312);
             this.chkModEmpresa.Name = "chkModEmpresa";
-            this.chkModEmpresa.Size = new System.Drawing.Size(102, 22);
+            this.chkModEmpresa.Size = new System.Drawing.Size(164, 22);
             this.chkModEmpresa.TabIndex = 14;
             this.chkModEmpresa.Text = "Empresa";
+            // 
+            // chkModEntradaMercadoria
+            // 
+            this.chkModEntradaMercadoria.Location = new System.Drawing.Point(690, 312);
+            this.chkModEntradaMercadoria.Name = "chkModEntradaMercadoria";
+            this.chkModEntradaMercadoria.Size = new System.Drawing.Size(164, 22);
+            this.chkModEntradaMercadoria.TabIndex = 16;
+            this.chkModEntradaMercadoria.Text = "Entrada Mercadoria";
             // 
             // chkModCancelarPedidos
             // 
             this.chkModCancelarPedidos.Location = new System.Drawing.Point(168, 338);
             this.chkModCancelarPedidos.Name = "chkModCancelarPedidos";
-            this.chkModCancelarPedidos.Size = new System.Drawing.Size(102, 22);
+            this.chkModCancelarPedidos.Size = new System.Drawing.Size(164, 22);
             this.chkModCancelarPedidos.TabIndex = 15;
             this.chkModCancelarPedidos.Text = "Cancelar Pedidos";
             // 
-            // chkModEntradaMercadoria
-            // 
-            this.chkModEntradaMercadoria.Location = new System.Drawing.Point(274, 338);
-            this.chkModEntradaMercadoria.Name = "chkModEntradaMercadoria";
-            this.chkModEntradaMercadoria.Size = new System.Drawing.Size(102, 22);
-            this.chkModEntradaMercadoria.TabIndex = 16;
-            this.chkModEntradaMercadoria.Text = "Ent. Mercadoria";
-            // 
-            // chkModEstoque
-            //
-            this.chkModEstoque.Location = new System.Drawing.Point(168, 338);
-            this.chkModEstoque.Name = "chkModEstoque";
-            this.chkModEstoque.Size = new System.Drawing.Size(102, 22);
-            this.chkModEstoque.TabIndex = 25;
-            this.chkModEstoque.Text = "Estoque";
-            this.chkModEstoque.ForeColor = System.Drawing.Color.FromArgb(50, 50, 50);
-            // 
             // chkModAvisos
             // 
-            this.chkModAvisos.Location = new System.Drawing.Point(380, 338);
+            this.chkModAvisos.Location = new System.Drawing.Point(342, 338);
             this.chkModAvisos.Name = "chkModAvisos";
-            this.chkModAvisos.Size = new System.Drawing.Size(102, 22);
+            this.chkModAvisos.Size = new System.Drawing.Size(164, 22);
             this.chkModAvisos.TabIndex = 17;
             this.chkModAvisos.Text = "Avisos";
             // 
-            // chkModTurno
-            // 
-            this.chkModTurno.Location = new System.Drawing.Point(168, 364);
-            this.chkModTurno.Name = "chkModTurno";
-            this.chkModTurno.Size = new System.Drawing.Size(140, 22);
-            this.chkModTurno.TabIndex = 24;
-            this.chkModTurno.Text = "Turno de Caixa";
-            this.chkModTurno.ForeColor = System.Drawing.Color.FromArgb(50, 50, 50);
-            // 
             // chkModConsultarPedido
             // 
-            this.chkModConsultarPedido.Location = new System.Drawing.Point(316, 364);
+            this.chkModConsultarPedido.Location = new System.Drawing.Point(516, 338);
             this.chkModConsultarPedido.Name = "chkModConsultarPedido";
-            this.chkModConsultarPedido.Size = new System.Drawing.Size(140, 22);
+            this.chkModConsultarPedido.Size = new System.Drawing.Size(164, 22);
             this.chkModConsultarPedido.TabIndex = 26;
             this.chkModConsultarPedido.Text = "Consultar Pedido";
             this.chkModConsultarPedido.ForeColor = System.Drawing.Color.FromArgb(50, 50, 50);
             // 
             // chkModFidelizacao
             // 
-            this.chkModFidelizacao.Location = new System.Drawing.Point(168, 388);
+            this.chkModFidelizacao.Location = new System.Drawing.Point(690, 338);
             this.chkModFidelizacao.Name = "chkModFidelizacao";
-            this.chkModFidelizacao.Size = new System.Drawing.Size(120, 22);
+            this.chkModFidelizacao.Size = new System.Drawing.Size(164, 22);
             this.chkModFidelizacao.TabIndex = 27;
             this.chkModFidelizacao.Text = "Fidelização";
             this.chkModFidelizacao.ForeColor = System.Drawing.Color.FromArgb(50, 50, 50);
