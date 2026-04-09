@@ -106,14 +106,17 @@ namespace Pedeai.Forms
             Col("Email",        "E-mail",              180);
             Col("Cidade",       "Cidade",              110);
             Col("TotalPedidos", "Pedidos",              60,  DataGridViewContentAlignment.MiddleCenter);
-            Col("TotalGasto",   "Total Gasto",          80,  DataGridViewContentAlignment.MiddleRight);
+            Col("TotalGasto",   "Total Gasto",          90,  DataGridViewContentAlignment.MiddleRight);
+            Col("GastoMensal",  "Gasto Mês",            80,  DataGridViewContentAlignment.MiddleRight);
 
-            // Formata TotalGasto com R$
+            // Formata valores monetários
             foreach (DataGridViewRow row in grid.Rows)
             {
                 if (row.IsNewRow) continue;
                 if (grid.Columns.Contains("TotalGasto") && row.Cells["TotalGasto"].Value is decimal d)
                     row.Cells["TotalGasto"].Value = d.ToString("N2");
+                if (grid.Columns.Contains("GastoMensal") && row.Cells["GastoMensal"].Value is decimal dm)
+                    row.Cells["GastoMensal"].Value = dm.ToString("N2");
             }
         }
 

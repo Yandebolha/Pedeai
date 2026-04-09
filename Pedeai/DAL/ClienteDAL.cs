@@ -23,6 +23,7 @@ namespace Pedeai.DAL
                                COALESCE((SELECT SUM(pw.pediValor_Total) FROM pedido_web pw
                                          WHERE pw.Codigo_Cliente = c.Codigo
                                            AND pw.pediSituacao <> 6), 0) AS TotalGasto,
+                               COALESCE(c.clieGasto_Mensal, 0) AS GastoMensal,
                                c.Situacao
                         FROM cliente c WHERE 1=1";
             if (!string.IsNullOrWhiteSpace(busca))
@@ -150,6 +151,8 @@ namespace Pedeai.DAL
                 clieEstado           = r["clieEstado"]?.ToString() ?? "",
                 clieTotalPedidos     = r["clieTotalPedidos"] == DBNull.Value ? 0 : Convert.ToInt32(r["clieTotalPedidos"]),
                 clieTotalGasto       = r["clieTotalGasto"] == DBNull.Value ? 0 : Convert.ToDecimal(r["clieTotalGasto"]),
+                clieGasto_Mensal     = r["clieGasto_Mensal"] == DBNull.Value ? 0 : Convert.ToDecimal(r["clieGasto_Mensal"]),
+                clieGasto_Mes_Ref    = r["clieGasto_Mes_Ref"] == DBNull.Value ? "" : r["clieGasto_Mes_Ref"].ToString(),
                 clieData_Cadastro    = r["clieData_Cadastro"] == DBNull.Value ? DateTime.Now : Convert.ToDateTime(r["clieData_Cadastro"]),
                 Situacao             = r["Situacao"]?.ToString() ?? "A",
                 Status_Transmissao   = r["Status_Transmissao"]?.ToString() ?? "N",
@@ -160,11 +163,20 @@ namespace Pedeai.DAL
         public void IncrementarTotais(int codigoCliente, decimal valorPedido)
         {
             if (codigoCliente <= 0) return;
+            string mesAtual = DateTime.Today.ToString("yyyy-MM");
             using var conn = AbrirConexao();
             using var cmd = new MySqlCommand(
-                "UPDATE cliente SET clieTotalPedidos = clieTotalPedidos + 1, " +
-                "clieTotalGasto = clieTotalGasto + @val WHERE Codigo = @cod", conn);
+                @"UPDATE cliente SET
+                    clieTotalPedidos = clieTotalPedidos + 1,
+                    clieTotalGasto   = clieTotalGasto   + @val,
+                    clieGasto_Mensal = CASE
+                        WHEN clieGasto_Mes_Ref = @mes THEN clieGasto_Mensal + @val
+                        ELSE @val
+                    END,
+                    clieGasto_Mes_Ref = @mes
+                  WHERE Codigo = @cod", conn);
             cmd.Parameters.AddWithValue("@val", valorPedido);
+            cmd.Parameters.AddWithValue("@mes", mesAtual);
             cmd.Parameters.AddWithValue("@cod", codigoCliente);
             cmd.ExecuteNonQuery();
         }

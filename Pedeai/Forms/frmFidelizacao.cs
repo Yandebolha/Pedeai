@@ -76,6 +76,7 @@ namespace Pedeai.Forms
                                         ? "Parabéns {Nome}! Você atingiu R$ {Meta} em compras e ganhou um cupom {CupomCodigo} válido até {Validade}."
                                         : cfg.fidMensagem;
             AtualizarPainelPremio();
+            btnSalvar.Text = "\u270E Salvar Edição";
         }
 
         private void BtnNovaRegra_Click(object sender, EventArgs e)
@@ -94,6 +95,7 @@ namespace Pedeai.Forms
             txtMsg.Text             = "Parabéns {Nome}! Você atingiu R$ {Meta} em compras e ganhou um cupom {CupomCodigo} válido até {Validade}.";
             gridConfigs.ClearSelection();
             AtualizarPainelPremio();
+            btnSalvar.Text = "Salvar Nova Regra";
             txtNomeRegra.Focus();
             txtNomeRegra.SelectAll();
         }

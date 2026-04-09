@@ -373,6 +373,12 @@ namespace Pedeai.DB
                 AddColumnIfNotExists(conn, db, "historico_fidelizacao", "Codigo_Config",
                     "INT NULL DEFAULT NULL");
 
+                // ── colunas gasto mensal cliente ──────────────────────────────
+                AddColumnIfNotExists(conn, db, "cliente", "clieGasto_Mensal",
+                    "DECIMAL(10,2) NOT NULL DEFAULT 0.00");
+                AddColumnIfNotExists(conn, db, "cliente", "clieGasto_Mes_Ref",
+                    "VARCHAR(7) NOT NULL DEFAULT ''");
+
                 return true;
             }
             catch (Exception ex)

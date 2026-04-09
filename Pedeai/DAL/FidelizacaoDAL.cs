@@ -130,6 +130,22 @@ namespace Pedeai.DAL
             return r == DBNull.Value ? 0 : Convert.ToInt32(r);
         }
 
+        /// <summary>Quantas vezes esse cliente já recebeu um prêmio desta config no mês/ano informado.</summary>
+        public int ContarPremiosEnviadosMes(int codigoCliente, int codigoConfig, int ano, int mes)
+        {
+            using var conn = AbrirConexao();
+            using var cmd = new MySqlCommand(
+                @"SELECT COUNT(*) FROM historico_fidelizacao
+                  WHERE Codigo_Cliente=@cli AND Codigo_Config=@cfg
+                    AND YEAR(fidData)=@ano AND MONTH(fidData)=@mes", conn);
+            cmd.Parameters.AddWithValue("@cli", codigoCliente);
+            cmd.Parameters.AddWithValue("@cfg", codigoConfig);
+            cmd.Parameters.AddWithValue("@ano", ano);
+            cmd.Parameters.AddWithValue("@mes", mes);
+            var r = cmd.ExecuteScalar();
+            return r == DBNull.Value ? 0 : Convert.ToInt32(r);
+        }
+
         public void RegistrarHistorico(int codigoCliente, int codigoPedido, int codigoConfig,
                                        string cupomCodigo, string descricao, string telefone)
         {
@@ -166,6 +182,39 @@ namespace Pedeai.DAL
             cmd.Parameters.AddWithValue("@ate", ate.Date);
             new MySqlDataAdapter(cmd).Fill(dt);
             return dt;
+        }
+
+        /// <summary>Busca o primeiro cupom de fidelização disponível (não usado, não vencido) do cliente.</summary>
+        public Modelo.Cupom BuscarCupomDisponivel(int codigoCliente)
+        {
+            using var conn = AbrirConexao();
+            var sql = @"
+                SELECT c.*
+                FROM historico_fidelizacao h
+                JOIN cupom c ON c.cupomCodigo = h.fidCupomCodigo
+                WHERE h.Codigo_Cliente = @cli
+                  AND c.Situacao = 'A'
+                  AND (c.cupomLimite_Usos = 0 OR c.cupomUsos_Realizados < c.cupomLimite_Usos)
+                  AND c.cupomValido_Ate >= CURDATE()
+                ORDER BY c.cupomValido_Ate ASC
+                LIMIT 1";
+            using var cmd = new MySqlCommand(sql, conn);
+            cmd.Parameters.AddWithValue("@cli", codigoCliente);
+            using var r = cmd.ExecuteReader();
+            if (!r.Read()) return null;
+            return new Modelo.Cupom
+            {
+                Codigo                = Convert.ToInt32(r["Codigo"]),
+                cupomCodigo           = r["cupomCodigo"]?.ToString() ?? "",
+                cupomDescricao        = r["cupomDescricao"]?.ToString() ?? "Cupom de Fidelização",
+                cupomTipo             = r["cupomTipo"]?.ToString() ?? "PERCENTUAL",
+                cupomValor            = r["cupomValor"] == DBNull.Value ? 0m : Convert.ToDecimal(r["cupomValor"]),
+                cupomPedido_Minimo    = r["cupomPedido_Minimo"] == DBNull.Value ? 0m : Convert.ToDecimal(r["cupomPedido_Minimo"]),
+                cupomLimite_Usos      = r["cupomLimite_Usos"] == DBNull.Value ? 1 : Convert.ToInt32(r["cupomLimite_Usos"]),
+                cupomUsos_Realizados  = r["cupomUsos_Realizados"] == DBNull.Value ? 0 : Convert.ToInt32(r["cupomUsos_Realizados"]),
+                cupomValido_Ate       = r["cupomValido_Ate"] == DBNull.Value ? DateTime.Today : Convert.ToDateTime(r["cupomValido_Ate"]),
+                Situacao              = r["Situacao"]?.ToString() ?? "A",
+            };
         }
 
         /// <summary>Insere um cupom de fidelização na tabela cupom (uso único).</summary>

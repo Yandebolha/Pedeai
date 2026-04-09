@@ -47,6 +47,14 @@ namespace Pedeai.BLL
         public DataTable ListarHistorico(DateTime de, DateTime ate)
             => _dal.ListarHistorico(de, ate);
 
+        /// <summary>Retorna o primeiro cupom de fidelização disponível para o cliente, ou null.</summary>
+        public Modelo.Cupom BuscarCupomDisponivel(int codigoCliente)
+            => _dal.BuscarCupomDisponivel(codigoCliente);
+
+        /// <summary>Remove a chamada ao WhatsApp — mantida apenas para não quebrar chamadas externas.</summary>
+        [Obsolete("WhatsApp automático desativado.")]
+        public void AbrirWhatsAppManual(int codigoCliente, int codigoConfig) { }
+
         /// <summary>
         /// Verifica se o cliente atingiu um novo patamar em qualquer regra ativa e, se sim, emite o prêmio.
         /// Retorna mensagem para exibir ao operador, ou string vazia se nada foi feito.
@@ -71,9 +79,13 @@ namespace Pedeai.BLL
                     var cfg = _dal.Carregar(codigoConfig);
                     if (cfg.fidMeta_Gasto <= 0) continue;
 
-                    int deveDar = (int)(cliente.clieTotalGasto / cfg.fidMeta_Gasto);
-                    int jaDeu   = _dal.ContarPremiosEnviados(codigoCliente, codigoConfig);
-                    if (deveDar <= jaDeu) continue;
+                    // Usa gasto mensal para fidelização — 1 cupom por mês quando bate a meta
+                    decimal gastoMes = cliente.clieGasto_Mensal;
+                    if (gastoMes < cfg.fidMeta_Gasto) continue;
+
+                    int jaDeuMes = _dal.ContarPremiosEnviadosMes(
+                        codigoCliente, codigoConfig, DateTime.Today.Year, DateTime.Today.Month);
+                    if (jaDeuMes > 0) continue; // já recebeu prêmio este mês
 
                     string descricao;
                     string cupomGerado = "";
@@ -91,8 +103,6 @@ namespace Pedeai.BLL
 
                     string telefone = !string.IsNullOrWhiteSpace(cliente.clieCelular)
                         ? cliente.clieCelular : cliente.clieTelefone;
-                    AbrirWhatsApp(telefone, cfg, cliente.clieNome_RazaoSocial, cupomGerado,
-                                  cliente.clieTotalGasto, cfg.fidMeta_Gasto);
 
                     _dal.RegistrarHistorico(codigoCliente, codigoPedido, codigoConfig,
                                             cupomGerado, descricao, telefone);
@@ -103,7 +113,7 @@ namespace Pedeai.BLL
                 string resultado = mensagens.ToString().Trim();
                 return string.IsNullOrEmpty(resultado)
                     ? ""
-                    : $"Fidelização: {cliente.clieNome_RazaoSocial} atingiu R$ {cliente.clieTotalGasto:N2}. Prêmios emitidos:\n{resultado}";
+                    : $"Fidelização: {cliente.clieNome_RazaoSocial} atingiu R$ {cliente.clieGasto_Mensal:N2} este mês. Prêmios emitidos:\n{resultado}";
             }
             catch (Exception ex)
             {
@@ -122,7 +132,8 @@ namespace Pedeai.BLL
                 var partes = nomeCliente.Trim().ToUpperInvariant().Split(' ');
                 sufixo = partes[0].Length > 4 ? partes[0].Substring(0, 4) : partes[0];
             }
-            return $"FID{DateTime.Now:yyyyMMddHHmm}{sufixo}";
+            // Inclui segundos + sufixo aleatório para evitar duplicatas
+            return $"FID{DateTime.Now:yyyyMMddHHmmss}{sufixo}";
         }
 
         private static void AbrirWhatsApp(string telefone, ConfigFidelizacao cfg,

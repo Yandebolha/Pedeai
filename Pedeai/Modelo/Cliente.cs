@@ -21,6 +21,8 @@ namespace Pedeai.Modelo
         public string clieEstado { get; set; } = "";
         public int clieTotalPedidos { get; set; }
         public decimal clieTotalGasto { get; set; }
+        public decimal clieGasto_Mensal { get; set; }
+        public string clieGasto_Mes_Ref { get; set; } = "";
         public DateTime clieData_Cadastro { get; set; }
 
         public string Situacao { get; set; } = "A";

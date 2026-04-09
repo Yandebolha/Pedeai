@@ -13,6 +13,7 @@ namespace Pedeai.Forms
         private MercadoriaBLL _mercBLL;
         private ClienteBLL    _clienteBLL;
         private CupomBLL      _cupomBLL;
+        private FidelizacaoBLL _fidelBLL;
         private readonly List<ItemPedidoWeb> _itens = new List<ItemPedidoWeb>();
         private readonly List<ProdItem>      _produtos = new List<ProdItem>();
         private ProdItem _produtoSelecionado = null;
@@ -24,7 +25,7 @@ namespace Pedeai.Forms
         {
             InitializeComponent();
             if (System.ComponentModel.LicenseManager.UsageMode == System.ComponentModel.LicenseUsageMode.Designtime) return;
-            _pedidoBLL = new PedidoBLL(); _mercBLL = new MercadoriaBLL(); _clienteBLL = new ClienteBLL(); _cupomBLL = new CupomBLL();
+            _pedidoBLL = new PedidoBLL(); _mercBLL = new MercadoriaBLL(); _clienteBLL = new ClienteBLL(); _cupomBLL = new CupomBLL(); _fidelBLL = new FidelizacaoBLL();
             Load  += (_, __) => CarregarProdutos();
             Shown += (_, __) => PnlAddItem_SizeChanged(null, EventArgs.Empty);
         }
@@ -48,7 +49,42 @@ namespace Pedeai.Forms
                     if (!string.IsNullOrWhiteSpace(c.clieComplemento)) endParts.Add(c.clieComplemento.Trim());
                     txtEndereco.Text = string.Join(" - ", endParts);
                 }
+                // Verificar cupom de fidelidade disponível e aplicar automaticamente
+                AplicarCupomFidelidadeSeDisponivel(c.Codigo);
             }
+        }
+
+        private void AplicarCupomFidelidadeSeDisponivel(int codigoCliente)
+        {
+            try
+            {
+                var cupom = _fidelBLL.BuscarCupomDisponivel(codigoCliente);
+                if (cupom == null) return;
+
+                // Só aplica se não houver cupom já aplicado manualmente
+                if (_cupomAplicado != null) return;
+
+                _cupomAplicado = cupom;
+                txtCupom.Text  = cupom.cupomCodigo;
+                string tipoStr = cupom.cupomTipo == "PERCENTUAL"
+                    ? $"{cupom.cupomValor:0.#}%"
+                    : $"R$ {cupom.cupomValor:N2}";
+                lblCupomInfo.ForeColor    = Color.FromArgb(39, 174, 96);
+                btnAplicarCupom.Text      = "Remover";
+                btnAplicarCupom.BackColor = Color.FromArgb(80, 40, 35);
+                btnAplicarCupom.ForeColor = Color.FromArgb(200, 130, 120);
+                AtualizarTotal();
+
+                string validade = cupom.cupomValido_Ate.ToString("dd/MM/yyyy");
+                MessageBox.Show(
+                    $"\u2B50 Cupom de fidelidade aplicado automaticamente!\n" +
+                    $"C\u00f3digo: {cupom.cupomCodigo}\n" +
+                    $"Desconto: {tipoStr}\n" +
+                    $"V\u00e1lido at\u00e9: {validade}",
+                    "Cupom de Fidelidade",
+                    MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch { /* não crítico */ }
         }
 
         // -- Visibilidade dinamica -------------------------------------------
@@ -331,6 +367,14 @@ namespace Pedeai.Forms
 
             if (_codigoCliente > 0)
                 _clienteBLL.IncrementarTotais(_codigoCliente, total);
+
+            // Verificar se o cliente atingiu nova meta de fidelidade após esse pedido
+            if (_codigoCliente > 0)
+            {
+                var premioMsg = new FidelizacaoBLL().VerificarEDispararPremio(_codigoCliente, pedido.Codigo > 0 ? pedido.Codigo : 0);
+                if (!string.IsNullOrEmpty(premioMsg))
+                    MessageBox.Show(premioMsg, "Fidelidade", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
 
             MessageBox.Show("Pedido " + pedido.pediNumero + " criado com sucesso!", "Sucesso",
                 MessageBoxButtons.OK, MessageBoxIcon.Information);
