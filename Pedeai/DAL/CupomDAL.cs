@@ -19,7 +19,9 @@ namespace Pedeai.DAL
                                cupomUsos_Realizados AS Usos,
                                cupomValido_Ate    AS ValidoAte,
                                Situacao
-                        FROM cupom ORDER BY cupomData_Cadastro DESC";
+                        FROM cupom
+                        WHERE cupomCodigo NOT LIKE 'FID%'
+                        ORDER BY cupomData_Cadastro DESC";
             using var cmd = new MySqlCommand(sql, conn);
             new MySqlDataAdapter(cmd).Fill(dt);
             return dt;
