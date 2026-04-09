@@ -24,6 +24,7 @@ namespace Pedeai.Forms
         // Currently resolved supplier/product
         private int    _fornecedorCodigo  = 0;
         private int    _produtoAtualCodigo = 0;
+        private int    _codigoEditando    = 0;  // 0 = nova entrada, >0 = editando
 
         public frmEntradaMercadoria()
         {
@@ -213,13 +214,71 @@ namespace Pedeai.Forms
             if (e.RowIndex < 0) return;
             var row = gridEntradas.Rows[e.RowIndex];
             if (row.DataBoundItem == null) return;
-            var dtRow = ((System.Data.DataRowView)row.DataBoundItem).Row;
-            var cod   = Convert.ToInt32(dtRow["Codigo"]);
-            var itens = _bll.ListarItens(cod);
+            var dtRow    = ((System.Data.DataRowView)row.DataBoundItem).Row;
+            var cod      = Convert.ToInt32(dtRow["Codigo"]);
+            var itens    = _bll.ListarItens(cod);
             var parcelas = _bll.ListarParcelas(cod);
 
             using var dlg = new frmDetalheEntrada(cod, dtRow, itens, parcelas, _bll);
             dlg.ShowDialog(this);
+            if (dlg.QuereEditar)
+                AbrirEdicaoEntrada(cod, dtRow, itens, parcelas);
+        }
+
+        private void AbrirEdicaoEntrada(int cod, System.Data.DataRow dtRow,
+            List<ItemEntradaMercadoria> itens, List<ParcelaEntradaMercadoria> parcelas)
+        {
+            _codigoEditando    = cod;
+            _fornecedorCodigo  = dtRow["Fornecedor"] != DBNull.Value ? 0 : 0; // será resolvido abaixo
+            _produtoAtualCodigo = 0;
+
+            // Cabeçalho
+            txtFornNome.Text  = dtRow["Fornecedor"]?.ToString() ?? "";
+            txtFornCod.Text   = "";
+            ResolverFornecedorPorNome();
+            if (DateTime.TryParse(dtRow["entData"]?.ToString(), out DateTime dt))
+                dtpData.Value = dt;
+            txtNumDoc.Text = dtRow["Documento"]?.ToString() ?? "";
+
+            // Itens
+            _itens.Clear();
+            foreach (var it in itens)
+                _itens.Add(new ItemEntradaMercadoria
+                {
+                    Codigo_Mercadoria  = it.Codigo_Mercadoria,
+                    itmNome_Mercadoria = it.itmNome_Mercadoria,
+                    itmQtde            = it.itmQtde,
+                    itmFracao          = it.itmFracao,
+                    itmUnid_Entrada    = it.itmUnid_Entrada,
+                    itmUnid_Saida      = it.itmUnid_Saida,
+                    itmPreco_Custo     = it.itmPreco_Custo,
+                    itmSubtotal        = it.itmSubtotal,
+                    itmAtualizar_Custo = it.itmAtualizar_Custo,
+                    Situacao           = "A",
+                });
+
+            // Parcelas
+            _parcelas.Clear();
+            foreach (var p in parcelas)
+                _parcelas.Add(new ParcelaEntradaMercadoria
+                {
+                    parNumero    = p.parNumero,
+                    parVencimento= p.parVencimento,
+                    parValor     = p.parValor,
+                    parObservacao= p.parObservacao,
+                });
+
+            // Limpar campos de produto
+            txtProdCod.Clear(); txtProdNome.Clear();
+            numQtde.Value = 1; numValorTotal.Value = 0; numCustoItem.Value = 0;
+            chkFracionado.Checked = false; chkAtualizarCusto.Checked = false;
+            AtualizarVisibilidadeFracao();
+
+            AtualizarGridItens();
+            AtualizarGridParcelas();
+            pnlNovaEntrada.Visible = true;
+            btnConfirmarEntrada.Text = "\u2714 Salvar Edição";
+            txtFornCod.Focus();
         }
 
         // ── Nova Entrada ─────────────────────────────────────────────────────
@@ -252,7 +311,8 @@ namespace Pedeai.Forms
             numFracao.Visible          = frac;
             txtUnidSaida.Visible       = frac;
             lblUnidadesEntrada.Visible = frac;
-            pnlAddItem.Height          = frac ? 66 : 36;
+            pnlAddItem.Height          = frac ? 80 : 44;
+            pnlNovaEntrada.PerformLayout();
             if (frac) AtualizarLblUnidades();
             RecalcularCusto();
         }
@@ -260,8 +320,10 @@ namespace Pedeai.Forms
         private void AbrirNovaEntrada()
         {
             _itens.Clear();
+            _codigoEditando     = 0;
             _fornecedorCodigo   = 0;
             _produtoAtualCodigo = 0;
+            btnConfirmarEntrada.Text = "\u2714 Confirmar";
 
             txtFornCod.Clear();
             txtFornNome.Clear();
@@ -272,7 +334,7 @@ namespace Pedeai.Forms
             numQtde.Value = 1;
             numValorTotal.Value = 0;
             numCustoItem.Value = 0;
-            chkAtualizarCusto.Checked = true;
+            chkAtualizarCusto.Checked = false;
             chkFracionado.Checked = false;
             numFracEntrada.Value = 1;
             AtualizarVisibilidadeFracao();
@@ -288,6 +350,8 @@ namespace Pedeai.Forms
             pnlNovaEntrada.Visible = false;
             _itens.Clear();
             _parcelas.Clear();
+            _codigoEditando = 0;
+            btnConfirmarEntrada.Text = "\u2714 Confirmar";
         }
 
         // ── Resolução de fornecedor ──────────────────────────────────────────
@@ -491,12 +555,24 @@ namespace Pedeai.Forms
             foreach (var item in _itens) total += item.itmSubtotal;
             entrada.entValorTotal = total;
 
-            var erro = _bll.Inserir(entrada, new List<ItemEntradaMercadoria>(_itens),
-                _parcelas.Count > 0 ? new List<ParcelaEntradaMercadoria>(_parcelas) : null);
+            string erro;
+            string msg;
+            if (_codigoEditando > 0)
+            {
+                entrada.Codigo = _codigoEditando;
+                erro = _bll.Atualizar(entrada, new List<ItemEntradaMercadoria>(_itens),
+                    _parcelas.Count > 0 ? new List<ParcelaEntradaMercadoria>(_parcelas) : null);
+                msg  = "Entrada atualizada com sucesso! Estoque recalculado.";
+            }
+            else
+            {
+                erro = _bll.Inserir(entrada, new List<ItemEntradaMercadoria>(_itens),
+                    _parcelas.Count > 0 ? new List<ParcelaEntradaMercadoria>(_parcelas) : null);
+                msg  = "Entrada registrada com sucesso! Estoque atualizado.";
+            }
             if (!string.IsNullOrEmpty(erro)) { MessageBox.Show("Erro: " + erro); return; }
 
-            MessageBox.Show("Entrada registrada com sucesso! Estoque atualizado.", "Sucesso",
-                MessageBoxButtons.OK, MessageBoxIcon.Information);
+            MessageBox.Show(msg, "Sucesso", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
             FecharNovaEntrada();
             CarregarGrid();
@@ -611,6 +687,11 @@ namespace Pedeai.Forms
             dlg.Controls.Add(txtP);
             dlg.ShowDialog(this);
         }
+
+        private void chkFracionado_CheckedChanged(object sender, EventArgs e)
+        {
+
+        }
     }
 
     // ── Detalhe leitura de entrada já registrada ────────────────────────────
@@ -619,6 +700,7 @@ namespace Pedeai.Forms
         private readonly EntradaMercadoriaBLL _bll;
         private readonly int _codigoEntrada;
         private DataGridView _gridParcelas;
+        public bool QuereEditar { get; private set; } = false;
 
         public frmDetalheEntrada(int codigo, System.Data.DataRow row, List<ItemEntradaMercadoria> itens,
             List<ParcelaEntradaMercadoria> parcelas, EntradaMercadoriaBLL bll)
@@ -744,7 +826,16 @@ namespace Pedeai.Forms
             };
             btnFechar.FlatAppearance.BorderSize = 0;
             btnFechar.Click += (_, __) => Close();
-            pnlFoot.Controls.AddRange(new Control[] { btnMarcarPago, btnFechar });
+            var btnEditar = new Button
+            {
+                Text = "\u270E Editar Entrada", Left = 328, Top = 8, Width = 130, Height = 28,
+                BackColor = Color.FromArgb(52, 100, 160), ForeColor = Color.White,
+                FlatStyle = FlatStyle.Flat, Cursor = Cursors.Hand,
+                Font = new Font("Segoe UI", 9F, FontStyle.Bold)
+            };
+            btnEditar.FlatAppearance.BorderSize = 0;
+            btnEditar.Click += (_, __) => { QuereEditar = true; Close(); };
+            pnlFoot.Controls.AddRange(new Control[] { btnMarcarPago, btnFechar, btnEditar });
 
             // Layout: add in reverse Dock order (Fill last)
             Controls.Add(_gridParcelas);

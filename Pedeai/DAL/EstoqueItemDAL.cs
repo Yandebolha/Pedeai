@@ -15,11 +15,18 @@ namespace Pedeai.DAL
             var sql = $@"SELECT e.Codigo,
                                e.estoNome AS Nome,
                                e.estoUnidade AS Unidade,
-                               COALESCE(m.mercEstoque_Atual, e.estoQtde_Atual) AS Qtde,
-                               COALESCE(m.mercPreco_Custo,   e.estoPreco_Custo)  AS Custo,
+                               COALESCE(
+                                   (SELECT m1.mercEstoque_Atual FROM mercadoria m1 WHERE m1.Codigo = e.Codigo_Mercadoria LIMIT 1),
+                                   (SELECT m2.mercEstoque_Atual FROM mercadoria m2 WHERE m2.mercMercadoria = e.estoNome AND e.estoEh_Produto = 1 LIMIT 1),
+                                   e.estoQtde_Atual
+                               ) AS Qtde,
+                               COALESCE(
+                                   (SELECT m3.mercPreco_Custo FROM mercadoria m3 WHERE m3.Codigo = e.Codigo_Mercadoria LIMIT 1),
+                                   (SELECT m4.mercPreco_Custo FROM mercadoria m4 WHERE m4.mercMercadoria = e.estoNome AND e.estoEh_Produto = 1 LIMIT 1),
+                                   e.estoPreco_Custo
+                               ) AS Custo,
                                e.estoEh_Produto AS EhProduto, e.Situacao
                         FROM estoque_item e
-                        LEFT JOIN mercadoria m ON m.Codigo = e.Codigo_Mercadoria
                         WHERE e.Situacao = 'A'{where}
                         ORDER BY e.estoNome";
             using var cmd = new MySqlCommand(sql, conn);

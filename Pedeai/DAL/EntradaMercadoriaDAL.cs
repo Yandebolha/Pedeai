@@ -256,6 +256,151 @@ namespace Pedeai.DAL
             return total;
         }
 
+        // ── Atualizar entrada existente (reverte estoque antigo, aplica novo) ─
+        public string Atualizar(EntradaMercadoria entrada, List<ItemEntradaMercadoria> itens,
+            List<Modelo.ParcelaEntradaMercadoria> parcelas = null)
+        {
+            try
+            {
+                using var conn  = AbrirConexao();
+                using var trans = conn.BeginTransaction();
+
+                // 1. Reverter estoque dos itens antigos
+                using var cmdRevMerc = new MySqlCommand(@"
+                    UPDATE mercadoria m
+                    JOIN item_entrada_mercadoria i ON i.Codigo_Mercadoria = m.Codigo
+                    SET m.mercEstoque_Atual = m.mercEstoque_Atual - (i.itmQtde * COALESCE(i.itmFracao, 1))
+                    WHERE i.Codigo_Entrada = @cod AND i.Situacao = 'A'", conn, trans);
+                cmdRevMerc.Parameters.AddWithValue("@cod", entrada.Codigo);
+                cmdRevMerc.ExecuteNonQuery();
+
+                using var cmdRevEsto = new MySqlCommand(@"
+                    UPDATE estoque_item e
+                    JOIN item_entrada_mercadoria i ON i.Codigo_Mercadoria = e.Codigo_Mercadoria
+                    SET e.estoQtde_Atual = e.estoQtde_Atual - (i.itmQtde * COALESCE(i.itmFracao, 1))
+                    WHERE i.Codigo_Entrada = @cod AND i.Situacao = 'A'", conn, trans);
+                cmdRevEsto.Parameters.AddWithValue("@cod", entrada.Codigo);
+                cmdRevEsto.ExecuteNonQuery();
+
+                // 2. Cancelar itens e parcelas antigos
+                using var cmdCancItens = new MySqlCommand(
+                    "UPDATE item_entrada_mercadoria SET Situacao='C' WHERE Codigo_Entrada=@cod", conn, trans);
+                cmdCancItens.Parameters.AddWithValue("@cod", entrada.Codigo);
+                cmdCancItens.ExecuteNonQuery();
+
+                using var cmdCancParc = new MySqlCommand(
+                    "UPDATE parcela_entrada_mercadoria SET Situacao='C' WHERE Codigo_Entrada=@cod AND Situacao='A'", conn, trans);
+                cmdCancParc.Parameters.AddWithValue("@cod", entrada.Codigo);
+                cmdCancParc.ExecuteNonQuery();
+
+                // 3. Atualizar cabeçalho da entrada
+                using var cmdUpd = new MySqlCommand(@"
+                    UPDATE entrada_mercadoria SET
+                        Codigo_Fornecedor  = @forn,
+                        entNome_Fornecedor = @nomeForn,
+                        entData            = @dt,
+                        entNumeroDoc       = @doc,
+                        entValorTotal      = @total
+                    WHERE Codigo = @cod", conn, trans);
+                cmdUpd.Parameters.AddWithValue("@forn",     entrada.Codigo_Fornecedor > 0 ? (object)entrada.Codigo_Fornecedor : DBNull.Value);
+                cmdUpd.Parameters.AddWithValue("@nomeForn", entrada.entNome_Fornecedor ?? "");
+                cmdUpd.Parameters.AddWithValue("@dt",       entrada.entData.Date);
+                cmdUpd.Parameters.AddWithValue("@doc",      entrada.entNumeroDoc ?? "");
+                cmdUpd.Parameters.AddWithValue("@total",    entrada.entValorTotal);
+                cmdUpd.Parameters.AddWithValue("@cod",      entrada.Codigo);
+                cmdUpd.ExecuteNonQuery();
+
+                // 4. Inserir novos itens e atualizar estoque
+                foreach (var item in itens)
+                {
+                    item.Codigo        = ProximoCodigo("item_entrada_mercadoria",    conn, trans);
+                    item.auxCodigo     = ProximoAuxCodigo("item_entrada_mercadoria", conn, trans);
+                    item.Codigo_Entrada = entrada.Codigo;
+
+                    const string sqlI = @"
+                        INSERT INTO item_entrada_mercadoria
+                            (auxCodigo,Codigo,Codigo_Entrada,Codigo_Mercadoria,
+                             itmNome_Mercadoria,itmQtde,itmFracao,itmUnid_Entrada,itmUnid_Saida,
+                             itmPreco_Custo,itmSubtotal,itmAtualizar_Custo,Situacao)
+                        VALUES
+                            (@aux,@cod,@ent,@merc,
+                             @nome,@qtde,@fracao,@unidEnt,@unidSai,
+                             @custo,@sub,@atualizar,'A')";
+                    using var cmdI = new MySqlCommand(sqlI, conn, trans);
+                    cmdI.Parameters.AddWithValue("@aux",      item.auxCodigo);
+                    cmdI.Parameters.AddWithValue("@cod",      item.Codigo);
+                    cmdI.Parameters.AddWithValue("@ent",      item.Codigo_Entrada);
+                    cmdI.Parameters.AddWithValue("@merc",     item.Codigo_Mercadoria);
+                    cmdI.Parameters.AddWithValue("@nome",     item.itmNome_Mercadoria ?? "");
+                    cmdI.Parameters.AddWithValue("@qtde",     item.itmQtde);
+                    cmdI.Parameters.AddWithValue("@fracao",   item.itmFracao <= 0 ? 1m : item.itmFracao);
+                    cmdI.Parameters.AddWithValue("@unidEnt",  item.itmUnid_Entrada ?? "");
+                    cmdI.Parameters.AddWithValue("@unidSai",  item.itmUnid_Saida ?? "");
+                    cmdI.Parameters.AddWithValue("@custo",    item.itmPreco_Custo);
+                    cmdI.Parameters.AddWithValue("@sub",      item.itmSubtotal);
+                    cmdI.Parameters.AddWithValue("@atualizar",item.itmAtualizar_Custo ? 1 : 0);
+                    cmdI.ExecuteNonQuery();
+
+                    if (item.Codigo_Mercadoria > 0)
+                    {
+                        decimal fracao = item.itmFracao <= 0 ? 1m : item.itmFracao;
+                        decimal delta  = item.itmQtde * fracao;
+
+                        using var cmdEst = new MySqlCommand(
+                            "UPDATE mercadoria SET mercEstoque_Atual = mercEstoque_Atual + @qtde WHERE Codigo=@merc",
+                            conn, trans);
+                        cmdEst.Parameters.AddWithValue("@qtde", delta);
+                        cmdEst.Parameters.AddWithValue("@merc", item.Codigo_Mercadoria);
+                        cmdEst.ExecuteNonQuery();
+
+                        using var cmdEstItem = new MySqlCommand(
+                            "UPDATE estoque_item SET estoQtde_Atual = estoQtde_Atual + @delta WHERE Codigo_Mercadoria = @merc",
+                            conn, trans);
+                        cmdEstItem.Parameters.AddWithValue("@delta", delta);
+                        cmdEstItem.Parameters.AddWithValue("@merc",  item.Codigo_Mercadoria);
+                        cmdEstItem.ExecuteNonQuery();
+
+                        if (item.itmAtualizar_Custo && item.itmPreco_Custo > 0)
+                        {
+                            using var cmdCusto = new MySqlCommand(
+                                "UPDATE mercadoria SET mercPreco_Custo=@custo WHERE Codigo=@merc",
+                                conn, trans);
+                            cmdCusto.Parameters.AddWithValue("@custo", item.itmPreco_Custo);
+                            cmdCusto.Parameters.AddWithValue("@merc",  item.Codigo_Mercadoria);
+                            cmdCusto.ExecuteNonQuery();
+                        }
+                    }
+                }
+
+                // 5. Inserir novas parcelas
+                if (parcelas != null && parcelas.Count > 0)
+                {
+                    foreach (var p in parcelas)
+                    {
+                        p.Codigo_Entrada = entrada.Codigo;
+                        p.Codigo    = ProximoCodigo("parcela_entrada_mercadoria",    conn, trans);
+                        p.auxCodigo = ProximoAuxCodigo("parcela_entrada_mercadoria", conn, trans);
+                        const string sqlP = @"INSERT INTO parcela_entrada_mercadoria
+                            (auxCodigo,Codigo,Codigo_Entrada,parNumero,parVencimento,parValor,parObservacao,Situacao)
+                            VALUES (@aux,@cod,@ent,@num,@vcto,@val,@obs,'A')";
+                        using var cmdP = new MySqlCommand(sqlP, conn, trans);
+                        cmdP.Parameters.AddWithValue("@aux", p.auxCodigo);
+                        cmdP.Parameters.AddWithValue("@cod", p.Codigo);
+                        cmdP.Parameters.AddWithValue("@ent", p.Codigo_Entrada);
+                        cmdP.Parameters.AddWithValue("@num", p.parNumero);
+                        cmdP.Parameters.AddWithValue("@vcto",p.parVencimento.Date);
+                        cmdP.Parameters.AddWithValue("@val", p.parValor);
+                        cmdP.Parameters.AddWithValue("@obs", p.parObservacao ?? "");
+                        cmdP.ExecuteNonQuery();
+                    }
+                }
+
+                trans.Commit();
+                return "";
+            }
+            catch (Exception ex) { return ex.Message; }
+        }
+
         // ── Mapear ───────────────────────────────────────────────────────────
         private static EntradaMercadoria Mapear(MySqlDataReader r) => new EntradaMercadoria
         {

@@ -61,6 +61,23 @@ namespace Pedeai.BLL
 
         public decimal TotalPeriodo(DateTime de, DateTime ate) => _dal.TotalPeriodo(de, ate);
 
+        public string Atualizar(EntradaMercadoria entrada, List<ItemEntradaMercadoria> itens,
+            List<ParcelaEntradaMercadoria> parcelas = null)
+        {
+            if (string.IsNullOrWhiteSpace(entrada.entNome_Fornecedor))
+                return "Informe o fornecedor.";
+            if (itens == null || itens.Count == 0)
+                return "Adicione pelo menos um item.";
+            foreach (var item in itens)
+            {
+                if (item.itmQtde <= 0)
+                    return $"Quantidade inv\u00e1lida para o item '{item.itmNome_Mercadoria}'.";
+                if (item.itmPreco_Custo < 0)
+                    return $"Custo inv\u00e1lido para o item '{item.itmNome_Mercadoria}'.";
+            }
+            return _dal.Atualizar(entrada, itens, parcelas);
+        }
+
         public string Cancelar(int codigo) => _dal.Cancelar(codigo);
     }
 }
