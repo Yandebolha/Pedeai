@@ -281,6 +281,32 @@ namespace Pedeai.BLL
             return linhas;
         }
 
+        /// <summary>
+        /// Gera o texto da comanda (via ENTREGA) em formato limpo para envio via WhatsApp.
+        /// </summary>
+        public static string GerarTextoWhatsApp(PedidoWeb pedido,
+                                                List<ItemPedidoWeb> itens,
+                                                ConfiguracaoImpressao cfg,
+                                                Empresa empresa,
+                                                string nomeAtendente = "")
+        {
+            int larg = cfg.larguraCaracteres > 0 ? cfg.larguraCaracteres : 42;
+            var linhas = GerarVia(pedido, itens, cfg, empresa, nomeAtendente, larg, "ENTREGA");
+
+            var sb = new System.Text.StringBuilder();
+            foreach (var l in linhas)
+            {
+                // Remove marcadores de formatação de impressão (§B§, §S§, §P§)
+                string linha = l;
+                if (linha.StartsWith("§B§")) linha = "*" + linha.Substring(3).Trim() + "*";
+                else if (linha.StartsWith("§S§")) linha = linha.Substring(3);
+                else if (linha == "§P§") continue;
+
+                sb.AppendLine(linha);
+            }
+            return sb.ToString().TrimEnd();
+        }
+
         // ── Helpers de formatacao ────────────────────────────────────────────
 
         private static string Centralizar(string texto, int larg)

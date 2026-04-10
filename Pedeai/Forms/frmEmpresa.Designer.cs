@@ -48,6 +48,7 @@ namespace Pedeai.Forms
             this.chkModTurno = new System.Windows.Forms.CheckBox();
             this.chkModConsultarPedido = new System.Windows.Forms.CheckBox();
             this.chkModFidelizacao = new System.Windows.Forms.CheckBox();
+            this.chkModWhatsApp = new System.Windows.Forms.CheckBox();
             this.txtImpNomeEmpresa = new System.Windows.Forms.TextBox();
             this.txtImpEndereco = new System.Windows.Forms.TextBox();
             this.txtImpTelefone = new System.Windows.Forms.TextBox();
@@ -450,6 +451,15 @@ namespace Pedeai.Forms
             this.chkModFidelizacao.Text = "Fidelização";
             this.chkModFidelizacao.ForeColor = System.Drawing.Color.FromArgb(50, 50, 50);
             // 
+            // chkModWhatsApp
+            // 
+            this.chkModWhatsApp.Location = new System.Drawing.Point(168, 364);
+            this.chkModWhatsApp.Name = "chkModWhatsApp";
+            this.chkModWhatsApp.Size = new System.Drawing.Size(164, 22);
+            this.chkModWhatsApp.TabIndex = 28;
+            this.chkModWhatsApp.Text = "WhatsApp";
+            this.chkModWhatsApp.ForeColor = System.Drawing.Color.FromArgb(50, 50, 50);
+            // 
             // txtImpNomeEmpresa
             // 
             this.txtImpNomeEmpresa.BackColor = System.Drawing.Color.White;
@@ -727,6 +737,7 @@ namespace Pedeai.Forms
             this.tabUsr.Controls.Add(this.chkModTurno);
             this.tabUsr.Controls.Add(this.chkModConsultarPedido);
             this.tabUsr.Controls.Add(this.chkModFidelizacao);
+            this.tabUsr.Controls.Add(this.chkModWhatsApp);
             this.tabUsr.Controls.Add(this.btnNovoUsr);
             this.tabUsr.Controls.Add(this.btnPesquisarUsr);
             this.tabUsr.Controls.Add(this.btnSalvUsr);
@@ -939,6 +950,7 @@ namespace Pedeai.Forms
         internal System.Windows.Forms.CheckBox chkModTurno;
         internal System.Windows.Forms.CheckBox chkModConsultarPedido;
         internal System.Windows.Forms.CheckBox chkModFidelizacao;
+        internal System.Windows.Forms.CheckBox chkModWhatsApp;
         // Impressao
         internal System.Windows.Forms.TextBox        txtImpNomeEmpresa;
         internal System.Windows.Forms.TextBox        txtImpEndereco;

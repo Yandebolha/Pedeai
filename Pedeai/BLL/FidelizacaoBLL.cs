@@ -107,6 +107,15 @@ namespace Pedeai.BLL
                     _dal.RegistrarHistorico(codigoCliente, codigoPedido, codigoConfig,
                                             cupomGerado, descricao, telefone);
 
+                    // Notificar via WhatsApp se cupom foi gerado
+                    if (!string.IsNullOrEmpty(cupomGerado) && !string.IsNullOrEmpty(telefone))
+                    {
+                        string validade = DateTime.Today
+                            .AddDays(cfg.fidCupom_Validade > 0 ? cfg.fidCupom_Validade : 30)
+                            .ToString("dd/MM/yyyy");
+                        WhatsAppService.NotificarCupom(telefone, cliente.clieNome_RazaoSocial, cupomGerado, validade);
+                    }
+
                     mensagens.AppendLine($"[{cfg.fidNome}] {descricao}");
                 }
 

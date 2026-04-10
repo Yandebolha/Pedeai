@@ -1151,9 +1151,31 @@ namespace Pedeai
             var erro = _pedidoBLL.AtualizarSituacao(cod, novaSit);
             if (!string.IsNullOrEmpty(erro)) { MessageBox.Show("Erro: " + erro); return; }
 
-            // Ao confirmar (situação 1), imprimir duas vias do cupom
+            // Notificações WhatsApp
+            if (novaSit == 2)
+                BLL.WhatsAppService.NotificarPreparo(pedido.pediTelefone_Cliente, pedido.pediNome_Cliente, pedido.pediNumero);
+            else if (novaSit == 4)
+                BLL.WhatsAppService.NotificarEntrega(pedido.pediTelefone_Cliente, pedido.pediNome_Cliente, pedido.pediNumero);
+
+            // Ao confirmar (situação 1), imprimir duas vias do cupom e enviar comanda no WhatsApp
             if (novaSit == 1)
+            {
                 ImprimirCupomPedido(cod);
+
+                if (BLL.WhatsAppService.Ativo && !string.IsNullOrWhiteSpace(pedido.pediTelefone_Cliente))
+                {
+                    try
+                    {
+                        var itensCf = _pedidoBLL.ListarItensObjetos(cod);
+                        var cfgCf   = _impBLL.Carregar();
+                        var empCf   = _empBLL.Carregar();
+                        string texto = BLL.ImpressaoPedido.GerarTextoWhatsApp(
+                            pedido, itensCf, cfgCf, empCf, UsuarioSessao.NomeAtual);
+                        BLL.WhatsAppService.NotificarConfirmacao(pedido.pediTelefone_Cliente, texto);
+                    }
+                    catch { }
+                }
+            }
 
             CarregarPedidos();
             RestaurarSelecaoPedido(cod);
@@ -1726,6 +1748,7 @@ namespace Pedeai
                 NavSe("Pedidos",         "\U0001F4CB  Pedidos",           MostrarPedidos);
                 NavSe("ConsultarPedido", "\U0001F50D  Consultar Pedido",  () => AbrirForm(new Forms.frmConsultarPedido()));
                 NavSe("Fidelizacao",     "\U0001F91D  Fidelização",         () => AbrirForm(new Forms.frmFidelizacao()));
+                NavSe("WhatsApp",        "\U0001F4AC  WhatsApp",             () => AbrirForm(new Forms.frmWhatsApp()));
                 NavSe("Financeiro",      "\U0001F4B0  Financeiro",        MostrarFinanceiro);
                 NavSe("Turno",           "\U0001F551  Turno de Caixa",    () => AbrirForm(new Forms.frmTurno()));
             }
