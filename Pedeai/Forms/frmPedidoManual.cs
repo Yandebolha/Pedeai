@@ -282,6 +282,7 @@ namespace Pedeai.Forms
                 itpwNome_Mercadoria = nome,
                 itpwQtde            = (int)numQtde.Value,
                 itpwPreco_Unitario  = numUnitario.Value,
+                itpwDesconto_Pct    = descPct,
                 itpwSubtotal        = unitFinal * numQtde.Value,
             };
 

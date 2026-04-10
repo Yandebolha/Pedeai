@@ -23,6 +23,7 @@ namespace Pedeai.Forms
             this.txtNomeRegra = new System.Windows.Forms.TextBox();
             this.lblMeta = new System.Windows.Forms.Label();
             this.numMeta = new System.Windows.Forms.NumericUpDown();
+            this.cmbMetaTipo = new System.Windows.Forms.ComboBox();
             this.lblPremio = new System.Windows.Forms.Label();
             this.rdCupom = new System.Windows.Forms.RadioButton();
             this.rdProduto = new System.Windows.Forms.RadioButton();
@@ -120,6 +121,7 @@ namespace Pedeai.Forms
             this.tabConfig.Controls.Add(this.txtNomeRegra);
             this.tabConfig.Controls.Add(this.lblMeta);
             this.tabConfig.Controls.Add(this.numMeta);
+            this.tabConfig.Controls.Add(this.cmbMetaTipo);
             this.tabConfig.Controls.Add(this.lblPremio);
             this.tabConfig.Controls.Add(this.rdCupom);
             this.tabConfig.Controls.Add(this.rdProduto);
@@ -203,6 +205,19 @@ namespace Pedeai.Forms
             0,
             0,
             0});
+            // 
+            // cmbMetaTipo
+            // 
+            this.cmbMetaTipo.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cmbMetaTipo.Font = new System.Drawing.Font("Segoe UI", 9F);
+            this.cmbMetaTipo.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(50)))), ((int)(((byte)(50)))), ((int)(((byte)(50)))));
+            this.cmbMetaTipo.Items.AddRange(new object[] { "Valor Gasto no Mês (R$)", "Nº de Pedidos no Mês" });
+            this.cmbMetaTipo.Location = new System.Drawing.Point(310, 188);
+            this.cmbMetaTipo.Name = "cmbMetaTipo";
+            this.cmbMetaTipo.Size = new System.Drawing.Size(200, 26);
+            this.cmbMetaTipo.TabIndex = 2;
+            this.cmbMetaTipo.SelectedIndex = 0;
+            this.cmbMetaTipo.SelectedIndexChanged += new System.EventHandler(this.CmbMetaTipo_SelectedIndexChanged);
             // 
             // lblPremio
             // 
@@ -728,6 +743,7 @@ namespace Pedeai.Forms
         private System.Windows.Forms.TextBox      txtNomeRegra;
         private System.Windows.Forms.Label        lblMeta;
         private System.Windows.Forms.NumericUpDown numMeta;
+        private System.Windows.Forms.ComboBox      cmbMetaTipo;
         private System.Windows.Forms.Label        lblPremio;
         private System.Windows.Forms.RadioButton  rdCupom;
         private System.Windows.Forms.RadioButton  rdProduto;

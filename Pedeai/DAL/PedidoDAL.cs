@@ -142,6 +142,7 @@ namespace Pedeai.DAL
                     itpwNome_Mercadoria = r["itpwNome_Mercadoria"]?.ToString() ?? "",
                     itpwQtde            = Convert.ToDecimal(r["itpwQtde"]),
                     itpwPreco_Unitario  = Convert.ToDecimal(r["itpwPreco_Unitario"]),
+                    itpwDesconto_Pct    = r["itpwDesconto_Pct"] == DBNull.Value ? 0m : Convert.ToDecimal(r["itpwDesconto_Pct"]),
                     itpwSubtotal        = Convert.ToDecimal(r["itpwSubtotal"]),
                     itpwObservacoes     = r["itpwObservacoes"]?.ToString() ?? "",
                 });
@@ -157,6 +158,7 @@ namespace Pedeai.DAL
             var sql = @"SELECT i.itpwNome_Mercadoria AS Produto,
                                i.itpwQtde            AS Qtde,
                                i.itpwPreco_Unitario  AS Unitario,
+                               i.itpwDesconto_Pct    AS Desconto,
                                i.itpwSubtotal        AS Subtotal,
                                i.itpwObservacoes     AS Obs
                         FROM itens_pedido_web i
@@ -229,8 +231,8 @@ namespace Pedeai.DAL
 
                     var sqlI = @"INSERT INTO itens_pedido_web
                         (auxCodigo,Codigo,Codigo_Pedido,Codigo_Mercadoria,
-                         itpwNome_Mercadoria,itpwQtde,itpwPreco_Unitario,itpwSubtotal,itpwObservacoes,Situacao)
-                        VALUES(@aux,@cod,@pedido,@merc,@nome,@qtde,@unit,@sub,@obs,'A')";
+                         itpwNome_Mercadoria,itpwQtde,itpwPreco_Unitario,itpwDesconto_Pct,itpwSubtotal,itpwObservacoes,Situacao)
+                        VALUES(@aux,@cod,@pedido,@merc,@nome,@qtde,@unit,@desc_pct,@sub,@obs,'A')";
                     using var cmdI = new MySqlCommand(sqlI, conn, trans);
                     cmdI.Parameters.AddWithValue("@aux",    item.auxCodigo);
                     cmdI.Parameters.AddWithValue("@cod",    item.Codigo);
@@ -239,6 +241,7 @@ namespace Pedeai.DAL
                     cmdI.Parameters.AddWithValue("@nome",   item.itpwNome_Mercadoria ?? "");
                     cmdI.Parameters.AddWithValue("@qtde",   item.itpwQtde);
                     cmdI.Parameters.AddWithValue("@unit",   item.itpwPreco_Unitario);
+                    cmdI.Parameters.AddWithValue("@desc_pct", item.itpwDesconto_Pct);
                     cmdI.Parameters.AddWithValue("@sub",    item.itpwSubtotal);
                     cmdI.Parameters.AddWithValue("@obs",    item.itpwObservacoes ?? "");
                     cmdI.ExecuteNonQuery();

@@ -359,6 +359,8 @@ namespace Pedeai.DB
                 AddColumnIfNotExists(conn, db, "config_fidelizacao", "fidNome",
                     "VARCHAR(100) NOT NULL DEFAULT 'Regra Padrão'");                AddColumnIfNotExists(conn, db, "config_fidelizacao", "fidProduto_Qtde",
                     "INT NOT NULL DEFAULT 1");
+                AddColumnIfNotExists(conn, db, "config_fidelizacao", "fidMeta_Tipo",
+                    "VARCHAR(10) NOT NULL DEFAULT 'VALOR'");
                 // ── historico_fidelizacao ─────────────────────────────────────
                 Exec(conn, @"
                     CREATE TABLE IF NOT EXISTS historico_fidelizacao (
@@ -377,8 +379,43 @@ namespace Pedeai.DB
                 AddColumnIfNotExists(conn, db, "cliente", "clieGasto_Mensal",
                     "DECIMAL(10,2) NOT NULL DEFAULT 0.00");
                 AddColumnIfNotExists(conn, db, "cliente", "clieGasto_Mes_Ref",
-                    "VARCHAR(7) NOT NULL DEFAULT ''");
+                    "VARCHAR(7) NOT NULL DEFAULT ''");                AddColumnIfNotExists(conn, db, "itens_pedido_web", "itpwDesconto_Pct",
+                    "DECIMAL(5,2) NOT NULL DEFAULT 0.00");
 
+                // ── Promoções e Cardápio do Dia ────────────────────────────
+                Exec(conn, @"
+                    CREATE TABLE IF NOT EXISTS promocao (
+                        Codigo            INT           NOT NULL AUTO_INCREMENT PRIMARY KEY,
+                        prom_Nome         VARCHAR(100)  NOT NULL DEFAULT '',
+                        prom_DataInicio   DATE          NOT NULL,
+                        prom_DataFim      DATE          NOT NULL,
+                        prom_Desconto_Tipo  VARCHAR(20) NOT NULL DEFAULT 'PERCENTUAL',
+                        prom_Desconto_Valor DECIMAL(10,2) NOT NULL DEFAULT 10.00,
+                        prom_Ativo        TINYINT(1)    NOT NULL DEFAULT 1
+                    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+                Exec(conn, @"
+                    CREATE TABLE IF NOT EXISTS promocao_item (
+                        Codigo              INT          NOT NULL AUTO_INCREMENT PRIMARY KEY,
+                        Codigo_Promocao     INT          NOT NULL,
+                        Codigo_Mercadoria   INT          NOT NULL DEFAULT 0,
+                        prom_Produto_Nome   VARCHAR(150) NOT NULL DEFAULT ''
+                    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+                Exec(conn, @"
+                    CREATE TABLE IF NOT EXISTS cardapio_dia (
+                        Codigo        INT          NOT NULL AUTO_INCREMENT PRIMARY KEY,
+                        card_Data     DATE         NOT NULL,
+                        card_Titulo   VARCHAR(200) NOT NULL DEFAULT '',
+                        card_Observacao TEXT        NOT NULL
+                    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+                Exec(conn, @"
+                    CREATE TABLE IF NOT EXISTS cardapio_dia_item (
+                        Codigo                INT           NOT NULL AUTO_INCREMENT PRIMARY KEY,
+                        Codigo_Cardapio       INT           NOT NULL,
+                        Codigo_Mercadoria     INT           NOT NULL DEFAULT 0,
+                        card_Produto_Nome     VARCHAR(150)  NOT NULL DEFAULT '',
+                        card_Produto_Preco    DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+                        card_Produto_Descricao VARCHAR(300) NOT NULL DEFAULT ''
+                    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
                 return true;
             }
             catch (Exception ex)

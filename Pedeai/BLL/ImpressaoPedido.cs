@@ -192,6 +192,14 @@ namespace Pedeai.BLL
                 else
                     linhas.Add(desc);
 
+                // linha de desconto por item
+                if (item.itpwDesconto_Pct > 0)
+                {
+                    decimal economia = item.itpwPreco_Unitario * item.itpwQtde - item.itpwSubtotal;
+                    string descLinha = $"§S§  Desc. {item.itpwDesconto_Pct:0.#}% = -R$ {economia:0.00}";
+                    linhas.Add(descLinha);
+                }
+
                 if (!string.IsNullOrWhiteSpace(item.itpwObservacoes))
                     linhas.Add("§S§  Obs: " + item.itpwObservacoes);
             }

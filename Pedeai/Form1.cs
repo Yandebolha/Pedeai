@@ -1061,7 +1061,7 @@ namespace Pedeai
                 _btnEmPreparo.Visible = !terminal;
                 _btnPronto.Visible    = retirada && !terminal;
                 _btnSaiu.Visible      = !retirada && !terminal;
-                _btnEntregue.Visible  = !retirada && !terminal;
+                _btnEntregue.Visible  = !terminal;   // visível para retirada e entrega
                 _btnCancelar.Visible  = !terminal;
             }
             catch { }

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Configuration;
 using System.Drawing;
 using System.Threading.Tasks;
@@ -74,14 +74,20 @@ namespace Pedeai.Forms
                 BackColor = CorFundo,
             };
 
-            var tabConexao = new TabPage { Text = " 🔗  Conexão ", BackColor = CorFundo };
-            var tabConfig  = new TabPage { Text = " ⚙️  Configurações ", BackColor = CorFundo };
+            var tabConexao   = new TabPage { Text = " 🔗  Conexão ",       BackColor = CorFundo };
+            var tabConfig    = new TabPage { Text = " ⚙️  Configurações ", BackColor = CorFundo };
+            var tabPromocoes = new TabPage { Text = " 🏷️  Promoções ",     BackColor = CorFundo };
+            var tabCardapio  = new TabPage { Text = " 🍽️  Cardápio do Dia ", BackColor = CorFundo };
 
             ConstruirTabConexao(tabConexao);
             ConstruirTabConfig(tabConfig);
+            ConstruirTabPromocoes(tabPromocoes);
+            ConstruirTabCardapio(tabCardapio);
 
             tabs.TabPages.Add(tabConexao);
             tabs.TabPages.Add(tabConfig);
+            tabs.TabPages.Add(tabPromocoes);
+            tabs.TabPages.Add(tabCardapio);
 
             Controls.Add(tabs);
             Controls.Add(pnlTop);
@@ -693,6 +699,516 @@ namespace Pedeai.Forms
 
             _lblStatus.Text      = texto;
             _lblStatus.ForeColor = cor;
+        }
+
+        // ── Tab Promoções ────────────────────────────────────────────────────
+
+        private DataGridView _gridPromocoes;
+        private DataGridView _gridPromItens;
+        private int          _promCodigoAtual = 0;
+        private readonly DAL.PromocaoDAL _promDal = new DAL.PromocaoDAL();
+
+        private void ConstruirTabPromocoes(TabPage tab)
+        {
+            tab.Padding = new Padding(8);
+
+            // ── Painel form ──────────────────────────────────────────────────
+            var pnlForm = new Panel { Dock = DockStyle.Top, Height = 112, BackColor = CorPainel, Padding = new Padding(8) };
+
+            pnlForm.Controls.Add(MkLbl(pnlForm, "Nome:", 8, 4));
+            var txtNome = new TextBox { Left = 8, Top = 22, Width = 160, BorderStyle = BorderStyle.FixedSingle, Font = new Font("Segoe UI", 9F) };
+            pnlForm.Controls.Add(txtNome);
+
+            pnlForm.Controls.Add(MkLbl(pnlForm, "Início:", 176, 4));
+            var dtpInicio = new DateTimePicker { Left = 176, Top = 22, Width = 104, Format = DateTimePickerFormat.Short };
+            pnlForm.Controls.Add(dtpInicio);
+
+            pnlForm.Controls.Add(MkLbl(pnlForm, "Fim:", 288, 4));
+            var dtpFim = new DateTimePicker { Left = 288, Top = 22, Width = 104, Value = DateTime.Today.AddDays(7), Format = DateTimePickerFormat.Short };
+            pnlForm.Controls.Add(dtpFim);
+
+            pnlForm.Controls.Add(MkLbl(pnlForm, "Tipo:", 400, 4));
+            var cmbTipo = new ComboBox { Left = 400, Top = 22, Width = 100, DropDownStyle = ComboBoxStyle.DropDownList, Font = new Font("Segoe UI", 9F) };
+            cmbTipo.Items.AddRange(new object[] { "PERCENTUAL", "FIXO" });
+            cmbTipo.SelectedIndex = 0;
+            pnlForm.Controls.Add(cmbTipo);
+
+            pnlForm.Controls.Add(MkLbl(pnlForm, "Valor:", 508, 4));
+            var numValor = new NumericUpDown { Left = 508, Top = 22, Width = 80, DecimalPlaces = 2, Maximum = 9999, Value = 10m, Font = new Font("Segoe UI", 9F), BorderStyle = BorderStyle.FixedSingle };
+            pnlForm.Controls.Add(numValor);
+
+            var btnNovaProm    = MkBtn(pnlForm, "➕ Nova",              8,   68, 80,  Color.FromArgb(52, 73, 94));
+            var btnSalvarProm  = MkBtn(pnlForm, "💾 Salvar",            96,  68, 100, CorHeader);
+            var btnExcluirProm = MkBtn(pnlForm, "🗑 Excluir",           204, 68, 90,  Color.FromArgb(150, 60, 40));
+            var btnEnviarProm  = MkBtn(pnlForm, "📲 Enviar Clientes",   302, 68, 140, Color.FromArgb(39, 110, 50));
+            pnlForm.Controls.AddRange(new Control[] { btnNovaProm, btnSalvarProm, btnExcluirProm, btnEnviarProm });
+
+            // ── Layout horizontal: lista | itens ─────────────────────────────
+            var pnlLista = new Panel { Dock = DockStyle.Left, Width = 320, Padding = new Padding(0, 4, 4, 0) };
+            _gridPromocoes = CriarGrid();
+            _gridPromocoes.Dock = DockStyle.Fill;
+            pnlLista.Controls.Add(_gridPromocoes);
+
+            var pnlItens = new Panel { Dock = DockStyle.Fill, Padding = new Padding(4, 4, 0, 0) };
+            var pnlBtnItens = new Panel { Dock = DockStyle.Top, Height = 36 };
+            var btnAddProd = MkBtn(pnlBtnItens, "➕ Adicionar Produto", 0,   4, 170, CorHeader);
+            var btnRemProd = MkBtn(pnlBtnItens, "➖ Remover",           178, 4, 110, Color.FromArgb(150, 60, 40));
+            pnlBtnItens.Controls.AddRange(new Control[] { btnAddProd, btnRemProd });
+            _gridPromItens = CriarGrid();
+            _gridPromItens.Dock = DockStyle.Fill;
+            _gridPromItens.Columns.Add(new DataGridViewTextBoxColumn { Name = "Codigo",  Visible = false });
+            _gridPromItens.Columns.Add(new DataGridViewTextBoxColumn { Name = "Produto", HeaderText = "Produtos desta Promoção", FillWeight = 100 });
+            pnlItens.Controls.Add(_gridPromItens);
+            pnlItens.Controls.Add(pnlBtnItens);
+
+            tab.Controls.Add(pnlItens);
+            tab.Controls.Add(pnlLista);
+            tab.Controls.Add(pnlForm);
+
+            // ── Helpers locais ───────────────────────────────────────────────
+            void LimparForm() { txtNome.Text = ""; cmbTipo.SelectedIndex = 0; numValor.Value = 10m; _promCodigoAtual = 0; _gridPromItens.Rows.Clear(); }
+
+            void CarregarForm(DataGridViewRow v)
+            {
+                if (v == null) return;
+                _promCodigoAtual = Convert.ToInt32(v.Cells["Codigo"].Value);
+                txtNome.Text         = v.Cells["Nome"]?.Value?.ToString() ?? "";
+                string tipo          = v.Cells["TipoDesc"]?.Value?.ToString() ?? "PERCENTUAL";
+                cmbTipo.SelectedItem = tipo;
+                if (decimal.TryParse(v.Cells["ValorDesc"]?.Value?.ToString(), out var vd)) numValor.Value = vd;
+                if (DateTime.TryParse(v.Cells["Inicio"]?.Value?.ToString(), out var vi)) dtpInicio.Value = vi;
+                if (DateTime.TryParse(v.Cells["Fim"]?.Value?.ToString(),    out var vf)) dtpFim.Value = vf;
+                CarregarGridPromItens();
+            }
+
+            // ── Eventos ──────────────────────────────────────────────────────
+            tab.Enter += (_, __) => { CarregarGridPromocoes(); LimparForm(); };
+
+            btnNovaProm.Click += (_, __) => LimparForm();
+
+            btnSalvarProm.Click += (_, __) =>
+            {
+                if (string.IsNullOrWhiteSpace(txtNome.Text)) { MessageBox.Show("Informe o nome."); return; }
+                if (dtpFim.Value.Date < dtpInicio.Value.Date) { MessageBox.Show("Data fim menor que início."); return; }
+                string tipo = cmbTipo.SelectedItem?.ToString() ?? "PERCENTUAL";
+                if (_promCodigoAtual > 0)
+                    _promDal.Atualizar(_promCodigoAtual, txtNome.Text.Trim(), dtpInicio.Value, dtpFim.Value, tipo, numValor.Value);
+                else
+                    _promCodigoAtual = _promDal.Salvar(txtNome.Text.Trim(), dtpInicio.Value, dtpFim.Value, tipo, numValor.Value);
+                CarregarGridPromocoes();
+                MessageBox.Show(_promCodigoAtual > 0 ? "Promoção salva! Agora adicione produtos." : "Atualizado.",
+                    "Promoções", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            };
+
+            btnExcluirProm.Click += (_, __) =>
+            {
+                if (_promCodigoAtual <= 0 && _gridPromocoes.CurrentRow == null) return;
+                int cod = _promCodigoAtual > 0 ? _promCodigoAtual : Convert.ToInt32(_gridPromocoes.CurrentRow.Cells["Codigo"].Value);
+                if (MessageBox.Show("Excluir esta promoção e seus produtos?", "Confirmar",
+                    MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes) return;
+                _promDal.Excluir(cod);
+                LimparForm();
+                CarregarGridPromocoes();
+            };
+
+            _gridPromocoes.SelectionChanged += (_, __) => CarregarForm(_gridPromocoes.CurrentRow);
+
+            btnAddProd.Click += (_, __) =>
+            {
+                if (_promCodigoAtual <= 0) { MessageBox.Show("Salve a promoção primeiro."); return; }
+                var (cod, nome) = AbrirSeletorProduto();
+                if (cod <= 0) return;
+                _promDal.AdicionarItem(_promCodigoAtual, cod, nome);
+                CarregarGridPromItens();
+            };
+
+            btnRemProd.Click += (_, __) =>
+            {
+                if (_gridPromItens.CurrentRow == null) return;
+                int itemCod = Convert.ToInt32(_gridPromItens.CurrentRow.Cells["Codigo"].Value);
+                _promDal.RemoverItem(itemCod);
+                CarregarGridPromItens();
+            };
+
+            btnEnviarProm.Click += async (_, __) =>
+            {
+                if (_promCodigoAtual <= 0) { MessageBox.Show("Selecione uma promoção."); return; }
+                if (!WhatsAppService.Ativo) { MessageBox.Show("WhatsApp não está ativo."); return; }
+                if (MessageBox.Show("Enviar promoção para todos os clientes com telefone?", "Confirmar",
+                    MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes) return;
+
+                var row = _gridPromocoes.CurrentRow;
+                if (row == null) return;
+                string promNome  = row.Cells["Nome"]?.Value?.ToString() ?? "";
+                string tipoD     = row.Cells["TipoDesc"]?.Value?.ToString() ?? "PERCENTUAL";
+                decimal valDesc  = 0; decimal.TryParse(row.Cells["ValorDesc"]?.Value?.ToString(), out valDesc);
+                string dataFimStr = "";
+                try { dataFimStr = Convert.ToDateTime(row.Cells["Fim"].Value).ToString("dd/MM/yyyy"); } catch { }
+                var produtos = _promDal.ListarItens(_promCodigoAtual).ConvertAll(i => i.nome);
+
+                var clientes = WhatsAppService.ListarClientesComFone();
+                btnEnviarProm.Enabled = false;
+                int enviado = 0;
+                await System.Threading.Tasks.Task.Run(() =>
+                {
+                    foreach (var (fone, nome) in clientes)
+                    {
+                        WhatsAppService.NotificarPromocao(fone, nome, promNome, dataFimStr, tipoD, valDesc, produtos);
+                        enviado++;
+                        System.Threading.Thread.Sleep(800);
+                        if (IsDisposed) return;
+                        Invoke(new Action(() => btnEnviarProm.Text = $"Enviando {enviado}/{clientes.Count}..."));
+                    }
+                }).ConfigureAwait(false);
+                if (!IsDisposed) Invoke(new Action(() =>
+                {
+                    btnEnviarProm.Enabled = true;
+                    btnEnviarProm.Text = "📲 Enviar Clientes";
+                    MessageBox.Show($"Promoção enviada para {enviado} cliente(s).", "Concluído",
+                        MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }));
+            };
+        }
+
+        private void CarregarGridPromocoes()
+        {
+            try
+            {
+                var dt = _promDal.Listar();
+                _gridPromocoes.DataSource = dt;
+                if (_gridPromocoes.Columns.Count > 0)
+                {
+                    if (_gridPromocoes.Columns["Codigo"]    != null) _gridPromocoes.Columns["Codigo"].Visible = false;
+                    if (_gridPromocoes.Columns["Nome"]      != null) { _gridPromocoes.Columns["Nome"].HeaderText = "Promoção"; _gridPromocoes.Columns["Nome"].FillWeight = 38; }
+                    if (_gridPromocoes.Columns["Inicio"]    != null) { _gridPromocoes.Columns["Inicio"].HeaderText = "Início"; _gridPromocoes.Columns["Inicio"].FillWeight = 17; }
+                    if (_gridPromocoes.Columns["Fim"]       != null) { _gridPromocoes.Columns["Fim"].HeaderText = "Fim"; _gridPromocoes.Columns["Fim"].FillWeight = 17; }
+                    if (_gridPromocoes.Columns["TipoDesc"]  != null) _gridPromocoes.Columns["TipoDesc"].Visible = false;
+                    if (_gridPromocoes.Columns["ValorDesc"] != null) { _gridPromocoes.Columns["ValorDesc"].HeaderText = "Desc."; _gridPromocoes.Columns["ValorDesc"].FillWeight = 14; }
+                    if (_gridPromocoes.Columns["Ativo"]     != null) _gridPromocoes.Columns["Ativo"].Visible = false;
+                    if (_gridPromocoes.Columns["Produtos"]  != null) { _gridPromocoes.Columns["Produtos"].HeaderText = "Produtos"; _gridPromocoes.Columns["Produtos"].FillWeight = 14; }
+                }
+            }
+            catch { }
+        }
+
+        private void CarregarGridPromItens()
+        {
+            _gridPromItens.Rows.Clear();
+            if (_promCodigoAtual <= 0) return;
+            try
+            {
+                foreach (var (cod, nome) in _promDal.ListarItens(_promCodigoAtual))
+                    _gridPromItens.Rows.Add(cod, nome);
+            }
+            catch { }
+        }
+
+        // ── Tab Cardápio do Dia ──────────────────────────────────────────────
+
+        private DataGridView _gridCardapioLista;   // lista de cardápios salvos (esquerda)
+        private DataGridView _gridCardapio;        // itens do cardápio selecionado (direita)
+        private int          _cardCodigoAtual = 0;
+        private readonly DAL.CardapioDiaDAL _cardDal = new DAL.CardapioDiaDAL();
+
+        private void ConstruirTabCardapio(TabPage tab)
+        {
+            tab.Padding = new Padding(8);
+
+            // ── Form de cabeçalho (topo) ─────────────────────────────────────
+            var pnlTop2 = new Panel { Dock = DockStyle.Top, Height = 110, BackColor = CorPainel, Padding = new Padding(8) };
+
+            pnlTop2.Controls.Add(MkLbl(pnlTop2, "Data:", 8, 4));
+            var dtpCard = new DateTimePicker { Left = 8, Top = 22, Width = 112, Format = DateTimePickerFormat.Short };
+            pnlTop2.Controls.Add(dtpCard);
+
+            pnlTop2.Controls.Add(MkLbl(pnlTop2, "Título / Destaque:", 130, 4));
+            var txtTitulo = new TextBox { Left = 130, Top = 22, Width = 230, BorderStyle = BorderStyle.FixedSingle, Font = new Font("Segoe UI", 9F), PlaceholderText = "Ex: Cardápio de Segunda..." };
+            pnlTop2.Controls.Add(txtTitulo);
+
+            pnlTop2.Controls.Add(MkLbl(pnlTop2, "Observação:", 8, 52));
+            var txtObs = new TextBox { Left = 8, Top = 70, Width = 352, Height = 34, Multiline = true, BorderStyle = BorderStyle.FixedSingle, Font = new Font("Segoe UI", 9F) };
+            pnlTop2.Controls.Add(txtObs);
+
+            var btnNovoCard   = MkBtn(pnlTop2, "➕ Novo",            370, 4,   80,  Color.FromArgb(52, 73, 94));
+            var btnSalvarCard = MkBtn(pnlTop2, "💾 Salvar",          370, 36,  80,  CorHeader);
+            var btnExcluirCard= MkBtn(pnlTop2, "🗑 Excluir",         370, 68,  80,  Color.FromArgb(150, 60, 40));
+            var btnEnviarCard = MkBtn(pnlTop2, "📲 Enviar Clientes", 458, 4,   128, Color.FromArgb(39, 110, 50));
+            btnEnviarCard.Height = 100;
+            pnlTop2.Controls.AddRange(new Control[] { btnNovoCard, btnSalvarCard, btnExcluirCard, btnEnviarCard });
+
+            // ── Layout horizontal: lista de cardápios (esq) | itens (dir) ────
+            var pnlLista = new Panel { Dock = DockStyle.Left, Width = 210, Padding = new Padding(0, 4, 4, 0) };
+            _gridCardapioLista = CriarGrid();
+            _gridCardapioLista.Dock = DockStyle.Fill;
+            _gridCardapioLista.Columns.Add(new DataGridViewTextBoxColumn { Name = "Codigo", Visible = false });
+            _gridCardapioLista.Columns.Add(new DataGridViewTextBoxColumn { Name = "Data",   HeaderText = "Data",   FillWeight = 45 });
+            _gridCardapioLista.Columns.Add(new DataGridViewTextBoxColumn { Name = "Titulo", HeaderText = "Título", FillWeight = 55 });
+            pnlLista.Controls.Add(_gridCardapioLista);
+
+            var pnlItens = new Panel { Dock = DockStyle.Fill, Padding = new Padding(4, 4, 0, 0) };
+            var pnlBtnCard = new Panel { Dock = DockStyle.Top, Height = 36, BackColor = CorFundo };
+            var btnAddItem = MkBtn(pnlBtnCard, "➕ Adicionar Produto do Catálogo", 0, 4, 220, CorHeader);
+            var btnRemItem = MkBtn(pnlBtnCard, "➖ Remover Item", 228, 4, 130, Color.FromArgb(150, 60, 40));
+            pnlBtnCard.Controls.AddRange(new Control[] { btnAddItem, btnRemItem });
+
+            _gridCardapio = CriarGrid();
+            _gridCardapio.ReadOnly = false;   // permite editar descrição diretamente
+            _gridCardapio.Dock = DockStyle.Fill;
+            _gridCardapio.Columns.Add(new DataGridViewTextBoxColumn { Name = "Codigo",    Visible = false });
+            _gridCardapio.Columns.Add(new DataGridViewTextBoxColumn { Name = "CodMerc",   Visible = false });
+            _gridCardapio.Columns.Add(new DataGridViewTextBoxColumn { Name = "Produto",   HeaderText = "Produto",   FillWeight = 38, ReadOnly = true });
+            _gridCardapio.Columns.Add(new DataGridViewTextBoxColumn { Name = "Preco",     HeaderText = "Preço R$",  FillWeight = 14, ReadOnly = true });
+            _gridCardapio.Columns.Add(new DataGridViewTextBoxColumn { Name = "Descricao", HeaderText = "Descrição", FillWeight = 48 });
+
+            pnlItens.Controls.Add(_gridCardapio);
+            pnlItens.Controls.Add(pnlBtnCard);
+
+            tab.Controls.Add(pnlItens);
+            tab.Controls.Add(pnlLista);
+            tab.Controls.Add(pnlTop2);
+
+            // ── Helpers locais ───────────────────────────────────────────────
+            void LimparCardForm() { dtpCard.Value = DateTime.Today; txtTitulo.Text = ""; txtObs.Text = ""; _cardCodigoAtual = 0; _gridCardapio.Rows.Clear(); }
+
+            void CarregarItensGrid()
+            {
+                _gridCardapio.Rows.Clear();
+                if (_cardCodigoAtual <= 0) return;
+                try
+                {
+                    foreach (var (cod, codM, nome, preco, desc) in _cardDal.ListarItens(_cardCodigoAtual))
+                        _gridCardapio.Rows.Add(cod, codM, nome, preco.ToString("N2"), desc);
+                }
+                catch { }
+            }
+
+            // ── Eventos ──────────────────────────────────────────────────────
+            tab.Enter += (_, __) => { CarregarListaCardapios(); LimparCardForm(); };
+
+            btnNovoCard.Click += (_, __) => LimparCardForm();
+
+            btnSalvarCard.Click += (_, __) =>
+            {
+                _cardCodigoAtual = _cardDal.SalvarCabecalho(dtpCard.Value, txtTitulo.Text.Trim(), txtObs.Text.Trim());
+                // Persiste itens da grid
+                _cardDal.LimparItens(_cardCodigoAtual);
+                foreach (DataGridViewRow r in _gridCardapio.Rows)
+                {
+                    if (r.IsNewRow) continue;
+                    string nome = r.Cells["Produto"].Value?.ToString() ?? "";
+                    if (string.IsNullOrWhiteSpace(nome)) continue;
+                    decimal prc = 0; decimal.TryParse(r.Cells["Preco"].Value?.ToString(), out prc);
+                    int codM = 0; int.TryParse(r.Cells["CodMerc"].Value?.ToString(), out codM);
+                    _cardDal.AdicionarItem(_cardCodigoAtual, codM, nome, prc, r.Cells["Descricao"].Value?.ToString() ?? "");
+                }
+                CarregarListaCardapios();
+                MessageBox.Show("Cardápio salvo!", "Cardápio do Dia", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            };
+
+            btnExcluirCard.Click += (_, __) =>
+            {
+                if (_cardCodigoAtual <= 0) return;
+                if (MessageBox.Show("Excluir este cardápio?", "Confirmar",
+                    MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes) return;
+                _cardDal.Excluir(_cardCodigoAtual);
+                LimparCardForm();
+                CarregarListaCardapios();
+            };
+
+            _gridCardapioLista.SelectionChanged += (_, __) =>
+            {
+                if (_gridCardapioLista.CurrentRow == null) return;
+                var row = _gridCardapioLista.CurrentRow;
+                _cardCodigoAtual = Convert.ToInt32(row.Cells["Codigo"].Value);
+                var (_, tit, obs) = _cardDal.BuscarPorCodigo(_cardCodigoAtual);
+                if (DateTime.TryParse(row.Cells["Data"].Value?.ToString(), out var d)) dtpCard.Value = d;
+                txtTitulo.Text = tit; txtObs.Text = obs;
+                CarregarItensGrid();
+            };
+
+            btnAddItem.Click += (_, __) =>
+            {
+                var (cod, nome) = AbrirSeletorProduto();
+                if (cod <= 0) return;
+                decimal preco = 0;
+                try
+                {
+                    var dtProd = new BLL.MercadoriaBLL().Listar();
+                    foreach (System.Data.DataRow r2 in dtProd.Rows)
+                        if (Convert.ToInt32(r2["Codigo"]) == cod)
+                        { decimal.TryParse(r2["Preco"]?.ToString(), out preco); break; }
+                }
+                catch { }
+                _gridCardapio.Rows.Add(0, cod, nome, preco.ToString("N2"), "");
+            };
+
+            btnRemItem.Click += (_, __) =>
+            {
+                if (_gridCardapio.CurrentRow == null || _gridCardapio.CurrentRow.IsNewRow) return;
+                if (int.TryParse(_gridCardapio.CurrentRow.Cells["Codigo"].Value?.ToString(), out int itemCod) && itemCod > 0)
+                    _cardDal.RemoverItem(itemCod);
+                _gridCardapio.Rows.Remove(_gridCardapio.CurrentRow);
+            };
+
+            btnEnviarCard.Click += async (_, __) =>
+            {
+                if (!WhatsAppService.Ativo) { MessageBox.Show("WhatsApp não está ativo."); return; }
+                if (_gridCardapio.Rows.Count == 0) { MessageBox.Show("Adicione itens ao cardápio."); return; }
+                if (MessageBox.Show("Enviar cardápio para todos os clientes com telefone?", "Confirmar",
+                    MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes) return;
+
+                var itens = new System.Collections.Generic.List<(string n, decimal p, string d)>();
+                foreach (DataGridViewRow r in _gridCardapio.Rows)
+                {
+                    if (r.IsNewRow) continue;
+                    decimal prc = 0; decimal.TryParse(r.Cells["Preco"].Value?.ToString(), out prc);
+                    itens.Add((r.Cells["Produto"].Value?.ToString() ?? "", prc, r.Cells["Descricao"].Value?.ToString() ?? ""));
+                }
+
+                var clientes = WhatsAppService.ListarClientesComFone();
+                btnEnviarCard.Enabled = false;
+                int enviado = 0;
+                string titulo = txtTitulo.Text.Trim();
+                string obs    = txtObs.Text.Trim();
+                string dataStr= dtpCard.Value.ToString("dd/MM/yyyy");
+                await System.Threading.Tasks.Task.Run(() =>
+                {
+                    foreach (var (fone, nome) in clientes)
+                    {
+                        WhatsAppService.NotificarCardapio(fone, nome, titulo, dataStr, itens, obs);
+                        enviado++;
+                        System.Threading.Thread.Sleep(800);
+                        if (IsDisposed) return;
+                        Invoke(new Action(() => btnEnviarCard.Text = $"Enviando {enviado}/{clientes.Count}..."));
+                    }
+                }).ConfigureAwait(false);
+                if (!IsDisposed) Invoke(new Action(() =>
+                {
+                    btnEnviarCard.Enabled = true;
+                    btnEnviarCard.Text = "📲 Enviar Clientes";
+                    MessageBox.Show($"Cardápio enviado para {enviado} cliente(s).", "Concluído",
+                        MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }));
+            };
+        }
+
+        private void CarregarListaCardapios()
+        {
+            _gridCardapioLista.Rows.Clear();
+            try
+            {
+                var dt = _cardDal.Listar();
+                foreach (System.Data.DataRow r in dt.Rows)
+                {
+                    string dataStr = r["Data"] == System.DBNull.Value ? "" : Convert.ToDateTime(r["Data"]).ToString("dd/MM/yy");
+                    _gridCardapioLista.Rows.Add(r["Codigo"], dataStr, r["Titulo"]);
+                }
+            }
+            catch { }
+        }
+
+        private void CarregarGridCardapio()
+        {
+            _gridCardapio.Rows.Clear();
+            if (_cardCodigoAtual <= 0) return;
+            try
+            {
+                foreach (var (cod, codM, nome, preco, desc) in _cardDal.ListarItens(_cardCodigoAtual))
+                    _gridCardapio.Rows.Add(cod, codM, nome, preco.ToString("N2"), desc);
+            }
+            catch { }
+        }
+
+        // ── Helpers de UI ────────────────────────────────────────────────────
+
+        private static Label MkLbl(Control parent, string texto, int x, int y)
+        {
+            var lbl = new Label { Text = texto, Left = x, Top = y, AutoSize = true,
+                ForeColor = Color.FromArgb(60, 50, 30), Font = new Font("Segoe UI", 8.5F) };
+            return lbl;
+        }
+
+        private static Button MkBtn(Control parent, string texto, int x, int y, int w, Color back)
+        {
+            var btn = new Button
+            {
+                Text = texto, Left = x, Top = y, Width = w, Height = 28,
+                BackColor = back, ForeColor = Color.White, FlatStyle = FlatStyle.Flat,
+                Cursor = Cursors.Hand, Font = new Font("Segoe UI", 8.5F, FontStyle.Bold)
+            };
+            btn.FlatAppearance.BorderSize = 0;
+            return btn;
+        }
+
+        private static DataGridView CriarGrid()
+        {
+            var g = new DataGridView
+            {
+                ReadOnly = true, AllowUserToAddRows = false,
+                SelectionMode = DataGridViewSelectionMode.FullRowSelect,
+                RowHeadersVisible = false, AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill,
+                BackgroundColor = Color.FromArgb(245, 237, 216),
+                GridColor = Color.FromArgb(200, 185, 160),
+                BorderStyle = BorderStyle.None, Font = new Font("Segoe UI", 9F),
+                DefaultCellStyle = new DataGridViewCellStyle
+                {
+                    BackColor = Color.FromArgb(245, 237, 216), ForeColor = Color.FromArgb(50, 50, 50),
+                    SelectionBackColor = Color.FromArgb(224, 113, 42), SelectionForeColor = Color.White
+                },
+                ColumnHeadersDefaultCellStyle = new DataGridViewCellStyle
+                {
+                    BackColor = Color.FromArgb(176, 110, 42), ForeColor = Color.White,
+                    Font = new Font("Segoe UI", 9F, FontStyle.Bold)
+                },
+                MultiSelect = false
+            };
+            return g;
+        }
+
+        /// <summary>Abre diálogo de seleção de produto do cardápio. Retorna (cod, nome) ou (0, "") se cancelado.</summary>
+        private (int cod, string nome) AbrirSeletorProduto()
+        {
+            using var dlg = new Form
+            {
+                Text = "Selecionar Produto", StartPosition = FormStartPosition.CenterParent,
+                Size = new Size(520, 400), FormBorderStyle = FormBorderStyle.FixedDialog,
+                MaximizeBox = false, MinimizeBox = false, BackColor = Color.FromArgb(245, 237, 216)
+            };
+            var txtF = new TextBox { Dock = DockStyle.Top, Height = 28, PlaceholderText = "Filtrar...", BorderStyle = BorderStyle.FixedSingle, Font = new Font("Segoe UI", 9F) };
+            var grd  = CriarGrid();
+            grd.Dock = DockStyle.Fill;
+            grd.Columns.Add(new DataGridViewTextBoxColumn { Name = "Codigo", Visible = false });
+            grd.Columns.Add(new DataGridViewTextBoxColumn { Name = "Nome", HeaderText = "Produto", FillWeight = 70 });
+            grd.Columns.Add(new DataGridViewTextBoxColumn { Name = "Preco", HeaderText = "Preço R$", FillWeight = 30 });
+
+            System.Data.DataTable dtProd = null;
+            try { dtProd = new BLL.MercadoriaBLL().Listar(); } catch { }
+
+            void Preencher(string filtro)
+            {
+                grd.Rows.Clear();
+                if (dtProd == null) return;
+                foreach (System.Data.DataRow r in dtProd.Rows)
+                {
+                    string nomeP = r["Nome"]?.ToString() ?? "";
+                    if (!string.IsNullOrWhiteSpace(filtro) && nomeP.IndexOf(filtro, StringComparison.OrdinalIgnoreCase) < 0) continue;
+                    string precoStr = r["Preco"] == System.DBNull.Value ? "" : Convert.ToDecimal(r["Preco"]).ToString("N2");
+                    grd.Rows.Add(r["Codigo"], nomeP, precoStr);
+                }
+            }
+            Preencher("");
+            txtF.TextChanged += (_, __) => Preencher(txtF.Text.Trim());
+
+            (int c, string n) resultado = (0, "");
+            void Selecionar() { if (grd.CurrentRow == null) return; resultado = (Convert.ToInt32(grd.CurrentRow.Cells["Codigo"].Value), grd.CurrentRow.Cells["Nome"].Value?.ToString() ?? ""); dlg.DialogResult = DialogResult.OK; }
+            grd.CellDoubleClick += (_, __) => Selecionar();
+
+            var btnOk = new Button { Text = "Selecionar", Dock = DockStyle.Bottom, Height = 32, BackColor = CorHeader, ForeColor = Color.White, FlatStyle = FlatStyle.Flat };
+            btnOk.FlatAppearance.BorderSize = 0;
+            btnOk.Click += (_, __) => Selecionar();
+            dlg.Controls.Add(grd); dlg.Controls.Add(btnOk); dlg.Controls.Add(txtF);
+            dlg.ShowDialog(this);
+            return resultado;
         }
 
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData)

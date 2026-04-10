@@ -5,7 +5,8 @@ namespace Pedeai.Modelo
         public int     Codigo            { get; set; }
         public string  fidNome           { get; set; } = "Regra Padrão";
         public bool    fidAtivo          { get; set; } = false;
-        public decimal fidMeta_Gasto     { get; set; } = 500m;   // R$ acumulado para ganhar prêmio
+        public decimal fidMeta_Gasto     { get; set; } = 500m;   // valor da meta (R$ ou nº pedidos)
+        public string  fidMeta_Tipo      { get; set; } = "VALOR"; // VALOR | PEDIDOS
         public string  fidPremio_Tipo    { get; set; } = "CUPOM"; // CUPOM | PRODUTO
         // Cupom settings
         public string  fidCupom_Tipo     { get; set; } = "PERCENTUAL"; // PERCENTUAL | FIXO

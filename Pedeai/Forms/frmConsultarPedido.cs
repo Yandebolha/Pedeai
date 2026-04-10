@@ -131,12 +131,32 @@ namespace Pedeai.Forms
                     : pedido.pediValor_Total;
                 lblValorPago.Text = valorPago.ToString("C");
 
-                // Desconto: cupom + diferença de pagamento
+                // Desconto: cupom + diferença de pagamento + desconto por item
                 decimal descontoCupom = pedido.pediDesconto;
                 decimal descontoPgto  = (pedido.pediValor_Pago.HasValue && pedido.pediValor_Pago.Value < pedido.pediValor_Total)
                     ? pedido.pediValor_Total - pedido.pediValor_Pago.Value
                     : 0m;
-                decimal totalDesconto = descontoCupom + descontoPgto;
+
+                // Somar descontos por item (itpwPreco_Unitario * qtde - subtotal)
+                decimal descontoItens = 0m;
+                try
+                {
+                    var itensDT = _bll.ListarItens(pedido.Codigo);
+                    foreach (System.Data.DataRow ri in itensDT.Rows)
+                    {
+                        decimal dpct = ri["Desconto"] == System.DBNull.Value ? 0m : Convert.ToDecimal(ri["Desconto"]);
+                        if (dpct > 0)
+                        {
+                            decimal unit = Convert.ToDecimal(ri["Unitario"]);
+                            decimal qtde = Convert.ToDecimal(ri["Qtde"]);
+                            decimal sub  = Convert.ToDecimal(ri["Subtotal"]);
+                            descontoItens += unit * qtde - sub;
+                        }
+                    }
+                }
+                catch { }
+
+                decimal totalDesconto = descontoCupom + descontoPgto + descontoItens;
 
                 if (totalDesconto > 0)
                 {
@@ -188,8 +208,9 @@ namespace Pedeai.Forms
             if (gridItens.Columns["Produto"]  != null) { gridItens.Columns["Produto"].HeaderText  = "Produto";   gridItens.Columns["Produto"].FillWeight  = 40; }
             if (gridItens.Columns["Qtde"]     != null) { gridItens.Columns["Qtde"].HeaderText     = "Qtde";      gridItens.Columns["Qtde"].FillWeight     = 8; }
             if (gridItens.Columns["Unitario"] != null) { gridItens.Columns["Unitario"].HeaderText = "Unit. R$";  gridItens.Columns["Unitario"].FillWeight = 12; }
+            if (gridItens.Columns["Desconto"] != null) { gridItens.Columns["Desconto"].HeaderText = "Desc.%";    gridItens.Columns["Desconto"].FillWeight = 8; }
             if (gridItens.Columns["Subtotal"] != null) { gridItens.Columns["Subtotal"].HeaderText = "Subtotal";  gridItens.Columns["Subtotal"].FillWeight = 12; }
-            if (gridItens.Columns["Obs"]      != null) { gridItens.Columns["Obs"].HeaderText      = "Obs.";      gridItens.Columns["Obs"].FillWeight      = 28; }
+            if (gridItens.Columns["Obs"]      != null) { gridItens.Columns["Obs"].HeaderText      = "Obs.";      gridItens.Columns["Obs"].FillWeight      = 20; }
         }
 
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData)

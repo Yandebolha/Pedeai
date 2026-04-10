@@ -34,6 +34,7 @@ namespace Pedeai.DAL
                 fidProduto_Codigo = r["fidProduto_Codigo"] == DBNull.Value ? 0 : Convert.ToInt32(r["fidProduto_Codigo"]),
                 fidProduto_Nome   = r["fidProduto_Nome"]?.ToString() ?? "",
                 fidProduto_Qtde   = r["fidProduto_Qtde"] == DBNull.Value ? 1 : Convert.ToInt32(r["fidProduto_Qtde"]),
+                fidMeta_Tipo      = r["fidMeta_Tipo"]?.ToString() ?? "VALOR",
                 fidMensagem       = r["fidMensagem"]?.ToString() ?? "",
                 Info              = r["Info"]?.ToString() ?? "",
             };
@@ -56,9 +57,9 @@ namespace Pedeai.DAL
             {
                 using var conn = AbrirConexao();
                 var sql = @"INSERT INTO config_fidelizacao
-                    (fidNome, fidAtivo, fidMeta_Gasto, fidPremio_Tipo, fidCupom_Tipo, fidCupom_Valor,
+                    (fidNome, fidAtivo, fidMeta_Gasto, fidMeta_Tipo, fidPremio_Tipo, fidCupom_Tipo, fidCupom_Valor,
                      fidCupom_Minimo, fidCupom_Validade, fidProduto_Codigo, fidProduto_Nome, fidProduto_Qtde, fidMensagem, Info)
-                    VALUES (@nome, @ativo, @meta, @tipo, @ctipo, @cval, @cmin, @cvalid, @pcod, @pnom, @pqtd, @msg, '')";
+                    VALUES (@nome, @ativo, @meta, @mtp, @tipo, @ctipo, @cval, @cmin, @cvalid, @pcod, @pnom, @pqtd, @msg, '')";
                 using var cmd = new MySqlCommand(sql, conn);
                 BindParams(cmd, cfg);
                 cmd.ExecuteNonQuery();
@@ -74,7 +75,7 @@ namespace Pedeai.DAL
             {
                 using var conn = AbrirConexao();
                 var sql = @"UPDATE config_fidelizacao SET
-                    fidNome=@nome, fidAtivo=@ativo, fidMeta_Gasto=@meta, fidPremio_Tipo=@tipo,
+                    fidNome=@nome, fidAtivo=@ativo, fidMeta_Gasto=@meta, fidMeta_Tipo=@mtp, fidPremio_Tipo=@tipo,
                     fidCupom_Tipo=@ctipo, fidCupom_Valor=@cval, fidCupom_Minimo=@cmin,
                     fidCupom_Validade=@cvalid, fidProduto_Codigo=@pcod, fidProduto_Nome=@pnom,
                     fidProduto_Qtde=@pqtd, fidMensagem=@msg
@@ -106,6 +107,7 @@ namespace Pedeai.DAL
             cmd.Parameters.AddWithValue("@nome",  cfg.fidNome ?? "Regra Padrão");
             cmd.Parameters.AddWithValue("@ativo", cfg.fidAtivo ? 1 : 0);
             cmd.Parameters.AddWithValue("@meta",  cfg.fidMeta_Gasto);
+            cmd.Parameters.AddWithValue("@mtp",   cfg.fidMeta_Tipo ?? "VALOR");
             cmd.Parameters.AddWithValue("@tipo",  cfg.fidPremio_Tipo ?? "CUPOM");
             cmd.Parameters.AddWithValue("@ctipo", cfg.fidCupom_Tipo ?? "PERCENTUAL");
             cmd.Parameters.AddWithValue("@cval",  cfg.fidCupom_Valor);
@@ -119,6 +121,23 @@ namespace Pedeai.DAL
 
         [Obsolete("Use Incluir or Alterar instead")]
         public string Salvar(ConfigFidelizacao cfg) => cfg.Codigo == 0 ? Incluir(cfg) : Alterar(cfg);
+
+        /// <summary>Conta pedidos entregues do cliente no mês/ano informado (para critério PEDIDOS).</summary>
+        public int ContarPedidosClienteMes(int codigoCliente, int ano, int mes)
+        {
+            using var conn = AbrirConexao();
+            using var cmd = new MySqlCommand(
+                @"SELECT COUNT(*) FROM pedido_web
+                  WHERE Codigo_Cliente = @cli
+                    AND YEAR(pediData_Pedido) = @ano
+                    AND MONTH(pediData_Pedido) = @mes
+                    AND pediCancelado != 1", conn);
+            cmd.Parameters.AddWithValue("@cli", codigoCliente);
+            cmd.Parameters.AddWithValue("@ano", ano);
+            cmd.Parameters.AddWithValue("@mes", mes);
+            var r = cmd.ExecuteScalar();
+            return r == DBNull.Value ? 0 : Convert.ToInt32(r);
+        }
 
         /// <summary>Quantas vezes esse cliente já recebeu um prêmio de uma config específica.</summary>
         public int ContarPremiosEnviados(int codigoCliente, int codigoConfig)

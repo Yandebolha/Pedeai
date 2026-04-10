@@ -18,7 +18,7 @@ namespace Pedeai.BLL
         {
             if (cfg == null) return "Configuração inválida.";
             if (string.IsNullOrWhiteSpace(cfg.fidNome)) return "Informe o nome da regra.";
-            if (cfg.fidMeta_Gasto <= 0) return "Meta de gasto deve ser maior que zero.";
+            if (cfg.fidMeta_Gasto <= 0) return "Meta deve ser maior que zero.";
             if (cfg.fidPremio_Tipo == "CUPOM" && cfg.fidCupom_Valor <= 0)
                 return "Valor do cupom deve ser maior que zero.";
             if (cfg.fidPremio_Tipo == "PRODUTO" && string.IsNullOrWhiteSpace(cfg.fidProduto_Nome))
@@ -31,7 +31,7 @@ namespace Pedeai.BLL
             if (cfg == null) return "Configuração inválida.";
             if (cfg.Codigo <= 0) return "Código inválido.";
             if (string.IsNullOrWhiteSpace(cfg.fidNome)) return "Informe o nome da regra.";
-            if (cfg.fidMeta_Gasto <= 0) return "Meta de gasto deve ser maior que zero.";
+            if (cfg.fidMeta_Gasto <= 0) return "Meta deve ser maior que zero.";
             if (cfg.fidPremio_Tipo == "CUPOM" && cfg.fidCupom_Valor <= 0)
                 return "Valor do cupom deve ser maior que zero.";
             if (cfg.fidPremio_Tipo == "PRODUTO" && string.IsNullOrWhiteSpace(cfg.fidProduto_Nome))
@@ -79,9 +79,15 @@ namespace Pedeai.BLL
                     var cfg = _dal.Carregar(codigoConfig);
                     if (cfg.fidMeta_Gasto <= 0) continue;
 
-                    // Usa gasto mensal para fidelização — 1 cupom por mês quando bate a meta
-                    decimal gastoMes = cliente.clieGasto_Mensal;
-                    if (gastoMes < cfg.fidMeta_Gasto) continue;
+                    // Verifica se cliente atingiu a meta (por valor gasto ou por nº de pedidos no mês)
+                    decimal metaAtingida;
+                    if (cfg.fidMeta_Tipo == "PEDIDOS")
+                        metaAtingida = _dal.ContarPedidosClienteMes(
+                            codigoCliente, DateTime.Today.Year, DateTime.Today.Month);
+                    else
+                        metaAtingida = cliente.clieGasto_Mensal; // VALOR (padrão)
+
+                    if (metaAtingida < cfg.fidMeta_Gasto) continue;
 
                     int jaDeuMes = _dal.ContarPremiosEnviadosMes(
                         codigoCliente, codigoConfig, DateTime.Today.Year, DateTime.Today.Month);
@@ -109,13 +115,24 @@ namespace Pedeai.BLL
                     _dal.RegistrarHistorico(codigoCliente, codigoPedido, codigoConfig,
                                             cupomGerado, descricao, telefone);
 
-                    // Notificar via WhatsApp se cupom foi gerado
-                    if (!string.IsNullOrEmpty(cupomGerado) && !string.IsNullOrEmpty(telefone))
+                    // Notificar via WhatsApp com mensagem adequada ao tipo de prêmio
+                    if (!string.IsNullOrEmpty(telefone))
                     {
-                        string validade = DateTime.Today
-                            .AddDays(cfg.fidCupom_Validade > 0 ? cfg.fidCupom_Validade : 30)
-                            .ToString("dd/MM/yyyy");
-                        WhatsAppService.NotificarCupom(telefone, cliente.clieNome_RazaoSocial, cupomGerado, validade);
+                        if (cfg.fidPremio_Tipo == "PRODUTO")
+                        {
+                            int qtdePremio = cfg.fidProduto_Qtde > 0 ? cfg.fidProduto_Qtde : 1;
+                            WhatsAppService.NotificarPremioProduto(telefone,
+                                cliente.clieNome_RazaoSocial, cfg.fidProduto_Nome, qtdePremio);
+                        }
+                        else if (!string.IsNullOrEmpty(cupomGerado))
+                        {
+                            string validade = DateTime.Today
+                                .AddDays(cfg.fidCupom_Validade > 0 ? cfg.fidCupom_Validade : 30)
+                                .ToString("dd/MM/yyyy");
+                            WhatsAppService.NotificarCupomDetalhado(telefone,
+                                cliente.clieNome_RazaoSocial, cupomGerado, validade,
+                                cfg.fidCupom_Tipo, cfg.fidCupom_Valor, cfg.fidCupom_Minimo);
+                        }
                     }
 
                     mensagens.AppendLine($"[{cfg.fidNome}] {descricao}");

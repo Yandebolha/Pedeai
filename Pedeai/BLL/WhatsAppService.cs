@@ -212,6 +212,105 @@ namespace Pedeai.BLL
             EnviarBackground(telefone, msg);
         }
 
+        /// <summary>Notifica cupom de fidelidade com desconto e pedido mínimo detalhados.</summary>
+        public static void NotificarCupomDetalhado(string telefone, string nomeCliente,
+            string cupomCodigo, string validade, string tipoDesc, decimal valorDesc, decimal pedidoMinimo)
+        {
+            if (!Ativo) return;
+            string descontoStr = tipoDesc == "PERCENTUAL"
+                ? $"{valorDesc:0.#}%"
+                : $"R$ {valorDesc:N2}";
+            string minimoStr = pedidoMinimo > 0 ? $"\nPedido mínimo: R$ {pedidoMinimo:N2}" : "";
+            string msg = $"Parabéns {nomeCliente}! 🎉\n" +
+                         $"Você ganhou um cupom de desconto: *{cupomCodigo}*\n" +
+                         $"Desconto: *{descontoStr}*{minimoStr}\n" +
+                         $"Válido até {validade}. Use no seu próximo pedido!";
+            EnviarBackground(telefone, msg);
+        }
+
+        /// <summary>Notifica prêmio PRODUTO de fidelidade.</summary>
+        public static void NotificarPremioProduto(string telefone, string nomeCliente,
+            string produtoNome, int qtde)
+        {
+            if (!Ativo) return;
+            string qtdeStr = qtde > 1 ? $"{qtde}x " : "";
+            string msg = $"Parabéns {nomeCliente}! 🎁\n" +
+                         $"Você atingiu sua meta de fidelidade!\n" +
+                         $"Seu prêmio: *{qtdeStr}{produtoNome}* GRÁTIS no próximo pedido. 🥳\n" +
+                         $"Informe ao atendente ao fazer seu pedido. Obrigado pela fidelidade!";
+            EnviarBackground(telefone, msg);
+        }
+
+        /// <summary>Envia mensagem de promoção para um cliente.</summary>
+        public static void NotificarPromocao(string telefone, string nomeCliente,
+            string promNome, string dataFim, string tipoDesc, decimal valorDesc,
+            System.Collections.Generic.List<string> produtos)
+        {
+            if (!Ativo) return;
+            string descontoStr = tipoDesc == "PERCENTUAL"
+                ? $"{valorDesc:0.#}% OFF"
+                : $"R$ {valorDesc:N2} de desconto";
+            var sb = new System.Text.StringBuilder();
+            sb.AppendLine($"Olá, {nomeCliente}! 🏷️");
+            sb.AppendLine($"*{promNome}*");
+            sb.AppendLine($"Desconto: *{descontoStr}*  |  Válido até: {dataFim}");
+            if (produtos.Count > 0)
+            {
+                sb.AppendLine("\nProdutos em promoção:");
+                foreach (var p in produtos) sb.AppendLine($"  ▪ {p}");
+            }
+            sb.AppendLine("\nNão perca essa oportunidade! 🛍️");
+            EnviarBackground(telefone, sb.ToString().Trim());
+        }
+
+        /// <summary>Envia cardápio do dia para um cliente.</summary>
+        public static void NotificarCardapio(string telefone, string nomeCliente,
+            string titulo, string data,
+            System.Collections.Generic.List<(string nome, decimal preco, string desc)> itens,
+            string observacao)
+        {
+            if (!Ativo) return;
+            var sb = new System.Text.StringBuilder();
+            sb.AppendLine($"Olá, {nomeCliente}! 🍽️");
+            sb.AppendLine($"*Cardápio do Dia — {data}*");
+            if (!string.IsNullOrWhiteSpace(titulo)) sb.AppendLine($"_{titulo}_");
+            sb.AppendLine();
+            foreach (var (nome, preco, desc) in itens)
+            {
+                string precoStr = preco > 0 ? $" — R$ {preco:N2}" : "";
+                sb.AppendLine($"  ▪ *{nome}*{precoStr}");
+                if (!string.IsNullOrWhiteSpace(desc)) sb.AppendLine($"    {desc}");
+            }
+            if (!string.IsNullOrWhiteSpace(observacao))
+            {
+                sb.AppendLine();
+                sb.AppendLine($"_{observacao}_");
+            }
+            sb.AppendLine("\nFaça seu pedido agora! 📱");
+            EnviarBackground(telefone, sb.ToString().Trim());
+        }
+
+        /// <summary>Lista todos os clientes com telefone disponível.</summary>
+        public static System.Collections.Generic.List<(string fone, string nome)> ListarClientesComFone()
+        {
+            var lista = new System.Collections.Generic.List<(string, string)>();
+            try
+            {
+                var dt = new DAL.ClienteDAL().Listar();
+                foreach (System.Data.DataRow r in dt.Rows)
+                {
+                    string cel  = r["Celular"]?.ToString()  ?? "";
+                    string tel  = r["Telefone"]?.ToString() ?? "";
+                    string nome = r["Nome"]?.ToString()     ?? "";
+                    string fone = !string.IsNullOrWhiteSpace(cel) ? cel : tel;
+                    if (!string.IsNullOrWhiteSpace(fone) && !string.IsNullOrWhiteSpace(nome))
+                        lista.Add((fone, nome));
+                }
+            }
+            catch { }
+            return lista;
+        }
+
         // ── Utilitário ────────────────────────────────────────────────────────
 
         private static async Task CriarSeNecessarioAsync()

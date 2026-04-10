@@ -67,6 +67,8 @@ namespace Pedeai.Forms
             txtNomeRegra.Text       = cfg.fidNome;
             chkAtivo.Checked        = cfg.fidAtivo;
             numMeta.Value           = cfg.fidMeta_Gasto > 0 ? cfg.fidMeta_Gasto : 500m;
+            cmbMetaTipo.SelectedIndex = cfg.fidMeta_Tipo == "PEDIDOS" ? 1 : 0;
+            AtualizarLblMeta();
             rdCupom.Checked         = cfg.fidPremio_Tipo != "PRODUTO";
             rdProduto.Checked       = cfg.fidPremio_Tipo == "PRODUTO";
             cmbCupomTipo.SelectedIndex = cfg.fidCupom_Tipo == "FIXO" ? 1 : 0;
@@ -89,6 +91,8 @@ namespace Pedeai.Forms
             txtNomeRegra.Text       = "Nova Regra";
             chkAtivo.Checked        = true;
             numMeta.Value           = 500m;
+            cmbMetaTipo.SelectedIndex = 0;
+            AtualizarLblMeta();
             rdCupom.Checked         = true;
             rdProduto.Checked       = false;
             cmbCupomTipo.SelectedIndex = 0;
@@ -128,6 +132,7 @@ namespace Pedeai.Forms
                 fidNome           = txtNomeRegra.Text.Trim(),
                 fidAtivo          = chkAtivo.Checked,
                 fidMeta_Gasto     = numMeta.Value,
+                fidMeta_Tipo      = cmbMetaTipo.SelectedIndex == 1 ? "PEDIDOS" : "VALOR",
                 fidPremio_Tipo    = rdProduto.Checked ? "PRODUTO" : "CUPOM",
                 fidCupom_Tipo     = cmbCupomTipo.SelectedIndex == 1 ? "FIXO" : "PERCENTUAL",
                 fidCupom_Valor    = numCupomValor.Value,
@@ -249,6 +254,18 @@ namespace Pedeai.Forms
         private void RdPremio_CheckedChanged(object sender, EventArgs e)
         {
             AtualizarPainelPremio();
+        }
+
+        private void CmbMetaTipo_SelectedIndexChanged(object sender, EventArgs e)
+            => AtualizarLblMeta();
+
+        private void AtualizarLblMeta()
+        {
+            bool isPedidos = cmbMetaTipo.SelectedIndex == 1;
+            lblMeta.Text          = isPedidos ? "Meta (Pedidos/mês):" : "Meta de Gasto (R$):";
+            numMeta.DecimalPlaces = isPedidos ? 0 : 2;
+            if (isPedidos && numMeta.Value != Math.Floor(numMeta.Value))
+                numMeta.Value = Math.Floor(numMeta.Value);
         }
 
         private void AtualizarPainelPremio()

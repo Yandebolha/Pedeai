@@ -10,6 +10,7 @@ namespace Pedeai.Modelo
         public string itpwNome_Mercadoria { get; set; }
         public decimal itpwQtde { get; set; }
         public decimal itpwPreco_Unitario { get; set; }
+        public decimal itpwDesconto_Pct  { get; set; } = 0m;   // % de desconto do item
         public decimal itpwSubtotal { get; set; }
         public string itpwObservacoes { get; set; } = "";
 
