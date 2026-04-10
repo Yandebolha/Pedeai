@@ -82,5 +82,11 @@ namespace Pedeai.Forms
             if (obj != null) { obj.Situacao = "I"; _bll.Salvar(obj); }
             pnlForm.Visible = false; _codigoEditando = 0; CarregarGrid();
         }
+
+        protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
+        {
+            if (keyData == Keys.Escape) { Close(); return true; }
+            return base.ProcessCmdKey(ref msg, keyData);
+        }
     }
 }

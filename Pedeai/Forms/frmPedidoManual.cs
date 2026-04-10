@@ -19,7 +19,14 @@ namespace Pedeai.Forms
         private ProdItem _produtoSelecionado = null;
         private Cupom    _cupomAplicado      = null;
         private decimal  _descontoCupom      = 0m;
-        private int _codigoCliente = 0;
+        private int _codigoCliente           = 0;
+
+        // Prêmio PRODUTO de fidelidade pendente
+        private int    _premioFidelProdHistoricoId = 0;
+        private int    _premioFidelProdCodigo      = 0;
+        private string _premioFidelProdNome        = "";
+        private int    _premioFidelProdQtde        = 1;
+        private bool   _premioFidelProdAplicado    = false;
 
         public frmPedidoManual()
         {
@@ -51,6 +58,24 @@ namespace Pedeai.Forms
                 }
                 // Verificar cupom de fidelidade disponível e aplicar automaticamente
                 AplicarCupomFidelidadeSeDisponivel(c.Codigo);
+
+                // Verificar prêmio PRODUTO pendente
+                try
+                {
+                    var premio = _fidelBLL.BuscarPremioProdutoPendente(c.Codigo);
+                    if (premio.historicoCod > 0)
+                    {
+                        _premioFidelProdHistoricoId = premio.historicoCod;
+                        _premioFidelProdCodigo      = premio.codigoProduto;
+                        _premioFidelProdNome        = premio.nomeProduto;
+                        _premioFidelProdQtde        = premio.qtde > 0 ? premio.qtde : 1;
+                        _premioFidelProdAplicado    = false;
+                        MessageBox.Show(
+                            $"🎁 Prêmio de fidelidade disponível!\nAo adicionar \"{_premioFidelProdNome}” ao pedido, {_premioFidelProdQtde}x serão cobrados por R$ 0,00.",
+                            "Fidelização", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
+                }
+                catch { /* não crítico */ }
             }
         }
 
@@ -248,8 +273,8 @@ namespace Pedeai.Forms
             int    codMerc = _produtoSelecionado?.Codigo ?? 0;
             if (string.IsNullOrWhiteSpace(nome)) { MessageBox.Show("Informe o produto."); return; }
 
-            decimal descPct  = Math.Max(0, Math.Min(100, numDescontoItem.Value));
-            decimal unitFinal = numUnitario.Value * (1m - descPct / 100m);
+            decimal descPct   = Math.Max(0, Math.Min(100, numDescontoItem.Value));
+            decimal unitFinal  = numUnitario.Value * (1m - descPct / 100m);
 
             var item = new ItemPedidoWeb
             {
@@ -259,9 +284,32 @@ namespace Pedeai.Forms
                 itpwPreco_Unitario  = numUnitario.Value,
                 itpwSubtotal        = unitFinal * numQtde.Value,
             };
-            _itens.Add(item);
 
             string descStr = descPct > 0 ? descPct.ToString("0.#") + "%" : "";
+
+            // Aplicar prêmio PRODUTO de fidelidade (desconto 100%)
+            if (_premioFidelProdHistoricoId > 0 && !_premioFidelProdAplicado)
+            {
+                bool match = (codMerc > 0 && codMerc == _premioFidelProdCodigo)
+                          || (!string.IsNullOrWhiteSpace(_premioFidelProdNome) &&
+                              nome.Equals(_premioFidelProdNome, StringComparison.OrdinalIgnoreCase));
+                if (match)
+                {
+                    // Force quantity to prize quantity
+                    int qtdePremio = _premioFidelProdQtde > 0 ? _premioFidelProdQtde : 1;
+                    item.itpwQtde           = qtdePremio;
+                    item.itpwPreco_Unitario = 0;
+                    item.itpwSubtotal       = 0;
+                    descStr                 = "🎁 100%";
+                    _premioFidelProdAplicado = true;
+                    MessageBox.Show(
+                        $"Prêmio de fidelidade aplicado: {qtdePremio}x “{nome}” por R$ 0,00!",
+                        "Fidelização", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+            }
+
+            _itens.Add(item);
+
             gridItens.Rows.Add(item.itpwNome_Mercadoria, item.itpwQtde,
                 item.itpwPreco_Unitario.ToString("N2"), descStr,
                 item.itpwSubtotal.ToString("N2"));
@@ -367,6 +415,13 @@ namespace Pedeai.Forms
 
             if (_codigoCliente > 0)
                 _clienteBLL.IncrementarTotais(_codigoCliente, total);
+
+            // Marcar prêmio PRODUTO como utilizado (após salvar o pedido)
+            if (_premioFidelProdAplicado && _premioFidelProdHistoricoId > 0)
+            {
+                try { _fidelBLL.MarcarPremioProdutoUsado(_premioFidelProdHistoricoId); }
+                catch { /* não crítico */ }
+            }
 
             // Verificar se o cliente atingiu nova meta de fidelidade após esse pedido
             if (_codigoCliente > 0)
@@ -522,6 +577,12 @@ namespace Pedeai.Forms
                 numQtde.Value = 1;
                 AtualizarTotal();
             }
+        }
+
+        protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
+        {
+            if (keyData == Keys.Escape) { Close(); return true; }
+            return base.ProcessCmdKey(ref msg, keyData);
         }
 
         private class ProdItem

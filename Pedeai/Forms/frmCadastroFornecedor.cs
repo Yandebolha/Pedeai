@@ -135,5 +135,11 @@ namespace Pedeai.Forms
             }
             catch { /* ignora falhas de rede */ }
         }
+
+        protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
+        {
+            if (keyData == Keys.Escape) { Close(); return true; }
+            return base.ProcessCmdKey(ref msg, keyData);
+        }
     }
 }

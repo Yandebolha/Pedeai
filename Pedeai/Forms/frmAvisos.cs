@@ -146,5 +146,11 @@ namespace Pedeai.Forms
             if (!string.IsNullOrEmpty(erro)) MessageBox.Show("Erro: " + erro);
             else CarregarGrid();
         }
+
+        protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
+        {
+            if (keyData == Keys.Escape) { Close(); return true; }
+            return base.ProcessCmdKey(ref msg, keyData);
+        }
     }
 }

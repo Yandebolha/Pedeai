@@ -15,6 +15,7 @@ namespace Pedeai.Modelo
         // Produto settings
         public int     fidProduto_Codigo { get; set; } = 0;
         public string  fidProduto_Nome   { get; set; } = "";
+        public int     fidProduto_Qtde   { get; set; } = 1;
         // WhatsApp message template
         // Suporta: {Nome} {Meta} {CupomCodigo} {Validade} {Produto} {TotalGasto}
         public string  fidMensagem       { get; set; } =

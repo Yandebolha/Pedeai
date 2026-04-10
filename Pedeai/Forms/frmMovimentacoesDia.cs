@@ -232,5 +232,11 @@ namespace Pedeai.Forms
                     row.DefaultCellStyle.BackColor = Color.FromArgb(215, 245, 220);
             }
         }
+
+        protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
+        {
+            if (keyData == Keys.Escape) { Close(); return true; }
+            return base.ProcessCmdKey(ref msg, keyData);
+        }
     }
 }

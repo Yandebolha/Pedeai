@@ -357,8 +357,8 @@ namespace Pedeai.DB
                         Exec(conn, "ALTER TABLE config_fidelizacao MODIFY Codigo INT NOT NULL AUTO_INCREMENT");
                 }
                 AddColumnIfNotExists(conn, db, "config_fidelizacao", "fidNome",
-                    "VARCHAR(100) NOT NULL DEFAULT 'Regra Padrão'");
-
+                    "VARCHAR(100) NOT NULL DEFAULT 'Regra Padrão'");                AddColumnIfNotExists(conn, db, "config_fidelizacao", "fidProduto_Qtde",
+                    "INT NOT NULL DEFAULT 1");
                 // ── historico_fidelizacao ─────────────────────────────────────
                 Exec(conn, @"
                     CREATE TABLE IF NOT EXISTS historico_fidelizacao (

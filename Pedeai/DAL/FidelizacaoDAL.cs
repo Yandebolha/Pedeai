@@ -33,6 +33,7 @@ namespace Pedeai.DAL
                 fidCupom_Validade = r["fidCupom_Validade"] == DBNull.Value ? 30 : Convert.ToInt32(r["fidCupom_Validade"]),
                 fidProduto_Codigo = r["fidProduto_Codigo"] == DBNull.Value ? 0 : Convert.ToInt32(r["fidProduto_Codigo"]),
                 fidProduto_Nome   = r["fidProduto_Nome"]?.ToString() ?? "",
+                fidProduto_Qtde   = r["fidProduto_Qtde"] == DBNull.Value ? 1 : Convert.ToInt32(r["fidProduto_Qtde"]),
                 fidMensagem       = r["fidMensagem"]?.ToString() ?? "",
                 Info              = r["Info"]?.ToString() ?? "",
             };
@@ -56,8 +57,8 @@ namespace Pedeai.DAL
                 using var conn = AbrirConexao();
                 var sql = @"INSERT INTO config_fidelizacao
                     (fidNome, fidAtivo, fidMeta_Gasto, fidPremio_Tipo, fidCupom_Tipo, fidCupom_Valor,
-                     fidCupom_Minimo, fidCupom_Validade, fidProduto_Codigo, fidProduto_Nome, fidMensagem, Info)
-                    VALUES (@nome, @ativo, @meta, @tipo, @ctipo, @cval, @cmin, @cvalid, @pcod, @pnom, @msg, '')";
+                     fidCupom_Minimo, fidCupom_Validade, fidProduto_Codigo, fidProduto_Nome, fidProduto_Qtde, fidMensagem, Info)
+                    VALUES (@nome, @ativo, @meta, @tipo, @ctipo, @cval, @cmin, @cvalid, @pcod, @pnom, @pqtd, @msg, '')";
                 using var cmd = new MySqlCommand(sql, conn);
                 BindParams(cmd, cfg);
                 cmd.ExecuteNonQuery();
@@ -76,7 +77,7 @@ namespace Pedeai.DAL
                     fidNome=@nome, fidAtivo=@ativo, fidMeta_Gasto=@meta, fidPremio_Tipo=@tipo,
                     fidCupom_Tipo=@ctipo, fidCupom_Valor=@cval, fidCupom_Minimo=@cmin,
                     fidCupom_Validade=@cvalid, fidProduto_Codigo=@pcod, fidProduto_Nome=@pnom,
-                    fidMensagem=@msg
+                    fidProduto_Qtde=@pqtd, fidMensagem=@msg
                     WHERE Codigo=@cod";
                 using var cmd = new MySqlCommand(sql, conn);
                 cmd.Parameters.AddWithValue("@cod", cfg.Codigo);
@@ -112,6 +113,7 @@ namespace Pedeai.DAL
             cmd.Parameters.AddWithValue("@cvalid",cfg.fidCupom_Validade);
             cmd.Parameters.AddWithValue("@pcod",  cfg.fidProduto_Codigo > 0 ? (object)cfg.fidProduto_Codigo : DBNull.Value);
             cmd.Parameters.AddWithValue("@pnom",  cfg.fidProduto_Nome ?? "");
+            cmd.Parameters.AddWithValue("@pqtd",  cfg.fidProduto_Qtde > 0 ? cfg.fidProduto_Qtde : 1);
             cmd.Parameters.AddWithValue("@msg",   cfg.fidMensagem ?? "");
         }
 
@@ -237,6 +239,40 @@ namespace Pedeai.DAL
             cmd.Parameters.AddWithValue("@val",   cfg.fidCupom_Valor);
             cmd.Parameters.AddWithValue("@min",   cfg.fidCupom_Minimo);
             cmd.Parameters.AddWithValue("@valid", DateTime.Today.AddDays(cfg.fidCupom_Validade > 0 ? cfg.fidCupom_Validade : 30));
+            cmd.ExecuteNonQuery();
+        }
+        /// <summary>Retorna o prêmio PRODUTO pendente mais recente do cliente (ainda não resgatado).</summary>
+        public (int historicoCod, int codigoProduto, string nomeProduto, int qtde) BuscarPremioProdutoPendente(int codigoCliente)
+        {
+            using var conn = AbrirConexao();
+            var sql = @"
+                SELECT h.Codigo, f.fidProduto_Codigo, f.fidProduto_Nome, f.fidProduto_Qtde
+                FROM historico_fidelizacao h
+                JOIN config_fidelizacao f ON f.Codigo = h.Codigo_Config
+                WHERE h.Codigo_Cliente = @cli
+                  AND h.fidCupomCodigo LIKE 'PROD:%'
+                  AND h.fidCupomCodigo <> 'PROD:OK'
+                ORDER BY h.fidData DESC
+                LIMIT 1";
+            using var cmd = new MySqlCommand(sql, conn);
+            cmd.Parameters.AddWithValue("@cli", codigoCliente);
+            using var r = cmd.ExecuteReader();
+            if (!r.Read()) return (0, 0, "", 0);
+            return (
+                Convert.ToInt32(r["Codigo"]),
+                r["fidProduto_Codigo"] == DBNull.Value ? 0 : Convert.ToInt32(r["fidProduto_Codigo"]),
+                r["fidProduto_Nome"]?.ToString() ?? "",
+                r["fidProduto_Qtde"] == DBNull.Value ? 1 : Convert.ToInt32(r["fidProduto_Qtde"])
+            );
+        }
+
+        /// <summary>Marca o prêmio PRODUTO do histórico como utilizado.</summary>
+        public void MarcarPremioProdutoUsado(int codigoHistorico)
+        {
+            using var conn = AbrirConexao();
+            using var cmd = new MySqlCommand(
+                "UPDATE historico_fidelizacao SET fidCupomCodigo='PROD:OK' WHERE Codigo=@id", conn);
+            cmd.Parameters.AddWithValue("@id", codigoHistorico);
             cmd.ExecuteNonQuery();
         }
     }

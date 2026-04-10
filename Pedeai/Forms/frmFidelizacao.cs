@@ -1,4 +1,5 @@
 using System;
+using System.Drawing;
 using System.Windows.Forms;
 using Pedeai.BLL;
 using Pedeai.Modelo;
@@ -9,6 +10,7 @@ namespace Pedeai.Forms
     {
         private readonly FidelizacaoBLL _bll;
         private int _codigoConfigEditando = 0;
+        private int _produtoCodigo         = 0;   // produto selecionado do cardápio
         private bool _carregandoConfigs = false;
 
         public frmFidelizacao()
@@ -72,6 +74,8 @@ namespace Pedeai.Forms
             numCupomMin.Value       = cfg.fidCupom_Minimo >= 0 ? cfg.fidCupom_Minimo : 0m;
             numCupomValidade.Value  = cfg.fidCupom_Validade > 0 ? Math.Min(cfg.fidCupom_Validade, 365) : 30;
             txtProdNome.Text        = cfg.fidProduto_Nome ?? "";
+            _produtoCodigo          = cfg.fidProduto_Codigo;
+            numProdQtde.Value       = cfg.fidProduto_Qtde > 0 ? cfg.fidProduto_Qtde : 1;
             txtMsg.Text             = string.IsNullOrWhiteSpace(cfg.fidMensagem)
                                         ? "Parabéns {Nome}! Você atingiu R$ {Meta} em compras e ganhou um cupom {CupomCodigo} válido até {Validade}."
                                         : cfg.fidMensagem;
@@ -92,6 +96,8 @@ namespace Pedeai.Forms
             numCupomMin.Value       = 0m;
             numCupomValidade.Value  = 30;
             txtProdNome.Text        = "";
+            _produtoCodigo          = 0;
+            numProdQtde.Value       = 1;
             txtMsg.Text             = "Parabéns {Nome}! Você atingiu R$ {Meta} em compras e ganhou um cupom {CupomCodigo} válido até {Validade}.";
             gridConfigs.ClearSelection();
             AtualizarPainelPremio();
@@ -128,6 +134,8 @@ namespace Pedeai.Forms
                 fidCupom_Minimo   = numCupomMin.Value,
                 fidCupom_Validade = (int)numCupomValidade.Value,
                 fidProduto_Nome   = txtProdNome.Text.Trim(),
+                fidProduto_Codigo = _produtoCodigo,
+                fidProduto_Qtde   = (int)numProdQtde.Value,
                 fidMensagem       = txtMsg.Text.Trim(),
             };
 
@@ -145,6 +153,91 @@ namespace Pedeai.Forms
             {
                 if (r.Cells["Codigo"]?.Value != null && Convert.ToInt32(r.Cells["Codigo"].Value) == cfg.Codigo)
                 { gridConfigs.ClearSelection(); r.Selected = true; break; }
+            }
+        }
+
+        private void BtnBuscarProduto_Click(object sender, EventArgs e)
+        {
+            using var dlg = new Form();
+            dlg.Text            = "Selecionar Produto";
+            dlg.StartPosition   = FormStartPosition.CenterParent;
+            dlg.Size            = new Size(600, 420);
+            dlg.FormBorderStyle = FormBorderStyle.FixedDialog;
+            dlg.MaximizeBox     = dlg.MinimizeBox = false;
+            dlg.BackColor       = Color.FromArgb(245, 237, 216);
+
+            var txtFiltro = new TextBox
+            {
+                Dock = DockStyle.Top, Height = 28,
+                Font = new Font("Segoe UI", 10F),
+                PlaceholderText = "Filtrar por nome...",
+                BorderStyle = BorderStyle.FixedSingle
+            };
+
+            var grid = new DataGridView
+            {
+                Dock = DockStyle.Fill, ReadOnly = true, AllowUserToAddRows = false,
+                SelectionMode = DataGridViewSelectionMode.FullRowSelect,
+                RowHeadersVisible = false, AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill,
+                BackgroundColor = Color.FromArgb(245, 237, 216), GridColor = Color.FromArgb(200, 185, 160),
+                DefaultCellStyle = { BackColor = Color.FromArgb(245, 237, 216), ForeColor = Color.FromArgb(50, 50, 50),
+                    SelectionBackColor = Color.FromArgb(224, 113, 42), SelectionForeColor = Color.White },
+                ColumnHeadersDefaultCellStyle = { BackColor = Color.FromArgb(176, 110, 42), ForeColor = Color.White,
+                    Font = new Font("Segoe UI", 9F, FontStyle.Bold) },
+                BorderStyle = BorderStyle.None, Font = new Font("Segoe UI", 9F), MultiSelect = false
+            };
+            grid.Columns.Add(new DataGridViewTextBoxColumn { Name = "Codigo", HeaderText = "Cód", FillWeight = 10 });
+            grid.Columns.Add(new DataGridViewTextBoxColumn { Name = "Nome",   HeaderText = "Produto", FillWeight = 65 });
+            grid.Columns.Add(new DataGridViewTextBoxColumn { Name = "Preco",  HeaderText = "Preço R$", FillWeight = 25 });
+
+            var mercBLL = new MercadoriaBLL();
+            var dt = mercBLL.Listar();
+
+            void Preencher(string filtro)
+            {
+                grid.Rows.Clear();
+                foreach (System.Data.DataRow r in dt.Rows)
+                {
+                    string nome = r["Nome"]?.ToString() ?? "";
+                    if (!string.IsNullOrWhiteSpace(filtro) &&
+                        nome.IndexOf(filtro, StringComparison.OrdinalIgnoreCase) < 0) continue;
+                    grid.Rows.Add(r["Codigo"], nome,
+                        r["Preco"] == System.DBNull.Value ? "" : Convert.ToDecimal(r["Preco"]).ToString("N2"));
+                }
+            }
+            Preencher("");
+            txtFiltro.TextChanged += (_, __) => Preencher(txtFiltro.Text.Trim());
+
+            (int cod, string nome) escolhido = (0, "");
+
+            void Selecionar()
+            {
+                if (grid.CurrentRow == null) return;
+                escolhido = (
+                    Convert.ToInt32(grid.CurrentRow.Cells["Codigo"].Value),
+                    grid.CurrentRow.Cells["Nome"].Value?.ToString() ?? "");
+                dlg.DialogResult = DialogResult.OK;
+            }
+
+            grid.CellDoubleClick += (_, __) => Selecionar();
+
+            var btnOk = new Button
+            {
+                Text = "Selecionar", Dock = DockStyle.Bottom, Height = 34,
+                BackColor = Color.FromArgb(87, 120, 38), ForeColor = Color.White,
+                FlatStyle = FlatStyle.Flat, Font = new Font("Segoe UI", 9F, FontStyle.Bold)
+            };
+            btnOk.FlatAppearance.BorderSize = 0;
+            btnOk.Click += (_, __) => Selecionar();
+
+            dlg.Controls.Add(grid);
+            dlg.Controls.Add(btnOk);
+            dlg.Controls.Add(txtFiltro);
+
+            if (dlg.ShowDialog(this) == DialogResult.OK && escolhido.cod > 0)
+            {
+                _produtoCodigo   = escolhido.cod;
+                txtProdNome.Text = escolhido.nome;
             }
         }
 
@@ -210,6 +303,12 @@ namespace Pedeai.Forms
         private void Grid_DataError(object sender, DataGridViewDataErrorEventArgs e)
         {
             e.ThrowException = false;
+        }
+
+        protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
+        {
+            if (keyData == Keys.Escape) { Close(); return true; }
+            return base.ProcessCmdKey(ref msg, keyData);
         }
     }
 }

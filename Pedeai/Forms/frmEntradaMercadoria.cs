@@ -692,6 +692,12 @@ namespace Pedeai.Forms
         {
 
         }
+
+        protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
+        {
+            if (keyData == Keys.Escape) { Close(); return true; }
+            return base.ProcessCmdKey(ref msg, keyData);
+        }
     }
 
     // ── Detalhe leitura de entrada já registrada ────────────────────────────
@@ -906,6 +912,12 @@ namespace Pedeai.Forms
             if (!string.IsNullOrEmpty(erro)) { MessageBox.Show("Erro: " + erro); return; }
             var parcelas = _bll.ListarParcelas(_codigoEntrada);
             CarregarParcelasGrid(parcelas);
+        }
+
+        protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
+        {
+            if (keyData == Keys.Escape) { Close(); return true; }
+            return base.ProcessCmdKey(ref msg, keyData);
         }
     }
 }

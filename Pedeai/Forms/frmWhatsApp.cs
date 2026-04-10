@@ -695,6 +695,12 @@ namespace Pedeai.Forms
             _lblStatus.ForeColor = cor;
         }
 
+        protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
+        {
+            if (keyData == Keys.Escape) { Close(); return true; }
+            return base.ProcessCmdKey(ref msg, keyData);
+        }
+
         protected override void OnFormClosed(FormClosedEventArgs e)
         {
             _timerStatus?.Stop();

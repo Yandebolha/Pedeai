@@ -324,5 +324,11 @@ namespace Pedeai.Forms
                 if (gridHistorico.Columns.Contains(kv.Key))
                     gridHistorico.Columns[kv.Key].HeaderText = kv.Value;
         }
+
+        protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
+        {
+            if (keyData == Keys.Escape) { Close(); return true; }
+            return base.ProcessCmdKey(ref msg, keyData);
+        }
     }
 }

@@ -256,6 +256,12 @@ namespace Pedeai.Forms
             if (cmbCategoria.Items.Count > 0) cmbCategoria.SelectedIndex = 0;
         }
 
+        protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
+        {
+            if (keyData == Keys.Escape) { Close(); return true; }
+            return base.ProcessCmdKey(ref msg, keyData);
+        }
+
         private sealed class CategoriaItem
         {
             public int?   Codigo { get; }

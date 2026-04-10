@@ -173,6 +173,12 @@ namespace Pedeai.Forms
             pnlForm.Visible = false; CarregarGrid();
         }
 
+        protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
+        {
+            if (keyData == Keys.Escape) { Close(); return true; }
+            return base.ProcessCmdKey(ref msg, keyData);
+        }
+
         private class CatItem
         {
             public int Codigo; public string Nome;

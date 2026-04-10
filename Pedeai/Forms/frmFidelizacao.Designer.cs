@@ -38,6 +38,9 @@ namespace Pedeai.Forms
             this.pnlProduto = new System.Windows.Forms.Panel();
             this.lblProdNome = new System.Windows.Forms.Label();
             this.txtProdNome = new System.Windows.Forms.TextBox();
+            this.btnBuscarProduto = new System.Windows.Forms.Button();
+            this.lblProdQtde = new System.Windows.Forms.Label();
+            this.numProdQtde = new System.Windows.Forms.NumericUpDown();
             this.lblMsg = new System.Windows.Forms.Label();
             this.txtMsg = new System.Windows.Forms.TextBox();
             this.lblTags = new System.Windows.Forms.Label();
@@ -64,6 +67,7 @@ namespace Pedeai.Forms
             ((System.ComponentModel.ISupportInitialize)(this.numCupomMin)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numCupomValidade)).BeginInit();
             this.pnlProduto.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.numProdQtde)).BeginInit();
             this.pnlListaBotoes.SuspendLayout();
             this.pnlLista.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.gridConfigs)).BeginInit();
@@ -357,9 +361,12 @@ namespace Pedeai.Forms
             this.pnlProduto.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.pnlProduto.Controls.Add(this.lblProdNome);
             this.pnlProduto.Controls.Add(this.txtProdNome);
+            this.pnlProduto.Controls.Add(this.btnBuscarProduto);
+            this.pnlProduto.Controls.Add(this.lblProdQtde);
+            this.pnlProduto.Controls.Add(this.numProdQtde);
             this.pnlProduto.Location = new System.Drawing.Point(16, 266);
             this.pnlProduto.Name = "pnlProduto";
-            this.pnlProduto.Size = new System.Drawing.Size(750, 48);
+            this.pnlProduto.Size = new System.Drawing.Size(750, 82);
             this.pnlProduto.TabIndex = 5;
             this.pnlProduto.Visible = false;
             // 
@@ -381,8 +388,49 @@ namespace Pedeai.Forms
             this.txtProdNome.Location = new System.Drawing.Point(186, 9);
             this.txtProdNome.MaxLength = 149;
             this.txtProdNome.Name = "txtProdNome";
-            this.txtProdNome.Size = new System.Drawing.Size(350, 25);
+            this.txtProdNome.Size = new System.Drawing.Size(300, 25);
             this.txtProdNome.TabIndex = 0;
+            this.txtProdNome.ReadOnly = true;
+            // 
+            // btnBuscarProduto
+            // 
+            this.btnBuscarProduto.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(176)))), ((int)(((byte)(110)))), ((int)(((byte)(42)))));
+            this.btnBuscarProduto.FlatAppearance.BorderSize = 0;
+            this.btnBuscarProduto.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnBuscarProduto.ForeColor = System.Drawing.Color.White;
+            this.btnBuscarProduto.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.btnBuscarProduto.Font = new System.Drawing.Font("Segoe UI", 8.5F, System.Drawing.FontStyle.Bold);
+            this.btnBuscarProduto.Location = new System.Drawing.Point(494, 7);
+            this.btnBuscarProduto.Name = "btnBuscarProduto";
+            this.btnBuscarProduto.Size = new System.Drawing.Size(110, 27);
+            this.btnBuscarProduto.TabIndex = 1;
+            this.btnBuscarProduto.Text = "🔍 Buscar";
+            this.btnBuscarProduto.UseVisualStyleBackColor = false;
+            this.btnBuscarProduto.Click += new System.EventHandler(this.BtnBuscarProduto_Click);
+            // 
+            // lblProdQtde
+            // 
+            this.lblProdQtde.AutoSize = true;
+            this.lblProdQtde.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(50)))), ((int)(((byte)(50)))), ((int)(((byte)(50)))));
+            this.lblProdQtde.Location = new System.Drawing.Point(8, 50);
+            this.lblProdQtde.Name = "lblProdQtde";
+            this.lblProdQtde.Size = new System.Drawing.Size(170, 19);
+            this.lblProdQtde.TabIndex = 2;
+            this.lblProdQtde.Text = "Quantidade Prêmio:";
+            // 
+            // numProdQtde
+            // 
+            this.numProdQtde.BackColor = System.Drawing.Color.White;
+            this.numProdQtde.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.numProdQtde.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(50)))), ((int)(((byte)(50)))), ((int)(((byte)(50)))));
+            this.numProdQtde.Location = new System.Drawing.Point(186, 47);
+            this.numProdQtde.Minimum = new decimal(new int[] {1, 0, 0, 0});
+            this.numProdQtde.Maximum = new decimal(new int[] {99, 0, 0, 0});
+            this.numProdQtde.Value   = new decimal(new int[] {1, 0, 0, 0});
+            this.numProdQtde.Name = "numProdQtde";
+            this.numProdQtde.Size = new System.Drawing.Size(80, 25);
+            this.numProdQtde.TabIndex = 3;
+            this.numProdQtde.Font = new System.Drawing.Font("Segoe UI", 9.5F);
             // 
             // lblMsg
             // 
@@ -652,6 +700,7 @@ namespace Pedeai.Forms
             ((System.ComponentModel.ISupportInitialize)(this.numCupomValidade)).EndInit();
             this.pnlProduto.ResumeLayout(false);
             this.pnlProduto.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.numProdQtde)).EndInit();
             this.pnlListaBotoes.ResumeLayout(false);
             this.pnlLista.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.gridConfigs)).EndInit();
@@ -694,6 +743,9 @@ namespace Pedeai.Forms
         private System.Windows.Forms.Panel        pnlProduto;
         private System.Windows.Forms.Label        lblProdNome;
         private System.Windows.Forms.TextBox      txtProdNome;
+        private System.Windows.Forms.Button        btnBuscarProduto;
+        private System.Windows.Forms.Label        lblProdQtde;
+        private System.Windows.Forms.NumericUpDown numProdQtde;
         private System.Windows.Forms.Label        lblMsg;
         private System.Windows.Forms.TextBox      txtMsg;
         private System.Windows.Forms.Label        lblTags;

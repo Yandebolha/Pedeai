@@ -75,5 +75,11 @@ namespace Pedeai.Forms
             _bll.Salvar(obj);
             pnlForm.Visible = false; Carregar();
         }
+
+        protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
+        {
+            if (keyData == Keys.Escape) { Close(); return true; }
+            return base.ProcessCmdKey(ref msg, keyData);
+        }
     }
 }

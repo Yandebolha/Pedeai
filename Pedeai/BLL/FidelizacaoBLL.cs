@@ -92,7 +92,9 @@ namespace Pedeai.BLL
 
                     if (cfg.fidPremio_Tipo == "PRODUTO")
                     {
-                        descricao = $"Prêmio produto: {cfg.fidProduto_Nome}";
+                        cupomGerado = $"PROD:{cfg.fidProduto_Codigo}";
+                        int qtde    = cfg.fidProduto_Qtde > 0 ? cfg.fidProduto_Qtde : 1;
+                        descricao   = $"Prêmio produto: {qtde}x {cfg.fidProduto_Nome}";
                     }
                     else
                     {
@@ -144,6 +146,14 @@ namespace Pedeai.BLL
             // Inclui segundos + sufixo aleatório para evitar duplicatas
             return $"FID{DateTime.Now:yyyyMMddHHmmss}{sufixo}";
         }
+
+        /// <summary>Retorna o prêmio PRODUTO pendente mais recente do cliente, ou (0,0,"",0).</summary>
+        public (int historicoCod, int codigoProduto, string nomeProduto, int qtde) BuscarPremioProdutoPendente(int codigoCliente)
+            => _dal.BuscarPremioProdutoPendente(codigoCliente);
+
+        /// <summary>Marca o prêmio PRODUTO como utilizado (fidCupomCodigo → 'PROD:OK').</summary>
+        public void MarcarPremioProdutoUsado(int codigoHistorico)
+            => _dal.MarcarPremioProdutoUsado(codigoHistorico);
 
         private static void AbrirWhatsApp(string telefone, ConfigFidelizacao cfg,
                                            string nome, string cupomCodigo,

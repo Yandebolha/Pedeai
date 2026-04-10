@@ -117,5 +117,9 @@ namespace Pedeai.Forms
             MessageBox.Show("Funcionalidade de impress\u00e3o do relat\u00f3rio em desenvolvimento.",
                             "Imprimir", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
-    }
+        protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
+        {
+            if (keyData == Keys.Escape) { Close(); return true; }
+            return base.ProcessCmdKey(ref msg, keyData);
+        }    }
 }

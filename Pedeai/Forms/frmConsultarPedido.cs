@@ -191,5 +191,11 @@ namespace Pedeai.Forms
             if (gridItens.Columns["Subtotal"] != null) { gridItens.Columns["Subtotal"].HeaderText = "Subtotal";  gridItens.Columns["Subtotal"].FillWeight = 12; }
             if (gridItens.Columns["Obs"]      != null) { gridItens.Columns["Obs"].HeaderText      = "Obs.";      gridItens.Columns["Obs"].FillWeight      = 28; }
         }
+
+        protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
+        {
+            if (keyData == Keys.Escape) { Close(); return true; }
+            return base.ProcessCmdKey(ref msg, keyData);
+        }
     }
 }
