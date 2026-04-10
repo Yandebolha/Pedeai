@@ -20,17 +20,17 @@ namespace Pedeai.Forms
             this.btnFechar = new System.Windows.Forms.Button();
             this.btnEntrar = new System.Windows.Forms.Button();
             this.pnlCard = new System.Windows.Forms.Panel();
+            this.picLogo = new System.Windows.Forms.PictureBox();
             this.lblBrand = new System.Windows.Forms.Label();
             this.lblTagline = new System.Windows.Forms.Label();
             this.lblLoginTitle = new System.Windows.Forms.Label();
             this.pnlLoginCard = new System.Windows.Forms.Panel();
             this.lblSenhaTitle = new System.Windows.Forms.Label();
             this.pnlSenhaCard = new System.Windows.Forms.Panel();
-            this.picLogo = new System.Windows.Forms.PictureBox();
             this.pnlCard.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.picLogo)).BeginInit();
             this.pnlLoginCard.SuspendLayout();
             this.pnlSenhaCard.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.picLogo)).BeginInit();
             this.SuspendLayout();
             // 
             // txtLogin
@@ -123,7 +123,7 @@ namespace Pedeai.Forms
             // pnlCard
             // 
             this.pnlCard.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.pnlCard.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(239)))), ((int)(((byte)(187)))), ((int)(((byte)(137)))));
+            this.pnlCard.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(200)))), ((int)(((byte)(185)))), ((int)(((byte)(160)))));
             this.pnlCard.Controls.Add(this.btnFechar);
             this.pnlCard.Controls.Add(this.picLogo);
             this.pnlCard.Controls.Add(this.lblBrand);
@@ -142,6 +142,18 @@ namespace Pedeai.Forms
             this.pnlCard.TabIndex = 0;
             this.pnlCard.Paint += new System.Windows.Forms.PaintEventHandler(this.pnlCard_Paint);
             this.pnlCard.MouseDown += new System.Windows.Forms.MouseEventHandler(this.FormDrag_MouseDown);
+            // 
+            // picLogo
+            // 
+            this.picLogo.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(200)))), ((int)(((byte)(185)))), ((int)(((byte)(160)))));
+            this.picLogo.Location = new System.Drawing.Point(192, 47);
+            this.picLogo.Margin = new System.Windows.Forms.Padding(4);
+            this.picLogo.Name = "picLogo";
+            this.picLogo.Size = new System.Drawing.Size(175, 196);
+            this.picLogo.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+            this.picLogo.TabIndex = 1;
+            this.picLogo.TabStop = false;
+            this.picLogo.Click += new System.EventHandler(this.picLogo_Click);
             // 
             // lblBrand
             // 
@@ -215,18 +227,6 @@ namespace Pedeai.Forms
             this.pnlSenhaCard.Size = new System.Drawing.Size(420, 49);
             this.pnlSenhaCard.TabIndex = 8;
             // 
-            // picLogo
-            // 
-            this.picLogo.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(239)))), ((int)(((byte)(187)))), ((int)(((byte)(137)))));
-            this.picLogo.Location = new System.Drawing.Point(192, 47);
-            this.picLogo.Margin = new System.Windows.Forms.Padding(4);
-            this.picLogo.Name = "picLogo";
-            this.picLogo.Size = new System.Drawing.Size(175, 196);
-            this.picLogo.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
-            this.picLogo.TabIndex = 1;
-            this.picLogo.TabStop = false;
-            this.picLogo.Click += new System.EventHandler(this.picLogo_Click);
-            // 
             // frmLogin
             // 
             this.AcceptButton = this.btnEntrar;
@@ -246,11 +246,11 @@ namespace Pedeai.Forms
             this.Text = "RanGoFood — Login";
             this.pnlCard.ResumeLayout(false);
             this.pnlCard.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.picLogo)).EndInit();
             this.pnlLoginCard.ResumeLayout(false);
             this.pnlLoginCard.PerformLayout();
             this.pnlSenhaCard.ResumeLayout(false);
             this.pnlSenhaCard.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.picLogo)).EndInit();
             this.ResumeLayout(false);
 
         }
