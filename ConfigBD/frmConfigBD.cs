@@ -14,8 +14,9 @@ namespace ConfigBD
     public class frmConfigBD : Form
     {
         // ── Caminho do App.config do RanGoFood (mesmo diretório do ConfigBD.exe) ──
+        // No .NET 5+, o arquivo de configuração se chama AppName.dll.config
         private static string ConfigPath =>
-            Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "RanGoFood.exe.config");
+            Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "RanGoFood.dll.config");
 
         private TextBox    txtServidor;
         private TextBox    txtPorta;

@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
@@ -11,31 +11,22 @@
     <RootNamespace>ConfigBD</RootNamespace>
     <ApplicationHighDpiMode>SystemAware</ApplicationHighDpiMode>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
-    <SelfContained>true</SelfContained>
-    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
-    <PublishSingleFile>true</PublishSingleFile>
-    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
-    <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="MySqlConnector" Version="2.3.7" />
   </ItemGroup>
 
-  <Target Name="PublishAndCopy" AfterTargets="Build">
+  <Target Name="CopyToRanGoFood" AfterTargets="Build">
     <PropertyGroup>
       <RanGoFoodBin>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\Pedeai\bin\$(Configuration)\net5.0-windows\'))</RanGoFoodBin>
-      <PublishOut>$(MSBuildThisFileDirectory)bin\$(Configuration)\publish\</PublishOut>
     </PropertyGroup>
-    <Exec Command="dotnet publish &quot;$(MSBuildThisFileFullPath)&quot; -c $(Configuration) -r win-x64 --self-contained true -p:PublishSingleFile=true -p:EnableCompressionInSingleFile=true --nologo -o &quot;$(PublishOut)&quot;"
-          ConsoleToMSBuild="true"
-          ContinueOnError="true" />
     <MakeDir Directories="$(RanGoFoodBin)" />
-    <Copy SourceFiles="$(PublishOut)ConfigBD.exe"
+    <Copy SourceFiles="$(TargetDir)ConfigBD.exe"
           DestinationFolder="$(RanGoFoodBin)"
           SkipUnchangedFiles="false"
           ContinueOnError="true" />
-    <Message Text="? ConfigBD.exe (self-contained) copiado para RanGoFood bin" Importance="high" />
+    <Message Text="ConfigBD.exe copiado para RanGoFood bin" Importance="high" />
   </Target>
 
 </Project>
