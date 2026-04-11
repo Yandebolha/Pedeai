@@ -22,6 +22,19 @@ namespace Pedeai.DB
         {
             try
             {
+                // Conecta sem banco para garantir que ele exista
+                var builder = new MySqlConnectionStringBuilder(ConnStr);
+                string dbName = builder.Database;
+                builder.Database = "";
+                using (var connInit = new MySqlConnection(builder.ToString()))
+                {
+                    connInit.Open();
+                    using var cmdCreate = new MySqlCommand(
+                        $"CREATE DATABASE IF NOT EXISTS `{dbName}` DEFAULT CHARSET utf8mb4 COLLATE utf8mb4_unicode_ci",
+                        connInit);
+                    cmdCreate.ExecuteNonQuery();
+                }
+
                 using var conn = new MySqlConnection(ConnStr);
                 conn.Open();
                 string db = conn.Database;

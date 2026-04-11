@@ -22,12 +22,15 @@ public static class DbHelper
         return conn;
     }
 
-    /// <summary>Testa se a conexão com o banco está disponível. Retorna false em caso de falha.</summary>
+    /// <summary>Testa se o servidor MySQL está acessível (sem exigir que o banco já exista).</summary>
     public static bool TestarConexao()
     {
         try
         {
-            using var conn = new MySqlConnection(ConnectionString);
+            // Remove o Database da string para não depender do banco existir
+            var b = new MySqlConnector.MySqlConnectionStringBuilder(ConnectionString);
+            b.Database = "";
+            using var conn = new MySqlConnector.MySqlConnection(b.ToString());
             conn.Open();
             return true;
         }

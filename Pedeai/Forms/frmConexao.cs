@@ -17,6 +17,9 @@ namespace Pedeai.Forms
     /// </summary>
     public class frmConexao : Form
     {
+        /// <summary>Se definido, exibe uma mensagem de erro no topo da janela ao abrir.</summary>
+        public string MotivoErro { get; set; }
+
         private TextBox   txtServidor;
         private TextBox   txtPorta;
         private TextBox   txtBanco;
@@ -35,7 +38,15 @@ namespace Pedeai.Forms
         public frmConexao()
         {
             BuildUI();
-            CarregarConexaoAtual();
+            Load += (_, __) =>
+            {
+                CarregarConexaoAtual();
+                if (!string.IsNullOrWhiteSpace(MotivoErro))
+                {
+                    lblStatus.ForeColor = Color.Red;
+                    lblStatus.Text      = "⚠ " + MotivoErro;
+                }
+            };
         }
 
         // ── Leitura da connection string atual ─────────────────────────────────
