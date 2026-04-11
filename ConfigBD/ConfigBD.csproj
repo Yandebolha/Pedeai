@@ -22,11 +22,14 @@
       <RanGoFoodBin>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\Pedeai\bin\$(Configuration)\net5.0-windows\'))</RanGoFoodBin>
     </PropertyGroup>
     <MakeDir Directories="$(RanGoFoodBin)" />
-    <Copy SourceFiles="$(TargetDir)ConfigBD.exe"
+    <ItemGroup>
+      <ConfigBDFiles Include="$(TargetDir)*.exe;$(TargetDir)*.dll;$(TargetDir)*.exe.config" />
+    </ItemGroup>
+    <Copy SourceFiles="@(ConfigBDFiles)"
           DestinationFolder="$(RanGoFoodBin)"
           SkipUnchangedFiles="false"
           ContinueOnError="true" />
-    <Message Text="ConfigBD.exe copiado para RanGoFood bin" Importance="high" />
+    <Message Text="ConfigBD.exe + DLLs copiados para RanGoFood bin" Importance="high" />
   </Target>
 
 </Project>
