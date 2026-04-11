@@ -363,10 +363,9 @@ namespace ConfigBD
             Controls.Add(MkLbl(label, 20, y));
             txt = new TextBox
             {
-                Location        = new Point(170, y - 2),
-                Size            = new Size(width, 24),
-                BorderStyle     = BorderStyle.FixedSingle,
-                PlaceholderText = placeholder,
+                Location    = new Point(170, y - 2),
+                Size        = new Size(width, 24),
+                BorderStyle = BorderStyle.FixedSingle,
             };
             Controls.Add(txt);
             y += 36;
