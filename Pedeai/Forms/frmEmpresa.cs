@@ -375,12 +375,6 @@ namespace Pedeai.Forms
         }
 
         // ── ABA SISTEMA ───────────────────────────────────────────────────────
-        private void BtnConexaoBD_Click(object sender, EventArgs e)
-        {
-            using var frm = new frmConexao();
-            frm.ShowDialog(this);
-        }
-
         private void BtnResetarBanco_Click(object sender, EventArgs e)
         {
             if (!UsuarioSessao.TemNivel(9))

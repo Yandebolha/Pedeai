@@ -22,6 +22,18 @@ public static class DbHelper
         return conn;
     }
 
+    /// <summary>Testa se a conexão com o banco está disponível. Retorna false em caso de falha.</summary>
+    public static bool TestarConexao()
+    {
+        try
+        {
+            using var conn = new MySqlConnection(ConnectionString);
+            conn.Open();
+            return true;
+        }
+        catch { return false; }
+    }
+
     // ── Sequência (padrão ConstruFarma) ─────────────────────────────────────
 
     private static int ProximoCodigo(string tabela)

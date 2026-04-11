@@ -857,7 +857,6 @@ namespace Pedeai.Forms
             this.tabSistema.Controls.Add(this.lblResetTitulo);
             this.tabSistema.Controls.Add(this.lblResetAviso);
             this.tabSistema.Controls.Add(this.btnResetarBanco);
-            this.tabSistema.Controls.Add(this.btnConexaoBD);
             this.tabSistema.BackColor = System.Drawing.Color.FromArgb(245, 237, 216);
             this.tabSistema.ForeColor = System.Drawing.Color.FromArgb(50, 50, 50);
             this.tabSistema.Location = new System.Drawing.Point(4, 30);
@@ -900,23 +899,6 @@ namespace Pedeai.Forms
             this.btnResetarBanco.Text = "⚠  Resetar Banco de Dados";
             this.btnResetarBanco.UseVisualStyleBackColor = false;
             this.btnResetarBanco.Click += new System.EventHandler(this.BtnResetarBanco_Click);
-            // 
-            // btnConexaoBD
-            // 
-            this.btnConexaoBD = new System.Windows.Forms.Button();
-            this.btnConexaoBD.BackColor = System.Drawing.Color.FromArgb(52, 100, 160);
-            this.btnConexaoBD.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.btnConexaoBD.FlatAppearance.BorderSize = 0;
-            this.btnConexaoBD.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnConexaoBD.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.btnConexaoBD.ForeColor = System.Drawing.Color.White;
-            this.btnConexaoBD.Location = new System.Drawing.Point(30, 220);
-            this.btnConexaoBD.Name = "btnConexaoBD";
-            this.btnConexaoBD.Size = new System.Drawing.Size(260, 40);
-            this.btnConexaoBD.TabIndex = 1;
-            this.btnConexaoBD.Text = "⚙  Configurar Banco de Dados";
-            this.btnConexaoBD.UseVisualStyleBackColor = false;
-            this.btnConexaoBD.Click += new System.EventHandler(this.BtnConexaoBD_Click);
             this.btnResetarBanco.Click += new System.EventHandler(this.BtnResetarBanco_Click);
             // 
             // frmEmpresa
@@ -1013,7 +995,6 @@ namespace Pedeai.Forms
         private System.Windows.Forms.Label          lblResetTitulo;
         private System.Windows.Forms.Label          lblResetAviso;
         internal System.Windows.Forms.Button        btnResetarBanco;
-        private System.Windows.Forms.Button         btnConexaoBD;
         private System.Windows.Forms.Button         btnSalvEmp;
         private System.Windows.Forms.Button         btnSalvImp;
         private System.Windows.Forms.Button         btnTesteImp;

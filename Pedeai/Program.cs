@@ -14,6 +14,22 @@ namespace Pedeai
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
 
+            // Testa a conexão com o banco antes de qualquer coisa.
+            // Se falhar, abre a tela de configuração para o usuário apontar o servidor correto.
+            while (!DB.DbHelper.TestarConexao())
+            {
+                var msg = MessageBox.Show(
+                    "Não foi possível conectar ao banco de dados.\n\n" +
+                    "Verifique se o servidor MySQL está acessível e configure a conexão.",
+                    "Falha de Conexão",
+                    MessageBoxButtons.OKCancel,
+                    MessageBoxIcon.Error);
+                if (msg == DialogResult.Cancel) return;
+
+                using var config = new Forms.frmConexao();
+                if (config.ShowDialog() != DialogResult.OK) return;
+            }
+
             // Cria tabelas, colunas e dados iniciais automaticamente
             if (!DbMigrator.Executar()) return;
 
