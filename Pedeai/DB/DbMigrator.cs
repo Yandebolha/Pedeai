@@ -416,6 +416,30 @@ namespace Pedeai.DB
                         card_Produto_Preco    DECIMAL(10,2) NOT NULL DEFAULT 0.00,
                         card_Produto_Descricao VARCHAR(300) NOT NULL DEFAULT ''
                     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+
+                // ── Licença: colunas empCodigo_Empresa, empChave_Licenca e empData_Graca ──
+                AddColumnIfNotExists(conn, db, "empresa", "empCodigo_Empresa",
+                    "VARCHAR(20) NOT NULL DEFAULT ''");
+                AddColumnIfNotExists(conn, db, "empresa", "empChave_Licenca",
+                    "VARCHAR(64) NOT NULL DEFAULT ''");
+                AddColumnIfNotExists(conn, db, "empresa", "empData_Graca",
+                    "DATE NULL DEFAULT NULL");
+
+                // Gera o código de empresa se ainda não existir
+                {
+                    using var chkCod = new MySqlCommand(
+                        "SELECT empCodigo_Empresa FROM empresa WHERE Codigo=1 LIMIT 1", conn);
+                    var codAtual = chkCod.ExecuteScalar()?.ToString() ?? "";
+                    if (string.IsNullOrWhiteSpace(codAtual))
+                    {
+                        string novoCod = LicencaService.GerarCodigoEmpresa();
+                        using var updCod = new MySqlCommand(
+                            "UPDATE empresa SET empCodigo_Empresa=@cod WHERE Codigo=1", conn);
+                        updCod.Parameters.AddWithValue("@cod", novoCod);
+                        updCod.ExecuteNonQuery();
+                    }
+                }
+
                 return true;
             }
             catch (Exception ex)
@@ -522,7 +546,14 @@ namespace Pedeai.DB
                     "item_entrada_mercadoria", "parcela_entrada_mercadoria",
                     "entrada_mercadoria", "gasto_material", "necessidade_empresa",
                     "turno", "estoque_item", "cliente", "cupom", "fornecedor",
-                    "mercadoria", "grupo_mercadoria", "empresa", "config_impressao"
+                    "mercadoria", "grupo_mercadoria",
+                    // WhatsApp / Promoções / Cardápio
+                    "promocao_item", "promocao",
+                    "cardapio_dia_item", "cardapio_dia",
+                    // Fidelização
+                    "historico_fidelizacao", "config_fidelizacao",
+                    // Empresa e configs (licença incluída — será recriada abaixo)
+                    "empresa", "config_impressao"
                 };
                 foreach (var t in truncar)
                     TruncateIfExists(conn, t);
@@ -548,7 +579,13 @@ namespace Pedeai.DB
                     (Codigo, empNome, empNome_Fantasia, empCNPJ, empTelefone, empEmail, empEndereco, Info)
                     VALUES (1, 'Minha Empresa', '', '', '', '', '', '')");
 
+                // Regenera o código de empresa após o reset (licença limpa)
+                string novoCodEmp = LicencaService.GerarCodigoEmpresa();
+                Exec(conn, $"UPDATE empresa SET empCodigo_Empresa='{novoCodEmp}', empChave_Licenca='', empData_Graca=NULL WHERE Codigo=1");
+
                 Exec(conn, "INSERT IGNORE INTO config_impressao (Codigo) VALUES (1)");
+                Exec(conn, @"INSERT IGNORE INTO config_fidelizacao (Codigo, fidMensagem)
+                    VALUES (1, 'Parabéns {Nome}! Você atingiu R$ {Meta} em compras e ganhou um cupom {CupomCodigo} válido até {Validade}.')");
 
                 return "";
             }

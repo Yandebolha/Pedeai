@@ -241,10 +241,11 @@ namespace Pedeai.BLL
             EnviarBackground(telefone, msg);
         }
 
-        /// <summary>Envia mensagem de promoção para um cliente.</summary>
+        /// <summary>Envia mensagem de promoção com cupom de desconto para um cliente.</summary>
         public static void NotificarPromocao(string telefone, string nomeCliente,
             string promNome, string dataFim, string tipoDesc, decimal valorDesc,
-            System.Collections.Generic.List<string> produtos)
+            System.Collections.Generic.List<(string nome, decimal preco)> produtos,
+            string cupomCodigo)
         {
             if (!Ativo) return;
             string descontoStr = tipoDesc == "PERCENTUAL"
@@ -257,7 +258,17 @@ namespace Pedeai.BLL
             if (produtos.Count > 0)
             {
                 sb.AppendLine("\nProdutos em promoção:");
-                foreach (var p in produtos) sb.AppendLine($"  ▪ {p}");
+                foreach (var (nome, preco) in produtos)
+                {
+                    string precoStr = preco > 0 ? $" — R$ {preco:N2}" : "";
+                    sb.AppendLine($"  ▪ *{nome}*{precoStr}");
+                }
+            }
+            if (!string.IsNullOrWhiteSpace(cupomCodigo))
+            {
+                sb.AppendLine();
+                sb.AppendLine($"🎟️ Use o cupom *{cupomCodigo}* no seu próximo pedido e ganhe {descontoStr}!");
+                sb.AppendLine("Informe ao atendente ao fazer seu pedido.");
             }
             sb.AppendLine("\nNão perca essa oportunidade! 🛍️");
             EnviarBackground(telefone, sb.ToString().Trim());
@@ -266,7 +277,7 @@ namespace Pedeai.BLL
         /// <summary>Envia cardápio do dia para um cliente.</summary>
         public static void NotificarCardapio(string telefone, string nomeCliente,
             string titulo, string data,
-            System.Collections.Generic.List<(string nome, decimal preco, string desc)> itens,
+            System.Collections.Generic.List<(string nome, string desc)> itens,
             string observacao)
         {
             if (!Ativo) return;
@@ -275,10 +286,9 @@ namespace Pedeai.BLL
             sb.AppendLine($"*Cardápio do Dia — {data}*");
             if (!string.IsNullOrWhiteSpace(titulo)) sb.AppendLine($"_{titulo}_");
             sb.AppendLine();
-            foreach (var (nome, preco, desc) in itens)
+            foreach (var (nome, desc) in itens)
             {
-                string precoStr = preco > 0 ? $" — R$ {preco:N2}" : "";
-                sb.AppendLine($"  ▪ *{nome}*{precoStr}");
+                sb.AppendLine($"  ▪ *{nome}*");
                 if (!string.IsNullOrWhiteSpace(desc)) sb.AppendLine($"    {desc}");
             }
             if (!string.IsNullOrWhiteSpace(observacao))

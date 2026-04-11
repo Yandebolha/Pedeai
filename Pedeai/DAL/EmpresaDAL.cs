@@ -24,7 +24,26 @@ namespace Pedeai.DAL
                 empEmail         = r["empEmail"]?.ToString() ?? "",
                 empEndereco      = r["empEndereco"]?.ToString() ?? "",
                 Info             = r["Info"]?.ToString() ?? "",
+                empCodigo_Empresa = TryGet(r, "empCodigo_Empresa"),
+                empChave_Licenca  = TryGet(r, "empChave_Licenca"),
+                empData_Graca     = TryGetDate(r, "empData_Graca"),
             };
+        }
+
+        private static string TryGet(MySqlDataReader r, string col)
+        {
+            try { return r[col]?.ToString() ?? ""; } catch { return ""; }
+        }
+
+        private static DateTime? TryGetDate(MySqlDataReader r, string col)
+        {
+            try
+            {
+                var v = r[col];
+                if (v == null || v == DBNull.Value) return null;
+                return Convert.ToDateTime(v);
+            }
+            catch { return null; }
         }
 
         // ── Salvar (insert ou update) ────────────────────────────────────────
@@ -75,6 +94,28 @@ namespace Pedeai.DAL
                 return "";
             }
             catch (Exception ex) { return ex.Message; }
+        }
+
+        /// <summary>Salva apenas a chave de licença e reseta o período de graça.</summary>
+        public void SalvarLicenca(int codEmpresa, string chave)
+        {
+            using var conn = AbrirConexao();
+            using var cmd  = new MySqlCommand(
+                "UPDATE empresa SET empChave_Licenca=@chave, empData_Graca=NULL WHERE Codigo=@cod", conn);
+            cmd.Parameters.AddWithValue("@chave", chave ?? "");
+            cmd.Parameters.AddWithValue("@cod",   codEmpresa);
+            cmd.ExecuteNonQuery();
+        }
+
+        /// <summary>Define a data de início do período de graça.</summary>
+        public void SalvarDataGraca(int codEmpresa, DateTime data)
+        {
+            using var conn = AbrirConexao();
+            using var cmd  = new MySqlCommand(
+                "UPDATE empresa SET empData_Graca=@data WHERE Codigo=@cod", conn);
+            cmd.Parameters.AddWithValue("@data", data.Date);
+            cmd.Parameters.AddWithValue("@cod",  codEmpresa);
+            cmd.ExecuteNonQuery();
         }
     }
 }

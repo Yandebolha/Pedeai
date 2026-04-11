@@ -71,16 +71,25 @@ namespace Pedeai.DAL
             cmd2.ExecuteNonQuery();
         }
 
-        public List<(int cod, string nome)> ListarItens(int codigoPromocao)
+        public List<(int cod, string nome, decimal preco)> ListarItens(int codigoPromocao)
         {
-            var lista = new List<(int, string)>();
+            var lista = new List<(int, string, decimal)>();
             using var conn = AbrirConexao();
-            using var cmd = new MySqlCommand(
-                "SELECT Codigo, prom_Produto_Nome FROM promocao_item WHERE Codigo_Promocao=@id ORDER BY Codigo",
-                conn);
+            using var cmd = new MySqlCommand(@"
+                SELECT i.Codigo, i.prom_Produto_Nome,
+                       COALESCE(m.mercPreco_Venda, 0) AS Preco
+                FROM promocao_item i
+                LEFT JOIN mercadoria m ON m.Codigo = i.Codigo_Mercadoria
+                WHERE i.Codigo_Promocao = @id
+                ORDER BY i.Codigo", conn);
             cmd.Parameters.AddWithValue("@id", codigoPromocao);
             using var r = cmd.ExecuteReader();
-            while (r.Read()) lista.Add((Convert.ToInt32(r["Codigo"]), r["prom_Produto_Nome"]?.ToString() ?? ""));
+            while (r.Read())
+                lista.Add((
+                    Convert.ToInt32(r["Codigo"]),
+                    r["prom_Produto_Nome"]?.ToString() ?? "",
+                    r["Preco"] == DBNull.Value ? 0m : Convert.ToDecimal(r["Preco"])
+                ));
             return lista;
         }
 

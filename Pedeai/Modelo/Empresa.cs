@@ -10,5 +10,11 @@ namespace Pedeai.Modelo
         public string empEmail { get; set; } = "";
         public string empEndereco { get; set; } = "";
         public string Info { get; set; } = "";
+        /// <summary>Código único da instalação, gerado automaticamente. Usado para gerar a chave de licença.</summary>
+        public string empCodigo_Empresa { get; set; } = "";
+        /// <summary>Chave de ativação informada pelo contratante. Validada pelo LicencaService.</summary>
+        public string empChave_Licenca { get; set; } = "";
+        /// <summary>Data de início do período de graça (null = graça ainda não iniciada).</summary>
+        public System.DateTime? empData_Graca { get; set; }
     }
 }

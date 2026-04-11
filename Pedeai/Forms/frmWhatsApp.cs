@@ -844,7 +844,33 @@ namespace Pedeai.Forms
                 decimal valDesc  = 0; decimal.TryParse(row.Cells["ValorDesc"]?.Value?.ToString(), out valDesc);
                 string dataFimStr = "";
                 try { dataFimStr = Convert.ToDateTime(row.Cells["Fim"].Value).ToString("dd/MM/yyyy"); } catch { }
-                var produtos = _promDal.ListarItens(_promCodigoAtual).ConvertAll(i => i.nome);
+                var itensComPreco = _promDal.ListarItens(_promCodigoAtual)
+                    .ConvertAll(i => (i.nome, i.preco));
+
+                // Gera um cupom compartilhado para esta promoção
+                string cupomCodigo = "";
+                try
+                {
+                    cupomCodigo = $"PROM{DateTime.Now:yyyyMMddHHmm}";
+                    DateTime dataFimCupom = DateTime.Today;
+                    try { dataFimCupom = Convert.ToDateTime(row.Cells["Fim"].Value); } catch { }
+                    var cupom = new Modelo.Cupom
+                    {
+                        cupomCodigo      = cupomCodigo,
+                        cupomDescricao   = $"Promoção: {promNome}",
+                        cupomTipo        = tipoD,
+                        cupomValor       = valDesc,
+                        cupomPedido_Minimo = 0,
+                        cupomLimite_Usos = 0,
+                        cupomValido_Ate  = dataFimCupom,
+                        Situacao         = "A",
+                        Status_Transmissao = "N",
+                        Info             = "",
+                    };
+                    string erroCupom = new DAL.CupomDAL().Incluir(cupom);
+                    if (!string.IsNullOrWhiteSpace(erroCupom)) cupomCodigo = ""; // não bloqueia o envio
+                }
+                catch { cupomCodigo = ""; }
 
                 var clientes = WhatsAppService.ListarClientesComFone();
                 btnEnviarProm.Enabled = false;
@@ -853,7 +879,7 @@ namespace Pedeai.Forms
                 {
                     foreach (var (fone, nome) in clientes)
                     {
-                        WhatsAppService.NotificarPromocao(fone, nome, promNome, dataFimStr, tipoD, valDesc, produtos);
+                        WhatsAppService.NotificarPromocao(fone, nome, promNome, dataFimStr, tipoD, valDesc, itensComPreco, cupomCodigo);
                         enviado++;
                         System.Threading.Thread.Sleep(800);
                         if (IsDisposed) return;
@@ -897,7 +923,7 @@ namespace Pedeai.Forms
             if (_promCodigoAtual <= 0) return;
             try
             {
-                foreach (var (cod, nome) in _promDal.ListarItens(_promCodigoAtual))
+                foreach (var (cod, nome, preco) in _promDal.ListarItens(_promCodigoAtual))
                     _gridPromItens.Rows.Add(cod, nome);
             }
             catch { }
@@ -956,9 +982,8 @@ namespace Pedeai.Forms
             _gridCardapio.Dock = DockStyle.Fill;
             _gridCardapio.Columns.Add(new DataGridViewTextBoxColumn { Name = "Codigo",    Visible = false });
             _gridCardapio.Columns.Add(new DataGridViewTextBoxColumn { Name = "CodMerc",   Visible = false });
-            _gridCardapio.Columns.Add(new DataGridViewTextBoxColumn { Name = "Produto",   HeaderText = "Produto",   FillWeight = 38, ReadOnly = true });
-            _gridCardapio.Columns.Add(new DataGridViewTextBoxColumn { Name = "Preco",     HeaderText = "Preço R$",  FillWeight = 14, ReadOnly = true });
-            _gridCardapio.Columns.Add(new DataGridViewTextBoxColumn { Name = "Descricao", HeaderText = "Descrição", FillWeight = 48 });
+            _gridCardapio.Columns.Add(new DataGridViewTextBoxColumn { Name = "Produto",   HeaderText = "Produto",   FillWeight = 45, ReadOnly = true });
+            _gridCardapio.Columns.Add(new DataGridViewTextBoxColumn { Name = "Descricao", HeaderText = "Descrição", FillWeight = 55 });
 
             pnlItens.Controls.Add(_gridCardapio);
             pnlItens.Controls.Add(pnlBtnCard);
@@ -976,8 +1001,8 @@ namespace Pedeai.Forms
                 if (_cardCodigoAtual <= 0) return;
                 try
                 {
-                    foreach (var (cod, codM, nome, preco, desc) in _cardDal.ListarItens(_cardCodigoAtual))
-                        _gridCardapio.Rows.Add(cod, codM, nome, preco.ToString("N2"), desc);
+                    foreach (var (cod, codM, nome, desc) in _cardDal.ListarItens(_cardCodigoAtual))
+                        _gridCardapio.Rows.Add(cod, codM, nome, desc);
                 }
                 catch { }
             }
@@ -997,9 +1022,8 @@ namespace Pedeai.Forms
                     if (r.IsNewRow) continue;
                     string nome = r.Cells["Produto"].Value?.ToString() ?? "";
                     if (string.IsNullOrWhiteSpace(nome)) continue;
-                    decimal prc = 0; decimal.TryParse(r.Cells["Preco"].Value?.ToString(), out prc);
                     int codM = 0; int.TryParse(r.Cells["CodMerc"].Value?.ToString(), out codM);
-                    _cardDal.AdicionarItem(_cardCodigoAtual, codM, nome, prc, r.Cells["Descricao"].Value?.ToString() ?? "");
+                    _cardDal.AdicionarItem(_cardCodigoAtual, codM, nome, r.Cells["Descricao"].Value?.ToString() ?? "");
                 }
                 CarregarListaCardapios();
                 MessageBox.Show("Cardápio salvo!", "Cardápio do Dia", MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -1030,16 +1054,7 @@ namespace Pedeai.Forms
             {
                 var (cod, nome) = AbrirSeletorProduto();
                 if (cod <= 0) return;
-                decimal preco = 0;
-                try
-                {
-                    var dtProd = new BLL.MercadoriaBLL().Listar();
-                    foreach (System.Data.DataRow r2 in dtProd.Rows)
-                        if (Convert.ToInt32(r2["Codigo"]) == cod)
-                        { decimal.TryParse(r2["Preco"]?.ToString(), out preco); break; }
-                }
-                catch { }
-                _gridCardapio.Rows.Add(0, cod, nome, preco.ToString("N2"), "");
+                _gridCardapio.Rows.Add(0, cod, nome, "");
             };
 
             btnRemItem.Click += (_, __) =>
@@ -1057,12 +1072,11 @@ namespace Pedeai.Forms
                 if (MessageBox.Show("Enviar cardápio para todos os clientes com telefone?", "Confirmar",
                     MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes) return;
 
-                var itens = new System.Collections.Generic.List<(string n, decimal p, string d)>();
+                var itens = new System.Collections.Generic.List<(string n, string d)>();
                 foreach (DataGridViewRow r in _gridCardapio.Rows)
                 {
                     if (r.IsNewRow) continue;
-                    decimal prc = 0; decimal.TryParse(r.Cells["Preco"].Value?.ToString(), out prc);
-                    itens.Add((r.Cells["Produto"].Value?.ToString() ?? "", prc, r.Cells["Descricao"].Value?.ToString() ?? ""));
+                    itens.Add((r.Cells["Produto"].Value?.ToString() ?? "", r.Cells["Descricao"].Value?.ToString() ?? ""));
                 }
 
                 var clientes = WhatsAppService.ListarClientesComFone();
@@ -1070,7 +1084,7 @@ namespace Pedeai.Forms
                 int enviado = 0;
                 string titulo = txtTitulo.Text.Trim();
                 string obs    = txtObs.Text.Trim();
-                string dataStr= dtpCard.Value.ToString("dd/MM/yyyy");
+                string dataStr= DateTime.Today.ToString("dd/MM/yyyy");
                 await System.Threading.Tasks.Task.Run(() =>
                 {
                     foreach (var (fone, nome) in clientes)
@@ -1113,8 +1127,8 @@ namespace Pedeai.Forms
             if (_cardCodigoAtual <= 0) return;
             try
             {
-                foreach (var (cod, codM, nome, preco, desc) in _cardDal.ListarItens(_cardCodigoAtual))
-                    _gridCardapio.Rows.Add(cod, codM, nome, preco.ToString("N2"), desc);
+                foreach (var (cod, codM, nome, desc) in _cardDal.ListarItens(_cardCodigoAtual))
+                    _gridCardapio.Rows.Add(cod, codM, nome, desc);
             }
             catch { }
         }

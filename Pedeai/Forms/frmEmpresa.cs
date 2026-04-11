@@ -45,6 +45,7 @@ namespace Pedeai.Forms
             txtEmpTel.Text      = _empresa.empTelefone;
             txtEmpEmail.Text    = _empresa.empEmail;
             txtEmpEnd.Text      = _empresa.empEndereco;
+            txtEmpCodigo.Text   = _empresa.empCodigo_Empresa;
         }
 
         private void BtnSalvarEmpresa_Click(object sender, EventArgs e)
@@ -374,6 +375,12 @@ namespace Pedeai.Forms
         }
 
         // ── ABA SISTEMA ───────────────────────────────────────────────────────
+        private void BtnConexaoBD_Click(object sender, EventArgs e)
+        {
+            using var frm = new frmConexao();
+            frm.ShowDialog(this);
+        }
+
         private void BtnResetarBanco_Click(object sender, EventArgs e)
         {
             if (!UsuarioSessao.TemNivel(9))

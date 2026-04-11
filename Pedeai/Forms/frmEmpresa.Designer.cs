@@ -19,6 +19,7 @@ namespace Pedeai.Forms
             this.txtEmpTel = new System.Windows.Forms.TextBox();
             this.txtEmpEmail = new System.Windows.Forms.TextBox();
             this.txtEmpEnd = new System.Windows.Forms.TextBox();
+            this.txtEmpCodigo = new System.Windows.Forms.TextBox();
             this.txtUsrNome = new System.Windows.Forms.TextBox();
             this.txtUsrLogin = new System.Windows.Forms.TextBox();
             this.txtUsrSenha = new System.Windows.Forms.TextBox();
@@ -146,6 +147,18 @@ namespace Pedeai.Forms
             this.txtEmpEnd.Name = "txtEmpEnd";
             this.txtEmpEnd.Size = new System.Drawing.Size(360, 25);
             this.txtEmpEnd.TabIndex = 5;
+            // 
+            // txtEmpCodigo
+            // 
+            this.txtEmpCodigo.BackColor = System.Drawing.Color.FromArgb(240, 230, 210);
+            this.txtEmpCodigo.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.txtEmpCodigo.ForeColor = System.Drawing.Color.FromArgb(120, 60, 10);
+            this.txtEmpCodigo.Location = new System.Drawing.Point(168, 272);
+            this.txtEmpCodigo.Name = "txtEmpCodigo";
+            this.txtEmpCodigo.ReadOnly = true;
+            this.txtEmpCodigo.Size = new System.Drawing.Size(140, 25);
+            this.txtEmpCodigo.TabIndex = 6;
+            this.txtEmpCodigo.Font = new System.Drawing.Font("Consolas", 10F, System.Drawing.FontStyle.Bold);
             // 
             // txtUsrNome
             // 
@@ -681,6 +694,7 @@ namespace Pedeai.Forms
             this.tabEmp.Controls.Add(this.txtEmpTel);
             this.tabEmp.Controls.Add(this.txtEmpEmail);
             this.tabEmp.Controls.Add(this.txtEmpEnd);
+            this.tabEmp.Controls.Add(this.txtEmpCodigo);
             this.tabEmp.Controls.Add(this.btnSalvEmp);
             this.tabEmp.Controls.Add(this.lblEmpNome);
             this.tabEmp.Controls.Add(this.lblEmpFantasia);
@@ -688,6 +702,7 @@ namespace Pedeai.Forms
             this.tabEmp.Controls.Add(this.lblEmpTel);
             this.tabEmp.Controls.Add(this.lblEmpEmail);
             this.tabEmp.Controls.Add(this.lblEmpEnd);
+            this.tabEmp.Controls.Add(this.lblEmpCodigo);
             this.tabEmp.Controls.Add(this.lblEmpTitle);
             this.tabEmp.ForeColor = System.Drawing.Color.FromArgb(50, 50, 50);
             this.tabEmp.Location = new System.Drawing.Point(4, 30);
@@ -704,7 +719,7 @@ namespace Pedeai.Forms
             this.btnSalvEmp.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnSalvEmp.Font = new System.Drawing.Font("Segoe UI", 9.5F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.btnSalvEmp.ForeColor = System.Drawing.Color.White;
-            this.btnSalvEmp.Location = new System.Drawing.Point(168, 282);
+            this.btnSalvEmp.Location = new System.Drawing.Point(168, 314);
             this.btnSalvEmp.Name = "btnSalvEmp";
             this.btnSalvEmp.Size = new System.Drawing.Size(160, 32);
             this.btnSalvEmp.TabIndex = 6;
@@ -842,6 +857,7 @@ namespace Pedeai.Forms
             this.tabSistema.Controls.Add(this.lblResetTitulo);
             this.tabSistema.Controls.Add(this.lblResetAviso);
             this.tabSistema.Controls.Add(this.btnResetarBanco);
+            this.tabSistema.Controls.Add(this.btnConexaoBD);
             this.tabSistema.BackColor = System.Drawing.Color.FromArgb(245, 237, 216);
             this.tabSistema.ForeColor = System.Drawing.Color.FromArgb(50, 50, 50);
             this.tabSistema.Location = new System.Drawing.Point(4, 30);
@@ -883,6 +899,24 @@ namespace Pedeai.Forms
             this.btnResetarBanco.TabIndex = 0;
             this.btnResetarBanco.Text = "⚠  Resetar Banco de Dados";
             this.btnResetarBanco.UseVisualStyleBackColor = false;
+            this.btnResetarBanco.Click += new System.EventHandler(this.BtnResetarBanco_Click);
+            // 
+            // btnConexaoBD
+            // 
+            this.btnConexaoBD = new System.Windows.Forms.Button();
+            this.btnConexaoBD.BackColor = System.Drawing.Color.FromArgb(52, 100, 160);
+            this.btnConexaoBD.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.btnConexaoBD.FlatAppearance.BorderSize = 0;
+            this.btnConexaoBD.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnConexaoBD.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.btnConexaoBD.ForeColor = System.Drawing.Color.White;
+            this.btnConexaoBD.Location = new System.Drawing.Point(30, 220);
+            this.btnConexaoBD.Name = "btnConexaoBD";
+            this.btnConexaoBD.Size = new System.Drawing.Size(260, 40);
+            this.btnConexaoBD.TabIndex = 1;
+            this.btnConexaoBD.Text = "⚙  Configurar Banco de Dados";
+            this.btnConexaoBD.UseVisualStyleBackColor = false;
+            this.btnConexaoBD.Click += new System.EventHandler(this.BtnConexaoBD_Click);
             this.btnResetarBanco.Click += new System.EventHandler(this.BtnResetarBanco_Click);
             // 
             // frmEmpresa
@@ -979,6 +1013,7 @@ namespace Pedeai.Forms
         private System.Windows.Forms.Label          lblResetTitulo;
         private System.Windows.Forms.Label          lblResetAviso;
         internal System.Windows.Forms.Button        btnResetarBanco;
+        private System.Windows.Forms.Button         btnConexaoBD;
         private System.Windows.Forms.Button         btnSalvEmp;
         private System.Windows.Forms.Button         btnSalvImp;
         private System.Windows.Forms.Button         btnTesteImp;
@@ -989,7 +1024,9 @@ namespace Pedeai.Forms
         private System.Windows.Forms.Label lblEmpCNPJ     = new System.Windows.Forms.Label { Text = "CNPJ:",          AutoSize = true, Left = 22, Top = 154, ForeColor = System.Drawing.Color.FromArgb(70,70,70) };
         private System.Windows.Forms.Label lblEmpTel      = new System.Windows.Forms.Label { Text = "Telefone:",      AutoSize = true, Left = 22, Top = 185, ForeColor = System.Drawing.Color.FromArgb(70,70,70) };
         private System.Windows.Forms.Label lblEmpEmail    = new System.Windows.Forms.Label { Text = "E-mail:",        AutoSize = true, Left = 22, Top = 216, ForeColor = System.Drawing.Color.FromArgb(70,70,70) };
-        private System.Windows.Forms.Label lblEmpEnd      = new System.Windows.Forms.Label { Text = "Endere\u00e7o:", AutoSize = true, Left = 22, Top = 247, ForeColor = System.Drawing.Color.FromArgb(70,70,70) };
+        private System.Windows.Forms.Label lblEmpEnd      = new System.Windows.Forms.Label { Text = "Endereço:", AutoSize = true, Left = 22, Top = 247, ForeColor = System.Drawing.Color.FromArgb(70,70,70) };
+        private System.Windows.Forms.Label lblEmpCodigo    = new System.Windows.Forms.Label { Text = "Código da Empresa:", AutoSize = true, Left = 22, Top = 278, ForeColor = System.Drawing.Color.FromArgb(120,60,10), Font = new System.Drawing.Font("Segoe UI", 8.5F, System.Drawing.FontStyle.Bold) };
+        internal System.Windows.Forms.TextBox txtEmpCodigo;
         // labels usuario
         private System.Windows.Forms.Label lblUsrNome      = new System.Windows.Forms.Label { Text = "Nome:",              AutoSize = true, Left = 22, Top = 25,  ForeColor = System.Drawing.Color.FromArgb(70,70,70) };
         private System.Windows.Forms.Label lblUsrLogin     = new System.Windows.Forms.Label { Text = "Login:",             AutoSize = true, Left = 22, Top = 65,  ForeColor = System.Drawing.Color.FromArgb(70,70,70) };

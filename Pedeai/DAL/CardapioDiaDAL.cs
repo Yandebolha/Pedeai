@@ -89,12 +89,12 @@ namespace Pedeai.DAL
             c2.Parameters.AddWithValue("@id", codigo); c2.ExecuteNonQuery();
         }
 
-        public List<(int cod, int codigoMerc, string nome, decimal preco, string descr)> ListarItens(int codigoCardapio)
+        public List<(int cod, int codigoMerc, string nome, string descr)> ListarItens(int codigoCardapio)
         {
-            var lista = new List<(int, int, string, decimal, string)>();
+            var lista = new List<(int, int, string, string)>();
             using var conn = AbrirConexao();
             using var cmd = new MySqlCommand(@"
-                SELECT Codigo, Codigo_Mercadoria, card_Produto_Nome, card_Produto_Preco, card_Produto_Descricao
+                SELECT Codigo, Codigo_Mercadoria, card_Produto_Nome, card_Produto_Descricao
                 FROM cardapio_dia_item WHERE Codigo_Cardapio=@id ORDER BY Codigo", conn);
             cmd.Parameters.AddWithValue("@id", codigoCardapio);
             using var r = cmd.ExecuteReader();
@@ -103,24 +103,22 @@ namespace Pedeai.DAL
                     Convert.ToInt32(r["Codigo"]),
                     r["Codigo_Mercadoria"] == DBNull.Value ? 0 : Convert.ToInt32(r["Codigo_Mercadoria"]),
                     r["card_Produto_Nome"]?.ToString() ?? "",
-                    r["card_Produto_Preco"] == DBNull.Value ? 0m : Convert.ToDecimal(r["card_Produto_Preco"]),
                     r["card_Produto_Descricao"]?.ToString() ?? ""
                 ));
             return lista;
         }
 
-        public void AdicionarItem(int codigoCardapio, int codigoMerc, string nome, decimal preco, string descr)
+        public void AdicionarItem(int codigoCardapio, int codigoMerc, string nome, string descr)
         {
             using var conn = AbrirConexao();
             using var cmd = new MySqlCommand(@"
                 INSERT INTO cardapio_dia_item
-                    (Codigo_Cardapio, Codigo_Mercadoria, card_Produto_Nome, card_Produto_Preco, card_Produto_Descricao)
-                VALUES (@card, @merc, @nome, @preco, @desc)", conn);
-            cmd.Parameters.AddWithValue("@card",  codigoCardapio);
-            cmd.Parameters.AddWithValue("@merc",  codigoMerc);
-            cmd.Parameters.AddWithValue("@nome",  nome);
-            cmd.Parameters.AddWithValue("@preco", preco);
-            cmd.Parameters.AddWithValue("@desc",  descr ?? "");
+                    (Codigo_Cardapio, Codigo_Mercadoria, card_Produto_Nome, card_Produto_Descricao)
+                VALUES (@card, @merc, @nome, @desc)", conn);
+            cmd.Parameters.AddWithValue("@card", codigoCardapio);
+            cmd.Parameters.AddWithValue("@merc", codigoMerc);
+            cmd.Parameters.AddWithValue("@nome", nome);
+            cmd.Parameters.AddWithValue("@desc", descr ?? "");
             cmd.ExecuteNonQuery();
         }
 
