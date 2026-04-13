@@ -132,21 +132,17 @@ namespace Pedeai.Forms
 
         private static void MostrarItensDialog(string numPedido, string cliente, DataTable dtItens)
         {
-            var corFundo  = Color.FromArgb(15, 22, 45);
-            var corCard   = Color.FromArgb(28, 37, 65);
-            var corTopBar = Color.FromArgb(36, 48, 82);
-
             using var frm = new Form();
-            frm.Text             = $"Itens \u2014 Pedido {numPedido}";
-            frm.BackColor        = corFundo;
-            frm.ForeColor        = Color.White;
+            frm.Text             = $"Itens — Pedido {numPedido}";
+            frm.BackColor        = Color.FromArgb(248, 245, 240);
+            frm.ForeColor        = Color.FromArgb(50, 40, 25);
             frm.Font             = new Font("Segoe UI", 9F);
             frm.ClientSize       = new Size(720, 420);
             frm.StartPosition    = FormStartPosition.CenterParent;
             frm.FormBorderStyle  = FormBorderStyle.FixedDialog;
             frm.MaximizeBox      = frm.MinimizeBox = false;
 
-            var pnlTop2 = new Panel { Dock = DockStyle.Top, Height = 44, BackColor = corTopBar };
+            var pnlTop2 = new Panel { Dock = DockStyle.Top, Height = 44, BackColor = Color.FromArgb(176, 110, 42) };
             var lblTit2 = new Label
             {
                 Text      = $"Pedido {numPedido}  |  Cliente: {cliente}",
@@ -158,42 +154,46 @@ namespace Pedeai.Forms
 
             var grid2 = new DataGridView
             {
-                Dock                      = DockStyle.Fill,
-                ReadOnly                  = true,
-                AllowUserToAddRows        = false,
-                SelectionMode             = DataGridViewSelectionMode.FullRowSelect,
-                RowHeadersVisible         = false,
-                BackgroundColor           = corCard,
-                DefaultCellStyle          = { BackColor = corCard, ForeColor = Color.White,
-                                              SelectionBackColor = Color.FromArgb(52, 152, 219), SelectionForeColor = Color.White },
-                AlternatingRowsDefaultCellStyle = { BackColor = Color.FromArgb(36, 48, 82) },
-                ColumnHeadersDefaultCellStyle   = { BackColor = corTopBar, ForeColor = Color.White,
-                                                    Font = new Font("Segoe UI", 9F, FontStyle.Bold) },
-                ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.DisableResizing,
-                ColumnHeadersHeight        = 36,
-                RowTemplate                = { Height = 28 },
-                GridColor                  = Color.FromArgb(50, 60, 100),
-                BorderStyle                = BorderStyle.None,
-                Font                       = new Font("Segoe UI", 9F),
-                AutoSizeColumnsMode        = DataGridViewAutoSizeColumnsMode.Fill
+                Dock                                    = DockStyle.Fill,
+                ReadOnly                                = true,
+                AllowUserToAddRows                      = false,
+                SelectionMode                           = DataGridViewSelectionMode.FullRowSelect,
+                RowHeadersVisible                       = false,
+                BackgroundColor                         = Color.FromArgb(250, 246, 238),
+                DefaultCellStyle                        = { BackColor = Color.FromArgb(250, 246, 238),
+                                                            ForeColor = Color.FromArgb(50, 40, 25),
+                                                            SelectionBackColor = Color.FromArgb(224, 113, 42),
+                                                            SelectionForeColor = Color.White },
+                AlternatingRowsDefaultCellStyle         = { BackColor = Color.FromArgb(240, 234, 218) },
+                ColumnHeadersDefaultCellStyle           = { BackColor = Color.FromArgb(176, 110, 42),
+                                                            ForeColor = Color.White,
+                                                            Font = new Font("Segoe UI", 9F, FontStyle.Bold) },
+                ColumnHeadersHeightSizeMode             = DataGridViewColumnHeadersHeightSizeMode.DisableResizing,
+                ColumnHeadersHeight                     = 36,
+                RowTemplate                             = { Height = 28 },
+                GridColor                               = Color.FromArgb(210, 200, 180),
+                EnableHeadersVisualStyles               = false,
+                BorderStyle                             = BorderStyle.None,
+                Font                                    = new Font("Segoe UI", 9F),
+                AutoSizeColumnsMode                     = DataGridViewAutoSizeColumnsMode.Fill
             };
             grid2.DataError += (_, e) => e.ThrowException = false;
 
-            var pnlFoot2 = new Panel { Dock = DockStyle.Bottom, Height = 42, BackColor = corCard };
+            var pnlFoot2 = new Panel { Dock = DockStyle.Bottom, Height = 42, BackColor = Color.FromArgb(235, 228, 214) };
             var btnFech2 = new Button
             {
                 Text      = "Fechar", Width = 100, Height = 28, Top = 7,
-                BackColor = Color.FromArgb(80, 95, 130), ForeColor = Color.White,
-                FlatStyle = FlatStyle.Flat, Cursor = Cursors.Hand
+                BackColor = Color.FromArgb(224, 113, 42), ForeColor = Color.White,
+                FlatStyle = FlatStyle.Flat, Cursor = Cursors.Hand, DialogResult = DialogResult.OK
             };
             btnFech2.FlatAppearance.BorderSize = 0;
-            btnFech2.Click += (_, __) => frm.Close();
             pnlFoot2.SizeChanged += (_, __) => btnFech2.Left = (pnlFoot2.Width - btnFech2.Width) / 2;
             pnlFoot2.Controls.Add(btnFech2);
 
             frm.Controls.Add(grid2);
             frm.Controls.Add(pnlFoot2);
             frm.Controls.Add(pnlTop2);
+            frm.AcceptButton = btnFech2;
 
             if (dtItens != null)
             {

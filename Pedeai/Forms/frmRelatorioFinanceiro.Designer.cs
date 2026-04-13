@@ -157,14 +157,15 @@ namespace Pedeai.Forms
             grid.RowHeadersVisible                 = false;
             grid.SelectionMode                     = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
             grid.AutoSizeColumnsMode               = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
+            grid.ColumnHeadersHeightSizeMode       = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             grid.BackgroundColor                   = System.Drawing.Color.FromArgb(248, 245, 240);
             grid.GridColor                         = System.Drawing.Color.FromArgb(210, 200, 180);
             grid.EnableHeadersVisualStyles         = false;
             grid.BorderStyle                       = System.Windows.Forms.BorderStyle.None;
-            grid.Font                              = new System.Drawing.Font("Segoe UI", 9F);
+            grid.Font                              = new System.Drawing.Font("Segoe UI", 7.5F);
             grid.ColumnHeadersDefaultCellStyle.BackColor = System.Drawing.Color.FromArgb(176, 110, 42);
             grid.ColumnHeadersDefaultCellStyle.ForeColor = System.Drawing.Color.White;
-            grid.ColumnHeadersDefaultCellStyle.Font      = new System.Drawing.Font("Segoe UI", 8.5F, System.Drawing.FontStyle.Bold);
+            grid.ColumnHeadersDefaultCellStyle.Font      = new System.Drawing.Font("Segoe UI", 7.5F, System.Drawing.FontStyle.Bold);
             grid.DefaultCellStyle.BackColor              = System.Drawing.Color.FromArgb(250, 246, 238);
             grid.DefaultCellStyle.ForeColor              = System.Drawing.Color.FromArgb(50, 40, 25);
             grid.DefaultCellStyle.SelectionBackColor     = System.Drawing.Color.FromArgb(224, 113, 42);
@@ -195,8 +196,8 @@ namespace Pedeai.Forms
 
             Text             = "Vendas por Per\u00edodo";
             StartPosition    = System.Windows.Forms.FormStartPosition.CenterParent;
-            Size             = new System.Drawing.Size(900, 620);
-            MinimumSize      = new System.Drawing.Size(750, 480);
+            Size             = new System.Drawing.Size(1150, 620);
+            MinimumSize      = new System.Drawing.Size(950, 480);
             BackColor        = System.Drawing.Color.FromArgb(248, 245, 240);
             Font             = new System.Drawing.Font("Segoe UI", 9F);
             AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);

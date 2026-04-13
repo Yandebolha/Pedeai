@@ -142,37 +142,30 @@ namespace Pedeai.Forms
         private void ConfigurarColunas(DataTable dt)
         {
             if (grid.Columns.Count == 0) return;
-            bool temDesconto = false;
-            foreach (DataRow r in dt.Rows)
-                if (dt.Columns.Contains("Desconto") && r["Desconto"] != DBNull.Value
-                    && Convert.ToDecimal(r["Desconto"]) > 0) { temDesconto = true; break; }
 
-            var show = new System.Collections.Generic.Dictionary<string, (string header, int fill)>
+            // Colunas desejadas na ordem de exibição: Horário, Tipo, Referência,
+            // Total Original, Desconto, Valor Recebido, Autorizado por, Pagamento
+            var show = new System.Collections.Generic.Dictionary<string, (string header, int fill, int minW, int order)>
             {
-                ["Horario"]       = ("Hor\u00e1rio",      11),
-                ["Tipo"]          = ("Tipo",               7),
-                ["Referencia"]    = ("Refer\u00eancia",    8),
-                ["Descricao"]     = ("Descri\u00e7\u00e3o", 28),
-                ["Valor"]         = ("Valor R$",           10),
-                ["ValorOriginal"] = ("Total Original",     11),
-                ["ValorRecebido"] = ("Valor Recebido",     11),
-                ["Desconto"]      = ("Desconto R$",         9),
-                ["Autorizador"]   = ("Autorizado por",     10),
-                ["Pagamento"]     = ("Pagamento",           9),
-                ["Status"]        = ("Status",              8),
+                ["Horario"]       = ("Hor\u00e1rio",       11,  94, 0),
+                ["Tipo"]          = ("Tipo",                 6,  46, 1),
+                ["Referencia"]    = ("Refer\u00eancia",     10,  94, 2),
+                ["ValorOriginal"] = ("Total Original",      13,  98, 3),
+                ["Desconto"]      = ("Desconto R$",         11,  84, 4),
+                ["ValorRecebido"] = ("Valor Recebido",      13,  98, 5),
+                ["Autorizador"]   = ("Autorizado por",      13,  98, 6),
+                ["Pagamento"]     = ("Pagamento",           11,  84, 7),
             };
-            if (grid.Columns.Contains("CodigoPedido"))
-                grid.Columns["CodigoPedido"].Visible = false;
 
+            // oculta tudo que não está na lista (Descrição, Valor, Status, CodigoPedido…)
             foreach (DataGridViewColumn col in grid.Columns)
             {
                 if (!show.ContainsKey(col.Name)) { col.Visible = false; continue; }
-                if ((col.Name == "ValorOriginal" || col.Name == "ValorRecebido" ||
-                     col.Name == "Desconto"      || col.Name == "Autorizador") && !temDesconto)
-                { col.Visible = false; continue; }
-                col.Visible    = true;
-                col.HeaderText = show[col.Name].header;
-                col.FillWeight = show[col.Name].fill;
+                col.Visible         = true;
+                col.HeaderText      = show[col.Name].header;
+                col.FillWeight      = show[col.Name].fill;
+                col.MinimumWidth    = show[col.Name].minW;
+                col.DisplayIndex    = show[col.Name].order;
             }
             if (grid.Columns.Contains("Horario"))
                 grid.Columns["Horario"].DefaultCellStyle.Format = "dd/MM/yyyy HH:mm";
@@ -279,80 +272,135 @@ namespace Pedeai.Forms
             var de  = dtpDe.Value.Date;
             var ate = dtpAte.Value.Date;
             int printRow = 0;
+            int pageNum  = 0;
 
             var doc = new System.Drawing.Printing.PrintDocument();
             doc.DocumentName = $"Vendas {de:dd-MM-yyyy} a {ate:dd-MM-yyyy}";
-            doc.DefaultPageSettings.Margins = new System.Drawing.Printing.Margins(75, 75, 75, 75);
+            doc.DefaultPageSettings.Landscape = true;
+            doc.DefaultPageSettings.Margins   = new System.Drawing.Printing.Margins(50, 50, 50, 50);
+
+            // Numeric column names — right-aligned
+            var numericCols = new System.Collections.Generic.HashSet<string>
+                { "Valor", "ValorOriginal", "ValorRecebido", "Desconto" };
 
             doc.PrintPage += (_, pe) =>
             {
                 try
                 {
-                    var g    = pe.Graphics;
-                    using var fnt  = new Font("Arial", 9F);
-                    using var bold = new Font("Arial", 9F, FontStyle.Bold);
-                    using var hdr  = new Font("Arial", 12F, FontStyle.Bold);
-                    using var darkBrush  = new SolidBrush(Color.FromArgb(50, 40, 25));
+                    pageNum++;
+                    var g = pe.Graphics;
+
+                    using var fnt      = new Font("Arial", 7F);
+                    using var bold     = new Font("Arial", 7.5F, FontStyle.Bold);
+                    using var hdr      = new Font("Arial", 10F,  FontStyle.Bold);
+                    using var small    = new Font("Arial", 7F);
+                    using var darkBrush  = new SolidBrush(Color.FromArgb(50,  40,  25));
                     using var amberBrush = new SolidBrush(Color.FromArgb(176, 110, 42));
-                    using var greenBrush = new SolidBrush(Color.FromArgb(60, 110, 30));
-                    using var redBrush   = new SolidBrush(Color.FromArgb(180, 50, 30));
+                    using var greenBrush = new SolidBrush(Color.FromArgb(50,  110, 30));
+                    using var redBrush   = new SolidBrush(Color.FromArgb(180, 50,  30));
                     using var altBrush   = new SolidBrush(Color.FromArgb(240, 234, 218));
+                    using var hdrBg      = new SolidBrush(Color.FromArgb(176, 110, 42));
+                    using var rowPen     = new Pen(Color.FromArgb(210, 200, 180), 0.5f);
+                    using var colPen     = new Pen(Color.FromArgb(200, 190, 170), 0.5f);
+                    using var divPen     = new Pen(Color.FromArgb(220, 255, 255, 255), 0.5f);
 
-                    float x  = pe.MarginBounds.Left;
-                    float y  = pe.MarginBounds.Top;
-                    float pw = pe.MarginBounds.Width;
-                    if (pw <= 0) { pw = 650; x = 75; y = 75; }
+                    using var sfL = new StringFormat
+                        { Trimming = StringTrimming.EllipsisCharacter, Alignment = StringAlignment.Near,
+                          FormatFlags = StringFormatFlags.NoWrap };
+                    using var sfR = new StringFormat
+                        { Trimming = StringTrimming.EllipsisCharacter, Alignment = StringAlignment.Far,
+                          FormatFlags = StringFormatFlags.NoWrap };
+                    using var sfC = new StringFormat
+                        { Trimming = StringTrimming.EllipsisCharacter, Alignment = StringAlignment.Center,
+                          FormatFlags = StringFormatFlags.NoWrap };
 
+                    float x           = pe.MarginBounds.Left;
+                    float y           = pe.MarginBounds.Top;
+                    float pw          = pe.MarginBounds.Width;
+                    float pageBottom  = pe.MarginBounds.Bottom;
+
+                    // Build visible column list (ordered, with weights)
                     var visCols = new System.Collections.Generic.List<DataGridViewColumn>();
                     foreach (DataGridViewColumn col in grid.Columns)
                         if (col.Visible) visCols.Add(col);
-                    float colW = visCols.Count > 0 ? pw / visCols.Count : pw;
+                    float totalWeight = 0f;
+                    foreach (var c2 in visCols) totalWeight += c2.FillWeight;
+                    if (totalWeight <= 0) totalWeight = visCols.Count;
+                    float GetW(DataGridViewColumn c2) => pw * c2.FillWeight / totalWeight;
 
-                    if (printRow == 0)
+                    // ── Page header ──────────────────────────────────────────
+                    if (pageNum == 1)
                     {
-                        g.DrawString("Vendas por Per\u00edodo", hdr, amberBrush, x, y); y += 24;
-                        g.DrawString($"Per\u00edodo: {de:dd/MM/yyyy} a {ate:dd/MM/yyyy}", fnt, darkBrush, x, y); y += 16;
+                        g.DrawString("Vendas por Per\u00edodo", hdr, amberBrush, x, y); y += 18;
+                        g.DrawString($"Per\u00edodo: {de:dd/MM/yyyy} a {ate:dd/MM/yyyy}", small, darkBrush, x, y); y += 13;
                         string resumo = lblTotal.Text;
-                        int sep = resumo.IndexOf('\u2502');
-                        if (sep > 0) resumo = resumo[..sep].Trim();
-                        g.DrawString(resumo, bold, amberBrush, x, y); y += 20;
-
-                        using var hdrBg = new SolidBrush(Color.FromArgb(176, 110, 42));
-                        g.FillRectangle(hdrBg, x, y, pw, 20);
-                        float cx = x;
-                        foreach (var col in visCols)
-                        {
-                            g.DrawString(col.HeaderText, bold, System.Drawing.Brushes.White, cx + 3, y + 3);
-                            cx += colW;
-                        }
-                        y += 22;
+                        int pipeIdx = resumo.IndexOf('\u2502');
+                        if (pipeIdx > 0) resumo = resumo[..pipeIdx].Trim();
+                        g.DrawString(resumo, bold, amberBrush, x, y); y += 14;
                     }
-
-                    float rowH = 18f;
-                    while (printRow < dt.Rows.Count && y + rowH <= pe.MarginBounds.Bottom)
+                    else
                     {
-                        var row = dt.Rows[printRow];
-                        if (printRow % 2 == 1) g.FillRectangle(altBrush, x, y, pw, rowH);
+                        string cont = $"Vendas por Per\u00edodo  [{de:dd/MM/yyyy} a {ate:dd/MM/yyyy}]  — continua\u00e7\u00e3o";
+                        g.DrawString(cont, small, amberBrush, x, y); y += 11;
+                    }
+                    y += 3;
+
+                    // ── Column header row ────────────────────────────────────
+                    const float hdrH = 16f;
+                    g.FillRectangle(hdrBg, x, y, pw, hdrH);
+                    float cx = x;
+                    foreach (var col in visCols)
+                    {
+                        float cw = GetW(col);
+                        bool isNum = numericCols.Contains(col.Name);
+                        var sf2 = isNum ? sfR : sfL;
+                        g.DrawString(col.HeaderText, bold, Brushes.White,
+                            new RectangleF(cx + 3, y + 2, cw - 5, hdrH - 2), sf2);
+                        if (cx > x) g.DrawLine(divPen, cx, y + 2, cx, y + hdrH - 1);
+                        cx += cw;
+                    }
+                    y += hdrH;
+
+                    // ── Data rows ────────────────────────────────────────────
+                    const float rowH    = 13f;
+                    const float footerH = 14f;
+
+                    while (printRow < dt.Rows.Count && y + rowH <= pageBottom - footerH)
+                    {
+                        var row  = dt.Rows[printRow];
                         string tipo = row.Table.Columns.Contains("Tipo") ? row["Tipo"]?.ToString() ?? "" : "";
                         var txtBrush = tipo == "Venda" ? greenBrush : tipo == "Compra" ? redBrush : darkBrush;
-                        float cx = x;
+
+                        if (printRow % 2 == 1) g.FillRectangle(altBrush, x, y, pw, rowH);
+
+                        cx = x;
                         foreach (var col in visCols)
                         {
-                            string val = "";
+                            float cw    = GetW(col);
+                            bool isNum  = numericCols.Contains(col.Name);
+                            var sf2     = isNum ? sfR : sfL;
+                            string val  = "";
                             if (dt.Columns.Contains(col.Name) && row[col.Name] != DBNull.Value)
                             {
-                                if (row[col.Name] is DateTime dtv) val = dtv.ToString("dd/MM HH:mm");
-                                else if (row[col.Name] is decimal dv) val = Math.Abs(dv).ToString("N2");
+                                if   (row[col.Name] is DateTime dtv) val = dtv.ToString("dd/MM HH:mm");
+                                else if (row[col.Name] is decimal dv)
+                                    val = dv == 0m ? "" : Math.Abs(dv).ToString("N2");
                                 else val = row[col.Name]?.ToString() ?? "";
                             }
-                            using var sf = new System.Drawing.StringFormat { Trimming = System.Drawing.StringTrimming.EllipsisCharacter };
-                            g.DrawString(val, fnt, txtBrush,
-                                new System.Drawing.RectangleF(cx + 3, y + 2, colW - 6, rowH), sf);
-                            cx += colW;
+                            g.DrawString(val, fnt, txtBrush, new RectangleF(cx + 3, y + 1, cw - 5, rowH - 1), sf2);
+                            if (cx > x) g.DrawLine(colPen, cx, y, cx, y + rowH);
+                            cx += cw;
                         }
+                        g.DrawLine(rowPen, x, y + rowH, x + pw, y + rowH);
                         y += rowH;
                         printRow++;
                     }
+
+                    // ── Footer: page number ──────────────────────────────────
+                    string footer = $"P\u00e1gina {pageNum}  \u2014  Gerado em {DateTime.Now:dd/MM/yyyy HH:mm}";
+                    g.DrawString(footer, small, darkBrush,
+                        new RectangleF(x, pageBottom - footerH, pw, footerH), sfR);
+
                     pe.HasMorePages = printRow < dt.Rows.Count;
                 }
                 catch (Exception ex)

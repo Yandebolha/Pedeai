@@ -131,11 +131,11 @@ namespace Pedeai.Forms
                     : pedido.pediValor_Total;
                 lblValorPago.Text = valorPago.ToString("C");
 
-                // Desconto: cupom + diferença de pagamento + desconto por item
+                // Desconto: pediDesconto já contém tanto o desconto de cupom quanto o
+                // desconto de pagamento autorizado (gravado por FinalizarPedido).
+                // Não somar novamente pediValor_Total - pediValor_Pago para evitar dupla contagem.
                 decimal descontoCupom = pedido.pediDesconto;
-                decimal descontoPgto  = (pedido.pediValor_Pago.HasValue && pedido.pediValor_Pago.Value < pedido.pediValor_Total)
-                    ? pedido.pediValor_Total - pedido.pediValor_Pago.Value
-                    : 0m;
+                decimal descontoPgto  = 0m;   // já está incluido em pediDesconto
 
                 // Somar descontos por item (itpwPreco_Unitario * qtde - subtotal)
                 decimal descontoItens = 0m;
