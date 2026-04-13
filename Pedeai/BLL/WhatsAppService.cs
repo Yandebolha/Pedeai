@@ -1,11 +1,11 @@
 using System;
-using System.Configuration;
 using System.Drawing;
 using System.IO;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
+using Pedeai.Modelo;
 
 namespace Pedeai.BLL
 {
@@ -17,9 +17,29 @@ namespace Pedeai.BLL
     {
         private static readonly HttpClient _http = new HttpClient { Timeout = TimeSpan.FromSeconds(12) };
 
-        public static string ApiUrl   => ConfigurationManager.AppSettings["WhatsAppApiUrl"]   ?? "";
-        public static string ApiKey   => ConfigurationManager.AppSettings["WhatsAppApiKey"]   ?? "";
-        public static string Instance => ConfigurationManager.AppSettings["WhatsAppInstance"] ?? "pedeai";
+        // Configuração centralizada no banco de dados (compartilhada entre máquinas em rede)
+        private static WhatsAppConfig _cfg;
+
+        private static WhatsAppConfig Cfg
+        {
+            get
+            {
+                if (_cfg == null)
+                    try { _cfg = new DAL.WhatsAppConfigDAL().Carregar(); }
+                    catch { _cfg = new WhatsAppConfig(); }
+                return _cfg;
+            }
+        }
+
+        /// <summary>Invalida o cache local, forçando releitura do banco na próxima chamada.</summary>
+        public static void InvalidarCache() => _cfg = null;
+
+        public static string ApiUrl   => Cfg.ApiUrl;
+        public static string ApiKey   => Cfg.ApiKey;
+        public static string Instance => string.IsNullOrWhiteSpace(Cfg.Instance) ? "pedeai" : Cfg.Instance;
+        public static string MsgPreparo => Cfg.MsgPreparo;
+        public static string MsgEntrega => Cfg.MsgEntrega;
+        public static string MsgCupom   => Cfg.MsgCupom;
 
         public static bool Ativo => !string.IsNullOrWhiteSpace(ApiUrl);
 
@@ -180,8 +200,9 @@ namespace Pedeai.BLL
         public static void NotificarPreparo(string telefone, string nomeCliente, string numeroPedido)
         {
             if (!Ativo) return;
-            string template = ConfigurationManager.AppSettings["WhatsAppMsgPreparo"]
-                ?? "Olá {Nome}! 🍕 Seu pedido #{Numero} já está sendo preparado. Em breve ficará pronto!";
+            string template = !string.IsNullOrWhiteSpace(MsgPreparo)
+                ? MsgPreparo
+                : "Olá {Nome}! 🍕 Seu pedido #{Numero} já está sendo preparado. Em breve ficará pronto!";
             string msg = template
                 .Replace("{Nome}",   nomeCliente  ?? "")
                 .Replace("{Numero}", numeroPedido ?? "");
@@ -191,8 +212,9 @@ namespace Pedeai.BLL
         public static void NotificarEntrega(string telefone, string nomeCliente, string numeroPedido)
         {
             if (!Ativo) return;
-            string template = ConfigurationManager.AppSettings["WhatsAppMsgEntrega"]
-                ?? "Olá {Nome}! 🛵 Seu pedido #{Numero} saiu para entrega. Aguarde em breve!";
+            string template = !string.IsNullOrWhiteSpace(MsgEntrega)
+                ? MsgEntrega
+                : "Olá {Nome}! 🛵 Seu pedido #{Numero} saiu para entrega. Aguarde em breve!";
             string msg = template
                 .Replace("{Nome}",   nomeCliente  ?? "")
                 .Replace("{Numero}", numeroPedido ?? "");
@@ -203,8 +225,9 @@ namespace Pedeai.BLL
             string cupomCodigo, string validade)
         {
             if (!Ativo) return;
-            string template = ConfigurationManager.AppSettings["WhatsAppMsgCupom"]
-                ?? "Parabéns {Nome}! 🎉 Você ganhou um cupom de desconto: *{CupomCodigo}*\nVálido até {Validade}. Use no seu próximo pedido!";
+            string template = !string.IsNullOrWhiteSpace(MsgCupom)
+                ? MsgCupom
+                : "Parabéns {Nome}! 🎉 Você ganhou um cupom de desconto: *{CupomCodigo}*\nVálido até {Validade}. Use no seu próximo pedido!";
             string msg = template
                 .Replace("{Nome}",       nomeCliente ?? "")
                 .Replace("{CupomCodigo}", cupomCodigo ?? "")
@@ -361,25 +384,18 @@ namespace Pedeai.BLL
         {
             try
             {
-                var config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
-
-                void Set(string key, string val)
+                var cfg = new WhatsAppConfig
                 {
-                    if (config.AppSettings.Settings[key] == null)
-                        config.AppSettings.Settings.Add(key, val ?? "");
-                    else
-                        config.AppSettings.Settings[key].Value = val ?? "";
-                }
-
-                Set("WhatsAppApiUrl",   apiUrl);
-                Set("WhatsAppApiKey",   apiKey);
-                Set("WhatsAppInstance", instanceName);
-                Set("WhatsAppMsgPreparo", msgPreparo);
-                Set("WhatsAppMsgEntrega", msgEntrega);
-                Set("WhatsAppMsgCupom",   msgCupom);
-
-                config.Save(ConfigurationSaveMode.Modified);
-                ConfigurationManager.RefreshSection("appSettings");
+                    ApiUrl     = apiUrl,
+                    ApiKey     = apiKey,
+                    Instance   = string.IsNullOrWhiteSpace(instanceName) ? "pedeai" : instanceName,
+                    MsgPreparo = msgPreparo,
+                    MsgEntrega = msgEntrega,
+                    MsgCupom   = msgCupom,
+                };
+                new DAL.WhatsAppConfigDAL().Salvar(cfg);
+                // Invalida o cache para que todos os processos releiam do banco
+                InvalidarCache();
             }
             catch (Exception ex)
             {

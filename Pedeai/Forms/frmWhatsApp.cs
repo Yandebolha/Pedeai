@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Configuration;
 using System.Drawing;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -396,22 +395,25 @@ namespace Pedeai.Forms
 
             pnl.Controls.Add(MkLabel("🍕 Em preparo:", y + 3));
             _txtMsgPreparo = MkTxt(y, 450,
-                ConfigurationManager.AppSettings["WhatsAppMsgPreparo"]
-                ?? "Olá {Nome}! 🍕 Seu pedido #{Numero} já está sendo preparado. Em breve ficará pronto!",
+                !string.IsNullOrWhiteSpace(WhatsAppService.MsgPreparo)
+                    ? WhatsAppService.MsgPreparo
+                    : "Olá {Nome}! 🍕 Seu pedido #{Numero} já está sendo preparado. Em breve ficará pronto!",
                 true);
             pnl.Controls.Add(_txtMsgPreparo); y += 62;
 
             pnl.Controls.Add(MkLabel("🛵 Saiu p/ entrega:", y + 3));
             _txtMsgEntrega = MkTxt(y, 450,
-                ConfigurationManager.AppSettings["WhatsAppMsgEntrega"]
-                ?? "Olá {Nome}! 🛵 Seu pedido #{Numero} saiu para entrega. Aguarde em breve!",
+                !string.IsNullOrWhiteSpace(WhatsAppService.MsgEntrega)
+                    ? WhatsAppService.MsgEntrega
+                    : "Olá {Nome}! 🛵 Seu pedido #{Numero} saiu para entrega. Aguarde em breve!",
                 true);
             pnl.Controls.Add(_txtMsgEntrega); y += 62;
 
             pnl.Controls.Add(MkLabel("🎁 Cupom fidelidade:", y + 3));
             _txtMsgCupom = MkTxt(y, 450,
-                ConfigurationManager.AppSettings["WhatsAppMsgCupom"]
-                ?? "Parabéns {Nome}! 🎉 Você ganhou um cupom: *{CupomCodigo}*\nVálido até {Validade}. Use no próximo pedido!",
+                !string.IsNullOrWhiteSpace(WhatsAppService.MsgCupom)
+                    ? WhatsAppService.MsgCupom
+                    : "Parabéns {Nome}! 🎉 Você ganhou um cupom: *{CupomCodigo}*\nVálido até {Validade}. Use no próximo pedido!",
                 true);
             pnl.Controls.Add(_txtMsgCupom); y += 68;
 

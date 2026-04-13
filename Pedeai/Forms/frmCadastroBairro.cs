@@ -1,4 +1,5 @@
 using System;
+using System.Data;
 using System.Drawing;
 using System.Windows.Forms;
 using Pedeai.BLL;
@@ -8,8 +9,9 @@ namespace Pedeai.Forms
 {
     public partial class frmCadastroBairro : Form
     {
-        private BairroBLL _bll;
-        private int       _codigoEditando = 0;
+        private BairroBLL   _bll;
+        private int         _codigoEditando = 0;
+        private BindingSource _bs = new BindingSource();
 
         public frmCadastroBairro()
         {
@@ -23,12 +25,26 @@ namespace Pedeai.Forms
         {
             try
             {
-                grid.DataSource = _bll.Listar();
+                var dt = _bll.Listar();
+                _bs.DataSource = dt;
+                grid.DataSource = _bs;
                 foreach (DataGridViewColumn col in grid.Columns)
                     col.Visible = col.Name != "Codigo";
+                AplicarFiltro();
             }
             catch (Exception ex) { MessageBox.Show("Erro: " + ex.Message); }
         }
+
+        private void AplicarFiltro()
+        {
+            string termo = txtBusca.Text.Trim();
+            if (_bs.DataSource is DataTable dt)
+                dt.DefaultView.RowFilter = string.IsNullOrEmpty(termo)
+                    ? ""
+                    : $"Bairro LIKE '%{termo.Replace("'", "''")}%'";
+        }
+
+        private void TxtBusca_TextChanged(object sender, EventArgs e) => AplicarFiltro();
 
         private void ModoNovo()
         {

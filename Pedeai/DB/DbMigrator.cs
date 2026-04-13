@@ -575,6 +575,46 @@ namespace Pedeai.DB
                         Situacao         CHAR(1)       NOT NULL DEFAULT 'A'
                     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
 
+                // ── config_whatsapp (centralizada no banco para funcionar em rede) ─
+                Exec(conn, @"
+                    CREATE TABLE IF NOT EXISTS config_whatsapp (
+                        Codigo          INT           NOT NULL DEFAULT 1 PRIMARY KEY,
+                        whaApiUrl       VARCHAR(300)  NOT NULL DEFAULT '',
+                        whaApiKey       VARCHAR(100)  NOT NULL DEFAULT '',
+                        whaInstance     VARCHAR(100)  NOT NULL DEFAULT 'pedeai',
+                        whaMsgPreparo   TEXT          NOT NULL,
+                        whaMsgEntrega   TEXT          NOT NULL,
+                        whaMsgCupom     TEXT          NOT NULL
+                    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+
+                Exec(conn, @"
+                    INSERT IGNORE INTO config_whatsapp
+                        (Codigo, whaApiUrl, whaApiKey, whaInstance, whaMsgPreparo, whaMsgEntrega, whaMsgCupom)
+                    VALUES (1, '', '', 'pedeai',
+                        'Olá {Nome}! 🍕 Seu pedido #{Numero} já está sendo preparado. Em breve ficará pronto!',
+                        'Olá {Nome}! 🛵 Seu pedido #{Numero} saiu para entrega. Aguarde em breve!',
+                        'Parabéns {Nome}! 🎉 Você ganhou um cupom de desconto: *{CupomCodigo}*\nVálido até {Validade}. Use no seu próximo pedido!')");
+
+                // Migrar configuração WhatsApp do App.config local → banco (somente se banco ainda sem URL)
+                {
+                    string appUrl = System.Configuration.ConfigurationManager.AppSettings["WhatsAppApiUrl"] ?? "";
+                    if (!string.IsNullOrWhiteSpace(appUrl))
+                    {
+                        using var migCmd = new MySqlCommand(@"
+                            UPDATE config_whatsapp SET
+                                whaApiUrl=@url, whaApiKey=@key, whaInstance=@inst,
+                                whaMsgPreparo=@prep, whaMsgEntrega=@entr, whaMsgCupom=@cup
+                            WHERE Codigo=1 AND whaApiUrl=''", conn);
+                        migCmd.Parameters.AddWithValue("@url",  appUrl);
+                        migCmd.Parameters.AddWithValue("@key",  System.Configuration.ConfigurationManager.AppSettings["WhatsAppApiKey"]      ?? "");
+                        migCmd.Parameters.AddWithValue("@inst", System.Configuration.ConfigurationManager.AppSettings["WhatsAppInstance"]     ?? "pedeai");
+                        migCmd.Parameters.AddWithValue("@prep", System.Configuration.ConfigurationManager.AppSettings["WhatsAppMsgPreparo"]   ?? "");
+                        migCmd.Parameters.AddWithValue("@entr", System.Configuration.ConfigurationManager.AppSettings["WhatsAppMsgEntrega"]   ?? "");
+                        migCmd.Parameters.AddWithValue("@cup",  System.Configuration.ConfigurationManager.AppSettings["WhatsAppMsgCupom"]     ?? "");
+                        migCmd.ExecuteNonQuery();
+                    }
+                }
+
                 return true;
             }
             catch (Exception ex)
