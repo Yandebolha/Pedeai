@@ -139,75 +139,82 @@ namespace Pedeai.Forms
             var doc = new PrintDocument();
             doc.DocumentName = $"Relatório Turno #{_turno.Codigo}";
 
+            // Forçar tamanho de página para evitar MarginBounds zerado (sem impressora padrão)
+            doc.DefaultPageSettings.Margins = new System.Drawing.Printing.Margins(75, 75, 75, 75);
+
             doc.PrintPage += (_, pe) =>
             {
-                var g    = pe.Graphics;
-                var fnt  = new Font("Segoe UI", 8F);
-                var bold = new Font("Segoe UI", 8F, FontStyle.Bold);
-                var hdr  = new Font("Segoe UI", 11F, FontStyle.Bold);
-                var brushDark  = new SolidBrush(Color.FromArgb(50, 40, 25));
-                var brushAmber = new SolidBrush(Color.FromArgb(176, 110, 42));
-                var brushHdrBg = new SolidBrush(Color.FromArgb(176, 110, 42));
-                var brushHdrFg = Brushes.White;
-                var brushAlt   = new SolidBrush(Color.FromArgb(240, 234, 218));
-
-                float x  = pe.MarginBounds.Left;
-                float y  = pe.MarginBounds.Top;
-                float pw = pe.MarginBounds.Width;
-
-                if (printRow == 0)
+                try
                 {
-                    // cabeçalho do relatório
-                    string sit = _turno.turSituacao == 'A' ? "ABERTO" : "FECHADO";
-                    g.DrawString($"Relatório de Turno #{_turno.Codigo}  —  {sit}", hdr, brushAmber, x, y); y += 22;
-                    g.DrawString($"Abertura: {_turno.turAbertura:dd/MM/yyyy HH:mm}   |   Usuário: {_turno.turUsuario}", fnt, brushDark, x, y); y += 15;
-                    g.DrawString($"Caixa Inicial: R$ {_turno.turCaixa_Inicial:N2}   |   {lblFechamento.Text}   |   {lblCaixaFinal.Text}", fnt, brushDark, x, y); y += 15;
-                    g.DrawLine(new Pen(Color.FromArgb(176, 110, 42), 1.5f), x, y, x + pw, y); y += 5;
-                    g.DrawString(lblResumo.Text, bold, brushAmber, x, y); y += 5;
-                    g.DrawLine(new Pen(Color.FromArgb(210, 190, 160)), x, y, x + pw, y); y += 10;
+                    var g    = pe.Graphics;
+                    using var fnt  = new Font("Arial", 9F);
+                    using var bold = new Font("Arial", 9F, FontStyle.Bold);
+                    using var hdr  = new Font("Arial", 12F, FontStyle.Bold);
+                    using var brushDark  = new SolidBrush(Color.FromArgb(50, 40, 25));
+                    using var brushAmber = new SolidBrush(Color.FromArgb(176, 110, 42));
+                    using var brushHdrBg = new SolidBrush(Color.FromArgb(176, 110, 42));
+                    using var brushAlt   = new SolidBrush(Color.FromArgb(240, 234, 218));
 
-                    // cabeçalho das colunas
-                    float colW = pw / cols.Count;
-                    float cx   = x;
-                    g.FillRectangle(brushHdrBg, cx, y, pw, 18);
-                    foreach (var col in cols)
+                    float x  = pe.MarginBounds.Left;
+                    float y  = pe.MarginBounds.Top;
+                    float pw = pe.MarginBounds.Width;
+                    if (pw <= 0) { pw = 650; x = 75; y = 75; }  // fallback se não houver impressora
+
+                    float colN = cols.Count > 0 ? cols.Count : 1;
+                    float colW = pw / colN;
+
+                    if (printRow == 0)
                     {
-                        g.DrawString(col.HeaderText, bold, brushHdrFg, cx + 2, y + 2);
-                        cx += colW;
-                    }
-                    y += 20;
-                }
+                        string sit = _turno.turSituacao == 'A' ? "ABERTO" : "FECHADO";
+                        g.DrawString($"Relatório de Turno #{_turno.Codigo}  —  {sit}", hdr, brushAmber, x, y); y += 24;
+                        g.DrawString($"Abertura: {_turno.turAbertura:dd/MM/yyyy HH:mm}   |   Usuário: {_turno.turUsuario}", fnt, brushDark, x, y); y += 16;
+                        g.DrawString($"Caixa Inicial: R$ {_turno.turCaixa_Inicial:N2}   |   {lblFechamento.Text}   |   {lblCaixaFinal.Text}", fnt, brushDark, x, y); y += 16;
+                        g.DrawString(lblResumo.Text, bold, brushAmber, x, y); y += 20;
+                        using var sepPen = new Pen(Color.FromArgb(210, 190, 160));
+                        g.DrawLine(sepPen, x, y, x + pw, y); y += 8;
 
-                float rowH = 17f;
-                float colWr = pw / cols.Count;
-                while (printRow < dt.Rows.Count && y + rowH <= pe.MarginBounds.Bottom)
+                        float cx = x;
+                        g.FillRectangle(brushHdrBg, cx, y, pw, 20);
+                        foreach (var col in cols)
+                        {
+                            g.DrawString(col.HeaderText, bold, Brushes.White, cx + 3, y + 3);
+                            cx += colW;
+                        }
+                        y += 22;
+                    }
+
+                    float rowH = 18f;
+                    while (printRow < dt.Rows.Count && y + rowH <= pe.MarginBounds.Bottom)
+                    {
+                        var row = dt.Rows[printRow];
+                        float cx = x;
+                        if (printRow % 2 == 1)
+                            g.FillRectangle(brushAlt, cx, y, pw, rowH);
+                        foreach (var col in cols)
+                        {
+                            var val = row.Table.Columns.Contains(col.Name) && row[col.Name] != DBNull.Value
+                                ? (row[col.Name]?.ToString() ?? "") : "";
+                            g.DrawString(val, fnt, brushDark, cx + 3, y + 3);
+                            cx += colW;
+                        }
+                        y += rowH;
+                        printRow++;
+                    }
+
+                    pe.HasMorePages = printRow < dt.Rows.Count;
+                }
+                catch (Exception ex)
                 {
-                    var row = dt.Rows[printRow];
-                    float cx = x;
-                    if (printRow % 2 == 1)
-                        g.FillRectangle(brushAlt, cx, y, pw, rowH);
-                    foreach (var col in cols)
-                    {
-                        var val = row.Table.Columns.Contains(col.Name) && row[col.Name] != DBNull.Value
-                            ? (row[col.Name]?.ToString() ?? "") : "";
-                        g.DrawString(val, fnt, brushDark, cx + 2, y + 2);
-                        cx += colWr;
-                    }
-                    y += rowH;
-                    printRow++;
+                    pe.HasMorePages = false;
+                    MessageBox.Show(this, "Erro ao gerar impressão:\n" + ex.Message, "Erro de Impressão",
+                        MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
-
-                pe.HasMorePages = printRow < dt.Rows.Count;
             };
 
-            using var pv = new PrintPreviewDialog
-            {
-                Document    = doc,
-                WindowState = FormWindowState.Maximized,
-                UseAntiAlias = true,
-                Text        = "Pré-visualização — Relatório de Turno"
-            };
-            pv.ShowDialog(this);
+            using var pd = new PrintDialog { Document = doc, UseEXDialog = true };
+            if (pd.ShowDialog(this) != DialogResult.OK) return;
+            try   { doc.Print(); }
+            catch (Exception ex) { MessageBox.Show("Erro ao imprimir: " + ex.Message); }
         }
 
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData)

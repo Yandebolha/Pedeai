@@ -1,7 +1,6 @@
-using System;
+﻿using System;
 using System.Data;
 using System.Drawing;
-using System.Drawing.Printing;
 using System.IO;
 using System.Text;
 using System.Windows.Forms;
@@ -9,334 +8,403 @@ using Pedeai.BLL;
 
 namespace Pedeai.Forms
 {
-    public class frmRelatorioFinanceiro : Form
+    public partial class frmRelatorioFinanceiro : Form
     {
-        private readonly PedidoBLL           _pedidoBLL;
-        private readonly GastoMaterialBLL    _gastosBLL;
-        private readonly EntradaMercadoriaBLL _entradaBLL;
+        private PedidoBLL            _pedidoBLL;
+        private GastoMaterialBLL     _gastosBLL;
+        private EntradaMercadoriaBLL _entradaBLL;
+        private DateTime _initDe;
+        private DateTime _initAte;
 
-        private ComboBox        _cmbTipo;
-        private DateTimePicker  _dtpDe;
-        private DateTimePicker  _dtpAte;
-        private DataGridView    _grid;
-        private Label           _lblTotal;
-
-        public frmRelatorioFinanceiro(PedidoBLL pedidoBLL, GastoMaterialBLL gastosBLL, EntradaMercadoriaBLL entradaBLL)
+        // Parameterless constructor required by the WinForms Designer
+        public frmRelatorioFinanceiro()
         {
+            InitializeComponent();
+        }
+
+        public frmRelatorioFinanceiro(PedidoBLL pedidoBLL, GastoMaterialBLL gastosBLL,
+                                      EntradaMercadoriaBLL entradaBLL,
+                                      DateTime? de = null, DateTime? ate = null)
+        {
+            InitializeComponent();
+            if (System.ComponentModel.LicenseManager.UsageMode ==
+                System.ComponentModel.LicenseUsageMode.Designtime) return;
             _pedidoBLL  = pedidoBLL;
             _gastosBLL  = gastosBLL;
             _entradaBLL = entradaBLL;
-            ConstruirUI();
+            _initDe     = de  ?? DateTime.Today.AddMonths(-1);
+            _initAte    = ate ?? DateTime.Today;
+            Load += Form_Load;
         }
 
-        private void ConstruirUI()
+        private void Form_Load(object sender, EventArgs e)
         {
-            Text             = "Relatório Financeiro";
-            StartPosition    = FormStartPosition.CenterParent;
-            Size             = new Size(860, 600);
-            MinimumSize      = new Size(700, 450);
-            BackColor        = Color.FromArgb(248, 245, 240);
-            Font             = new Font("Segoe UI", 9F);
-
-            // ── Top bar ──────────────────────────────────────────────────────
-            var topBar = new Panel
-            {
-                Dock      = DockStyle.Top,
-                Height    = 44,
-                BackColor = Color.FromArgb(176, 110, 42)
-            };
-            var lblTit = new Label
-            {
-                Text      = "Relatório Financeiro",
-                ForeColor = Color.White,
-                Font      = new Font("Segoe UI", 11F, FontStyle.Bold),
-                Dock      = DockStyle.Fill,
-                TextAlign = ContentAlignment.MiddleLeft,
-                Padding   = new Padding(12, 0, 0, 0)
-            };
-            topBar.Controls.Add(lblTit);
-
-            // ── Filter bar ───────────────────────────────────────────────────
-            var pnlFil = new Panel
-            {
-                Dock      = DockStyle.Top,
-                Height    = 46,
-                BackColor = Color.FromArgb(235, 228, 214),
-                Padding   = new Padding(8, 8, 8, 4)
-            };
-
-            int lx = 8;
-            pnlFil.Controls.Add(MkLbl("Tipo:", lx, 14)); lx += 36;
-
-            _cmbTipo = new ComboBox
-            {
-                Left = lx, Top = 10, Width = 100, DropDownStyle = ComboBoxStyle.DropDownList,
-                BackColor = Color.FromArgb(14, 21, 46), ForeColor = Color.White,
-                FlatStyle = FlatStyle.Flat
-            };
-            _cmbTipo.Items.AddRange(new object[] { "Ambos", "Entrada", "Saída" });
-            _cmbTipo.SelectedIndex = 0;
-            pnlFil.Controls.Add(_cmbTipo); lx += 110;
-
-            pnlFil.Controls.Add(MkLbl("De:", lx, 14)); lx += 28;
-            _dtpDe = new DateTimePicker { Left = lx, Top = 10, Width = 120, Format = DateTimePickerFormat.Short, Value = DateTime.Today.AddMonths(-1) };
-            pnlFil.Controls.Add(_dtpDe); lx += 130;
-
-            pnlFil.Controls.Add(MkLbl("Até:", lx, 14)); lx += 32;
-            _dtpAte = new DateTimePicker { Left = lx, Top = 10, Width = 120, Format = DateTimePickerFormat.Short, Value = DateTime.Today };
-            pnlFil.Controls.Add(_dtpAte); lx += 130;
-
-            var btnFil = MkBtn("Filtrar", lx, Color.FromArgb(224, 113, 42)); lx += 90;
-            btnFil.Click += (_, __) => Carregar();
-            pnlFil.Controls.Add(btnFil);
-
-            var btnExp = MkBtn("Exportar CSV", lx, Color.FromArgb(87, 120, 38)); lx += 120;
-            btnExp.Width = 114;
-            btnExp.Click += (_, __) => ExportarCsv();
-            pnlFil.Controls.Add(btnExp);
-
-            // ── Bottom bar ───────────────────────────────────────────────────
-            var pnlBot = new Panel
-            {
-                Dock      = DockStyle.Bottom,
-                Height    = 32,
-                BackColor = Color.FromArgb(235, 228, 214)
-            };
-            _lblTotal = new Label
-            {
-                Dock      = DockStyle.Fill,
-                ForeColor = Color.FromArgb(130, 80, 20),
-                Font      = new Font("Segoe UI", 9F, FontStyle.Bold),
-                TextAlign = ContentAlignment.MiddleLeft,
-                Padding   = new Padding(8, 0, 0, 0),
-                Text      = ""
-            };
-            pnlBot.Controls.Add(_lblTotal);
-
-            // ── Grid ─────────────────────────────────────────────────────────
-            _grid = new DataGridView
-            {
-                Dock                    = DockStyle.Fill,
-                ReadOnly                = true,
-                AllowUserToAddRows      = false,
-                RowHeadersVisible       = false,
-                SelectionMode           = DataGridViewSelectionMode.FullRowSelect,
-                AutoSizeColumnsMode     = DataGridViewAutoSizeColumnsMode.Fill,
-                BackgroundColor         = Color.FromArgb(248, 245, 240),
-                GridColor               = Color.FromArgb(210, 200, 180),
-                EnableHeadersVisualStyles = false,
-                BorderStyle             = BorderStyle.None,
-                Font                    = new Font("Segoe UI", 9F)
-            };
-            _grid.ColumnHeadersDefaultCellStyle.BackColor = Color.FromArgb(176, 110, 42);
-            _grid.ColumnHeadersDefaultCellStyle.ForeColor = Color.White;
-            _grid.ColumnHeadersDefaultCellStyle.Font      = new Font("Segoe UI", 8.5F, FontStyle.Bold);
-            _grid.DefaultCellStyle.BackColor              = Color.FromArgb(250, 246, 238);
-            _grid.DefaultCellStyle.ForeColor              = Color.FromArgb(50, 40, 25);
-            _grid.DefaultCellStyle.SelectionBackColor     = Color.FromArgb(224, 113, 42);
-            _grid.DefaultCellStyle.SelectionForeColor     = Color.White;
-            _grid.AlternatingRowsDefaultCellStyle.BackColor = Color.FromArgb(240, 234, 218);
-            _grid.DataError += (_, ev) => ev.ThrowException = false;
-
-            Controls.Add(_grid);
-            Controls.Add(pnlBot);
-            Controls.Add(pnlFil);
-            Controls.Add(topBar);
-
+            dtpDe.Value  = _initDe;
+            dtpAte.Value = _initAte;
             Carregar();
         }
 
-        private static Label MkLbl(string t, int l, int top) => new Label
-        {
-            Text      = t,
-            Left      = l, Top = top, AutoSize = true,
-            ForeColor = Color.FromArgb(50, 40, 25),
-            Font      = new Font("Segoe UI", 8.5F)
-        };
+        private void BtnFiltrar_Click(object sender, EventArgs e) => Carregar();
+        private void BtnImprimir_Click(object sender, EventArgs e) => Imprimir();
+        private void BtnExportCsv_Click(object sender, EventArgs e) => ExportarCsv();
 
-        private static Button MkBtn(string t, int l, Color bg)
-        {
-            var b = new Button
-            {
-                Text      = t,
-                Left      = l, Top = 7, Width = 80, Height = 28,
-                BackColor = bg, ForeColor = Color.White,
-                FlatStyle = FlatStyle.Flat, Cursor = Cursors.Hand
-            };
-            b.FlatAppearance.BorderSize = 0;
-            return b;
-        }
+        private void Grid_DataError(object sender, DataGridViewDataErrorEventArgs e)
+            => e.ThrowException = false;
 
-        private void Carregar()
+        private void Grid_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
         {
+            if (e.RowIndex < 0 || _pedidoBLL == null) return;
+            var row = grid.Rows[e.RowIndex];
+            if (row.DataBoundItem == null) return;
+            var dr = ((DataRowView)row.DataBoundItem).Row;
+            if (!dr.Table.Columns.Contains("CodigoPedido")) return;
+            if (dr["Tipo"]?.ToString() != "Venda") return;
+            int cod = dr["CodigoPedido"] == DBNull.Value ? 0 : Convert.ToInt32(dr["CodigoPedido"]);
+            if (cod <= 0) return;
             try
             {
-                var de   = _dtpDe.Value.Date;
-                var ate  = _dtpAte.Value.Date;
-                string tipo = _cmbTipo.SelectedItem?.ToString() ?? "Ambos";
-
-                var result = new DataTable();
-                result.Columns.Add("Data",      typeof(DateTime));
-                result.Columns.Add("Tipo",      typeof(string));
-                result.Columns.Add("Descrição", typeof(string));
-                result.Columns.Add("Valor",     typeof(decimal));
-
-                decimal totalEntrada = 0m, totalSaida = 0m;
-
-                if (tipo == "Entrada" || tipo == "Ambos")
-                {
-                    var dtFin = _pedidoBLL.GetFinanceiro(de, ate);
-                    foreach (DataRow r in dtFin.Rows)
-                    {
-                        if (r["Dia"] == DBNull.Value) continue;
-                        decimal v = r["TotalBruto"] == DBNull.Value ? 0m : Convert.ToDecimal(r["TotalBruto"]);
-                        int p     = r["Pedidos"]    == DBNull.Value ? 0  : Convert.ToInt32(r["Pedidos"]);
-                        if (v == 0m && p == 0) continue;
-                        var nr = result.NewRow();
-                        nr["Data"]      = Convert.ToDateTime(r["Dia"]);
-                        nr["Tipo"]      = "Entrada";
-                        nr["Descrição"] = $"Vendas — {p} pedido(s)";
-                        nr["Valor"]     = v;
-                        result.Rows.Add(nr);
-                        totalEntrada += v;
-                    }
-                }
-
-                if (tipo == "Saída" || tipo == "Ambos")
-                {
-                    // Gastos de material
-                    var dtGastos = _gastosBLL.Listar(de, ate);
-                    foreach (DataRow r in dtGastos.Rows)
-                    {
-                        decimal v = r["Valor"] == DBNull.Value ? 0m : Convert.ToDecimal(r["Valor"]);
-                        var nr = result.NewRow();
-                        nr["Data"]      = r["Data"] == DBNull.Value ? (object)DBNull.Value : Convert.ToDateTime(r["Data"]);
-                        nr["Tipo"]      = "Saída";
-                        nr["Descrição"] = $"Gasto — {r["Descricao"]}";
-                        nr["Valor"]     = v;
-                        result.Rows.Add(nr);
-                        totalSaida += v;
-                    }
-
-                    // Compras (entradas de mercadoria)
-                    var dtEntradas = _entradaBLL.Listar(de, ate);
-                    foreach (DataRow r in dtEntradas.Rows)
-                    {
-                        decimal v = r["Total"] == DBNull.Value ? 0m : Convert.ToDecimal(r["Total"]);
-                        var nr = result.NewRow();
-                        nr["Data"]      = r["entData"] == DBNull.Value ? (object)DBNull.Value : Convert.ToDateTime(r["entData"]);
-                        nr["Tipo"]      = "Saída";
-                        nr["Descrição"] = $"Compra — {r["Fornecedor"]}";
-                        nr["Valor"]     = v;
-                        result.Rows.Add(nr);
-                        totalSaida += v;
-                    }
-                }
-
-                // Ordenar por data desc
-                var sorted = result.DefaultView;
-                sorted.Sort = "Data DESC";
-                _grid.DataSource = sorted.ToTable();
-
-                FormatarGrid();
-
-                // Resumo
-                string resumo = tipo == "Ambos"
-                    ? $"Entradas: R$ {totalEntrada:N2}   |   Saídas: R$ {totalSaida:N2}   |   Saldo: R$ {(totalEntrada - totalSaida):N2}"
-                    : tipo == "Entrada"
-                        ? $"Total Entradas: R$ {totalEntrada:N2}"
-                        : $"Total Saídas: R$ {totalSaida:N2}";
-                _lblTotal.Text = resumo;
+                var dtItens = _pedidoBLL.ListarItens(cod);
+                MostrarItensDialog(dr["Referencia"]?.ToString() ?? "", dr["Descricao"]?.ToString() ?? "", dtItens);
             }
-            catch (Exception ex) { MessageBox.Show("Erro ao carregar: " + ex.Message); }
-        }
-
-        private void FormatarGrid()
-        {
-            if (_grid.Columns.Count == 0) return;
-            if (_grid.Columns.Contains("Data"))
-            {
-                _grid.Columns["Data"].DefaultCellStyle.Format = "dd/MM/yyyy";
-                _grid.Columns["Data"].FillWeight = 15;
-            }
-            if (_grid.Columns.Contains("Tipo"))
-            {
-                _grid.Columns["Tipo"].FillWeight = 12;
-                _grid.Columns["Tipo"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
-            }
-            if (_grid.Columns.Contains("Descrição"))
-                _grid.Columns["Descrição"].FillWeight = 55;
-            if (_grid.Columns.Contains("Valor"))
-            {
-                _grid.Columns["Valor"].DefaultCellStyle.Format = "N2";
-                _grid.Columns["Valor"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
-                _grid.Columns["Valor"].FillWeight = 18;
-            }
-
-            // Colorir linhas por tipo
-            foreach (DataGridViewRow row in _grid.Rows)
-            {
-                if (row.IsNewRow) continue;
-                var tipo = row.Cells["Tipo"]?.Value?.ToString();
-                if (tipo == "Entrada")
-                {
-                    row.DefaultCellStyle.ForeColor = Color.FromArgb(60, 110, 30);
-                }
-                else if (tipo == "Saída")
-                {
-                    row.DefaultCellStyle.ForeColor = Color.FromArgb(180, 50, 30);
-                }
-            }
-        }
-
-        private void ExportarCsv()
-        {
-            var dt = _grid.DataSource as DataTable;
-            if (dt == null || dt.Rows.Count == 0) { MessageBox.Show("Sem dados para exportar."); return; }
-
-            using var sfd = new SaveFileDialog
-            {
-                Title      = "Exportar Relatório",
-                Filter     = "CSV (*.csv)|*.csv",
-                FileName   = $"relatorio_financeiro_{DateTime.Today:yyyyMMdd}.csv",
-                DefaultExt = "csv"
-            };
-            if (sfd.ShowDialog(this) != DialogResult.OK) return;
-
-            try
-            {
-                var sb = new StringBuilder();
-                // Header
-                var headers = new string[dt.Columns.Count];
-                for (int i = 0; i < dt.Columns.Count; i++)
-                    headers[i] = $"\"{dt.Columns[i].ColumnName}\"";
-                sb.AppendLine(string.Join(";", headers));
-
-                // Rows
-                foreach (DataRow row in dt.Rows)
-                {
-                    var cells = new string[dt.Columns.Count];
-                    for (int i = 0; i < dt.Columns.Count; i++)
-                    {
-                        var val = row[i] == DBNull.Value ? "" : row[i].ToString()!;
-                        if (row[i] is decimal d) val = d.ToString("N2");
-                        else if (row[i] is DateTime dt2) val = dt2.ToString("dd/MM/yyyy");
-                        cells[i] = $"\"{val}\"";
-                    }
-                    sb.AppendLine(string.Join(";", cells));
-                }
-
-                File.WriteAllText(sfd.FileName, sb.ToString(), Encoding.UTF8);
-                MessageBox.Show($"Relatório exportado com sucesso!\n{sfd.FileName}", "Exportar CSV",
-                    MessageBoxButtons.OK, MessageBoxIcon.Information);
-            }
-            catch (Exception ex) { MessageBox.Show("Erro ao exportar: " + ex.Message); }
+            catch (Exception ex) { MessageBox.Show("Erro ao carregar itens: " + ex.Message); }
         }
 
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
         {
             if (keyData == Keys.Escape) { Close(); return true; }
             return base.ProcessCmdKey(ref msg, keyData);
+        }
+
+        private void Carregar()
+        {
+            if (_pedidoBLL == null) return;
+            try
+            {
+                var de  = dtpDe.Value.Date;
+                var ate = dtpAte.Value.Date;
+                string tipo = cmbTipo.SelectedItem?.ToString() ?? "Ambos";
+
+                var dt = _pedidoBLL.GetMovimentacoesPeriodo(de, ate);
+
+                // Filter by type if needed
+                if (tipo == "Sa\u00edda (Vendas)")
+                {
+                    for (int i = dt.Rows.Count - 1; i >= 0; i--)
+                        if (dt.Rows[i]["Tipo"]?.ToString() != "Venda") dt.Rows.RemoveAt(i);
+                }
+                else if (tipo == "Entrada (Compras/Gastos)")
+                {
+                    for (int i = dt.Rows.Count - 1; i >= 0; i--)
+                        if (dt.Rows[i]["Tipo"]?.ToString() != "Compra") dt.Rows.RemoveAt(i);
+                }
+
+                // Always append gasto_material as Compra rows when showing Entrada or Ambos
+                if (tipo == "Entrada (Compras/Gastos)" || tipo == "Ambos")
+                {
+                    var dtGastos = _gastosBLL.Listar(de, ate);
+                    foreach (DataRow r in dtGastos.Rows)
+                    {
+                        var nr = dt.NewRow();
+                        nr["Horario"]      = r["Data"] == DBNull.Value ? (object)DBNull.Value : Convert.ToDateTime(r["Data"]);
+                        nr["Tipo"]         = "Compra";
+                        nr["Referencia"]   = "Gasto";
+                        nr["Descricao"]    = r["Descricao"]?.ToString() ?? "";
+                        nr["Valor"]        = -(r["Valor"] == DBNull.Value ? 0m : Convert.ToDecimal(r["Valor"]));
+                        nr["CodigoPedido"] = 0;
+                        nr["Status"]       = "Lan\u00e7ado";
+                        dt.Rows.Add(nr);
+                    }
+                }
+
+                decimal totalSaida = 0m, totalEntrada = 0m, totalDescontos = 0m;
+                foreach (DataRow r in dt.Rows)
+                {
+                    decimal v = r["Valor"] == DBNull.Value ? 0m : Convert.ToDecimal(r["Valor"]);
+                    if (v >= 0) totalSaida   += v;
+                    else        totalEntrada += Math.Abs(v);
+                    if (dt.Columns.Contains("Desconto") && r["Desconto"] != DBNull.Value)
+                        totalDescontos += Convert.ToDecimal(r["Desconto"]);
+                }
+
+                grid.DataSource = dt;
+                ConfigurarColunas(dt);
+                ColorirLinhas(dt);
+                grid.Cursor = Cursors.Hand;
+
+                lblTotal.Text = $"  Vendas: R$ {totalSaida:N2}   |   Compras: R$ {totalEntrada:N2}   |   " +
+                                $"Saldo: R$ {(totalSaida - totalEntrada):N2}" +
+                                (totalDescontos > 0 ? $"   |   \u2193 Descontos: R$ {totalDescontos:N2}" : "") +
+                                "   \u2502 Duplo clique em venda para ver os itens";
+            }
+            catch (Exception ex) { MessageBox.Show("Erro ao carregar: " + ex.Message); }
+        }
+
+        private void ConfigurarColunas(DataTable dt)
+        {
+            if (grid.Columns.Count == 0) return;
+            bool temDesconto = false;
+            foreach (DataRow r in dt.Rows)
+                if (dt.Columns.Contains("Desconto") && r["Desconto"] != DBNull.Value
+                    && Convert.ToDecimal(r["Desconto"]) > 0) { temDesconto = true; break; }
+
+            var show = new System.Collections.Generic.Dictionary<string, (string header, int fill)>
+            {
+                ["Horario"]       = ("Hor\u00e1rio",      11),
+                ["Tipo"]          = ("Tipo",               7),
+                ["Referencia"]    = ("Refer\u00eancia",    8),
+                ["Descricao"]     = ("Descri\u00e7\u00e3o", 28),
+                ["Valor"]         = ("Valor R$",           10),
+                ["ValorOriginal"] = ("Total Original",     11),
+                ["ValorRecebido"] = ("Valor Recebido",     11),
+                ["Desconto"]      = ("Desconto R$",         9),
+                ["Autorizador"]   = ("Autorizado por",     10),
+                ["Pagamento"]     = ("Pagamento",           9),
+                ["Status"]        = ("Status",              8),
+            };
+            if (grid.Columns.Contains("CodigoPedido"))
+                grid.Columns["CodigoPedido"].Visible = false;
+
+            foreach (DataGridViewColumn col in grid.Columns)
+            {
+                if (!show.ContainsKey(col.Name)) { col.Visible = false; continue; }
+                if ((col.Name == "ValorOriginal" || col.Name == "ValorRecebido" ||
+                     col.Name == "Desconto"      || col.Name == "Autorizador") && !temDesconto)
+                { col.Visible = false; continue; }
+                col.Visible    = true;
+                col.HeaderText = show[col.Name].header;
+                col.FillWeight = show[col.Name].fill;
+            }
+            if (grid.Columns.Contains("Horario"))
+                grid.Columns["Horario"].DefaultCellStyle.Format = "dd/MM/yyyy HH:mm";
+        }
+
+        private void ColorirLinhas(DataTable dt)
+        {
+            foreach (DataGridViewRow row in grid.Rows)
+            {
+                if (row.DataBoundItem == null) continue;
+                var dr   = ((DataRowView)row.DataBoundItem).Row;
+                var tipo = dr["Tipo"]?.ToString();
+                bool temDesconto = dt.Columns.Contains("Desconto")
+                                   && dr["Desconto"] != DBNull.Value
+                                   && Convert.ToDecimal(dr["Desconto"]) > 0;
+                if (tipo == "Compra")
+                    row.DefaultCellStyle.BackColor = Color.FromArgb(255, 220, 215);
+                else if (temDesconto)
+                    row.DefaultCellStyle.BackColor = Color.FromArgb(255, 240, 200);
+                else if (tipo == "Venda")
+                    row.DefaultCellStyle.BackColor = Color.FromArgb(215, 245, 220);
+            }
+        }
+
+        private static void MostrarItensDialog(string numPedido, string cliente, DataTable dtItens)
+        {
+            using var frm = new Form();
+            frm.Text             = $"Itens \u2014 Pedido {numPedido}";
+            frm.BackColor        = Color.FromArgb(248, 245, 240);
+            frm.Font             = new Font("Segoe UI", 9F);
+            frm.ClientSize       = new System.Drawing.Size(720, 420);
+            frm.StartPosition    = FormStartPosition.CenterParent;
+            frm.FormBorderStyle  = FormBorderStyle.FixedDialog;
+            frm.MaximizeBox      = frm.MinimizeBox = false;
+
+            var pTop = new Panel { Dock = DockStyle.Top, Height = 44, BackColor = Color.FromArgb(176, 110, 42) };
+            pTop.Controls.Add(new Label
+            {
+                Text = $"Pedido {numPedido}  |  Cliente: {cliente}",
+                AutoSize = true, Top = 12, Left = 12,
+                Font = new Font("Segoe UI", 10F, FontStyle.Bold), ForeColor = Color.White
+            });
+
+            var g2 = new DataGridView
+            {
+                Dock = DockStyle.Fill, ReadOnly = true, AllowUserToAddRows = false,
+                SelectionMode = DataGridViewSelectionMode.FullRowSelect, RowHeadersVisible = false,
+                BackgroundColor = Color.FromArgb(250, 246, 238), BorderStyle = BorderStyle.None,
+                Font = new Font("Segoe UI", 9F),
+                AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill,
+                DefaultCellStyle          = { BackColor = Color.FromArgb(250, 246, 238), ForeColor = Color.FromArgb(50, 40, 25),
+                                              SelectionBackColor = Color.FromArgb(224, 113, 42), SelectionForeColor = Color.White },
+                AlternatingRowsDefaultCellStyle = { BackColor = Color.FromArgb(240, 234, 218) },
+                ColumnHeadersDefaultCellStyle   = { BackColor = Color.FromArgb(176, 110, 42), ForeColor = Color.White,
+                                                    Font = new Font("Segoe UI", 9F, FontStyle.Bold) },
+            };
+            g2.DataError += (_, ev) => ev.ThrowException = false;
+
+            var pFoot = new Panel { Dock = DockStyle.Bottom, Height = 42, BackColor = Color.FromArgb(235, 228, 214) };
+            var btnF  = new Button { Text = "Fechar", Width = 100, Height = 28, Top = 7,
+                BackColor = Color.FromArgb(224, 113, 42), ForeColor = Color.White,
+                FlatStyle = FlatStyle.Flat, Cursor = Cursors.Hand, DialogResult = DialogResult.OK };
+            btnF.FlatAppearance.BorderSize = 0;
+            pFoot.SizeChanged += (_, __) => btnF.Left = (pFoot.Width - btnF.Width) / 2;
+            pFoot.Controls.Add(btnF);
+
+            frm.Controls.Add(g2); frm.Controls.Add(pFoot); frm.Controls.Add(pTop);
+            frm.AcceptButton = btnF;
+
+            if (dtItens != null)
+            {
+                g2.DataSource = dtItens;
+                var hide = new System.Collections.Generic.HashSet<string>
+                    { "Codigo", "Codigo_Pedido", "Codigo_Mercadoria", "auxCodigo",
+                      "Situacao", "Status_Transmissao", "Info", "itpwDesconto_Pct" };
+                var captions = new System.Collections.Generic.Dictionary<string, string>
+                {
+                    ["itpwNome_Mercadoria"] = "Produto",
+                    ["itpwQtde"]           = "Qtde",
+                    ["itpwPreco_Unitario"] = "Unit\u00e1rio (R$)",
+                    ["itpwSubtotal"]       = "Subtotal (R$)",
+                    ["itpwObservacoes"]    = "Observa\u00e7\u00f5es",
+                    ["Produto"]  = "Produto",
+                    ["Qtde"]     = "Qtde",
+                    ["Unitario"] = "Unit\u00e1rio (R$)",
+                    ["Subtotal"] = "Subtotal (R$)",
+                    ["Obs"]      = "Observa\u00e7\u00f5es",
+                };
+                foreach (DataGridViewColumn col in g2.Columns)
+                {
+                    if (hide.Contains(col.Name)) { col.Visible = false; continue; }
+                    if (captions.TryGetValue(col.Name, out string h)) col.HeaderText = h;
+                }
+            }
+            frm.ShowDialog();
+        }
+
+        private void Imprimir()
+        {
+            var dt = grid.DataSource as DataTable;
+            if (dt == null || dt.Rows.Count == 0)
+            { MessageBox.Show("Sem dados para imprimir.", "Imprimir"); return; }
+
+            var de  = dtpDe.Value.Date;
+            var ate = dtpAte.Value.Date;
+            int printRow = 0;
+
+            var doc = new System.Drawing.Printing.PrintDocument();
+            doc.DocumentName = $"Vendas {de:dd-MM-yyyy} a {ate:dd-MM-yyyy}";
+            doc.DefaultPageSettings.Margins = new System.Drawing.Printing.Margins(75, 75, 75, 75);
+
+            doc.PrintPage += (_, pe) =>
+            {
+                try
+                {
+                    var g    = pe.Graphics;
+                    using var fnt  = new Font("Arial", 9F);
+                    using var bold = new Font("Arial", 9F, FontStyle.Bold);
+                    using var hdr  = new Font("Arial", 12F, FontStyle.Bold);
+                    using var darkBrush  = new SolidBrush(Color.FromArgb(50, 40, 25));
+                    using var amberBrush = new SolidBrush(Color.FromArgb(176, 110, 42));
+                    using var greenBrush = new SolidBrush(Color.FromArgb(60, 110, 30));
+                    using var redBrush   = new SolidBrush(Color.FromArgb(180, 50, 30));
+                    using var altBrush   = new SolidBrush(Color.FromArgb(240, 234, 218));
+
+                    float x  = pe.MarginBounds.Left;
+                    float y  = pe.MarginBounds.Top;
+                    float pw = pe.MarginBounds.Width;
+                    if (pw <= 0) { pw = 650; x = 75; y = 75; }
+
+                    var visCols = new System.Collections.Generic.List<DataGridViewColumn>();
+                    foreach (DataGridViewColumn col in grid.Columns)
+                        if (col.Visible) visCols.Add(col);
+                    float colW = visCols.Count > 0 ? pw / visCols.Count : pw;
+
+                    if (printRow == 0)
+                    {
+                        g.DrawString("Vendas por Per\u00edodo", hdr, amberBrush, x, y); y += 24;
+                        g.DrawString($"Per\u00edodo: {de:dd/MM/yyyy} a {ate:dd/MM/yyyy}", fnt, darkBrush, x, y); y += 16;
+                        string resumo = lblTotal.Text;
+                        int sep = resumo.IndexOf('\u2502');
+                        if (sep > 0) resumo = resumo[..sep].Trim();
+                        g.DrawString(resumo, bold, amberBrush, x, y); y += 20;
+
+                        using var hdrBg = new SolidBrush(Color.FromArgb(176, 110, 42));
+                        g.FillRectangle(hdrBg, x, y, pw, 20);
+                        float cx = x;
+                        foreach (var col in visCols)
+                        {
+                            g.DrawString(col.HeaderText, bold, System.Drawing.Brushes.White, cx + 3, y + 3);
+                            cx += colW;
+                        }
+                        y += 22;
+                    }
+
+                    float rowH = 18f;
+                    while (printRow < dt.Rows.Count && y + rowH <= pe.MarginBounds.Bottom)
+                    {
+                        var row = dt.Rows[printRow];
+                        if (printRow % 2 == 1) g.FillRectangle(altBrush, x, y, pw, rowH);
+                        string tipo = row.Table.Columns.Contains("Tipo") ? row["Tipo"]?.ToString() ?? "" : "";
+                        var txtBrush = tipo == "Venda" ? greenBrush : tipo == "Compra" ? redBrush : darkBrush;
+                        float cx = x;
+                        foreach (var col in visCols)
+                        {
+                            string val = "";
+                            if (dt.Columns.Contains(col.Name) && row[col.Name] != DBNull.Value)
+                            {
+                                if (row[col.Name] is DateTime dtv) val = dtv.ToString("dd/MM HH:mm");
+                                else if (row[col.Name] is decimal dv) val = Math.Abs(dv).ToString("N2");
+                                else val = row[col.Name]?.ToString() ?? "";
+                            }
+                            using var sf = new System.Drawing.StringFormat { Trimming = System.Drawing.StringTrimming.EllipsisCharacter };
+                            g.DrawString(val, fnt, txtBrush,
+                                new System.Drawing.RectangleF(cx + 3, y + 2, colW - 6, rowH), sf);
+                            cx += colW;
+                        }
+                        y += rowH;
+                        printRow++;
+                    }
+                    pe.HasMorePages = printRow < dt.Rows.Count;
+                }
+                catch (Exception ex)
+                {
+                    pe.HasMorePages = false;
+                    MessageBox.Show(this, "Erro ao gerar impress\u00e3o:\n" + ex.Message, "Erro de Impress\u00e3o",
+                        MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            };
+
+            using var pd = new PrintDialog { Document = doc, UseEXDialog = true };
+            if (pd.ShowDialog(this) != DialogResult.OK) return;
+            try   { doc.Print(); }
+            catch (Exception ex) { MessageBox.Show("Erro ao imprimir: " + ex.Message); }
+        }
+
+        private void ExportarCsv()
+        {
+            var dt = grid.DataSource as DataTable;
+            if (dt == null || dt.Rows.Count == 0) { MessageBox.Show("Sem dados para exportar."); return; }
+
+            using var sfd = new SaveFileDialog
+            {
+                Title = "Exportar Relatório", Filter = "CSV (*.csv)|*.csv",
+                FileName = $"vendas_{DateTime.Today:yyyyMMdd}.csv", DefaultExt = "csv"
+            };
+            if (sfd.ShowDialog(this) != DialogResult.OK) return;
+
+            try
+            {
+                var sb = new StringBuilder();
+                var headers = new string[dt.Columns.Count];
+                for (int i = 0; i < dt.Columns.Count; i++)
+                    headers[i] = $"\"{dt.Columns[i].ColumnName}\"";
+                sb.AppendLine(string.Join(";", headers));
+
+                foreach (DataRow row in dt.Rows)
+                {
+                    var cells = new string[dt.Columns.Count];
+                    for (int i = 0; i < dt.Columns.Count; i++)
+                    {
+                        var val = row[i] == DBNull.Value ? "" : row[i].ToString();
+                        if (row[i] is decimal d) val = d.ToString("N2");
+                        else if (row[i] is DateTime dt2) val = dt2.ToString("dd/MM/yyyy HH:mm");
+                        cells[i] = $"\"{val}\"";
+                    }
+                    sb.AppendLine(string.Join(";", cells));
+                }
+                File.WriteAllText(sfd.FileName, sb.ToString(), Encoding.UTF8);
+                MessageBox.Show($"Exportado!\n{sfd.FileName}", "CSV", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (Exception ex) { MessageBox.Show("Erro ao exportar: " + ex.Message); }
         }
     }
 }

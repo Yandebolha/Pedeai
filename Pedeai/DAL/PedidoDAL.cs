@@ -459,6 +459,67 @@ namespace Pedeai.DAL
 
         /// <summary>Retorna detalhe de movimentações de um dia (vendas + compras).</summary>
         public DataTable GetMovimentacoesDia(DateTime dia)
+            => GetMovimentacoesPeriodo(dia, dia);
+
+        /// <summary>Retorna movimentações individuais (pedidos + compras) em um período.</summary>
+        public DataTable GetMovimentacoesPeriodo(DateTime de, DateTime ate)
+        {
+            var dt = new DataTable();
+            using var conn = AbrirConexao();
+            var sql = @"
+                SELECT
+                    p.pediData_Lancamento   AS Horario,
+                    'Venda'                 AS Tipo,
+                    p.pediNumero            AS Referencia,
+                    p.pediNome_Cliente      AS Descricao,
+                    COALESCE(p.pediValor_Pago, p.pediValor_Total) AS Valor,
+                    p.pediValor_Total       AS ValorOriginal,
+                    p.pediValor_Pago        AS ValorRecebido,
+                    CASE WHEN p.pediValor_Pago IS NOT NULL
+                              AND p.pediValor_Pago < p.pediValor_Total
+                         THEN p.pediValor_Total - p.pediValor_Pago
+                         ELSE NULL END      AS Desconto,
+                    p.pediAutorizador       AS Autorizador,
+                    CASE p.pediForma_Pagamento
+                        WHEN 0 THEN 'Dinheiro' WHEN 1 THEN 'Cartão' WHEN 2 THEN 'Pix'
+                        ELSE 'Outro' END     AS Pagamento,
+                    CASE p.pediSituacao
+                        WHEN 0 THEN 'Pendente'         WHEN 1 THEN 'Confirmado'
+                        WHEN 2 THEN 'Em Preparo'       WHEN 3 THEN 'Pronto'
+                        WHEN 4 THEN 'Saiu p/ Entrega'  WHEN 5 THEN 'Entregue'
+                        WHEN 6 THEN 'Cancelado'
+                        ELSE CAST(p.pediSituacao AS CHAR) END AS Status,
+                    p.Codigo                AS CodigoPedido
+                FROM pedido_web p
+                WHERE DATE(p.pediData_Lancamento) BETWEEN @de AND @ate
+                  AND p.pediSituacao NOT IN (6)
+                UNION ALL
+                SELECT
+                    e.entData_Lancamento    AS Horario,
+                    'Compra'                AS Tipo,
+                    CONCAT('#', e.Codigo)  AS Referencia,
+                    CONCAT('Entrada - ', e.entNome_Fornecedor) AS Descricao,
+                    -e.entValorTotal        AS Valor,
+                    NULL                    AS ValorOriginal,
+                    NULL                    AS ValorRecebido,
+                    NULL                    AS Desconto,
+                    NULL                    AS Autorizador,
+                    ''                      AS Pagamento,
+                    'Lançado'               AS Status,
+                    0                       AS CodigoPedido
+                FROM entrada_mercadoria e
+                WHERE DATE(e.entData) BETWEEN @de AND @ate
+                  AND e.Situacao = 'A'
+                ORDER BY Horario ASC";
+            using var cmd = new MySqlCommand(sql, conn);
+            cmd.Parameters.AddWithValue("@de",  de.Date);
+            cmd.Parameters.AddWithValue("@ate", ate.Date);
+            new MySqlDataAdapter(cmd).Fill(dt);
+            return dt;
+        }
+
+        [System.Obsolete("Use GetMovimentacoesPeriodo instead")]
+        public DataTable GetMovimentacoesDia_Old(DateTime dia)
         {
             var dt = new DataTable();
             using var conn = AbrirConexao();

@@ -1126,6 +1126,44 @@ namespace Pedeai
                             Logger.Log("Pedido finalizado", logExtra);
                             CarregarPedidos();
                             RestaurarSelecaoPedido(cod);
+                            // Troco em dinheiro
+                            decimal troco = vPago - pedido.pediValor_Total;
+                            if (din > 0 && troco > 0.005m)
+                            {
+                                using var dlgTroco = new Form
+                                {
+                                    Text            = "Troco",
+                                    StartPosition   = FormStartPosition.CenterParent,
+                                    FormBorderStyle = FormBorderStyle.FixedDialog,
+                                    MaximizeBox     = false, MinimizeBox = false,
+                                    BackColor       = Color.FromArgb(245, 237, 216),
+                                    ClientSize      = new Size(320, 148),
+                                    Font            = new Font("Segoe UI", 9F)
+                                };
+                                var pnlTrocoTop = new Panel { Left = 0, Top = 0, Width = 320, Height = 36, BackColor = Color.FromArgb(176, 110, 42) };
+                                pnlTrocoTop.Controls.Add(new Label { Text = "Troco para o Cliente", ForeColor = Color.White, Font = new Font("Segoe UI", 10F, FontStyle.Bold), AutoSize = true, Left = 12, Top = 8 });
+                                dlgTroco.Controls.Add(pnlTrocoTop);
+                                dlgTroco.Controls.Add(new Label
+                                {
+                                    Text      = $"💰  Devolver  R$ {troco:N2}  em dinheiro",
+                                    Left = 20, Top = 52, AutoSize = true,
+                                    Font      = new Font("Segoe UI", 13F, FontStyle.Bold),
+                                    ForeColor = Color.FromArgb(39, 127, 56)
+                                });
+                                dlgTroco.Controls.Add(new Label
+                                {
+                                    Text = $"Recebido: R$ {din:N2}   |   Total: R$ {pedido.pediValor_Total:N2}",
+                                    Left = 20, Top = 86, AutoSize = true,
+                                    ForeColor = Color.FromArgb(100, 80, 40)
+                                });
+                                var btnOkTroco = new Button { Text = "OK", Left = 110, Top = 106, Width = 100, Height = 30,
+                                    BackColor = Color.FromArgb(87, 120, 38), ForeColor = Color.White,
+                                    FlatStyle = FlatStyle.Flat, DialogResult = DialogResult.OK };
+                                btnOkTroco.FlatAppearance.BorderSize = 0;
+                                dlgTroco.Controls.Add(btnOkTroco);
+                                dlgTroco.AcceptButton = btnOkTroco;
+                                dlgTroco.ShowDialog(this);
+                            }
                             // Reimprimir cupom quando há desconto autorizado no pagamento
                             if (!string.IsNullOrEmpty(autNome))
                                 ImprimirCupomPedido(cod);
@@ -1447,7 +1485,16 @@ namespace Pedeai
                 using var frm = new Forms.frmRelatorioFinanceiro(_pedidoBLL, _gastosBLL, _entradaBLL);
                 frm.ShowDialog(this);
             };
-            pnlFil.Controls.AddRange(new Control[] { lblDe, dtpFinDe, lblAte, dtpFinAte, btnFil, btnRelFin });
+            var btnHoje = new Button { Text = "� Vendas por Período", Left = 542, Top = 8, Width = 140, Height = 28, BackColor = Color.FromArgb(52, 100, 160), ForeColor = Color.White, FlatStyle = FlatStyle.Flat, Cursor = Cursors.Hand };
+            btnHoje.FlatAppearance.BorderSize = 0;
+            btnHoje.Click += (_, __) =>
+            {
+                using var frm = new Forms.frmRelatorioFinanceiro(_pedidoBLL, _gastosBLL, _entradaBLL,
+                    de: DateTime.Today, ate: DateTime.Today);
+                frm.Text = $"Vendas por Período — {DateTime.Today:dd/MM/yyyy}";
+                frm.ShowDialog(this);
+            };
+            pnlFil.Controls.AddRange(new Control[] { lblDe, dtpFinDe, lblAte, dtpFinAte, btnFil, btnRelFin, btnHoje });
 
             // ── Cards de resumo ──
             _pnlFinCards = new FlowLayoutPanel

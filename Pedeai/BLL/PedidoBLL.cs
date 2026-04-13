@@ -87,6 +87,9 @@ namespace Pedeai.BLL
         public System.Data.DataTable GetMovimentacoesDia(DateTime dia)
             => _dal.GetMovimentacoesDia(dia);
 
+        public System.Data.DataTable GetMovimentacoesPeriodo(DateTime de, DateTime ate)
+            => _dal.GetMovimentacoesPeriodo(de, ate);
+
         public string InserirManual(PedidoWeb pedido, System.Collections.Generic.List<ItemPedidoWeb> itens)
         {
             if (string.IsNullOrWhiteSpace(pedido.pediNome_Cliente))

@@ -86,6 +86,21 @@
     <Compile Update="Forms\frmRelatorioFinanceiro.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Update="Forms\frmRelatorioFinanceiro.Designer.cs">
+      <DependentUpon>frmRelatorioFinanceiro.cs</DependentUpon>
+    </Compile>
+    <Compile Update="Forms\frmLicenca.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Forms\frmLicenca.Designer.cs">
+      <DependentUpon>frmLicenca.cs</DependentUpon>
+    </Compile>
+    <Compile Update="Forms\frmCadastroBairro.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Forms\frmCadastroBairro.Designer.cs">
+      <DependentUpon>frmCadastroBairro.cs</DependentUpon>
+    </Compile>
     <Compile Update="Forms\frmAutorizacao.cs">
       <SubType>Form</SubType>
     </Compile>
