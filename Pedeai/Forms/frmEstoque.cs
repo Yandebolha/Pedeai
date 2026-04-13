@@ -27,10 +27,9 @@ namespace Pedeai.Forms
             try
             {
                 grid.DataSource = _bll.Listar(txtFiltro.Text.Trim());
-                var hide = new[] { "EhProduto", "Situacao" };
+                var hide = new[] { "EhProduto", "Situacao", "Codigo" };
                 foreach (DataGridViewColumn c in grid.Columns)
                     c.Visible = !Array.Exists(hide, h => h == c.Name);
-                if (grid.Columns["Codigo"]    != null) { grid.Columns["Codigo"].HeaderText    = "Cód.";         grid.Columns["Codigo"].FillWeight    = 6; }
                 if (grid.Columns["Nome"]      != null) { grid.Columns["Nome"].HeaderText      = "Nome / Item";  grid.Columns["Nome"].FillWeight      = 40; }
                 if (grid.Columns["Unidade"]   != null) { grid.Columns["Unidade"].HeaderText   = "Unid.";        grid.Columns["Unidade"].FillWeight   = 8; }
                 if (grid.Columns["Qtde"]      != null) { grid.Columns["Qtde"].HeaderText      = "Qtde";         grid.Columns["Qtde"].FillWeight      = 10; }

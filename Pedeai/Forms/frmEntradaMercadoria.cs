@@ -189,10 +189,9 @@ namespace Pedeai.Forms
         {
             if (gridEntradas.Columns.Count == 0) return;
             foreach (DataGridViewColumn col in gridEntradas.Columns) col.Visible = false;
-            var visivel = new[] { "Codigo", "entData", "Fornecedor", "Documento", "Itens", "Total", "Lancamento" };
+            var visivel = new[] { "entData", "Fornecedor", "Documento", "Itens", "Total", "Lancamento" };
             var cabecalhos = new System.Collections.Generic.Dictionary<string, string>
             {
-                ["Codigo"]    = "C\u00f3d.",
                 ["entData"]   = "Data",
                 ["Fornecedor"]= "Fornecedor",
                 ["Documento"] = "N\u00ba Doc",

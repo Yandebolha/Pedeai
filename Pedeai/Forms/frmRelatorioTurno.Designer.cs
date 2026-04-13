@@ -59,15 +59,18 @@ namespace Pedeai.Forms
 
             // ── gridPedidos ────────────────────────────────────────────────
             this.gridPedidos.Dock                  = System.Windows.Forms.DockStyle.Fill;
-            this.gridPedidos.BackgroundColor        = System.Drawing.Color.FromArgb(235, 226, 208);
-            this.gridPedidos.ForeColor              = System.Drawing.Color.White;
-            this.gridPedidos.GridColor              = System.Drawing.Color.FromArgb(50, 60, 100);
+            this.gridPedidos.BackgroundColor        = System.Drawing.Color.FromArgb(248, 245, 240);
+            this.gridPedidos.ForeColor              = System.Drawing.Color.FromArgb(50, 40, 25);
+            this.gridPedidos.GridColor              = System.Drawing.Color.FromArgb(210, 200, 180);
             this.gridPedidos.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.gridPedidos.ColumnHeadersDefaultCellStyle.BackColor = System.Drawing.Color.FromArgb(245, 237, 216);
-            this.gridPedidos.ColumnHeadersDefaultCellStyle.ForeColor = System.Drawing.Color.FromArgb(200, 210, 240);
-            this.gridPedidos.DefaultCellStyle.BackColor  = System.Drawing.Color.FromArgb(30, 40, 70);
-            this.gridPedidos.DefaultCellStyle.ForeColor  = System.Drawing.Color.White;
+            this.gridPedidos.ColumnHeadersDefaultCellStyle.BackColor = System.Drawing.Color.FromArgb(176, 110, 42);
+            this.gridPedidos.ColumnHeadersDefaultCellStyle.ForeColor = System.Drawing.Color.White;
+            this.gridPedidos.ColumnHeadersDefaultCellStyle.Font = new System.Drawing.Font("Segoe UI", 8.5F, System.Drawing.FontStyle.Bold);
+            this.gridPedidos.DefaultCellStyle.BackColor  = System.Drawing.Color.FromArgb(250, 246, 238);
+            this.gridPedidos.DefaultCellStyle.ForeColor  = System.Drawing.Color.FromArgb(50, 40, 25);
             this.gridPedidos.DefaultCellStyle.SelectionBackColor = System.Drawing.Color.FromArgb(224, 113, 42);
+            this.gridPedidos.DefaultCellStyle.SelectionForeColor = System.Drawing.Color.White;
+            this.gridPedidos.AlternatingRowsDefaultCellStyle.BackColor = System.Drawing.Color.FromArgb(240, 234, 218);
             this.gridPedidos.AutoSizeColumnsMode    = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
             this.gridPedidos.ReadOnly               = true;
             this.gridPedidos.SelectionMode          = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;

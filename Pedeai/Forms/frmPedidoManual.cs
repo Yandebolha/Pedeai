@@ -632,7 +632,7 @@ namespace Pedeai.Forms
 
             if (dlg.ShowDialog(this) == DialogResult.OK && escolha1 != null && escolha2 != null)
             {
-                decimal precoFinal = Math.Max(escolha1.Preco, escolha2.Preco);
+                decimal precoFinal = (escolha1.Preco + escolha2.Preco) / 2m;
                 decimal descPct    = numDescontoItem.Value;
                 decimal unitFinal  = precoFinal * (1m - descPct / 100m);
                 int     qty        = (int)numQtde.Value;

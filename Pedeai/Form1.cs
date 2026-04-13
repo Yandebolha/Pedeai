@@ -1440,7 +1440,14 @@ namespace Pedeai
             var btnFil = new Button { Text = "Filtrar", Left = 332, Top = 8, Width = 80, Height = 28, BackColor = CorBotaoAtivo, ForeColor = Color.White, FlatStyle = FlatStyle.Flat, Cursor = Cursors.Hand };
             btnFil.FlatAppearance.BorderSize = 0;
             btnFil.Click += (_, __) => CarregarFinanceiro();
-            pnlFil.Controls.AddRange(new Control[] { lblDe, dtpFinDe, lblAte, dtpFinAte, btnFil });
+            var btnRelFin = new Button { Text = "📊 Relatório", Left = 422, Top = 8, Width = 110, Height = 28, BackColor = Color.FromArgb(87, 120, 38), ForeColor = Color.White, FlatStyle = FlatStyle.Flat, Cursor = Cursors.Hand };
+            btnRelFin.FlatAppearance.BorderSize = 0;
+            btnRelFin.Click += (_, __) =>
+            {
+                using var frm = new Forms.frmRelatorioFinanceiro(_pedidoBLL, _gastosBLL, _entradaBLL);
+                frm.ShowDialog(this);
+            };
+            pnlFil.Controls.AddRange(new Control[] { lblDe, dtpFinDe, lblAte, dtpFinAte, btnFil, btnRelFin });
 
             // ── Cards de resumo ──
             _pnlFinCards = new FlowLayoutPanel

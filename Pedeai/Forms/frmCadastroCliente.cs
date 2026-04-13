@@ -100,7 +100,7 @@ namespace Pedeai.Forms
                 grid.Columns[name].DefaultCellStyle.Alignment = align;
             }
 
-            Col("Codigo",       "Cód.",               40,  DataGridViewContentAlignment.MiddleCenter);
+            if (grid.Columns.Contains("Codigo")) grid.Columns["Codigo"].Visible = false;
             Col("Nome",         "Nome / Razão Social", 220);
             Col("Celular",      "Celular",             110,  DataGridViewContentAlignment.MiddleCenter);
             Col("Email",        "E-mail",              180);

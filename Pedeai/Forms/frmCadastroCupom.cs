@@ -22,7 +22,11 @@ namespace Pedeai.Forms
 
         private void CarregarGrid()
         {
-            try { grid.DataSource = _bll.Listar(); }
+            try
+            {
+                grid.DataSource = _bll.Listar();
+                if (grid.Columns.Contains("Codigo")) grid.Columns["Codigo"].Visible = false;
+            }
             catch (Exception ex) { MessageBox.Show("Erro: " + ex.Message); }
         }
 

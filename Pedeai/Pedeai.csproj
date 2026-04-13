@@ -83,6 +83,9 @@
     <Compile Update="Forms\frmMovimentacoesDia.Designer.cs">
       <DependentUpon>frmMovimentacoesDia.cs</DependentUpon>
     </Compile>
+    <Compile Update="Forms\frmRelatorioFinanceiro.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Update="Forms\frmAutorizacao.cs">
       <SubType>Form</SubType>
     </Compile>
