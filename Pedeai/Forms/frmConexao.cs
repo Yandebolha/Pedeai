@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Drawing;
@@ -15,41 +15,31 @@ namespace Pedeai.Forms
     /// <summary>
     /// Permite editar a connection string do MySQL e descobrir servidores na rede local.
     /// </summary>
-    public class frmConexao : Form
+    public partial class frmConexao : Form
     {
         /// <summary>Se definido, exibe uma mensagem de erro no topo da janela ao abrir.</summary>
         public string MotivoErro { get; set; }
-
-        private TextBox   txtServidor;
-        private TextBox   txtPorta;
-        private TextBox   txtBanco;
-        private TextBox   txtUsuario;
-        private TextBox   txtSenha;
-        private ListBox   lstServidores;
-        private Button    btnVarrer;
-        private Button    btnTestar;
-        private Button    btnSalvar;
-        private Button    btnCancelar;
-        private Label     lblStatus;
-        private ProgressBar progressVarrer;
 
         private bool _varrendo = false;
 
         public frmConexao()
         {
-            BuildUI();
-            Load += (_, __) =>
-            {
-                CarregarConexaoAtual();
-                if (!string.IsNullOrWhiteSpace(MotivoErro))
-                {
-                    lblStatus.ForeColor = Color.Red;
-                    lblStatus.Text      = "⚠ " + MotivoErro;
-                }
-            };
+            InitializeComponent();
+            if (System.ComponentModel.LicenseManager.UsageMode == System.ComponentModel.LicenseUsageMode.Designtime) return;
+            Load += FrmConexao_Load;
         }
 
-        // ── Leitura da connection string atual ─────────────────────────────────
+        private void FrmConexao_Load(object sender, EventArgs e)
+        {
+            CarregarConexaoAtual();
+            if (!string.IsNullOrWhiteSpace(MotivoErro))
+            {
+                lblStatus.ForeColor = Color.Red;
+                lblStatus.Text      = "âš  " + MotivoErro;
+            }
+        }
+
+        // â”€â”€ Leitura da connection string atual â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         private void CarregarConexaoAtual()
         {
             var cs = ConfigurationManager.AppSettings["ConnectionString"] ?? "";
@@ -83,7 +73,7 @@ namespace Pedeai.Forms
                $"User={txtUsuario.Text.Trim()};Password={txtSenha.Text};" +
                $"Port={txtPorta.Text.Trim()};CharSet=utf8mb4;SslMode=None;AllowPublicKeyRetrieval=true;";
 
-        // ── Varredura de rede ─────────────────────────────────────────────────
+        // â”€â”€ Varredura de rede â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         private async void BtnVarrer_Click(object sender, EventArgs e)
         {
             if (_varrendo) return;
@@ -158,7 +148,7 @@ namespace Pedeai.Forms
             _varrendo         = false;
         }
 
-        // ── Testar conexão ────────────────────────────────────────────────────
+        // â”€â”€ Testar conexÃ£o â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         private void BtnTestar_Click(object sender, EventArgs e)
         {
             lblStatus.Text = "Testando...";
@@ -167,16 +157,16 @@ namespace Pedeai.Forms
                 using var conn = new MySqlConnection(MontarConnectionString());
                 conn.Open();
                 lblStatus.ForeColor = Color.Green;
-                lblStatus.Text      = $"✔ Conexão OK — MySQL {conn.ServerVersion}";
+                lblStatus.Text      = $"âœ” ConexÃ£o OK â€” MySQL {conn.ServerVersion}";
             }
             catch (Exception ex)
             {
                 lblStatus.ForeColor = Color.Red;
-                lblStatus.Text      = "✖ Falha: " + ex.Message;
+                lblStatus.Text      = "âœ– Falha: " + ex.Message;
             }
         }
 
-        // ── Salvar no App.config ──────────────────────────────────────────────
+        // â”€â”€ Salvar no App.config â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         private void BtnSalvar_Click(object sender, EventArgs e)
         {
             string novaCs = MontarConnectionString();
@@ -190,7 +180,7 @@ namespace Pedeai.Forms
             catch (Exception ex)
             {
                 var r = MessageBox.Show(
-                    $"A conexão falhou:\n{ex.Message}\n\nSalvar mesmo assim?",
+                    $"A conexÃ£o falhou:\n{ex.Message}\n\nSalvar mesmo assim?",
                     "Aviso", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
                 if (r != DialogResult.Yes) return;
             }
@@ -208,174 +198,33 @@ namespace Pedeai.Forms
                     node.Attributes["value"].Value = novaCs;
                 doc.Save(configPath);
 
-                // Atualiza em memória também (sem reiniciar o app)
+                // Atualiza em memÃ³ria tambÃ©m (sem reiniciar o app)
                 var config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
                 config.AppSettings.Settings["ConnectionString"].Value = novaCs;
                 config.Save(ConfigurationSaveMode.Modified);
                 ConfigurationManager.RefreshSection("appSettings");
 
                 MessageBox.Show(
-                    "Configuração salva!\nAs novas conexões usarão o servidor configurado.",
+                    "ConfiguraÃ§Ã£o salva!\nAs novas conexÃµes usarÃ£o o servidor configurado.",
                     "Salvo", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 DialogResult = DialogResult.OK;
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Erro ao salvar configuração:\n" + ex.Message,
+                MessageBox.Show("Erro ao salvar configuraÃ§Ã£o:\n" + ex.Message,
                     "Erro", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
-        // ── Clique na lista de servidores descobertos ─────────────────────────
+        // â”€â”€ Clique na lista de servidores descobertos â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         private void LstServidores_DoubleClick(object sender, EventArgs e)
         {
             if (lstServidores.SelectedItem is string ip)
                 txtServidor.Text = ip;
         }
 
-        // ── UI ────────────────────────────────────────────────────────────────
-        private void BuildUI()
-        {
-            Text            = "Configuração de Conexão ao Banco de Dados";
-            ClientSize      = new Size(520, 500);
-            FormBorderStyle = FormBorderStyle.FixedDialog;
-            MaximizeBox     = false;
-            MinimizeBox     = false;
-            StartPosition   = FormStartPosition.CenterParent;
-            BackColor       = Color.FromArgb(250, 242, 225);
-
-            // Título
-            var lblTitulo = new Label
-            {
-                Text      = "⚙️  Conexão ao Banco de Dados",
-                Font      = new Font("Segoe UI", 13F, FontStyle.Bold),
-                ForeColor = Color.FromArgb(120, 60, 10),
-                Location  = new Point(0, 14),
-                Size      = new Size(520, 34),
-                TextAlign = ContentAlignment.MiddleCenter,
-            };
-
-            // Labels e campos
-            int col1 = 20, col2 = 160, lw = 130, fw = 200;
-            int y = 60;
-
-            var lblSrv = MkLbl("Servidor (IP/hostname):", col1, y);
-            txtServidor = new TextBox { Location = new Point(col2, y - 2), Size = new Size(fw, 24), BorderStyle = BorderStyle.FixedSingle };
-            y += 36;
-
-            var lblPrt = MkLbl("Porta MySQL:", col1, y);
-            txtPorta = new TextBox { Location = new Point(col2, y - 2), Size = new Size(70, 24), BorderStyle = BorderStyle.FixedSingle, Text = "3306" };
-            y += 36;
-
-            var lblBd = MkLbl("Nome do Banco:", col1, y);
-            txtBanco = new TextBox { Location = new Point(col2, y - 2), Size = new Size(fw, 24), BorderStyle = BorderStyle.FixedSingle };
-            y += 36;
-
-            var lblUsr = MkLbl("Usuário:", col1, y);
-            txtUsuario = new TextBox { Location = new Point(col2, y - 2), Size = new Size(fw, 24), BorderStyle = BorderStyle.FixedSingle };
-            y += 36;
-
-            var lblPwd = MkLbl("Senha:", col1, y);
-            txtSenha = new TextBox { Location = new Point(col2, y - 2), Size = new Size(fw, 24), BorderStyle = BorderStyle.FixedSingle, UseSystemPasswordChar = true };
-            y += 44;
-
-            // Botões testar/salvar
-            btnTestar = MkBtn("🔍 Testar Conexão", col1, y, 155, Color.FromArgb(52, 100, 160));
-            btnTestar.Click += BtnTestar_Click;
-
-            btnSalvar = MkBtn("💾 Salvar", col1 + 165, y, 100, Color.FromArgb(87, 140, 38));
-            btnSalvar.Click += BtnSalvar_Click;
-
-            btnCancelar = MkBtn("Cancelar", col1 + 275, y, 90, Color.FromArgb(150, 60, 40));
-            btnCancelar.Click += (_, __) => Close();
-
-            y += 48;
-
-            // Status
-            lblStatus = new Label
-            {
-                Location  = new Point(col1, y),
-                Size      = new Size(480, 22),
-                Font      = new Font("Segoe UI", 8.5F),
-                ForeColor = Color.FromArgb(80, 60, 30),
-            };
-            y += 30;
-
-            // Separador
-            var sep = new Label
-            {
-                Text      = "Servidores MySQL encontrados na rede:",
-                Location  = new Point(col1, y),
-                AutoSize  = true,
-                Font      = new Font("Segoe UI", 9F, FontStyle.Bold),
-                ForeColor = Color.FromArgb(60, 50, 30),
-            };
-            y += 22;
-
-            progressVarrer = new ProgressBar
-            {
-                Location  = new Point(col1, y),
-                Size      = new Size(380, 14),
-                Style     = ProgressBarStyle.Blocks,
-                Visible   = true,
-            };
-            y += 20;
-
-            lstServidores = new ListBox
-            {
-                Location      = new Point(col1, y),
-                Size          = new Size(380, 90),
-                BorderStyle   = BorderStyle.FixedSingle,
-                Font          = new Font("Consolas", 9.5F),
-                BackColor     = Color.FromArgb(255, 252, 245),
-            };
-            lstServidores.DoubleClick += LstServidores_DoubleClick;
-            lstServidores.Items.Add("localhost");
-
-            btnVarrer = MkBtn("🔎 Varrer Rede", col1 + 390, y, 110, Color.FromArgb(180, 110, 20));
-            btnVarrer.Click += BtnVarrer_Click;
-
-            Controls.AddRange(new Control[]
-            {
-                lblTitulo,
-                lblSrv, txtServidor,
-                lblPrt, txtPorta,
-                lblBd,  txtBanco,
-                lblUsr, txtUsuario,
-                lblPwd, txtSenha,
-                btnTestar, btnSalvar, btnCancelar,
-                lblStatus,
-                sep, progressVarrer,
-                lstServidores, btnVarrer,
-            });
-        }
-
-        private static Label MkLbl(string text, int x, int y)
-            => new Label
-            {
-                Text      = text,
-                Location  = new Point(x, y),
-                AutoSize  = true,
-                Font      = new Font("Segoe UI", 9F, FontStyle.Bold),
-                ForeColor = Color.FromArgb(60, 50, 30),
-            };
-
-        private static Button MkBtn(string text, int x, int y, int w, Color back)
-        {
-            var b = new Button
-            {
-                Text      = text,
-                Location  = new Point(x, y),
-                Size      = new Size(w, 30),
-                BackColor = back,
-                ForeColor = Color.White,
-                FlatStyle = FlatStyle.Flat,
-                Font      = new Font("Segoe UI", 9F),
-                Cursor    = Cursors.Hand,
-            };
-            b.FlatAppearance.BorderSize = 0;
-            return b;
-        }
+        // â”€â”€ Cancelar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        private void BtnCancelar_Click(object sender, EventArgs e) { Close(); }
 
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
         {

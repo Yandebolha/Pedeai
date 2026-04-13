@@ -74,7 +74,7 @@ namespace Pedeai.Forms
             this.gridPedidos.AllowUserToAddRows      = false;
             this.gridPedidos.RowHeadersVisible       = false;
             this.gridPedidos.EnableHeadersVisualStyles = false;
-            this.gridPedidos.DataError              += (_, e2) => e2.ThrowException = false;
+            this.gridPedidos.DataError              += new System.Windows.Forms.DataGridViewDataErrorEventHandler(this.GridPedidos_DataError);
 
             // ── lblResumo ──────────────────────────────────────────────────
             this.lblResumo.Dock      = System.Windows.Forms.DockStyle.Bottom;
@@ -105,7 +105,6 @@ namespace Pedeai.Forms
             this.MinimumSize         = new System.Drawing.Size(700, 480);
             this.StartPosition       = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text                = "Relat\u00f3rio de Turno \u2014 Movimenta\u00e7\u00f5es";
-            this.Load               += new System.EventHandler(this.frmRelatorioTurno_Load);
 
             this.Controls.Add(this.gridPedidos);
             this.Controls.Add(this.lblResumo);

@@ -7,41 +7,21 @@ using Pedeai.BLL;
 
 namespace Pedeai.Forms
 {
-    public class frmWhatsApp : Form
+    public partial class frmWhatsApp : Form
     {
-        // ── Campos ───────────────────────────────────────────────────────────
-        private System.Windows.Forms.Timer _timerStatus;
-        private PictureBox  _picQR;
-        private Label       _lblStatus;
-        private Label       _lblInstrucao;
-        private Button      _btnRefreshQR;
-        private Button      _btnDesconectar;
-        private TextBox     _txtTelefone;
-        private Label       _lblPairingCode;
-        private TextBox     _txtApiUrl;
-        private TextBox     _txtApiKey;
-        private TextBox     _txtInstance;
-        private TextBox     _txtMsgPreparo;
-        private TextBox     _txtMsgEntrega;
-        private TextBox     _txtMsgCupom;
-
-        private static readonly Color CorHeader  = Color.FromArgb(176, 110, 42);
-        private static readonly Color CorFundo   = Color.FromArgb(245, 237, 216);
-        private static readonly Color CorPainel  = Color.FromArgb(235, 226, 208);
-        private static readonly Color CorVerde   = Color.FromArgb(39, 174, 96);
-        private static readonly Color CorVermelho= Color.FromArgb(192, 57, 43);
+        // ── Constantes de cor ───────────────────────────────────────────────
+        private static readonly Color CorHeader   = Color.FromArgb(176, 110, 42);
+        private static readonly Color CorFundo    = Color.FromArgb(245, 237, 216);
+        private static readonly Color CorPainel   = Color.FromArgb(235, 226, 208);
+        private static readonly Color CorVerde    = Color.FromArgb(39, 174, 96);
+        private static readonly Color CorVermelho = Color.FromArgb(192, 57, 43);
 
         public frmWhatsApp()
         {
-            Text          = "WhatsApp";
-            BackColor     = CorFundo;
-            ForeColor     = Color.FromArgb(50, 40, 20);
-            Font          = new Font("Segoe UI", 9F);
-            ClientSize    = new Size(700, 560);
-            StartPosition = FormStartPosition.CenterParent;
-            MinimumSize   = new Size(640, 500);
-
+            InitializeComponent();
             ConstruirUI();
+            if (System.ComponentModel.LicenseManager.UsageMode == System.ComponentModel.LicenseUsageMode.Designtime) return;
+            _promDal = new DAL.PromocaoDAL();
             Load += FrmWhatsApp_Load;
         }
 
@@ -703,10 +683,8 @@ namespace Pedeai.Forms
 
         // ── Tab Promoções ────────────────────────────────────────────────────
 
-        private DataGridView _gridPromocoes;
-        private DataGridView _gridPromItens;
-        private int          _promCodigoAtual = 0;
-        private readonly DAL.PromocaoDAL _promDal = new DAL.PromocaoDAL();
+        private int _promCodigoAtual = 0;
+        private DAL.PromocaoDAL _promDal;
 
         private void ConstruirTabPromocoes(TabPage tab)
         {

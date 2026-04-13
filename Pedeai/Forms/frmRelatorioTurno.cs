@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Data;
 using System.Drawing;
 using System.Windows.Forms;
@@ -9,13 +9,22 @@ namespace Pedeai.Forms
 {
     public partial class frmRelatorioTurno : Form
     {
-        private readonly TurnoBLL _bll = new TurnoBLL();
-        private readonly Turno    _turno;
+        private TurnoBLL _bll;
+        private readonly Turno _turno;
+
+        // Construtor sem parÃ¢metros â€” obrigatÃ³rio para o Designer
+        public frmRelatorioTurno()
+        {
+            InitializeComponent();
+        }
 
         public frmRelatorioTurno(Turno turno)
         {
-            _turno = turno;
             InitializeComponent();
+            if (System.ComponentModel.LicenseManager.UsageMode == System.ComponentModel.LicenseUsageMode.Designtime) return;
+            _turno = turno;
+            _bll   = new TurnoBLL();
+            Load  += frmRelatorioTurno_Load;
         }
 
         private void frmRelatorioTurno_Load(object sender, EventArgs e)
@@ -38,7 +47,7 @@ namespace Pedeai.Forms
                 : "Fechamento: (em aberto)";
             lblCaixaFinal.Text    = _turno.turCaixa_Final.HasValue
                 ? $"Caixa Final: R$ {_turno.turCaixa_Final.Value:N2}"
-                : "Caixa Final: —";
+                : "Caixa Final: â€”";
         }
 
         private void CarregarPedidos()
@@ -113,13 +122,19 @@ namespace Pedeai.Forms
 
         private void BtnImprimir_Click(object sender, EventArgs e)
         {
-            // Placeholder p/ impressão futura
-            MessageBox.Show("Funcionalidade de impress\u00e3o do relat\u00f3rio em desenvolvimento.",
+            MessageBox.Show("Funcionalidade de impressÃ£o do relatÃ³rio em desenvolvimento.",
                             "Imprimir", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
+
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
         {
             if (keyData == Keys.Escape) { Close(); return true; }
             return base.ProcessCmdKey(ref msg, keyData);
-        }    }
+        }
+
+        private void GridPedidos_DataError(object sender, System.Windows.Forms.DataGridViewDataErrorEventArgs e)
+        {
+            e.ThrowException = false;
+        }
+    }
 }
