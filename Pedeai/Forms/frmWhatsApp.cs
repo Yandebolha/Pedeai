@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Configuration;
 using System.Drawing;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -364,8 +365,62 @@ namespace Pedeai.Forms
 
             pnl.Controls.Add(MkLabel("URL da API:", y + 3));
             _txtApiUrl = MkTxt(y, 380, WhatsAppService.ApiUrl);
-            _txtApiUrl.PlaceholderText = "Ex: http://localhost:8081";
+            _txtApiUrl.PlaceholderText = "Ex: http://192.168.1.10:8081";
             pnl.Controls.Add(_txtApiUrl); y += 28;
+
+            // Aviso + botão de substituição quando URL ainda usa localhost
+            var pnlAvisoUrl = new Panel
+            {
+                Left      = 0, Top = y,
+                Width     = 580, Height = 36,
+                BackColor = Color.FromArgb(255, 243, 205),
+                BorderStyle = BorderStyle.FixedSingle,
+                Visible   = ApiUrlUsaLocalhost(),
+            };
+            var lblAvisoUrl = new Label
+            {
+                Text      = "⚠  A URL usa 'localhost' — outras máquinas em rede não conseguirão conectar.",
+                Left = 6, Top = 4, AutoSize = true,
+                Font      = new Font("Segoe UI", 8F),
+                ForeColor = Color.FromArgb(130, 80, 10),
+            };
+            var btnUsarIpServidor = new Button
+            {
+                Text      = "🌐  Usar IP do servidor",
+                Left = 430, Top = 4, Width = 140, Height = 26,
+                BackColor = CorHeader,
+                ForeColor = Color.White,
+                FlatStyle = FlatStyle.Flat,
+                Cursor    = Cursors.Hand,
+                Font      = new Font("Segoe UI", 8F, FontStyle.Bold),
+            };
+            btnUsarIpServidor.FlatAppearance.BorderSize = 0;
+            btnUsarIpServidor.Click += (_, __) =>
+            {
+                string ip = ObterIpServidor();
+                if (!string.IsNullOrEmpty(ip))
+                {
+                    string porta = "8081";
+                    if (!string.IsNullOrEmpty(_txtApiUrl.Text))
+                    {
+                        try { porta = new Uri(_txtApiUrl.Text).Port.ToString(); } catch { }
+                    }
+                    _txtApiUrl.Text = $"http://{ip}:{porta}";
+                    pnlAvisoUrl.Visible = ApiUrlUsaLocalhost();
+                }
+                else
+                {
+                    MessageBox.Show(
+                        "Não foi possível detectar o IP do servidor automaticamente.\n" +
+                        "Substitua 'localhost' pelo IP do servidor manualmente na URL da API.\n" +
+                        "Exemplo: http://192.168.1.10:8081",
+                        "IP não detectado", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+            };
+            _txtApiUrl.TextChanged += (_, __) => pnlAvisoUrl.Visible = ApiUrlUsaLocalhost();
+            pnlAvisoUrl.Controls.Add(lblAvisoUrl);
+            pnlAvisoUrl.Controls.Add(btnUsarIpServidor);
+            pnl.Controls.Add(pnlAvisoUrl); y += 42;
 
             pnl.Controls.Add(MkLabel("API Key:", y + 3));
             _txtApiKey = MkTxt(y, 380, WhatsAppService.ApiKey);
@@ -609,6 +664,43 @@ namespace Pedeai.Forms
                 MessageBox.Show($"Status da conexão: {stLabel}", "Teste WhatsApp",
                     MessageBoxButtons.OK, MessageBoxIcon.Information);
             }));
+        }
+
+        // ── Helpers de URL ────────────────────────────────────────────────────
+
+        /// <summary>Retorna true quando a URL da API ainda usa localhost/127.0.0.1.</summary>
+        private bool ApiUrlUsaLocalhost()
+        {
+            string url = _txtApiUrl?.Text?.Trim() ?? "";
+            if (string.IsNullOrEmpty(url)) return false;
+            try
+            {
+                var uri = new Uri(url);
+                string host = uri.Host.ToLower();
+                return host == "localhost" || host == "127.0.0.1" || host == "::1";
+            }
+            catch { return false; }
+        }
+
+        /// <summary>
+        /// Extrai o host/IP do servidor MySQL da ConnectionString do App.config.
+        /// Retorna null se for localhost ou não detectável.
+        /// </summary>
+        private static string ObterIpServidor()
+        {
+            try
+            {
+                string cs = ConfigurationManager.AppSettings["ConnectionString"] ?? "";
+                if (string.IsNullOrEmpty(cs)) return null;
+                var b = new MySqlConnector.MySqlConnectionStringBuilder(cs);
+                string host = b.Server ?? "";
+                if (string.IsNullOrEmpty(host)) return null;
+                if (host.Equals("localhost", StringComparison.OrdinalIgnoreCase) ||
+                    host == "127.0.0.1" || host == "::1")
+                    return null;
+                return host;
+            }
+            catch { return null; }
         }
 
         // ── Lógica de UI ─────────────────────────────────────────────────────
