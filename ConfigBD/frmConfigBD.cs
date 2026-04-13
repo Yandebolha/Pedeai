@@ -128,8 +128,11 @@ namespace ConfigBD
         }
 
         // ── Salvar no App.config ──────────────────────────────────────────────
-        private void BtnSalvar_Click(object sender, EventArgs e)
+        private async void BtnSalvar_Click(object sender, EventArgs e)
         {
+            btnSalvar.Enabled = false;
+            btnTestar.Enabled = false;
+
             // Cria o arquivo de configuração mínimo se não existir
             if (!File.Exists(ConfigPath))
             {
@@ -151,31 +154,44 @@ namespace ConfigBD
                         $"Não foi possível criar o arquivo de configuração:\n{ConfigPath}\n\n{ex.Message}\n\n" +
                         "Verifique se o ConfigBD.exe está na mesma pasta que o RanGoFood.exe.",
                         "Erro ao criar arquivo", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    btnSalvar.Enabled = true;
+                    btnTestar.Enabled = true;
                     return;
                 }
             }
 
-            // Testa servidor antes de salvar (não-bloqueante, apenas aviso)
+            // Testa conexão em background antes de salvar
+            SetStatus("Verificando conexão...", Color.Gray);
+            bool conexaoOk = false;
             try
             {
-                string cs = MontarCS(timeoutSecs: 5);
-                bool ok = false;
-                try { using var c = new MySqlConnection(cs); c.Open(); ok = true; } catch { }
-                if (!ok)
+                string csCaptura = MontarCS(timeoutSecs: 5);
+                conexaoOk = await Task.Run(() =>
                 {
-                    var b = new MySqlConnectionStringBuilder(cs) { Database = "" };
-                    try { using var c2 = new MySqlConnection(b.ToString()); c2.Open(); ok = true; } catch { }
-                }
-                if (!ok)
+                    try { using var c = new MySqlConnection(csCaptura); c.Open(); return true; } catch { }
+                    try
+                    {
+                        var b = new MySqlConnectionStringBuilder(csCaptura) { Database = "" };
+                        using var c2 = new MySqlConnection(b.ToString()); c2.Open(); return true;
+                    }
+                    catch { return false; }
+                });
+            }
+            catch { conexaoOk = false; }
+
+            if (!conexaoOk)
+            {
+                var r = MessageBox.Show(
+                    "Não foi possível verificar a conexão com o servidor informado.\n\nSalvar mesmo assim?",
+                    "Aviso", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+                if (r != DialogResult.Yes)
                 {
-                    // Avisa mas não bloqueia o salvamento
-                    var r = MessageBox.Show(
-                        "Não foi possível verificar a conexão com o servidor informado.\n\nSalvar mesmo assim?",
-                        "Aviso", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
-                    if (r != DialogResult.Yes) return;
+                    SetStatus("Salvamento cancelado.", Color.DarkOrange);
+                    btnSalvar.Enabled = true;
+                    btnTestar.Enabled = true;
+                    return;
                 }
             }
-            catch { /* ignora erros inesperados no teste */ }
 
             try
             {
@@ -186,7 +202,6 @@ namespace ConfigBD
                     node.Attributes["value"].Value = MontarCS();
                 else
                 {
-                    // Cria o nó se não existir
                     var appSettings = doc.SelectSingleNode("//appSettings")
                                      ?? doc.DocumentElement.AppendChild(doc.CreateElement("appSettings"));
                     var add = doc.CreateElement("add");
@@ -204,6 +219,11 @@ namespace ConfigBD
             {
                 MessageBox.Show("Erro ao salvar:\n" + ex.Message, "Erro",
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            finally
+            {
+                btnSalvar.Enabled = true;
+                btnTestar.Enabled = true;
             }
         }
 
