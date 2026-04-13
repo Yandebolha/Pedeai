@@ -14,6 +14,7 @@ namespace Pedeai.Forms
         private ClienteBLL    _clienteBLL;
         private CupomBLL      _cupomBLL;
         private FidelizacaoBLL _fidelBLL;
+        private BairroBLL     _bairroBLL;
         private readonly List<ItemPedidoWeb> _itens = new List<ItemPedidoWeb>();
         private readonly List<ProdItem>      _produtos = new List<ProdItem>();
         private ProdItem _produtoSelecionado = null;
@@ -32,8 +33,8 @@ namespace Pedeai.Forms
         {
             InitializeComponent();
             if (System.ComponentModel.LicenseManager.UsageMode == System.ComponentModel.LicenseUsageMode.Designtime) return;
-            _pedidoBLL = new PedidoBLL(); _mercBLL = new MercadoriaBLL(); _clienteBLL = new ClienteBLL(); _cupomBLL = new CupomBLL(); _fidelBLL = new FidelizacaoBLL();
-            Load  += (_, __) => CarregarProdutos();
+            _pedidoBLL = new PedidoBLL(); _mercBLL = new MercadoriaBLL(); _clienteBLL = new ClienteBLL(); _cupomBLL = new CupomBLL(); _fidelBLL = new FidelizacaoBLL(); _bairroBLL = new BairroBLL();
+            Load  += (_, __) => { CarregarProdutos(); CarregarBairros(); };
             Shown += (_, __) => PnlAddItem_SizeChanged(null, EventArgs.Empty);
         }
 
@@ -118,10 +119,48 @@ namespace Pedeai.Forms
             bool entrega  = cmbEntrega.SelectedIndex == 1;
             bool dinheiro = cmbPagamento.SelectedIndex == 0;
             lblEndereco.Visible = txtEndereco.Visible = entrega;
+            lblBairro.Visible   = cmbBairro.Visible   = entrega;
             lblTroco.Visible    = numTroco.Visible    = dinheiro;
             lblTaxa.Visible     = numTaxa.Visible     = entrega;
-            if (!entrega) numTaxa.Value = 0;
+            if (!entrega) { numTaxa.Value = 0; cmbBairro.SelectedIndex = 0; }
             AtualizarTotal();
+        }
+
+        // -- Bairros / Taxa de entrega ----------------------------------------
+        private void CarregarBairros()
+        {
+            try
+            {
+                cmbBairro.Items.Clear();
+                cmbBairro.Items.Add("-- Selecione o bairro --");
+                var dt = _bairroBLL.Listar(apenasAtivos: true);
+                foreach (System.Data.DataRow r in dt.Rows)
+                    cmbBairro.Items.Add(new BairroItem(
+                        Convert.ToInt32(r["Codigo"]),
+                        r["Cidade"]?.ToString() ?? "",
+                        r["Bairro"]?.ToString() ?? "",
+                        r["Taxa"] == System.DBNull.Value ? 0m : Convert.ToDecimal(r["Taxa"])));
+                cmbBairro.SelectedIndex = 0;
+            }
+            catch { /* não bloqueia se tabela ainda não existir */ }
+        }
+
+        private void AplicarTaxaBairro()
+        {
+            if (cmbBairro.SelectedItem is BairroItem item)
+                numTaxa.Value = item.Taxa;
+        }
+
+        private sealed class BairroItem
+        {
+            public int     Codigo  { get; }
+            public string  Cidade  { get; }
+            public string  Nome    { get; }
+            public decimal Taxa    { get; }
+            public BairroItem(int cod, string cidade, string nome, decimal taxa)
+            { Codigo = cod; Cidade = cidade; Nome = nome; Taxa = taxa; }
+            public override string ToString() =>
+                string.IsNullOrWhiteSpace(Cidade) ? Nome : $"{Nome} ({Cidade})";
         }
 
         // -- Produtos --------------------------------------------------------

@@ -110,13 +110,14 @@ namespace PedeaiUpdateAdmin.Forms
 
             this.lblPublicarInfo.Text = "ℹ️  O ZIP deve conter: pasta files/ com executáveis, e opcionalmente update.sql.";
             this.lblPublicarInfo.SetBounds(8, 190, 570, 40);
-            this.lblPublicarInfo.ForeColor = System.Drawing.Color.SteelBlue;
+            this.lblPublicarInfo.ForeColor = System.Drawing.Color.FromArgb(130, 115, 90);
 
             this.btnPublicar.Text      = "🚀  Publicar Atualização";
             this.btnPublicar.SetBounds(8, 280, 200, 36);
-            this.btnPublicar.BackColor = System.Drawing.Color.FromArgb(25, 120, 220);
+            this.btnPublicar.BackColor = System.Drawing.Color.FromArgb(176, 110, 42);
             this.btnPublicar.ForeColor = System.Drawing.Color.White;
             this.btnPublicar.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnPublicar.FlatAppearance.BorderSize = 0;
             this.btnPublicar.Click += new System.EventHandler(this.BtnPublicar_Click);
 
             this.pbUpload.SetBounds(8, 324, 590, 16); this.pbUpload.Visible = false;
@@ -138,6 +139,16 @@ namespace PedeaiUpdateAdmin.Forms
             this.dgvClientes.MultiSelect = false;
             this.dgvClientes.AllowUserToAddRows = false;
             this.dgvClientes.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
+            this.dgvClientes.BackgroundColor = System.Drawing.Color.FromArgb(250, 245, 238);
+            this.dgvClientes.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.dgvClientes.GridColor = System.Drawing.Color.FromArgb(200, 185, 160);
+            this.dgvClientes.DefaultCellStyle.SelectionBackColor = System.Drawing.Color.FromArgb(224, 113, 42);
+            this.dgvClientes.DefaultCellStyle.SelectionForeColor = System.Drawing.Color.White;
+            this.dgvClientes.ColumnHeadersDefaultCellStyle.BackColor = System.Drawing.Color.FromArgb(240, 230, 202);
+            this.dgvClientes.ColumnHeadersDefaultCellStyle.ForeColor = System.Drawing.Color.FromArgb(80, 60, 30);
+            this.dgvClientes.ColumnHeadersDefaultCellStyle.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
+            this.dgvClientes.AlternatingRowsDefaultCellStyle.BackColor = System.Drawing.Color.FromArgb(245, 237, 216);
+            this.dgvClientes.EnableHeadersVisualStyles = false;
 
             this.lblFiltroNivel.Text  = "Filtrar nível:"; this.lblFiltroNivel.SetBounds(8, 460, 90, 22);
             this.cboFiltroNivel.SetBounds(100, 458, 150, 22);
@@ -148,18 +159,28 @@ namespace PedeaiUpdateAdmin.Forms
             this.cboFiltroNivel.SelectedIndexChanged += new System.EventHandler(this.CboFiltroNivel_Changed);
 
             this.btnRefreshClientes.Text     = "🔄 Atualizar"; this.btnRefreshClientes.SetBounds(260, 456, 110, 28);
+            this.btnRefreshClientes.BackColor = System.Drawing.Color.FromArgb(176, 110, 42);
+            this.btnRefreshClientes.ForeColor = System.Drawing.Color.White;
+            this.btnRefreshClientes.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnRefreshClientes.FlatAppearance.BorderSize = 0;
             this.btnRefreshClientes.Click   += new System.EventHandler(this.BtnRefreshClientes_Click);
             this.btnAlterarNivel.Text        = "Alterar Nível";  this.btnAlterarNivel.SetBounds(380, 456, 120, 28);
+            this.btnAlterarNivel.BackColor   = System.Drawing.Color.FromArgb(176, 110, 42);
+            this.btnAlterarNivel.ForeColor   = System.Drawing.Color.White;
+            this.btnAlterarNivel.FlatStyle   = System.Windows.Forms.FlatStyle.Flat;
+            this.btnAlterarNivel.FlatAppearance.BorderSize = 0;
             this.btnAlterarNivel.Click      += new System.EventHandler(this.BtnAlterarNivel_Click);
             this.btnBloquear.Text            = "Bloquear";        this.btnBloquear.SetBounds(510, 456, 100, 28);
-            this.btnBloquear.BackColor       = System.Drawing.Color.FromArgb(180, 50, 50);
+            this.btnBloquear.BackColor       = System.Drawing.Color.FromArgb(192, 57, 43);
             this.btnBloquear.ForeColor       = System.Drawing.Color.White;
             this.btnBloquear.FlatStyle       = System.Windows.Forms.FlatStyle.Flat;
+            this.btnBloquear.FlatAppearance.BorderSize = 0;
             this.btnBloquear.Click          += new System.EventHandler(this.BtnBloquear_Click);
             this.btnDesbloquear.Text         = "Desbloquear";     this.btnDesbloquear.SetBounds(620, 456, 110, 28);
-            this.btnDesbloquear.BackColor    = System.Drawing.Color.FromArgb(40, 140, 40);
+            this.btnDesbloquear.BackColor    = System.Drawing.Color.FromArgb(87, 120, 38);
             this.btnDesbloquear.ForeColor    = System.Drawing.Color.White;
             this.btnDesbloquear.FlatStyle    = System.Windows.Forms.FlatStyle.Flat;
+            this.btnDesbloquear.FlatAppearance.BorderSize = 0;
             this.btnDesbloquear.Click       += new System.EventHandler(this.BtnDesbloquear_Click);
 
             // ── tabPacotes ───────────────────────────────────────────────────────────
@@ -174,14 +195,29 @@ namespace PedeaiUpdateAdmin.Forms
             this.dgvPacotes.MultiSelect = false;
             this.dgvPacotes.AllowUserToAddRows = false;
             this.dgvPacotes.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
+            this.dgvPacotes.BackgroundColor = System.Drawing.Color.FromArgb(250, 245, 238);
+            this.dgvPacotes.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.dgvPacotes.GridColor = System.Drawing.Color.FromArgb(200, 185, 160);
+            this.dgvPacotes.DefaultCellStyle.SelectionBackColor = System.Drawing.Color.FromArgb(224, 113, 42);
+            this.dgvPacotes.DefaultCellStyle.SelectionForeColor = System.Drawing.Color.White;
+            this.dgvPacotes.ColumnHeadersDefaultCellStyle.BackColor = System.Drawing.Color.FromArgb(240, 230, 202);
+            this.dgvPacotes.ColumnHeadersDefaultCellStyle.ForeColor = System.Drawing.Color.FromArgb(80, 60, 30);
+            this.dgvPacotes.ColumnHeadersDefaultCellStyle.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
+            this.dgvPacotes.AlternatingRowsDefaultCellStyle.BackColor = System.Drawing.Color.FromArgb(245, 237, 216);
+            this.dgvPacotes.EnableHeadersVisualStyles = false;
 
             this.btnRefreshPacotes.Text  = "🔄 Atualizar"; this.btnRefreshPacotes.SetBounds(8, 476, 110, 28);
+            this.btnRefreshPacotes.BackColor = System.Drawing.Color.FromArgb(176, 110, 42);
+            this.btnRefreshPacotes.ForeColor = System.Drawing.Color.White;
+            this.btnRefreshPacotes.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnRefreshPacotes.FlatAppearance.BorderSize = 0;
             this.btnRefreshPacotes.Click += new System.EventHandler(this.BtnRefreshPacotes_Click);
             this.btnExcluirPacote.Text   = "❌ Desativar Pacote";
             this.btnExcluirPacote.SetBounds(128, 476, 160, 28);
-            this.btnExcluirPacote.BackColor = System.Drawing.Color.FromArgb(180, 50, 50);
+            this.btnExcluirPacote.BackColor = System.Drawing.Color.FromArgb(192, 57, 43);
             this.btnExcluirPacote.ForeColor = System.Drawing.Color.White;
             this.btnExcluirPacote.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnExcluirPacote.FlatAppearance.BorderSize = 0;
             this.btnExcluirPacote.Click  += new System.EventHandler(this.BtnExcluirPacote_Click);
 
             // ── tabConfig ────────────────────────────────────────────────────────────
@@ -198,8 +234,16 @@ namespace PedeaiUpdateAdmin.Forms
             this.lblAdminToken.Text= "Admin Token:";           this.lblAdminToken.SetBounds(8, 56, 130, 20);
             this.txtAdminToken.SetBounds(140, 54, 400, 23);   this.txtAdminToken.PasswordChar = '●';
             this.btnSalvarConfig.Text  = "💾 Salvar";          this.btnSalvarConfig.SetBounds(140, 90, 120, 28);
+            this.btnSalvarConfig.BackColor = System.Drawing.Color.FromArgb(87, 120, 38);
+            this.btnSalvarConfig.ForeColor = System.Drawing.Color.White;
+            this.btnSalvarConfig.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnSalvarConfig.FlatAppearance.BorderSize = 0;
             this.btnSalvarConfig.Click += new System.EventHandler(this.BtnSalvarConfig_Click);
             this.btnTestarConexao.Text  = "🔌 Testar Conexão"; this.btnTestarConexao.SetBounds(270, 90, 130, 28);
+            this.btnTestarConexao.BackColor = System.Drawing.Color.FromArgb(176, 110, 42);
+            this.btnTestarConexao.ForeColor = System.Drawing.Color.White;
+            this.btnTestarConexao.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnTestarConexao.FlatAppearance.BorderSize = 0;
             this.btnTestarConexao.Click += new System.EventHandler(this.BtnTestarConexao_Click);
 
             // ── Status bar ───────────────────────────────────────────────────────────
@@ -213,6 +257,8 @@ namespace PedeaiUpdateAdmin.Forms
 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.BackColor = System.Drawing.Color.FromArgb(248, 245, 240);
+            this.Font = new System.Drawing.Font("Segoe UI", 9F);
             this.ClientSize = new System.Drawing.Size(966, 605);
             this.Text = "PedeaiUpdateAdmin — Gerenciador de Atualizações";
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;

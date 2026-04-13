@@ -1760,6 +1760,7 @@ namespace Pedeai
                              || UsuarioSessao.TemModulo("Cupons")
                              || UsuarioSessao.TemModulo("Estoque")
                              || UsuarioSessao.TemModulo("EntradaMercadoria")
+                             || UsuarioSessao.TemModulo("Bairros")
                              || UsuarioSessao.TemModulo("Avisos");
             if (temCadastros)
             {
@@ -1771,6 +1772,7 @@ namespace Pedeai
                 NavSe("Cupons",            "\U0001F3F7  Cupons",           () => AbrirForm(new frmCadastroCupom()));
                 NavSe("Estoque",           "\U0001F4E6  Estoque",           () => AbrirForm(new frmEstoque()));
                 NavSe("EntradaMercadoria", "\U0001F69A  Entrada Mercad.",  () => AbrirForm(new frmEntradaMercadoria()));
+                NavSe("Bairros",           "\U0001F4CD  Bairros / Taxa",   () => AbrirForm(new frmCadastroBairro()));
                 NavSe("Avisos",            "\U0001F514  Avisos",           () => AbrirForm(new frmAvisos()));
             }
 

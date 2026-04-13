@@ -4,7 +4,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using PedeaiUpdateServer.Data;
-using System.IO;
+using System;
 
 namespace PedeaiUpdateServer
 {
@@ -18,11 +18,11 @@ namespace PedeaiUpdateServer
             services.AddControllers();
 
             // Resolve caminhos
-            string baseDir     = Configuration["DataDir"] ?? "Data";
-            string dbPath      = Path.Combine(baseDir, "update.db");
-            string packagesDir = Configuration["PackagesDir"] ?? Path.Combine(baseDir, "packages");
+            string connStr     = Configuration.GetConnectionString("Supabase")
+                                 ?? throw new InvalidOperationException("ConnectionStrings:Supabase não configurado no appsettings.json");
+            string packagesDir = Configuration["PackagesDir"] ?? "Data/packages";
 
-            services.AddSingleton(new UpdateDb(dbPath));
+            services.AddSingleton(new UpdateDb(connStr));
             services.AddSingleton(packagesDir);
 
             // Permite uploads grandes (pacotes de atualização)

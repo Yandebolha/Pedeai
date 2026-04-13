@@ -159,10 +159,18 @@ namespace PedeaiBackup.Forms
             this.btnBrowseMegaCmd.Text = "...";   this.btnBrowseMegaCmd.SetBounds(295, 106, 30, 23);
             this.btnBrowseMegaCmd.Click += new System.EventHandler(this.BtnBrowseMegaCmd_Click);
             this.btnTestarMega.Text = "Testar MEGA"; this.btnTestarMega.SetBounds(112, 140, 120, 28);
+            this.btnTestarMega.BackColor = System.Drawing.Color.FromArgb(176, 110, 42);
+            this.btnTestarMega.ForeColor = System.Drawing.Color.White;
+            this.btnTestarMega.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnTestarMega.FlatAppearance.BorderSize = 0;
             this.btnTestarMega.Click += new System.EventHandler(this.BtnTestarMega_Click);
 
             this.btnSalvarConexao.Text = "💾  Salvar Configurações";
             this.btnSalvarConexao.SetBounds(8, 240, 200, 32);
+            this.btnSalvarConexao.BackColor = System.Drawing.Color.FromArgb(87, 120, 38);
+            this.btnSalvarConexao.ForeColor = System.Drawing.Color.White;
+            this.btnSalvarConexao.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnSalvarConexao.FlatAppearance.BorderSize = 0;
             this.btnSalvarConexao.Click += new System.EventHandler(this.BtnSalvarConexao_Click);
 
             // ── tabAgendamento ──────────────────────────────────────────────────────
@@ -210,6 +218,10 @@ namespace PedeaiBackup.Forms
 
             this.btnSalvarAgendamento.Text = "💾  Salvar Agendamento";
             this.btnSalvarAgendamento.SetBounds(8, 386, 200, 32);
+            this.btnSalvarAgendamento.BackColor = System.Drawing.Color.FromArgb(87, 120, 38);
+            this.btnSalvarAgendamento.ForeColor = System.Drawing.Color.White;
+            this.btnSalvarAgendamento.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnSalvarAgendamento.FlatAppearance.BorderSize = 0;
             this.btnSalvarAgendamento.Click += new System.EventHandler(this.BtnSalvarAgendamento_Click);
 
             // ── tabLog ──────────────────────────────────────────────────────────────
@@ -224,21 +236,27 @@ namespace PedeaiBackup.Forms
             this.rtxLog.SetBounds(4, 4, 700, 380);
             this.btnLimparLog.Text = "Limpar Log";
             this.btnLimparLog.SetBounds(4, 390, 120, 28);
+            this.btnLimparLog.BackColor = System.Drawing.Color.FromArgb(192, 57, 43);
+            this.btnLimparLog.ForeColor = System.Drawing.Color.White;
+            this.btnLimparLog.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnLimparLog.FlatAppearance.BorderSize = 0;
             this.btnLimparLog.Click += new System.EventHandler(this.BtnLimparLog_Click);
 
             // ── Botões inferiores ───────────────────────────────────────────────────
             this.btnExecutarAgora.Text = "▶  Backup Incremental Agora";
             this.btnExecutarAgora.SetBounds(8, 476, 220, 36);
-            this.btnExecutarAgora.BackColor = System.Drawing.Color.FromArgb(25, 120, 220);
+            this.btnExecutarAgora.BackColor = System.Drawing.Color.FromArgb(176, 110, 42);
             this.btnExecutarAgora.ForeColor = System.Drawing.Color.White;
             this.btnExecutarAgora.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnExecutarAgora.FlatAppearance.BorderSize = 0;
             this.btnExecutarAgora.Click += new System.EventHandler(this.BtnExecutarAgora_Click);
 
             this.btnExecutarCompleto.Text = "▶▶  Backup Completo Agora";
             this.btnExecutarCompleto.SetBounds(238, 476, 220, 36);
-            this.btnExecutarCompleto.BackColor = System.Drawing.Color.FromArgb(40, 140, 40);
+            this.btnExecutarCompleto.BackColor = System.Drawing.Color.FromArgb(87, 120, 38);
             this.btnExecutarCompleto.ForeColor = System.Drawing.Color.White;
             this.btnExecutarCompleto.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnExecutarCompleto.FlatAppearance.BorderSize = 0;
             this.btnExecutarCompleto.Click += new System.EventHandler(this.BtnExecutarCompleto_Click);
 
             this.lblStatus.Text = "Status: Aguardando...";
@@ -276,6 +294,8 @@ namespace PedeaiBackup.Forms
 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.BackColor = System.Drawing.Color.FromArgb(248, 245, 240);
+            this.Font = new System.Drawing.Font("Segoe UI", 9F);
             this.ClientSize = new System.Drawing.Size(730, 520);
             this.MinimumSize = new System.Drawing.Size(746, 559);
             this.Text = "PedeaiBackup — Configuração de Backup";

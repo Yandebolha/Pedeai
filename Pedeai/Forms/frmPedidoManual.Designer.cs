@@ -60,6 +60,8 @@ namespace Pedeai.Forms
             this.cmbEntrega = new System.Windows.Forms.ComboBox();
             this.lblEndereco = new System.Windows.Forms.Label();
             this.txtEndereco = new System.Windows.Forms.TextBox();
+            this.lblBairro = new System.Windows.Forms.Label();
+            this.cmbBairro = new System.Windows.Forms.ComboBox();
             this.lblTaxa = new System.Windows.Forms.Label();
             this.numTaxa = new System.Windows.Forms.NumericUpDown();
             this.pnlDiv2 = new System.Windows.Forms.Panel();
@@ -548,6 +550,8 @@ namespace Pedeai.Forms
             this.sideContent.Controls.Add(this.cmbEntrega);
             this.sideContent.Controls.Add(this.lblEndereco);
             this.sideContent.Controls.Add(this.txtEndereco);
+            this.sideContent.Controls.Add(this.lblBairro);
+            this.sideContent.Controls.Add(this.cmbBairro);
             this.sideContent.Controls.Add(this.lblTaxa);
             this.sideContent.Controls.Add(this.numTaxa);
             this.sideContent.Controls.Add(this.pnlDiv2);
@@ -709,16 +713,42 @@ namespace Pedeai.Forms
             this.txtEndereco.Size = new System.Drawing.Size(329, 24);
             this.txtEndereco.TabIndex = 10;
             // 
+            // lblBairro
+            // 
+            this.lblBairro.AutoSize = true;
+            this.lblBairro.Font = new System.Drawing.Font("Segoe UI", 8.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.lblBairro.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(110)))), ((int)(((byte)(130)))), ((int)(((byte)(175)))));
+            this.lblBairro.Location = new System.Drawing.Point(16, 282);
+            this.lblBairro.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.lblBairro.Name = "lblBairro";
+            this.lblBairro.Size = new System.Drawing.Size(39, 15);
+            this.lblBairro.TabIndex = 10;
+            this.lblBairro.Text = "Bairro";
+            // 
+            // cmbBairro
+            // 
+            this.cmbBairro.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(14)))), ((int)(((byte)(21)))), ((int)(((byte)(46)))));
+            this.cmbBairro.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cmbBairro.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.cmbBairro.Font = new System.Drawing.Font("Segoe UI", 9.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.cmbBairro.ForeColor = System.Drawing.Color.White;
+            this.cmbBairro.Location = new System.Drawing.Point(16, 300);
+            this.cmbBairro.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.cmbBairro.Name = "cmbBairro";
+            this.cmbBairro.Size = new System.Drawing.Size(329, 25);
+            this.cmbBairro.TabIndex = 11;
+            this.cmbBairro.SelectedIndexChanged += new System.EventHandler(this.CmbBairro_SelectedIndexChanged);
+            // 
             // lblTaxa
             // 
             this.lblTaxa.AutoSize = true;
             this.lblTaxa.Font = new System.Drawing.Font("Segoe UI", 8.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.lblTaxa.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(110)))), ((int)(((byte)(130)))), ((int)(((byte)(175)))));
-            this.lblTaxa.Location = new System.Drawing.Point(16, 287);
+            this.lblTaxa.Location = new System.Drawing.Point(16, 342);
             this.lblTaxa.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.lblTaxa.Name = "lblTaxa";
             this.lblTaxa.Size = new System.Drawing.Size(113, 15);
-            this.lblTaxa.TabIndex = 11;
+            this.lblTaxa.TabIndex = 12;
             this.lblTaxa.Text = "Taxa de Entrega (R$)";
             // 
             // numTaxa
@@ -727,7 +757,7 @@ namespace Pedeai.Forms
             this.numTaxa.DecimalPlaces = 2;
             this.numTaxa.Font = new System.Drawing.Font("Segoe UI", 9.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.numTaxa.ForeColor = System.Drawing.Color.White;
-            this.numTaxa.Location = new System.Drawing.Point(16, 308);
+            this.numTaxa.Location = new System.Drawing.Point(16, 363);
             this.numTaxa.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.numTaxa.Maximum = new decimal(new int[] {
             999,
@@ -742,7 +772,7 @@ namespace Pedeai.Forms
             // pnlDiv2
             // 
             this.pnlDiv2.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(34)))), ((int)(((byte)(46)))), ((int)(((byte)(82)))));
-            this.pnlDiv2.Location = new System.Drawing.Point(0, 350);
+            this.pnlDiv2.Location = new System.Drawing.Point(0, 405);
             this.pnlDiv2.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.pnlDiv2.Name = "pnlDiv2";
             this.pnlDiv2.Size = new System.Drawing.Size(362, 1);
@@ -753,7 +783,7 @@ namespace Pedeai.Forms
             this.lblSecPagamento.AutoSize = true;
             this.lblSecPagamento.Font = new System.Drawing.Font("Segoe UI", 7.5F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.lblSecPagamento.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(80)))), ((int)(((byte)(105)))), ((int)(((byte)(160)))));
-            this.lblSecPagamento.Location = new System.Drawing.Point(16, 362);
+            this.lblSecPagamento.Location = new System.Drawing.Point(16, 417);
             this.lblSecPagamento.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.lblSecPagamento.Name = "lblSecPagamento";
             this.lblSecPagamento.Size = new System.Drawing.Size(68, 12);
@@ -771,7 +801,7 @@ namespace Pedeai.Forms
             "Dinheiro",
             "Cartão",
             "Pix"});
-            this.cmbPagamento.Location = new System.Drawing.Point(16, 385);
+            this.cmbPagamento.Location = new System.Drawing.Point(16, 440);
             this.cmbPagamento.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.cmbPagamento.Name = "cmbPagamento";
             this.cmbPagamento.Size = new System.Drawing.Size(328, 25);
@@ -783,7 +813,7 @@ namespace Pedeai.Forms
             this.lblTroco.AutoSize = true;
             this.lblTroco.Font = new System.Drawing.Font("Segoe UI", 8.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.lblTroco.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(110)))), ((int)(((byte)(130)))), ((int)(((byte)(175)))));
-            this.lblTroco.Location = new System.Drawing.Point(16, 422);
+            this.lblTroco.Location = new System.Drawing.Point(16, 477);
             this.lblTroco.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.lblTroco.Name = "lblTroco";
             this.lblTroco.Size = new System.Drawing.Size(87, 15);
@@ -796,7 +826,7 @@ namespace Pedeai.Forms
             this.numTroco.DecimalPlaces = 2;
             this.numTroco.Font = new System.Drawing.Font("Segoe UI", 9.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.numTroco.ForeColor = System.Drawing.Color.White;
-            this.numTroco.Location = new System.Drawing.Point(16, 443);
+            this.numTroco.Location = new System.Drawing.Point(16, 498);
             this.numTroco.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.numTroco.Maximum = new decimal(new int[] {
             9999,
@@ -813,7 +843,7 @@ namespace Pedeai.Forms
             this.lblTrocoInfo.AutoSize = true;
             this.lblTrocoInfo.Font = new System.Drawing.Font("Segoe UI", 8.5F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.lblTrocoInfo.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(87)))), ((int)(((byte)(120)))), ((int)(((byte)(38)))));
-            this.lblTrocoInfo.Location = new System.Drawing.Point(180, 448);
+            this.lblTrocoInfo.Location = new System.Drawing.Point(180, 503);
             this.lblTrocoInfo.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.lblTrocoInfo.Name = "lblTrocoInfo";
             this.lblTrocoInfo.Size = new System.Drawing.Size(0, 15);
@@ -822,7 +852,7 @@ namespace Pedeai.Forms
             // pnlDiv3
             // 
             this.pnlDiv3.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(34)))), ((int)(((byte)(46)))), ((int)(((byte)(82)))));
-            this.pnlDiv3.Location = new System.Drawing.Point(0, 485);
+            this.pnlDiv3.Location = new System.Drawing.Point(0, 540);
             this.pnlDiv3.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.pnlDiv3.Name = "pnlDiv3";
             this.pnlDiv3.Size = new System.Drawing.Size(362, 1);
@@ -833,7 +863,7 @@ namespace Pedeai.Forms
             this.lblSecObs.AutoSize = true;
             this.lblSecObs.Font = new System.Drawing.Font("Segoe UI", 7.5F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.lblSecObs.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(80)))), ((int)(((byte)(105)))), ((int)(((byte)(160)))));
-            this.lblSecObs.Location = new System.Drawing.Point(16, 497);
+            this.lblSecObs.Location = new System.Drawing.Point(16, 552);
             this.lblSecObs.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.lblSecObs.Name = "lblSecObs";
             this.lblSecObs.Size = new System.Drawing.Size(75, 12);
@@ -846,7 +876,7 @@ namespace Pedeai.Forms
             this.txtObs.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.txtObs.Font = new System.Drawing.Font("Segoe UI", 9.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.txtObs.ForeColor = System.Drawing.Color.White;
-            this.txtObs.Location = new System.Drawing.Point(16, 520);
+            this.txtObs.Location = new System.Drawing.Point(16, 575);
             this.txtObs.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.txtObs.Name = "txtObs";
             this.txtObs.Size = new System.Drawing.Size(329, 24);
@@ -855,7 +885,7 @@ namespace Pedeai.Forms
             // pnlDiv4
             // 
             this.pnlDiv4.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(34)))), ((int)(((byte)(46)))), ((int)(((byte)(82)))));
-            this.pnlDiv4.Location = new System.Drawing.Point(0, 562);
+            this.pnlDiv4.Location = new System.Drawing.Point(0, 617);
             this.pnlDiv4.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.pnlDiv4.Name = "pnlDiv4";
             this.pnlDiv4.Size = new System.Drawing.Size(362, 1);
@@ -866,7 +896,7 @@ namespace Pedeai.Forms
             this.lblSecCupom.AutoSize = true;
             this.lblSecCupom.Font = new System.Drawing.Font("Segoe UI", 7.5F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.lblSecCupom.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(80)))), ((int)(((byte)(105)))), ((int)(((byte)(160)))));
-            this.lblSecCupom.Location = new System.Drawing.Point(16, 575);
+            this.lblSecCupom.Location = new System.Drawing.Point(16, 630);
             this.lblSecCupom.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.lblSecCupom.Name = "lblSecCupom";
             this.lblSecCupom.Size = new System.Drawing.Size(42, 12);
@@ -880,7 +910,7 @@ namespace Pedeai.Forms
             this.txtCupom.CharacterCasing = System.Windows.Forms.CharacterCasing.Upper;
             this.txtCupom.Font = new System.Drawing.Font("Segoe UI", 9.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.txtCupom.ForeColor = System.Drawing.Color.White;
-            this.txtCupom.Location = new System.Drawing.Point(16, 598);
+            this.txtCupom.Location = new System.Drawing.Point(16, 653);
             this.txtCupom.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.txtCupom.Name = "txtCupom";
             this.txtCupom.PlaceholderText = "Código do cupom";
@@ -894,7 +924,7 @@ namespace Pedeai.Forms
             this.btnAplicarCupom.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnAplicarCupom.Font = new System.Drawing.Font("Segoe UI", 8.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.btnAplicarCupom.ForeColor = System.Drawing.Color.White;
-            this.btnAplicarCupom.Location = new System.Drawing.Point(266, 598);
+            this.btnAplicarCupom.Location = new System.Drawing.Point(266, 653);
             this.btnAplicarCupom.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.btnAplicarCupom.Name = "btnAplicarCupom";
             this.btnAplicarCupom.Size = new System.Drawing.Size(79, 30);
@@ -908,7 +938,7 @@ namespace Pedeai.Forms
             this.lblCupomInfo.AutoSize = true;
             this.lblCupomInfo.Font = new System.Drawing.Font("Segoe UI", 8.5F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.lblCupomInfo.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(87)))), ((int)(((byte)(120)))), ((int)(((byte)(38)))));
-            this.lblCupomInfo.Location = new System.Drawing.Point(16, 635);
+            this.lblCupomInfo.Location = new System.Drawing.Point(16, 690);
             this.lblCupomInfo.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.lblCupomInfo.Name = "lblCupomInfo";
             this.lblCupomInfo.Size = new System.Drawing.Size(0, 15);
@@ -978,6 +1008,7 @@ namespace Pedeai.Forms
 
         private void CmbEntrega_SelectedIndexChanged(object sender, System.EventArgs e) { AtualizarVisibilidade(); }
         private void CmbPagamento_SelectedIndexChanged(object sender, System.EventArgs e) { AtualizarVisibilidade(); }
+        private void CmbBairro_SelectedIndexChanged(object sender, System.EventArgs e) { AplicarTaxaBairro(); }
         private void NumTroco_ValueChanged(object sender, System.EventArgs e) { AtualizarTrocoInfo(); }
         private void NumTaxa_ValueChanged(object sender, System.EventArgs e) { AtualizarTotal(); }
         private void BtnCanc_Click(object sender, System.EventArgs e) { Close(); }
@@ -1010,6 +1041,8 @@ namespace Pedeai.Forms
         private System.Windows.Forms.TextBox       txtTelefone;
         private System.Windows.Forms.ComboBox      cmbEntrega;
         private System.Windows.Forms.TextBox       txtEndereco;
+        private System.Windows.Forms.Label         lblBairro;
+        private System.Windows.Forms.ComboBox      cmbBairro;
         private System.Windows.Forms.Label         lblEndereco;
         private System.Windows.Forms.ComboBox      cmbPagamento;
         private System.Windows.Forms.NumericUpDown numTroco;

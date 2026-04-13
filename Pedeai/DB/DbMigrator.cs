@@ -453,6 +453,17 @@ namespace Pedeai.DB
                     }
                 }
 
+                // ── bairro (taxa de entrega por bairro) ──────────────────────
+                Exec(conn, @"
+                    CREATE TABLE IF NOT EXISTS bairro (
+                        Codigo           INT           NOT NULL AUTO_INCREMENT PRIMARY KEY,
+                        auxCodigo        INT           NOT NULL DEFAULT 1,
+                        baiCidade        VARCHAR(100)  NOT NULL DEFAULT '',
+                        baiNome          VARCHAR(100)  NOT NULL DEFAULT '',
+                        baiTaxa_Entrega  DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+                        Situacao         CHAR(1)       NOT NULL DEFAULT 'A'
+                    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+
                 return true;
             }
             catch (Exception ex)
