@@ -107,13 +107,29 @@ namespace ConfigBD
         // ── Salvar no App.config ──────────────────────────────────────────────
         private void BtnSalvar_Click(object sender, EventArgs e)
         {
+            // Cria o arquivo de configuração mínimo se não existir
             if (!File.Exists(ConfigPath))
             {
-                MessageBox.Show(
-                    $"Arquivo de configuração não encontrado:\n{ConfigPath}\n\n" +
-                    "Coloque o ConfigBD.exe na mesma pasta que o RanGoFood.exe.",
-                    "Arquivo não encontrado", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
+                try
+                {
+                    var xmlNovo = new XmlDocument();
+                    xmlNovo.AppendChild(xmlNovo.CreateXmlDeclaration("1.0", "utf-8", null));
+                    var root = xmlNovo.AppendChild(xmlNovo.CreateElement("configuration"));
+                    var appSettings = root.AppendChild(xmlNovo.CreateElement("appSettings"));
+                    var add = xmlNovo.CreateElement("add");
+                    add.SetAttribute("key", "ConnectionString");
+                    add.SetAttribute("value", "");
+                    appSettings.AppendChild(add);
+                    xmlNovo.Save(ConfigPath);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(
+                        $"Não foi possível criar o arquivo de configuração:\n{ConfigPath}\n\n{ex.Message}\n\n" +
+                        "Verifique se o ConfigBD.exe está na mesma pasta que o RanGoFood.exe.",
+                        "Erro ao criar arquivo", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
             }
 
             // Testa servidor antes de salvar

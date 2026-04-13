@@ -80,7 +80,118 @@ namespace Pedeai.DB
                         Info             VARCHAR(255)   NOT NULL DEFAULT ''
                     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
 
-                // ── 4. Colunas em pedido_web ─────────────────────────────────────────
+                // ── 4. Tabelas pré-existentes (criadas aqui se banco for novo) ─────────
+                Exec(conn, @"
+                    CREATE TABLE IF NOT EXISTS cliente (
+                        auxCodigo            INT           NOT NULL DEFAULT 1,
+                        Codigo               INT           NOT NULL AUTO_INCREMENT PRIMARY KEY,
+                        clieNome_RazaoSocial VARCHAR(150)  NOT NULL DEFAULT '',
+                        clieTelefone         VARCHAR(20)   NOT NULL DEFAULT '',
+                        clieCelular          VARCHAR(20)   NOT NULL DEFAULT '',
+                        clieEmail            VARCHAR(100)  NOT NULL DEFAULT '',
+                        clieCPF_CNPJ_        VARCHAR(18)   NOT NULL DEFAULT '',
+                        clieCEP              VARCHAR(10)   NOT NULL DEFAULT '',
+                        clieEndereco         VARCHAR(200)  NOT NULL DEFAULT '',
+                        clieNumero           VARCHAR(20)   NOT NULL DEFAULT '',
+                        clieComplemento      VARCHAR(100)  NOT NULL DEFAULT '',
+                        clieBairro           VARCHAR(100)  NOT NULL DEFAULT '',
+                        clieCidade           VARCHAR(100)  NOT NULL DEFAULT '',
+                        clieEstado           VARCHAR(2)    NOT NULL DEFAULT '',
+                        clieTotalPedidos     INT           NOT NULL DEFAULT 0,
+                        clieTotalGasto       DECIMAL(12,2) NOT NULL DEFAULT 0.00,
+                        clieGasto_Mensal     DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+                        clieGasto_Mes_Ref    VARCHAR(7)    NOT NULL DEFAULT '',
+                        clieData_Cadastro    DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                        Situacao             CHAR(1)       NOT NULL DEFAULT 'A',
+                        Status_Transmissao   CHAR(1)       NOT NULL DEFAULT 'N',
+                        Info                 VARCHAR(255)  NOT NULL DEFAULT ''
+                    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+
+                Exec(conn, @"
+                    CREATE TABLE IF NOT EXISTS grupo_mercadoria (
+                        auxCodigo        INT           NOT NULL DEFAULT 1,
+                        Codigo           INT           NOT NULL AUTO_INCREMENT PRIMARY KEY,
+                        grmeDescricao_   VARCHAR(100)  NOT NULL DEFAULT '',
+                        grmeOrdem        INT           NOT NULL DEFAULT 0,
+                        Situacao         CHAR(1)       NOT NULL DEFAULT 'A',
+                        grmeData_Cadastro DATETIME     NULL DEFAULT NULL
+                    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+
+                Exec(conn, @"
+                    CREATE TABLE IF NOT EXISTS mercadoria (
+                        auxCodigo            INT           NOT NULL DEFAULT 1,
+                        Codigo               INT           NOT NULL AUTO_INCREMENT PRIMARY KEY,
+                        Codigo_Grupo         INT           NOT NULL DEFAULT 0,
+                        mercMercadoria       VARCHAR(150)  NOT NULL DEFAULT '',
+                        mercApresentacao     TEXT          NOT NULL,
+                        mercPreco_Venda      DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+                        mercPreco_Custo      DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+                        mercPreco_Promocional DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+                        mercEstoque_Atual    DECIMAL(12,4) NOT NULL DEFAULT 0,
+                        mercControla_Estoque TINYINT(1)    NOT NULL DEFAULT 0,
+                        mercImagem_Url       VARCHAR(300)  NOT NULL DEFAULT '',
+                        mercDestaque         TINYINT(1)    NOT NULL DEFAULT 0,
+                        mercOrdem            INT           NOT NULL DEFAULT 0,
+                        mercHabilitar_Ifood  TINYINT(1)    NOT NULL DEFAULT 0,
+                        mercHabilitar_Site   TINYINT(1)    NOT NULL DEFAULT 0,
+                        Situacao             CHAR(1)       NOT NULL DEFAULT 'A',
+                        Status_Transmissao   CHAR(1)       NOT NULL DEFAULT 'N',
+                        Info                 VARCHAR(255)  NOT NULL DEFAULT '',
+                        mercData_Cadastro    DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP
+                    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+
+                Exec(conn, @"
+                    CREATE TABLE IF NOT EXISTS pedido_web (
+                        auxCodigo            INT           NOT NULL DEFAULT 1,
+                        Codigo               INT           NOT NULL AUTO_INCREMENT PRIMARY KEY,
+                        pediNumero           VARCHAR(20)   NOT NULL DEFAULT '',
+                        Codigo_Cliente       INT           NULL DEFAULT NULL,
+                        pediNome_Cliente     VARCHAR(150)  NOT NULL DEFAULT '',
+                        pediTelefone_Cliente VARCHAR(20)   NOT NULL DEFAULT '',
+                        pediSituacao         TINYINT       NOT NULL DEFAULT 0,
+                        pediTipo_Entrega     TINYINT       NOT NULL DEFAULT 0,
+                        pediForma_Pagamento  TINYINT       NOT NULL DEFAULT 0,
+                        pediOrigem           TINYINT       NOT NULL DEFAULT 2,
+                        pediSubtotal         DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+                        pediTaxa_Entrega     DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+                        pediDesconto         DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+                        pediValor_Total      DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+                        pediTroco_Para       DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+                        pediValor_Pago       DECIMAL(10,2) NULL DEFAULT NULL,
+                        pediPago_Dinheiro    DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+                        pediPago_Cartao      DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+                        pediPago_Pix         DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+                        pediCodigo_Transacao VARCHAR(100)  NULL DEFAULT NULL,
+                        pediEndereco_Entrega VARCHAR(300)  NOT NULL DEFAULT '',
+                        pediObservacoes      TEXT          NOT NULL,
+                        pediCancelado_Por    VARCHAR(100)  NULL DEFAULT NULL,
+                        pediCodigo_Cupom     VARCHAR(50)   NOT NULL DEFAULT '',
+                        pediAutorizador      VARCHAR(150)  NULL DEFAULT NULL,
+                        pediData_Lancamento  DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                        pediData_Atualizacao DATETIME      NULL DEFAULT NULL,
+                        Situacao             CHAR(1)       NOT NULL DEFAULT 'A',
+                        Status_Transmissao   CHAR(1)       NOT NULL DEFAULT 'N',
+                        Info                 VARCHAR(255)  NOT NULL DEFAULT ''
+                    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+
+                Exec(conn, @"
+                    CREATE TABLE IF NOT EXISTS itens_pedido_web (
+                        auxCodigo            INT           NOT NULL DEFAULT 1,
+                        Codigo               INT           NOT NULL AUTO_INCREMENT PRIMARY KEY,
+                        Codigo_Pedido        INT           NOT NULL,
+                        Codigo_Mercadoria    INT           NOT NULL DEFAULT 0,
+                        itpwNome_Mercadoria  VARCHAR(200)  NOT NULL DEFAULT '',
+                        itpwQtde             DECIMAL(10,4) NOT NULL DEFAULT 0,
+                        itpwPreco_Unitario   DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+                        itpwSubtotal         DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+                        itpwObservacoes      VARCHAR(300)  NOT NULL DEFAULT '',
+                        itpwDesconto_Pct     DECIMAL(5,2)  NOT NULL DEFAULT 0.00,
+                        Situacao             CHAR(1)       NOT NULL DEFAULT 'A',
+                        Status_Transmissao   CHAR(1)       NOT NULL DEFAULT 'N',
+                        Info                 VARCHAR(255)  NOT NULL DEFAULT ''
+                    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+
+                // ── 4b. Colunas em pedido_web (adicionadas em versões posteriores) ─
                 AddColumnIfNotExists(conn, db, "pedido_web", "pediCancelado_Por",
                     "VARCHAR(100) NULL DEFAULT NULL");
                 AddColumnIfNotExists(conn, db, "pedido_web", "pediValor_Pago",
