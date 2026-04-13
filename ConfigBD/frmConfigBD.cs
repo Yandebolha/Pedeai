@@ -78,29 +78,52 @@ namespace ConfigBD
             catch { return null; }
         }
 
-        private string MontarCS() =>
+        private string MontarCS(int timeoutSecs = 15) =>
             $"Server={txtServidor.Text.Trim()};" +
             $"Database={txtBanco.Text.Trim()};" +
             $"User={txtUsuario.Text.Trim()};" +
             $"Password={txtSenha.Text};" +
             $"Port={txtPorta.Text.Trim()};" +
-            $"CharSet=utf8mb4;SslMode=None;AllowPublicKeyRetrieval=true;";
+            $"CharSet=utf8mb4;SslMode=None;AllowPublicKeyRetrieval=true;" +
+            $"ConnectionTimeout={timeoutSecs};";
 
         // ── Testar conexão ────────────────────────────────────────────────────
-        private void BtnTestar_Click(object sender, EventArgs e)
+        private async void BtnTestar_Click(object sender, EventArgs e)
         {
+            btnTestar.Enabled = false;
+            btnSalvar.Enabled = false;
             SetStatus("Testando conexão...", Color.Gray);
             try
             {
-                // Testa só servidor (sem exigir que o banco exista)
-                var b = new MySqlConnectionStringBuilder(MontarCS()) { Database = "" };
-                using var conn = new MySqlConnection(b.ToString());
-                conn.Open();
-                SetStatus($"✔  Servidor acessível — MySQL {conn.ServerVersion}", Color.Green);
+                string versao = await Task.Run(() =>
+                {
+                    // Tenta primeiro com o banco especificado (mais permissivo para usuários remotos).
+                    // Se falhar, tenta sem banco (útil quando o banco ainda não existe).
+                    string cs = MontarCS(timeoutSecs: 5);
+                    try
+                    {
+                        using var conn = new MySqlConnection(cs);
+                        conn.Open();
+                        return conn.ServerVersion;
+                    }
+                    catch
+                    {
+                        var b = new MySqlConnectionStringBuilder(cs) { Database = "" };
+                        using var conn2 = new MySqlConnection(b.ToString());
+                        conn2.Open();
+                        return conn2.ServerVersion;
+                    }
+                });
+                SetStatus($"✔  Servidor acessível — MySQL {versao}", Color.Green);
             }
             catch (Exception ex)
             {
                 SetStatus("✖  " + ex.Message, Color.Red);
+            }
+            finally
+            {
+                btnTestar.Enabled = true;
+                btnSalvar.Enabled = true;
             }
         }
 
@@ -132,20 +155,27 @@ namespace ConfigBD
                 }
             }
 
-            // Testa servidor antes de salvar
+            // Testa servidor antes de salvar (não-bloqueante, apenas aviso)
             try
             {
-                var b = new MySqlConnectionStringBuilder(MontarCS()) { Database = "" };
-                using var conn = new MySqlConnection(b.ToString());
-                conn.Open();
+                string cs = MontarCS(timeoutSecs: 5);
+                bool ok = false;
+                try { using var c = new MySqlConnection(cs); c.Open(); ok = true; } catch { }
+                if (!ok)
+                {
+                    var b = new MySqlConnectionStringBuilder(cs) { Database = "" };
+                    try { using var c2 = new MySqlConnection(b.ToString()); c2.Open(); ok = true; } catch { }
+                }
+                if (!ok)
+                {
+                    // Avisa mas não bloqueia o salvamento
+                    var r = MessageBox.Show(
+                        "Não foi possível verificar a conexão com o servidor informado.\n\nSalvar mesmo assim?",
+                        "Aviso", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+                    if (r != DialogResult.Yes) return;
+                }
             }
-            catch (Exception ex)
-            {
-                var r = MessageBox.Show(
-                    $"Não foi possível conectar ao servidor:\n{ex.Message}\n\nSalvar mesmo assim?",
-                    "Aviso", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
-                if (r != DialogResult.Yes) return;
-            }
+            catch { /* ignora erros inesperados no teste */ }
 
             try
             {
