@@ -1,0 +1,60 @@
+version: "3.8"
+
+services:
+  # ── Servidor de Licenças ────────────────────────────────────────────────────
+  licenca:
+    build:
+      context: ./PedeaiLicencaServer
+      dockerfile: Dockerfile
+    image: pedeai-licenca-server:latest
+    container_name: pedeai_licenca
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    environment:
+      ApiKey: "${LICENCA_API_KEY}"
+      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_URLS: "http://+:5000"
+    networks:
+      - pedeai_net
+
+  # ── Servidor de Atualizações ────────────────────────────────────────────────
+  update:
+    build:
+      context: ./PedeaiUpdateServer
+      dockerfile: Dockerfile
+    image: pedeai-update-server:latest
+    container_name: pedeai_update
+    restart: unless-stopped
+    ports:
+      - "5001:5001"
+    environment:
+      ClienteApiKey: "${UPDATE_CLIENT_KEY}"
+      AdminToken: "${UPDATE_ADMIN_TOKEN}"
+      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_URLS: "http://+:5001"
+    volumes:
+      - pedeai_update_data:/app/Data
+    networks:
+      - pedeai_net
+
+  # ── Nginx reverse proxy (opcional, recomendado para HTTPS) ─────────────────
+  # nginx:
+  #   image: nginx:alpine
+  #   container_name: pedeai_nginx
+  #   restart: unless-stopped
+  #   ports:
+  #     - "80:80"
+  #     - "443:443"
+  #   volumes:
+  #     - ./nginx/pedeai.conf:/etc/nginx/conf.d/default.conf:ro
+  #     - /etc/letsencrypt:/etc/letsencrypt:ro
+  #   depends_on: [licenca, update]
+  #   networks: [pedeai_net]
+
+volumes:
+  pedeai_update_data:
+
+networks:
+  pedeai_net:
+    driver: bridge

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Configuration;
 using System.Windows.Forms;
 using Pedeai.DAL;
 using Pedeai.DB;
@@ -26,8 +27,13 @@ namespace Pedeai
             // Cria banco (se não existir) + tabelas + dados iniciais
             if (!DbMigrator.Executar()) return;
 
-            // Verifica licença antes de abrir o login
+            // ── Auto-renovação de licença via VPS ───────────────────────────
             var empresa = new EmpresaDAL().Carregar();
+            TentarAutoRenovarLicenca(empresa);
+
+            // Recarrega após possível atualização da chave
+            empresa = new EmpresaDAL().Carregar();
+
             bool licencaValida = LicencaService.ValidarChave(empresa.empCodigo_Empresa, empresa.empChave_Licenca);
 
             if (!licencaValida)
@@ -46,7 +52,8 @@ namespace Pedeai
             }
             else
             {
-                // Aviso de vencimento próximo (últimos 5 dias do mês)
+                // Aviso de vencimento próximo (últimos 5 dias) — após auto-renovação, só aparece
+                // se a VPS estava offline e não conseguiu renovar.
                 var exp = LicencaService.ObterExpiracao(empresa.empChave_Licenca);
                 if (exp.HasValue && (exp.Value - DateTime.Today).TotalDays <= 5)
                 {
@@ -66,6 +73,41 @@ namespace Pedeai
             }
 
             Application.Run(new Form1());
+        }
+
+        /// <summary>
+        /// Tenta renovar automaticamente a licença via VPS se ela estiver vencida ou próxima do vencimento.
+        /// Falha silenciosamente se a VPS estiver offline ou não configurada.
+        /// </summary>
+        private static void TentarAutoRenovarLicenca(Modelo.Empresa empresa)
+        {
+            string vpsUrl = ConfigurationManager.AppSettings["LicencaVpsUrl"] ?? "";
+            string apiKey = ConfigurationManager.AppSettings["LicencaApiKey"] ?? "";
+
+            if (string.IsNullOrWhiteSpace(vpsUrl) || string.IsNullOrWhiteSpace(apiKey))
+                return; // VPS não configurada — usa fluxo manual
+
+            // Renovar se: licença inválida OU vencendo em até 7 dias
+            bool precisaRenovar = !LicencaService.ValidarChave(empresa.empCodigo_Empresa, empresa.empChave_Licenca);
+            if (!precisaRenovar)
+            {
+                var exp = LicencaService.ObterExpiracao(empresa.empChave_Licenca);
+                precisaRenovar = exp.HasValue && (exp.Value - DateTime.Today).TotalDays <= 7;
+            }
+
+            if (!precisaRenovar) return;
+
+            string novaChave = LicencaApiClient.TentarRenovar(
+                empresa.empCodigo_Empresa, apiKey, vpsUrl, diasValidade: 30);
+
+            if (!string.IsNullOrWhiteSpace(novaChave)
+                && LicencaService.ValidarChave(empresa.empCodigo_Empresa, novaChave))
+            {
+                new EmpresaDAL().SalvarLicenca(empresa.Codigo, novaChave);
+                // Reseta período de graça se havia sido iniciado
+                if (empresa.empData_Graca.HasValue)
+                    new EmpresaDAL().SalvarDataGraca(empresa.Codigo, null);
+            }
         }
     }
 }

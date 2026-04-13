@@ -53,6 +53,9 @@ Dados da empresa cadastrada no sistema (único registro, Codigo=1).
 | `empTelefone` | VARCHAR(20) | Telefone de contato |
 | `empEmail` | VARCHAR(100) | Email |
 | `empEndereco` | VARCHAR(255) | Endereço completo |
+| `empCodigo_Empresa` | VARCHAR(20) | Código único gerado na 1ª inicialização (usado no HMAC de licença) |
+| `empChave_Licenca` | VARCHAR(64) | Chave de licença atual (`YYYYMMDD-XXXXX-XXXXX-XXXXX`) |
+| `empData_Graca` | DATE | Data limite do período de graça (NULL = sem graça ativa) |
 | `Info` | VARCHAR(255) | Campo extra livre |
 
 ---
@@ -154,6 +157,7 @@ Itens de cada pedido.
 | `itpwPreco_Unitario` | DECIMAL(10,2) | Preço unitário no momento do pedido |
 | `itpwSubtotal` | DECIMAL(10,2) | Qtde × preço unitário |
 | `itpwObservacoes` | VARCHAR(300) | Observações do item (ex.: "sem cebola") |
+| `itpwDesconto_Pct` | DECIMAL(5,2) | Percentual de desconto aplicado ao item (0 = sem desconto) |
 | `Situacao` | CHAR(1) | `'A'`=Ativo |
 | `Status_Transmissao` | CHAR(1) | Controle de sincronização |
 | `Info` | VARCHAR(255) | Campo extra livre |
@@ -181,6 +185,8 @@ Cadastro de clientes.
 | `clieEstado` | VARCHAR(2) | UF |
 | `clieTotalPedidos` | INT | Contador de pedidos (atualizado automaticamente ao confirmar pedido) |
 | `clieTotalGasto` | DECIMAL(12,2) | Soma total gasta (atualizado automaticamente) |
+| `clieGasto_Mensal` | DECIMAL(10,2) | Gasto acumulado no mês de referência (programa de fidelidade) |
+| `clieGasto_Mes_Ref` | VARCHAR(7) | Mês de referência no formato `"YYYY-MM"` |
 | `clieData_Cadastro` | DATETIME | Data de cadastro |
 | `Situacao` | CHAR(1) | `'A'`=Ativo · `'I'`=Inativo |
 | `Status_Transmissao` | CHAR(1) | Controle de sincronização |
@@ -386,6 +392,98 @@ Configurações da impressora térmica (único registro, Codigo=1).
 | `lblAtendente` | VARCHAR(50) | Rótulo do atendente |
 | `larguraCaracteres` | INT | Largura da impressora em caracteres (padrão: 42) |
 | `impressoraNome` | VARCHAR(200) | Nome da impressora instalada no Windows |
+
+---
+
+### `config_fidelizacao`
+Configuração do programa de fidelidade (único registro, Codigo=1).
+
+| Coluna | Tipo | Descrição |
+|---|---|---|
+| `Codigo` | INT PK (=1) | Registro único |
+| `fidNome` | VARCHAR(100) | Nome da regra (ex.: `"Regra Padrão"`) |
+| `fidAtivo` | TINYINT(1) | `1` = programa ativo |
+| `fidMeta_Tipo` | VARCHAR(10) | `'VALOR'` = meta em R$ gastos · `'CONTAGEM'` = meta em pedidos |
+| `fidMeta_Gasto` | DECIMAL(10,2) | Meta em R$ para ganhar prêmio (quando `fidMeta_Tipo='VALOR'`) |
+| `fidPremio_Tipo` | VARCHAR(20) | `'CUPOM'` = prêmio é um cupom · `'PRODUTO'` = prêmio é um produto grátis |
+| `fidCupom_Tipo` | VARCHAR(20) | Tipo do cupom: `'PERCENTUAL'` ou `'FIXO'` |
+| `fidCupom_Valor` | DECIMAL(10,2) | Valor/percentual do cupom prêmio |
+| `fidCupom_Minimo` | DECIMAL(10,2) | Pedido mínimo para usar o cupom prêmio |
+| `fidCupom_Validade` | INT | Validade do cupom em dias |
+| `fidProduto_Codigo` | INT | Código do produto grátis (quando `fidPremio_Tipo='PRODUTO'`) |
+| `fidProduto_Nome` | VARCHAR(150) | Nome do produto grátis |
+| `fidProduto_Qtde` | INT | Quantidade do produto grátis |
+| `fidMensagem` | TEXT | Template da mensagem enviada ao cliente (`{Nome}`, `{Meta}`, `{CupomCodigo}`, `{Validade}`) |
+| `Info` | VARCHAR(255) | Campo extra livre |
+
+---
+
+### `historico_fidelizacao`
+Histórico de premiações do programa de fidelidade.
+
+| Coluna | Tipo | Descrição |
+|---|---|---|
+| `Codigo` | INT PK | ID do registro |
+| `Codigo_Cliente` | INT FK→cliente | Cliente premiado |
+| `Codigo_Pedido` | INT FK→pedido_web | Pedido que atingiu a meta |
+| `Codigo_Config` | INT FK→config_fidelizacao | Configuração vigente no momento da premiação |
+| `fidData` | DATETIME | Data/hora da premiação |
+| `fidCupomCodigo` | VARCHAR(50) | Código do cupom gerado (vazio se prêmio foi produto) |
+| `fidDescricao` | VARCHAR(200) | Texto descritivo do prêmio concedido |
+| `fidTelefone` | VARCHAR(20) | Telefone do cliente (para envio de mensagem) |
+
+---
+
+### `promocao`
+Promoções por período com desconto em produtos.
+
+| Coluna | Tipo | Descrição |
+|---|---|---|
+| `Codigo` | INT PK | ID da promoção |
+| `prom_Nome` | VARCHAR(100) | Nome da promoção |
+| `prom_DataInicio` | DATE | Data de início |
+| `prom_DataFim` | DATE | Data de encerramento |
+| `prom_Desconto_Tipo` | VARCHAR(20) | `'PERCENTUAL'` ou `'FIXO'` |
+| `prom_Desconto_Valor` | DECIMAL(10,2) | Percentual (%) ou valor fixo (R$) de desconto |
+| `prom_Ativo` | TINYINT(1) | `1` = promoção ativa |
+
+---
+
+### `promocao_item`
+Produtos incluídos em uma promoção.
+
+| Coluna | Tipo | Descrição |
+|---|---|---|
+| `Codigo` | INT PK | ID do item |
+| `Codigo_Promocao` | INT FK→promocao | Promoção pai |
+| `Codigo_Mercadoria` | INT FK→mercadoria | Produto (0 = não vinculado) |
+| `prom_Produto_Nome` | VARCHAR(150) | Nome do produto na promoção |
+
+---
+
+### `cardapio_dia`
+Cardápio especial do dia (título e observação geral).
+
+| Coluna | Tipo | Descrição |
+|---|---|---|
+| `Codigo` | INT PK | ID do cardápio |
+| `card_Data` | DATE | Data do cardápio |
+| `card_Titulo` | VARCHAR(200) | Título do cardápio do dia |
+| `card_Observacao` | TEXT | Observação geral |
+
+---
+
+### `cardapio_dia_item`
+Itens de um cardápio do dia.
+
+| Coluna | Tipo | Descrição |
+|---|---|---|
+| `Codigo` | INT PK | ID do item |
+| `Codigo_Cardapio` | INT FK→cardapio_dia | Cardápio pai |
+| `Codigo_Mercadoria` | INT FK→mercadoria | Produto (0 = não vinculado) |
+| `card_Produto_Nome` | VARCHAR(150) | Nome do produto |
+| `card_Produto_Preco` | DECIMAL(10,2) | Preço especial do dia |
+| `card_Produto_Descricao` | VARCHAR(300) | Descrição do produto no cardápio |
 
 ---
 

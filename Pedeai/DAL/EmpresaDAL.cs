@@ -107,13 +107,13 @@ namespace Pedeai.DAL
             cmd.ExecuteNonQuery();
         }
 
-        /// <summary>Define a data de início do período de graça.</summary>
-        public void SalvarDataGraca(int codEmpresa, DateTime data)
+        /// <summary>Define (ou limpa com null) a data de início do período de graça.</summary>
+        public void SalvarDataGraca(int codEmpresa, DateTime? data)
         {
             using var conn = AbrirConexao();
             using var cmd  = new MySqlCommand(
                 "UPDATE empresa SET empData_Graca=@data WHERE Codigo=@cod", conn);
-            cmd.Parameters.AddWithValue("@data", data.Date);
+            cmd.Parameters.AddWithValue("@data", data.HasValue ? (object)data.Value.Date : DBNull.Value);
             cmd.Parameters.AddWithValue("@cod",  codEmpresa);
             cmd.ExecuteNonQuery();
         }
