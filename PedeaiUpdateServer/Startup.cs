@@ -17,12 +17,14 @@ namespace PedeaiUpdateServer
         {
             services.AddControllers();
 
-            // Resolve caminhos
-            string connStr     = Configuration.GetConnectionString("Supabase")
-                                 ?? throw new InvalidOperationException("ConnectionStrings:Supabase não configurado no appsettings.json");
+            // Resolve credenciais Supabase
+            string supabaseUrl = Configuration["Supabase:Url"]
+                                 ?? throw new InvalidOperationException("Supabase:Url n\u00e3o configurado no appsettings.json");
+            string supabaseKey = Configuration["Supabase:Key"]
+                                 ?? throw new InvalidOperationException("Supabase:Key n\u00e3o configurado no appsettings.json");
             string packagesDir = Configuration["PackagesDir"] ?? "Data/packages";
 
-            services.AddSingleton(new UpdateDb(connStr));
+            services.AddSingleton(new UpdateDb(supabaseUrl, supabaseKey));
             services.AddSingleton(packagesDir);
 
             // Permite uploads grandes (pacotes de atualização)

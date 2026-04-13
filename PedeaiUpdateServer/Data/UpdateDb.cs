@@ -1,165 +1,134 @@
-using Npgsql;
 using PedeaiUpdateServer.Models;
 using System;
 using System.Collections.Generic;
+using System.Net.Http;
+using System.Text;
+using System.Text.Json;
 
 namespace PedeaiUpdateServer.Data
 {
     /// <summary>
-    /// Repositório PostgreSQL (Supabase) para o servidor de atualizações.
-    /// As tabelas são criadas automaticamente na primeira execução.
+    /// Repositório Supabase via REST API (PostgREST).
+    /// As tabelas devem ser criadas previamente rodando Data/init_supabase.sql
+    /// no editor SQL do projeto Supabase.
     /// </summary>
     public class UpdateDb
     {
-        private readonly string _connStr;
+        private readonly HttpClient _http;
+        private readonly string     _base;
 
-        public UpdateDb(string connectionString)
+        private static readonly JsonSerializerOptions _jsOpts = new JsonSerializerOptions
         {
-            _connStr = connectionString;
-            EnsureCreated();
+            PropertyNameCaseInsensitive = true
+        };
+
+        public UpdateDb(string supabaseUrl, string supabaseKey)
+        {
+            _base = supabaseUrl.TrimEnd('/') + "/rest/v1/";
+            _http = new HttpClient();
+            _http.DefaultRequestHeaders.Add("apikey",        supabaseKey);
+            _http.DefaultRequestHeaders.Add("Authorization", "Bearer " + supabaseKey);
         }
 
-        // ── Inicialização ─────────────────────────────────────────────────────────
+        // ── Helpers ───────────────────────────────────────────────────────────────
 
-        private void EnsureCreated()
+        private T[] Get<T>(string table, string query = "")
         {
-            using var conn = Open();
-            Exec(conn, @"
-                CREATE TABLE IF NOT EXISTS ""Clientes"" (
-                    ""Id""             BIGSERIAL    PRIMARY KEY,
-                    ""CodigoEmpresa""  TEXT         NOT NULL,
-                    ""NomeEmpresa""    TEXT         NOT NULL DEFAULT '',
-                    ""Nivel""          INTEGER      NOT NULL DEFAULT 2,
-                    ""VersaoAtual""    TEXT         NOT NULL DEFAULT '',
-                    ""Bloqueado""      BOOLEAN      NOT NULL DEFAULT FALSE,
-                    ""DataRegistro""   TIMESTAMPTZ  NOT NULL,
-                    ""UltimaConsulta"" TIMESTAMPTZ
-                )");
+            string url  = _base + table + (string.IsNullOrEmpty(query) ? "" : "?" + query);
+            var    resp = _http.GetAsync(url).GetAwaiter().GetResult();
+            string body = resp.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+            if (!resp.IsSuccessStatusCode)
+                throw new Exception($"Supabase GET {table} [{(int)resp.StatusCode}]: {body}");
+            return JsonSerializer.Deserialize<T[]>(body, _jsOpts) ?? Array.Empty<T>();
+        }
 
-            Exec(conn, @"
-                CREATE TABLE IF NOT EXISTS ""Pacotes"" (
-                    ""Id""              BIGSERIAL   PRIMARY KEY,
-                    ""Versao""          TEXT        NOT NULL,
-                    ""Nivel""           INTEGER     NOT NULL DEFAULT 2,
-                    ""Descricao""       TEXT        NOT NULL DEFAULT '',
-                    ""CaminhoArquivo""  TEXT        NOT NULL,
-                    ""TamanhoBytes""    BIGINT      NOT NULL DEFAULT 0,
-                    ""TemSQL""          BOOLEAN     NOT NULL DEFAULT FALSE,
-                    ""DataPublicacao""  TIMESTAMPTZ NOT NULL,
-                    ""Ativo""           BOOLEAN     NOT NULL DEFAULT TRUE
-                )");
+        private T PostOne<T>(string table, object body)
+        {
+            var json = JsonSerializer.Serialize(body, _jsOpts);
+            var req  = new HttpRequestMessage(HttpMethod.Post, _base + table);
+            req.Headers.Add("Prefer", "return=representation");
+            req.Content = new StringContent(json, Encoding.UTF8, "application/json");
+            var resp     = _http.SendAsync(req).GetAwaiter().GetResult();
+            string rBody = resp.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+            if (!resp.IsSuccessStatusCode)
+                throw new Exception($"Supabase POST {table} [{(int)resp.StatusCode}]: {rBody}");
+            var arr = JsonSerializer.Deserialize<T[]>(rBody, _jsOpts);
+            return arr != null && arr.Length > 0 ? arr[0] : default;
+        }
 
-            Exec(conn, @"
-                CREATE TABLE IF NOT EXISTS ""AplicacoesUpdate"" (
-                    ""Id""           BIGSERIAL   PRIMARY KEY,
-                    ""ClienteId""    BIGINT      NOT NULL,
-                    ""PacoteId""     BIGINT      NOT NULL,
-                    ""DataDownload"" TIMESTAMPTZ,
-                    ""DataAplicada"" TIMESTAMPTZ,
-                    ""Status""       TEXT        NOT NULL DEFAULT 'baixado',
-                    ""Detalhe""      TEXT
-                )");
+        private void Patch(string table, string filter, object body)
+        {
+            var json = JsonSerializer.Serialize(body, _jsOpts);
+            var req  = new HttpRequestMessage(new HttpMethod("PATCH"), _base + table + "?" + filter);
+            req.Content = new StringContent(json, Encoding.UTF8, "application/json");
+            var    resp  = _http.SendAsync(req).GetAwaiter().GetResult();
+            string rBody = resp.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+            if (!resp.IsSuccessStatusCode)
+                throw new Exception($"Supabase PATCH {table} [{(int)resp.StatusCode}]: {rBody}");
         }
 
         // ── Clientes ──────────────────────────────────────────────────────────────
 
         public long RegistrarCliente(string codigoEmpresa, string nomeEmpresa)
         {
-            string cod = codigoEmpresa.Trim().ToUpperInvariant();
-            using var conn = Open();
+            string cod      = codigoEmpresa.Trim().ToUpperInvariant();
+            var    existing = Get<ClienteRow>("Clientes",
+                                "CodigoEmpresa=eq." + Uri.EscapeDataString(cod) + "&select=Id");
+            if (existing.Length > 0) return existing[0].Id;
 
-            using var check = new NpgsqlCommand(
-                @"SELECT ""Id"" FROM ""Clientes"" WHERE ""CodigoEmpresa""=@cod LIMIT 1", conn);
-            check.Parameters.AddWithValue("@cod", cod);
-            object existente = check.ExecuteScalar();
-            if (existente != null) return Convert.ToInt64(existente);
-
-            using var cmd = new NpgsqlCommand(@"
-                INSERT INTO ""Clientes"" (""CodigoEmpresa"", ""NomeEmpresa"", ""Nivel"", ""Bloqueado"", ""DataRegistro"")
-                VALUES (@cod, @nome, 2, FALSE, @data)
-                RETURNING ""Id""", conn);
-            cmd.Parameters.AddWithValue("@cod",  cod);
-            cmd.Parameters.AddWithValue("@nome", nomeEmpresa ?? "");
-            cmd.Parameters.AddWithValue("@data", DateTime.UtcNow);
-            return Convert.ToInt64(cmd.ExecuteScalar());
+            var row = PostOne<ClienteRow>("Clientes", new
+            {
+                CodigoEmpresa = cod,
+                NomeEmpresa   = nomeEmpresa ?? "",
+                Nivel         = 2,
+                Bloqueado     = false,
+                DataRegistro  = DateTime.UtcNow
+            });
+            return row?.Id ?? 0;
         }
 
         public Cliente ObterCliente(long id)
         {
-            using var conn = Open();
-            using var cmd  = new NpgsqlCommand(@"SELECT * FROM ""Clientes"" WHERE ""Id""=@id", conn);
-            cmd.Parameters.AddWithValue("@id", id);
-            using var r = cmd.ExecuteReader();
-            return r.Read() ? MapCliente(r) : null;
+            var rows = Get<ClienteRow>("Clientes", "Id=eq." + id);
+            return rows.Length > 0 ? MapCliente(rows[0]) : null;
         }
 
         public List<Cliente> ListarClientes()
         {
+            var rows = Get<ClienteRow>("Clientes", "order=Id.asc");
             var list = new List<Cliente>();
-            using var conn = Open();
-            using var cmd  = new NpgsqlCommand(@"SELECT * FROM ""Clientes"" ORDER BY ""Id""", conn);
-            using var r = cmd.ExecuteReader();
-            while (r.Read()) list.Add(MapCliente(r));
+            foreach (var r in rows) list.Add(MapCliente(r));
             return list;
         }
 
         public void AtualizarUltimaConsulta(long clienteId)
-        {
-            using var conn = Open();
-            using var cmd  = new NpgsqlCommand(
-                @"UPDATE ""Clientes"" SET ""UltimaConsulta""=@d WHERE ""Id""=@id", conn);
-            cmd.Parameters.AddWithValue("@d",  DateTime.UtcNow);
-            cmd.Parameters.AddWithValue("@id", clienteId);
-            cmd.ExecuteNonQuery();
-        }
+            => Patch("Clientes", "Id=eq." + clienteId, new { UltimaConsulta = DateTime.UtcNow });
 
         public void AtualizarVersaoCliente(long clienteId, string versao)
-        {
-            using var conn = Open();
-            using var cmd  = new NpgsqlCommand(
-                @"UPDATE ""Clientes"" SET ""VersaoAtual""=@v WHERE ""Id""=@id", conn);
-            cmd.Parameters.AddWithValue("@v",  versao ?? "");
-            cmd.Parameters.AddWithValue("@id", clienteId);
-            cmd.ExecuteNonQuery();
-        }
+            => Patch("Clientes", "Id=eq." + clienteId, new { VersaoAtual = versao ?? "" });
 
         public void AlterarNivelCliente(long clienteId, int nivel)
-        {
-            using var conn = Open();
-            using var cmd  = new NpgsqlCommand(
-                @"UPDATE ""Clientes"" SET ""Nivel""=@n WHERE ""Id""=@id", conn);
-            cmd.Parameters.AddWithValue("@n",  nivel);
-            cmd.Parameters.AddWithValue("@id", clienteId);
-            cmd.ExecuteNonQuery();
-        }
+            => Patch("Clientes", "Id=eq." + clienteId, new { Nivel = nivel });
 
         public void AlterarBloqueioCliente(long clienteId, bool bloqueado)
-        {
-            using var conn = Open();
-            using var cmd  = new NpgsqlCommand(
-                @"UPDATE ""Clientes"" SET ""Bloqueado""=@b WHERE ""Id""=@id", conn);
-            cmd.Parameters.AddWithValue("@b",  bloqueado);
-            cmd.Parameters.AddWithValue("@id", clienteId);
-            cmd.ExecuteNonQuery();
-        }
+            => Patch("Clientes", "Id=eq." + clienteId, new { Bloqueado = bloqueado });
 
         // ── Pacotes ───────────────────────────────────────────────────────────────
 
         public long InserirPacote(Pacote p)
         {
-            using var conn = Open();
-            using var cmd  = new NpgsqlCommand(@"
-                INSERT INTO ""Pacotes"" (""Versao"",""Nivel"",""Descricao"",""CaminhoArquivo"",""TamanhoBytes"",""TemSQL"",""DataPublicacao"",""Ativo"")
-                VALUES (@v,@n,@d,@c,@t,@s,@pub,TRUE)
-                RETURNING ""Id""", conn);
-            cmd.Parameters.AddWithValue("@v",   p.Versao);
-            cmd.Parameters.AddWithValue("@n",   p.Nivel);
-            cmd.Parameters.AddWithValue("@d",   p.Descricao ?? "");
-            cmd.Parameters.AddWithValue("@c",   p.CaminhoArquivo);
-            cmd.Parameters.AddWithValue("@t",   p.TamanhoBytes);
-            cmd.Parameters.AddWithValue("@s",   p.TemSQL);
-            cmd.Parameters.AddWithValue("@pub", DateTime.UtcNow);
-            return Convert.ToInt64(cmd.ExecuteScalar());
+            var row = PostOne<PacoteRow>("Pacotes", new
+            {
+                Versao         = p.Versao,
+                Nivel          = p.Nivel,
+                Descricao      = p.Descricao ?? "",
+                CaminhoArquivo = p.CaminhoArquivo,
+                TamanhoBytes   = p.TamanhoBytes,
+                TemSQL         = p.TemSQL,
+                DataPublicacao = DateTime.UtcNow,
+                Ativo          = true
+            });
+            return row?.Id ?? 0;
         }
 
         public Pacote ObterPacoteParaCliente(long clienteId, string versaoAtual)
@@ -167,81 +136,56 @@ namespace PedeaiUpdateServer.Data
             var cliente = ObterCliente(clienteId);
             if (cliente == null || cliente.Bloqueado) return null;
 
-            using var conn = Open();
-            using var cmd  = new NpgsqlCommand(@"
-                SELECT * FROM ""Pacotes""
-                WHERE ""Ativo""=TRUE
-                  AND ""Nivel"" <= @nivel
-                  AND ""Versao"" > @versao
-                ORDER BY ""Versao"" DESC
-                LIMIT 1", conn);
-            cmd.Parameters.AddWithValue("@nivel",  cliente.Nivel);
-            cmd.Parameters.AddWithValue("@versao", versaoAtual ?? "");
-            using var r = cmd.ExecuteReader();
-            return r.Read() ? MapPacote(r) : null;
+            string versaoEnc = Uri.EscapeDataString(versaoAtual ?? "");
+            var rows = Get<PacoteRow>("Pacotes",
+                "Ativo=eq.true&Nivel=lte." + cliente.Nivel +
+                "&Versao=gt." + versaoEnc + "&order=Versao.desc&limit=1");
+            return rows.Length > 0 ? MapPacote(rows[0]) : null;
         }
 
         public Pacote ObterPacote(long id)
         {
-            using var conn = Open();
-            using var cmd  = new NpgsqlCommand(@"SELECT * FROM ""Pacotes"" WHERE ""Id""=@id AND ""Ativo""=TRUE", conn);
-            cmd.Parameters.AddWithValue("@id", id);
-            using var r = cmd.ExecuteReader();
-            return r.Read() ? MapPacote(r) : null;
+            var rows = Get<PacoteRow>("Pacotes", "Id=eq." + id + "&Ativo=eq.true");
+            return rows.Length > 0 ? MapPacote(rows[0]) : null;
         }
 
         public List<Pacote> ListarPacotes()
         {
+            var rows = Get<PacoteRow>("Pacotes", "order=Id.desc");
             var list = new List<Pacote>();
-            using var conn = Open();
-            using var cmd  = new NpgsqlCommand(@"SELECT * FROM ""Pacotes"" ORDER BY ""Id"" DESC", conn);
-            using var r = cmd.ExecuteReader();
-            while (r.Read()) list.Add(MapPacote(r));
+            foreach (var r in rows) list.Add(MapPacote(r));
             return list;
         }
 
         public void DesativarPacote(long id)
-        {
-            using var conn = Open();
-            using var cmd  = new NpgsqlCommand(@"UPDATE ""Pacotes"" SET ""Ativo""=FALSE WHERE ""Id""=@id", conn);
-            cmd.Parameters.AddWithValue("@id", id);
-            cmd.ExecuteNonQuery();
-        }
+            => Patch("Pacotes", "Id=eq." + id, new { Ativo = false });
 
         // ── Aplicações ────────────────────────────────────────────────────────────
 
         public long RegistrarDownload(long clienteId, long pacoteId)
         {
-            using var conn = Open();
-            using var cmd = new NpgsqlCommand(@"
-                INSERT INTO ""AplicacoesUpdate"" (""ClienteId"",""PacoteId"",""DataDownload"",""Status"")
-                VALUES (@c,@p,@d,'baixado')
-                RETURNING ""Id""", conn);
-            cmd.Parameters.AddWithValue("@c", clienteId);
-            cmd.Parameters.AddWithValue("@p", pacoteId);
-            cmd.Parameters.AddWithValue("@d", DateTime.UtcNow);
-            return Convert.ToInt64(cmd.ExecuteScalar());
+            var row = PostOne<AplicacaoRow>("AplicacoesUpdate", new
+            {
+                ClienteId    = clienteId,
+                PacoteId     = pacoteId,
+                DataDownload = DateTime.UtcNow,
+                Status       = "baixado"
+            });
+            return row?.Id ?? 0;
         }
 
         public void ConfirmarAplicacao(long clienteId, long pacoteId, string status, string detalhe)
         {
-            using var conn = Open();
-            // PostgreSQL não suporta ORDER BY em UPDATE diretamente — usa subquery
-            using var cmd  = new NpgsqlCommand(@"
-                UPDATE ""AplicacoesUpdate""
-                SET ""DataAplicada""=@d, ""Status""=@s, ""Detalhe""=@det
-                WHERE ""Id"" = (
-                    SELECT ""Id"" FROM ""AplicacoesUpdate""
-                    WHERE ""ClienteId""=@c AND ""PacoteId""=@p
-                    ORDER BY ""Id"" DESC
-                    LIMIT 1
-                )", conn);
-            cmd.Parameters.AddWithValue("@d",   DateTime.UtcNow);
-            cmd.Parameters.AddWithValue("@s",   status ?? "aplicado");
-            cmd.Parameters.AddWithValue("@det", detalhe ?? "");
-            cmd.Parameters.AddWithValue("@c",   clienteId);
-            cmd.Parameters.AddWithValue("@p",   pacoteId);
-            cmd.ExecuteNonQuery();
+            var rows = Get<AplicacaoRow>("AplicacoesUpdate",
+                "ClienteId=eq." + clienteId + "&PacoteId=eq." + pacoteId + "&order=Id.desc&limit=1");
+
+            if (rows.Length > 0)
+                Patch("AplicacoesUpdate", "Id=eq." + rows[0].Id, new
+                {
+                    DataAplicada = DateTime.UtcNow,
+                    Status       = status ?? "aplicado",
+                    Detalhe      = detalhe ?? ""
+                });
 
             if (status == "aplicado")
             {
@@ -251,45 +195,71 @@ namespace PedeaiUpdateServer.Data
             }
         }
 
-        // ── Interno ───────────────────────────────────────────────────────────────
+        // ── Maps ──────────────────────────────────────────────────────────────────
 
-        private NpgsqlConnection Open()
+        private static Cliente MapCliente(ClienteRow r) => new Cliente
         {
-            var conn = new NpgsqlConnection(_connStr);
-            conn.Open();
-            return conn;
-        }
-
-        private static void Exec(NpgsqlConnection conn, string sql)
-        {
-            using var cmd = new NpgsqlCommand(sql, conn);
-            cmd.ExecuteNonQuery();
-        }
-
-        private static Cliente MapCliente(NpgsqlDataReader r) => new Cliente
-        {
-            Id             = r.GetInt64(r.GetOrdinal("Id")),
-            CodigoEmpresa  = r["CodigoEmpresa"]?.ToString(),
-            NomeEmpresa    = r["NomeEmpresa"]?.ToString(),
-            Nivel          = Convert.ToInt32(r["Nivel"]),
-            VersaoAtual    = r["VersaoAtual"]?.ToString(),
-            Bloqueado      = r.GetBoolean(r.GetOrdinal("Bloqueado")),
-            DataRegistro   = r["DataRegistro"]?.ToString(),
-            UltimaConsulta = r["UltimaConsulta"] is DBNull ? null : r["UltimaConsulta"]?.ToString()
+            Id             = r.Id,
+            CodigoEmpresa  = r.CodigoEmpresa,
+            NomeEmpresa    = r.NomeEmpresa,
+            Nivel          = r.Nivel,
+            VersaoAtual    = r.VersaoAtual,
+            Bloqueado      = r.Bloqueado,
+            DataRegistro   = r.DataRegistro,
+            UltimaConsulta = r.UltimaConsulta
         };
 
-        private static Pacote MapPacote(NpgsqlDataReader r) => new Pacote
+        private static Pacote MapPacote(PacoteRow r) => new Pacote
         {
-            Id             = r.GetInt64(r.GetOrdinal("Id")),
-            Versao         = r["Versao"]?.ToString(),
-            Nivel          = Convert.ToInt32(r["Nivel"]),
-            Descricao      = r["Descricao"]?.ToString(),
-            CaminhoArquivo = r["CaminhoArquivo"]?.ToString(),
-            TamanhoBytes   = Convert.ToInt64(r["TamanhoBytes"]),
-            TemSQL         = r.GetBoolean(r.GetOrdinal("TemSQL")),
-            DataPublicacao = r["DataPublicacao"]?.ToString(),
-            Ativo          = r.GetBoolean(r.GetOrdinal("Ativo"))
+            Id             = r.Id,
+            Versao         = r.Versao,
+            Nivel          = r.Nivel,
+            Descricao      = r.Descricao,
+            CaminhoArquivo = r.CaminhoArquivo,
+            TamanhoBytes   = r.TamanhoBytes,
+            TemSQL         = r.TemSQL,
+            DataPublicacao = r.DataPublicacao,
+            Ativo          = r.Ativo
         };
+
+        // ── Row DTOs ──────────────────────────────────────────────────────────────
+
+        private class ClienteRow
+        {
+            public long   Id             { get; set; }
+            public string CodigoEmpresa  { get; set; }
+            public string NomeEmpresa    { get; set; }
+            public int    Nivel          { get; set; }
+            public string VersaoAtual    { get; set; }
+            public bool   Bloqueado      { get; set; }
+            public string DataRegistro   { get; set; }
+            public string UltimaConsulta { get; set; }
+        }
+
+        private class PacoteRow
+        {
+            public long   Id             { get; set; }
+            public string Versao         { get; set; }
+            public int    Nivel          { get; set; }
+            public string Descricao      { get; set; }
+            public string CaminhoArquivo { get; set; }
+            public long   TamanhoBytes   { get; set; }
+            public bool   TemSQL         { get; set; }
+            public string DataPublicacao { get; set; }
+            public bool   Ativo          { get; set; }
+        }
+
+        private class AplicacaoRow
+        {
+            public long   Id           { get; set; }
+            public long   ClienteId    { get; set; }
+            public long   PacoteId     { get; set; }
+            public string DataDownload { get; set; }
+            public string DataAplicada { get; set; }
+            public string Status       { get; set; }
+            public string Detalhe      { get; set; }
+        }
     }
 }
+
 
