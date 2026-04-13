@@ -61,7 +61,7 @@ namespace Pedeai.Forms
             this.lblEndereco = new System.Windows.Forms.Label();
             this.txtEndereco = new System.Windows.Forms.TextBox();
             this.lblBairro = new System.Windows.Forms.Label();
-            this.cmbBairro = new System.Windows.Forms.ComboBox();
+            this.lblBairroAtual = new System.Windows.Forms.Label();
             this.lblTaxa = new System.Windows.Forms.Label();
             this.numTaxa = new System.Windows.Forms.NumericUpDown();
             this.pnlDiv2 = new System.Windows.Forms.Panel();
@@ -551,7 +551,7 @@ namespace Pedeai.Forms
             this.sideContent.Controls.Add(this.lblEndereco);
             this.sideContent.Controls.Add(this.txtEndereco);
             this.sideContent.Controls.Add(this.lblBairro);
-            this.sideContent.Controls.Add(this.cmbBairro);
+            this.sideContent.Controls.Add(this.lblBairroAtual);
             this.sideContent.Controls.Add(this.lblTaxa);
             this.sideContent.Controls.Add(this.numTaxa);
             this.sideContent.Controls.Add(this.pnlDiv2);
@@ -725,19 +725,20 @@ namespace Pedeai.Forms
             this.lblBairro.TabIndex = 10;
             this.lblBairro.Text = "Bairro";
             // 
-            // cmbBairro
+            // cmbBairro -> substituído por lblBairroAtual (bairro vem do cadastro do cliente)
             // 
-            this.cmbBairro.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(14)))), ((int)(((byte)(21)))), ((int)(((byte)(46)))));
-            this.cmbBairro.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cmbBairro.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.cmbBairro.Font = new System.Drawing.Font("Segoe UI", 9.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.cmbBairro.ForeColor = System.Drawing.Color.White;
-            this.cmbBairro.Location = new System.Drawing.Point(16, 300);
-            this.cmbBairro.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.cmbBairro.Name = "cmbBairro";
-            this.cmbBairro.Size = new System.Drawing.Size(329, 25);
-            this.cmbBairro.TabIndex = 11;
-            this.cmbBairro.SelectedIndexChanged += new System.EventHandler(this.CmbBairro_SelectedIndexChanged);
+            this.lblBairroAtual.AutoSize = false;
+            this.lblBairroAtual.Font = new System.Drawing.Font("Segoe UI", 9.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.lblBairroAtual.ForeColor = System.Drawing.Color.White;
+            this.lblBairroAtual.BackColor = System.Drawing.Color.FromArgb(14, 21, 46);
+            this.lblBairroAtual.Location = new System.Drawing.Point(16, 300);
+            this.lblBairroAtual.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.lblBairroAtual.Name = "lblBairroAtual";
+            this.lblBairroAtual.Size = new System.Drawing.Size(329, 25);
+            this.lblBairroAtual.TabIndex = 11;
+            this.lblBairroAtual.Text = "—";
+            this.lblBairroAtual.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.lblBairroAtual.Padding = new System.Windows.Forms.Padding(4, 0, 0, 0);
             // 
             // lblTaxa
             // 
@@ -1008,7 +1009,7 @@ namespace Pedeai.Forms
 
         private void CmbEntrega_SelectedIndexChanged(object sender, System.EventArgs e) { AtualizarVisibilidade(); }
         private void CmbPagamento_SelectedIndexChanged(object sender, System.EventArgs e) { AtualizarVisibilidade(); }
-        private void CmbBairro_SelectedIndexChanged(object sender, System.EventArgs e) { AplicarTaxaBairro(); }
+        private void CmbBairro_SelectedIndexChanged(object sender, System.EventArgs e) { /* removido — bairro vem do cliente */ }
         private void NumTroco_ValueChanged(object sender, System.EventArgs e) { AtualizarTrocoInfo(); }
         private void NumTaxa_ValueChanged(object sender, System.EventArgs e) { AtualizarTotal(); }
         private void BtnCanc_Click(object sender, System.EventArgs e) { Close(); }
@@ -1042,7 +1043,7 @@ namespace Pedeai.Forms
         private System.Windows.Forms.ComboBox      cmbEntrega;
         private System.Windows.Forms.TextBox       txtEndereco;
         private System.Windows.Forms.Label         lblBairro;
-        private System.Windows.Forms.ComboBox      cmbBairro;
+        private System.Windows.Forms.Label         lblBairroAtual;
         private System.Windows.Forms.Label         lblEndereco;
         private System.Windows.Forms.ComboBox      cmbPagamento;
         private System.Windows.Forms.NumericUpDown numTroco;

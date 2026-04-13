@@ -14,7 +14,18 @@ namespace Pedeai.Forms
         private ClienteBLL    _clienteBLL;
         private CupomBLL      _cupomBLL;
         private FidelizacaoBLL _fidelBLL;
-        private BairroBLL     _bairroBLL;
+        private BairroBLL     _bairroBLL;   // para cruzamento bairro do cliente
+        private readonly List<BairroItem> _bairrosCadastrados = new List<BairroItem>();
+
+        private sealed class BairroItem
+        {
+            public int     Codigo  { get; }
+            public string  Cidade  { get; }
+            public string  Nome    { get; }
+            public decimal Taxa    { get; }
+            public BairroItem(int cod, string cidade, string nome, decimal taxa)
+            { Codigo = cod; Cidade = cidade; Nome = nome; Taxa = taxa; }
+        }
         private readonly List<ItemPedidoWeb> _itens = new List<ItemPedidoWeb>();
         private readonly List<ProdItem>      _produtos = new List<ProdItem>();
         private ProdItem _produtoSelecionado = null;
@@ -34,7 +45,7 @@ namespace Pedeai.Forms
             InitializeComponent();
             if (System.ComponentModel.LicenseManager.UsageMode == System.ComponentModel.LicenseUsageMode.Designtime) return;
             _pedidoBLL = new PedidoBLL(); _mercBLL = new MercadoriaBLL(); _clienteBLL = new ClienteBLL(); _cupomBLL = new CupomBLL(); _fidelBLL = new FidelizacaoBLL(); _bairroBLL = new BairroBLL();
-            Load  += (_, __) => { CarregarProdutos(); CarregarBairros(); };
+            Load  += (_, __) => { CarregarProdutos(); CarregarBairrosCadastrados(); };
             Shown += (_, __) => PnlAddItem_SizeChanged(null, EventArgs.Empty);
         }
 
@@ -57,6 +68,9 @@ namespace Pedeai.Forms
                     if (!string.IsNullOrWhiteSpace(c.clieComplemento)) endParts.Add(c.clieComplemento.Trim());
                     txtEndereco.Text = string.Join(" - ", endParts);
                 }
+
+                // Cruzar bairro/cidade do cliente com tabela de Bairros/Taxa
+                AplicarTaxaPorBairroCliente(c.clieBairro, c.clieCidade);
                 // Verificar cupom de fidelidade disponível e aplicar automaticamente
                 AplicarCupomFidelidadeSeDisponivel(c.Codigo);
 
@@ -118,49 +132,70 @@ namespace Pedeai.Forms
         {
             bool entrega  = cmbEntrega.SelectedIndex == 1;
             bool dinheiro = cmbPagamento.SelectedIndex == 0;
-            lblEndereco.Visible = txtEndereco.Visible = entrega;
-            lblBairro.Visible   = cmbBairro.Visible   = entrega;
-            lblTroco.Visible    = numTroco.Visible    = dinheiro;
-            lblTaxa.Visible     = numTaxa.Visible     = entrega;
-            if (!entrega) { numTaxa.Value = 0; cmbBairro.SelectedIndex = 0; }
+            lblEndereco.Visible    = txtEndereco.Visible    = entrega;
+            lblBairro.Visible      = lblBairroAtual.Visible = entrega;
+            lblTroco.Visible       = numTroco.Visible       = dinheiro;
+            lblTaxa.Visible        = numTaxa.Visible        = entrega;
+            if (!entrega) { numTaxa.Value = 0; lblBairroAtual.Text = "\u2014"; }
             AtualizarTotal();
         }
 
-        // -- Bairros / Taxa de entrega ----------------------------------------
-        private void CarregarBairros()
+        // -- Bairros / Taxa de entrega (cruzamento automático por cadastro do cliente) ----
+        private void CarregarBairrosCadastrados()
         {
             try
             {
-                cmbBairro.Items.Clear();
-                cmbBairro.Items.Add("-- Selecione o bairro --");
+                _bairrosCadastrados.Clear();
                 var dt = _bairroBLL.Listar(apenasAtivos: true);
                 foreach (System.Data.DataRow r in dt.Rows)
-                    cmbBairro.Items.Add(new BairroItem(
+                    _bairrosCadastrados.Add(new BairroItem(
                         Convert.ToInt32(r["Codigo"]),
                         r["Cidade"]?.ToString() ?? "",
                         r["Bairro"]?.ToString() ?? "",
                         r["Taxa"] == System.DBNull.Value ? 0m : Convert.ToDecimal(r["Taxa"])));
-                cmbBairro.SelectedIndex = 0;
             }
             catch { /* não bloqueia se tabela ainda não existir */ }
         }
 
-        private void AplicarTaxaBairro()
-        {
-            if (cmbBairro.SelectedItem is BairroItem item)
-                numTaxa.Value = item.Taxa;
-        }
+        private void AplicarTaxaPorBairroCliente(string bairroCliente, string cidadeCliente)        {
+            string bairroN  = (bairroCliente  ?? "").Trim();
+            string cidadeN  = (cidadeCliente  ?? "").Trim();
 
-        private sealed class BairroItem
-        {
-            public int     Codigo  { get; }
-            public string  Cidade  { get; }
-            public string  Nome    { get; }
-            public decimal Taxa    { get; }
-            public BairroItem(int cod, string cidade, string nome, decimal taxa)
-            { Codigo = cod; Cidade = cidade; Nome = nome; Taxa = taxa; }
-            public override string ToString() =>
-                string.IsNullOrWhiteSpace(Cidade) ? Nome : $"{Nome} ({Cidade})";
+            if (string.IsNullOrWhiteSpace(bairroN))
+            {
+                lblBairroAtual.Text      = "— (cliente sem bairro cadastrado)";
+                lblBairroAtual.ForeColor = System.Drawing.Color.FromArgb(180, 160, 120);
+                return;
+            }
+
+            // Tentativa 1: bairro + cidade
+            BairroItem match = null;
+            if (!string.IsNullOrWhiteSpace(cidadeN))
+                match = _bairrosCadastrados.Find(b =>
+                    string.Equals(b.Nome,   bairroN, StringComparison.OrdinalIgnoreCase) &&
+                    string.Equals(b.Cidade, cidadeN, StringComparison.OrdinalIgnoreCase));
+
+            // Tentativa 2: somente bairro
+            if (match == null)
+                match = _bairrosCadastrados.Find(b =>
+                    string.Equals(b.Nome, bairroN, StringComparison.OrdinalIgnoreCase));
+
+            if (match != null)
+            {
+                string exibir = string.IsNullOrWhiteSpace(match.Cidade)
+                    ? match.Nome
+                    : $"{match.Nome} ({match.Cidade})";
+                lblBairroAtual.Text      = exibir;
+                lblBairroAtual.ForeColor = System.Drawing.Color.White;
+                numTaxa.Value            = match.Taxa;
+            }
+            else
+            {
+                string exibir = string.IsNullOrWhiteSpace(cidadeN) ? bairroN : $"{bairroN} ({cidadeN})";
+                lblBairroAtual.Text      = $"{exibir} — sem taxa cadastrada";
+                lblBairroAtual.ForeColor = System.Drawing.Color.FromArgb(230, 150, 50);
+                // não altera numTaxa, deixa o operador ajustar manualmente
+            }
         }
 
         // -- Produtos --------------------------------------------------------
