@@ -120,12 +120,38 @@ namespace Pedeai.Forms
                 Font = new Font("Segoe UI", 9F, FontStyle.Bold),
                 Dock = DockStyle.Top, Height = 22
             };
-            var pnlFields = new Panel { Dock = DockStyle.Top, Height = 62 };
-            var lblDesc = new Label { Text = "Descrição:", Left = 0, Top = 4, Width = 70, TextAlign = ContentAlignment.MiddleLeft, ForeColor = Color.FromArgb(100, 80, 50) };
-            txtDescricao = new TextBox { Left = 75, Top = 2, Width = 260, Height = 24, BorderStyle = BorderStyle.FixedSingle, BackColor = Color.White, ForeColor = ClrText, Font = new Font("Segoe UI", 10F) };
-            var lblVal = new Label { Text = "Valor R$:", Left = 346, Top = 4, Width = 65, TextAlign = ContentAlignment.MiddleLeft, ForeColor = Color.FromArgb(100, 80, 50) };
-            numValor = new NumericUpDown { Left = 416, Top = 2, Width = 110, Height = 24, DecimalPlaces = 2, Minimum = 0, Maximum = 99999, Font = new Font("Segoe UI", 10F, FontStyle.Bold), BackColor = Color.White, ForeColor = ClrText, ThousandsSeparator = true };
-            pnlFields.Controls.AddRange(new Control[] { lblDesc, txtDescricao, lblVal, numValor });
+            var pnlFields = new Panel { Dock = DockStyle.Top, Height = 36, BackColor = ClrFoot };
+            // Valor R$ — fixed width on the right
+            var lblVal = new Label
+            {
+                Text = "Valor R$:", Width = 65, Dock = DockStyle.Right,
+                TextAlign = ContentAlignment.MiddleLeft, ForeColor = Color.FromArgb(100, 80, 50)
+            };
+            numValor = new NumericUpDown
+            {
+                Width = 120, Dock = DockStyle.Right,
+                DecimalPlaces = 2, Minimum = 0, Maximum = 99999,
+                Font = new Font("Segoe UI", 10F, FontStyle.Bold),
+                BackColor = Color.White, ForeColor = ClrText, ThousandsSeparator = true,
+                Margin = new Padding(0, 4, 4, 4)
+            };
+            // Descrição — fills the rest
+            txtDescricao = new TextBox
+            {
+                Dock = DockStyle.Fill,
+                BorderStyle = BorderStyle.FixedSingle, BackColor = Color.White,
+                ForeColor = ClrText, Font = new Font("Segoe UI", 10F)
+            };
+            var lblDesc = new Label
+            {
+                Text = "Descri\u00e7\u00e3o:", Width = 75, Dock = DockStyle.Left,
+                TextAlign = ContentAlignment.MiddleLeft, ForeColor = Color.FromArgb(100, 80, 50)
+            };
+            // Right-to-left: numValor then lblVal, then txtDescricao fills middle
+            pnlFields.Controls.Add(txtDescricao);
+            pnlFields.Controls.Add(numValor);
+            pnlFields.Controls.Add(lblVal);
+            pnlFields.Controls.Add(lblDesc);
 
             var pnlBtns = new Panel { Dock = DockStyle.Bottom, Height = 34 };
             btnSalvar = MkBtn("Salvar", ClrGreen, 100);

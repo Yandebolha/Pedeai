@@ -185,14 +185,34 @@ namespace Pedeai.BLL
 
             foreach (var item in itens)
             {
-                string desc     = $"{item.itpwQtde:0.##} {item.itpwNome_Mercadoria} ({item.itpwPreco_Unitario:0.00})";
+                // Detectar se os ingredientes estão embutidos no nome (itens de marmita)
+                string nomeBase = item.itpwNome_Mercadoria;
+                string padraoIng = $" ({item.itpwObservacoes})";
+                bool temIngredientes = !string.IsNullOrWhiteSpace(item.itpwObservacoes)
+                    && nomeBase.EndsWith(padraoIng);
+                string nomeExib = temIngredientes
+                    ? nomeBase.Substring(0, nomeBase.Length - padraoIng.Length)
+                    : nomeBase;
+
+                string desc     = $"{item.itpwQtde:0.##} {nomeExib} ({item.itpwPreco_Unitario:0.00})";
                 string totalStr = item.itpwSubtotal.ToString("0.00");
                 if (desc.Length + totalStr.Length + 1 <= larg)
                     linhas.Add(desc + PreencharDir(totalStr, larg - desc.Length));
                 else
                     linhas.Add(desc);
 
-                // linha de desconto por item
+                // Ingredientes de marmita — cada um em sua própria linha, indentado
+                if (temIngredientes)
+                {
+                    foreach (var ing in item.itpwObservacoes.Split(','))
+                    {
+                        string ingTrim = ing.Trim();
+                        if (!string.IsNullOrEmpty(ingTrim))
+                            linhas.Add("§S§  " + ingTrim);
+                    }
+                }
+
+                // Linha de desconto por item
                 if (item.itpwDesconto_Pct > 0)
                 {
                     decimal economia = item.itpwPreco_Unitario * item.itpwQtde - item.itpwSubtotal;
@@ -200,7 +220,8 @@ namespace Pedeai.BLL
                     linhas.Add(descLinha);
                 }
 
-                if (!string.IsNullOrWhiteSpace(item.itpwObservacoes))
+                // Observação regular (não ingredientes de marmita)
+                if (!string.IsNullOrWhiteSpace(item.itpwObservacoes) && !temIngredientes)
                     linhas.Add("§S§  Obs: " + item.itpwObservacoes);
             }
 
@@ -309,6 +330,14 @@ namespace Pedeai.BLL
                 if (linha.StartsWith("§B§")) linha = "*" + linha.Substring(3).Trim() + "*";
                 else if (linha.StartsWith("§S§")) linha = linha.Substring(3);
                 else if (linha == "§P§") continue;
+
+                // Omitir linhas de rodapé da comanda que não pertencem ao WhatsApp
+                if (!string.IsNullOrWhiteSpace(cfg.lblAtendente) && linha.TrimStart().StartsWith(cfg.lblAtendente))
+                    continue;
+                if (linha.Trim() == "***")
+                    continue;
+                if (linha.Trim().StartsWith("VIA:"))
+                    continue;
 
                 sb.AppendLine(linha);
             }
