@@ -1,7 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Net.Http;
+using System.Text;
+using System.Text.Json;
+using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Configuration;
 using Pedeai.BLL;
 using Pedeai.Modelo;
 
@@ -59,6 +64,35 @@ namespace Pedeai.Forms
             var erro = _empBLL.Salvar(_empresa);
             if (!string.IsNullOrEmpty(erro)) { MessageBox.Show("Erro: " + erro); return; }
             MessageBox.Show("Dados da empresa salvos com sucesso!", "OK", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            // Atualiza nome no Supabase em background
+            _ = AtualizarNomeSupabaseAsync(_empresa);
+        }
+
+        private static async Task AtualizarNomeSupabaseAsync(Empresa empresa)
+        {
+            try
+            {
+                string url = ConfigurationManager.AppSettings["SupabaseUrl"] ?? "";
+                string key = ConfigurationManager.AppSettings["SupabaseKey"] ?? "";
+                if (string.IsNullOrWhiteSpace(url) || string.IsNullOrWhiteSpace(key)) return;
+                if (string.IsNullOrWhiteSpace(empresa.empCodigo_Empresa)) return;
+
+                string cod  = empresa.empCodigo_Empresa.Trim().ToUpperInvariant();
+                string nome = string.IsNullOrWhiteSpace(empresa.empNome_Fantasia)
+                    ? empresa.empNome : empresa.empNome_Fantasia;
+                string restBase = url.TrimEnd('/') + "/rest/v1/";
+
+                using var http = new HttpClient { Timeout = TimeSpan.FromSeconds(10) };
+                http.DefaultRequestHeaders.Add("apikey", key);
+                http.DefaultRequestHeaders.Add("Authorization", "Bearer " + key);
+
+                var patch = JsonSerializer.Serialize(new { NomeEmpresa = nome ?? "" });
+                var req = new HttpRequestMessage(new HttpMethod("PATCH"),
+                    restBase + "Clientes?CodigoEmpresa=eq." + Uri.EscapeDataString(cod));
+                req.Content = new StringContent(patch, Encoding.UTF8, "application/json");
+                await http.SendAsync(req);
+            }
+            catch { /* silent */ }
         }
 
         // ── ABA USUARIOS ─────────────────────────────────────────────────────
