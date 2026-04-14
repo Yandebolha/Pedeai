@@ -53,7 +53,8 @@ namespace PedeaiUpdateAdmin.Forms
             this.txtVpsUrl           = new System.Windows.Forms.TextBox();
             this.lblAdminToken       = new System.Windows.Forms.Label();
             this.txtAdminToken       = new System.Windows.Forms.TextBox();
-            this.btnSalvarConfig     = new System.Windows.Forms.Button();
+            this.txtServiceRoleKey  = new System.Windows.Forms.TextBox();
+            this.lblServiceRoleKey  = new System.Windows.Forms.Label();
             this.btnTestarConexao    = new System.Windows.Forms.Button();
             this.lblConfigInfo       = new System.Windows.Forms.Label();
 
@@ -227,6 +228,8 @@ namespace PedeaiUpdateAdmin.Forms
             this.tabConfig.Controls.Add(this.txtVpsUrl);
             this.tabConfig.Controls.Add(this.lblAdminToken);
             this.tabConfig.Controls.Add(this.txtAdminToken);
+            this.tabConfig.Controls.Add(this.lblServiceRoleKey);
+            this.tabConfig.Controls.Add(this.txtServiceRoleKey);
             this.tabConfig.Controls.Add(this.btnSalvarConfig);
             this.tabConfig.Controls.Add(this.btnTestarConexao);
             this.tabConfig.Controls.Add(this.lblConfigInfo);
@@ -311,6 +314,8 @@ namespace PedeaiUpdateAdmin.Forms
         private System.Windows.Forms.TextBox                txtVpsUrl;
         private System.Windows.Forms.Label                  lblAdminToken;
         private System.Windows.Forms.TextBox                txtAdminToken;
+        private System.Windows.Forms.Label                  lblServiceRoleKey;
+        private System.Windows.Forms.TextBox                txtServiceRoleKey;
         private System.Windows.Forms.Label                  lblConfigInfo;
         private System.Windows.Forms.Button                 btnSalvarConfig;
         private System.Windows.Forms.Button                 btnTestarConexao;

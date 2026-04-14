@@ -24,7 +24,7 @@
     </PropertyGroup>
     <MakeDir Directories="$(RanGoFoodBin)" />
     <ItemGroup>
-      <ConfigBDFiles Include="$(TargetDir)*.exe;$(TargetDir)*.dll;$(TargetDir)*.exe.config" />
+      <ConfigBDFiles Include="$(TargetDir)*.exe;$(TargetDir)*.dll;$(TargetDir)*.exe.config;$(TargetDir)*.runtimeconfig.json" />
     </ItemGroup>
     <Copy SourceFiles="@(ConfigBDFiles)"
           DestinationFolder="$(RanGoFoodBin)"

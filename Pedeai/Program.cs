@@ -3,6 +3,7 @@ using System.Configuration;
 using System.Net.Http;
 using System.Text;
 using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Pedeai.DAL;
@@ -35,10 +36,24 @@ namespace Pedeai
             var empresa = new EmpresaDAL().Carregar();
             TentarAutoRenovarLicenca(empresa);
 
-            // ── Registro no Supabase (background — aparece no gerenciador) ──
-            _ = RegistrarNoSupabase(empresa);
+            // ── Registro no Supabase + sync de licença (aguarda até 8s) ────
+            // Deve terminar ANTES do reload para que a ChaveLicenca já esteja
+            // salva localmente quando a validação ocorrer.
+            try { RegistrarNoSupabase(empresa).Wait(TimeSpan.FromSeconds(8)); } catch { }
 
-            // Recarrega após possível atualização da chave
+            // ── Sync periódico a cada 10 min (nível + licença) ──────────────
+            var syncTimer = new System.Threading.Timer(_ =>
+            {
+                try
+                {
+                    var emp = new EmpresaDAL().Carregar();
+                    _ = RegistrarNoSupabase(emp);
+                }
+                catch { }
+            }, null, TimeSpan.FromMinutes(10), TimeSpan.FromMinutes(10));
+            GC.KeepAlive(syncTimer);
+
+            // Recarrega após possível atualização da chave vinda do Supabase
             empresa = new EmpresaDAL().Carregar();
 
             bool licencaValida = LicencaService.ValidarChave(empresa.empCodigo_Empresa, empresa.empChave_Licenca);
@@ -142,7 +157,7 @@ namespace Pedeai
 
                 // 1. Verifica se já existe
                 var getResp = await http.GetAsync(
-                    restBase + "Clientes?CodigoEmpresa=eq." + Uri.EscapeDataString(cod) + "&select=Id,Nivel");
+                    restBase + "Clientes?CodigoEmpresa=eq." + Uri.EscapeDataString(cod) + "&select=Id,Nivel,ChaveLicenca");
                 string getBody = await getResp.Content.ReadAsStringAsync();
 
                 if (!getResp.IsSuccessStatusCode) return;
@@ -152,13 +167,25 @@ namespace Pedeai
 
                 if (existentes != null && existentes.Length > 0)
                 {
-                    // Já existe — atualiza NomeEmpresa, VersaoAtual e UltimaConsulta
+                    // Já existe — atualiza NomeEmpresa e UltimaConsulta
                     long id    = existentes[0].Id;
                     int  nivel = existentes[0].Nivel;
 
-                    // Sincroniza nível local se diferente
-                    if (nivel != empresa.empNivel_Atualizacao)
+                    // ── Sync Nível ──────────────────────────────────────────
+                    if (nivel > 0 && nivel != empresa.empNivel_Atualizacao)
                         new EmpresaDAL().SalvarNivelAtualizacao(empresa.Codigo, nivel);
+
+                    // ── Sync ChaveLicenca ───────────────────────────────────
+                    string chaveSup = existentes[0].ChaveLicenca ?? "";
+                    if (!string.IsNullOrWhiteSpace(chaveSup)
+                        && chaveSup != empresa.empChave_Licenca
+                        && LicencaService.ValidarChave(cod, chaveSup))
+                    {
+                        new EmpresaDAL().SalvarLicenca(empresa.Codigo, chaveSup);
+                        // Reseta período de graça ao receber chave válida do servidor
+                        if (empresa.empData_Graca.HasValue)
+                            new EmpresaDAL().SalvarDataGraca(empresa.Codigo, null);
+                    }
 
                     var patch = JsonSerializer.Serialize(new
                     {
@@ -195,8 +222,9 @@ namespace Pedeai
 
         private class ClienteIdNivel
         {
-            public long Id    { get; set; }
-            public int  Nivel { get; set; }
+            public long   Id            { get; set; }
+            public int    Nivel         { get; set; }
+            public string ChaveLicenca  { get; set; }
         }
     }
 }

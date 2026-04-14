@@ -21,13 +21,14 @@ namespace PedeaiUpdateAdmin.Forms
 
         private void FrmUpdateAdmin_Load(object sender, EventArgs e)
         {
-            var (url, key) = AdminApiClient.CarregarConfig();
-            txtVpsUrl.Text    = url;
-            txtAdminToken.Text = key;
+            var (url, key, srk) = AdminApiClient.CarregarConfig();
+            txtVpsUrl.Text         = url;
+            txtAdminToken.Text     = key;
+            txtServiceRoleKey.Text = srk;
 
             if (!string.IsNullOrWhiteSpace(url) && !string.IsNullOrWhiteSpace(key))
             {
-                _api = new AdminApiClient(url, key);
+                _api = new AdminApiClient(url, key, srk);
                 CarregarClientes();
                 CarregarPacotes();
             }
@@ -228,8 +229,8 @@ namespace PedeaiUpdateAdmin.Forms
 
         private void BtnSalvarConfig_Click(object sender, EventArgs e)
         {
-            AdminApiClient.SalvarConfig(txtVpsUrl.Text.Trim(), txtAdminToken.Text.Trim());
-            _api = new AdminApiClient(txtVpsUrl.Text.Trim(), txtAdminToken.Text.Trim());
+            AdminApiClient.SalvarConfig(txtVpsUrl.Text.Trim(), txtAdminToken.Text.Trim(), txtServiceRoleKey.Text.Trim());
+            _api = new AdminApiClient(txtVpsUrl.Text.Trim(), txtAdminToken.Text.Trim(), txtServiceRoleKey.Text.Trim());
             SetStatus("Configuração salva.");
         }
 
@@ -239,7 +240,7 @@ namespace PedeaiUpdateAdmin.Forms
             SetStatus("Testando conexão...");
             try
             {
-                var client = new AdminApiClient(txtVpsUrl.Text.Trim(), txtAdminToken.Text.Trim());
+                var client = new AdminApiClient(txtVpsUrl.Text.Trim(), txtAdminToken.Text.Trim(), txtServiceRoleKey.Text.Trim());
                 var lista   = await client.ListarClientesAsync();
                 SetStatus($"Conexão OK! {lista.Count} clientes registrados.");
             }
