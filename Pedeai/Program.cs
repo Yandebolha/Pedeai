@@ -1,5 +1,9 @@
 ﻿using System;
 using System.Configuration;
+using System.Net.Http;
+using System.Text;
+using System.Text.Json;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using Pedeai.DAL;
 using Pedeai.DB;
@@ -30,6 +34,9 @@ namespace Pedeai
             // ── Auto-renovação de licença via VPS ───────────────────────────
             var empresa = new EmpresaDAL().Carregar();
             TentarAutoRenovarLicenca(empresa);
+
+            // ── Registro no Supabase (background — aparece no gerenciador) ──
+            _ = RegistrarNoSupabase(empresa);
 
             // Recarrega após possível atualização da chave
             empresa = new EmpresaDAL().Carregar();
@@ -108,6 +115,88 @@ namespace Pedeai
                 if (empresa.empData_Graca.HasValue)
                     new EmpresaDAL().SalvarDataGraca(empresa.Codigo, null);
             }
+        }
+
+        /// <summary>
+        /// Registra ou atualiza esta instalação na tabela Clientes do Supabase.
+        /// Executado em background — falha silenciosamente se offline.
+        /// Após o registro, o cliente aparece no PedeaiUpdateAdmin e no LicencaGenerator.
+        /// </summary>
+        private static async Task RegistrarNoSupabase(Modelo.Empresa empresa)
+        {
+            try
+            {
+                string url = ConfigurationManager.AppSettings["SupabaseUrl"] ?? "";
+                string key = ConfigurationManager.AppSettings["SupabaseKey"] ?? "";
+                if (string.IsNullOrWhiteSpace(url) || string.IsNullOrWhiteSpace(key)) return;
+                if (string.IsNullOrWhiteSpace(empresa.empCodigo_Empresa)) return;
+
+                string cod  = empresa.empCodigo_Empresa.Trim().ToUpperInvariant();
+                string nome = string.IsNullOrWhiteSpace(empresa.empNome_Fantasia)
+                    ? empresa.empNome : empresa.empNome_Fantasia;
+                string restBase = url.TrimEnd('/') + "/rest/v1/";
+
+                using var http = new HttpClient { Timeout = TimeSpan.FromSeconds(15) };
+                http.DefaultRequestHeaders.Add("apikey", key);
+                http.DefaultRequestHeaders.Add("Authorization", "Bearer " + key);
+
+                // 1. Verifica se já existe
+                var getResp = await http.GetAsync(
+                    restBase + "Clientes?CodigoEmpresa=eq." + Uri.EscapeDataString(cod) + "&select=Id,Nivel");
+                string getBody = await getResp.Content.ReadAsStringAsync();
+
+                if (!getResp.IsSuccessStatusCode) return;
+
+                var opts = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+                var existentes = JsonSerializer.Deserialize<ClienteIdNivel[]>(getBody, opts);
+
+                if (existentes != null && existentes.Length > 0)
+                {
+                    // Já existe — atualiza NomeEmpresa, VersaoAtual e UltimaConsulta
+                    long id    = existentes[0].Id;
+                    int  nivel = existentes[0].Nivel;
+
+                    // Sincroniza nível local se diferente
+                    if (nivel != empresa.empNivel_Atualizacao)
+                        new EmpresaDAL().SalvarNivelAtualizacao(empresa.Codigo, nivel);
+
+                    var patch = JsonSerializer.Serialize(new
+                    {
+                        NomeEmpresa    = nome ?? "",
+                        UltimaConsulta = DateTime.UtcNow
+                    });
+                    var patchReq = new HttpRequestMessage(new HttpMethod("PATCH"),
+                        restBase + "Clientes?Id=eq." + id);
+                    patchReq.Content = new StringContent(patch, Encoding.UTF8, "application/json");
+                    await http.SendAsync(patchReq);
+                }
+                else
+                {
+                    // Novo cliente — registra
+                    int nivelLocal = empresa.empNivel_Atualizacao > 0 ? empresa.empNivel_Atualizacao : 2;
+                    var payload = JsonSerializer.Serialize(new
+                    {
+                        CodigoEmpresa  = cod,
+                        NomeEmpresa    = nome ?? "",
+                        Nivel          = nivelLocal,
+                        VersaoAtual    = "",
+                        Bloqueado      = false,
+                        DataRegistro   = DateTime.UtcNow,
+                        UltimaConsulta = DateTime.UtcNow
+                    });
+                    var postReq = new HttpRequestMessage(HttpMethod.Post, restBase + "Clientes");
+                    postReq.Headers.Add("Prefer", "return=minimal");
+                    postReq.Content = new StringContent(payload, Encoding.UTF8, "application/json");
+                    await http.SendAsync(postReq);
+                }
+            }
+            catch { /* background — falha silenciosa */ }
+        }
+
+        private class ClienteIdNivel
+        {
+            public long Id    { get; set; }
+            public int  Nivel { get; set; }
         }
     }
 }
