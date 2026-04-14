@@ -36,10 +36,10 @@ namespace Pedeai
             var empresa = new EmpresaDAL().Carregar();
             TentarAutoRenovarLicenca(empresa);
 
-            // ── Registro no Supabase + sync de licença (aguarda até 8s) ────
-            // Deve terminar ANTES do reload para que a ChaveLicenca já esteja
-            // salva localmente quando a validação ocorrer.
-            try { RegistrarNoSupabase(empresa).Wait(TimeSpan.FromSeconds(8)); } catch { }
+            // ── Registro no Supabase + sync de licença ────────────────────
+            // Roda em thread separada para não bloquear a UI, mas aguarda
+            // até 8s para que a ChaveLicenca já esteja salva antes do reload.
+            try { Task.Run(() => RegistrarNoSupabase(empresa)).Wait(TimeSpan.FromSeconds(8)); } catch { }
 
             // ── Sync periódico a cada 10 min (nível + licença) ──────────────
             var syncTimer = new System.Threading.Timer(_ =>
