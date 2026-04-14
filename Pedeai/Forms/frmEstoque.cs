@@ -30,10 +30,22 @@ namespace Pedeai.Forms
                 var hide = new[] { "EhProduto", "Situacao", "Codigo" };
                 foreach (DataGridViewColumn c in grid.Columns)
                     c.Visible = !Array.Exists(hide, h => h == c.Name);
-                if (grid.Columns["Nome"]      != null) { grid.Columns["Nome"].HeaderText      = "Nome / Item";  grid.Columns["Nome"].FillWeight      = 40; }
-                if (grid.Columns["Unidade"]   != null) { grid.Columns["Unidade"].HeaderText   = "Unid.";        grid.Columns["Unidade"].FillWeight   = 8; }
-                if (grid.Columns["Qtde"]      != null) { grid.Columns["Qtde"].HeaderText      = "Qtde";         grid.Columns["Qtde"].FillWeight      = 10; }
-                if (grid.Columns["Custo"]     != null) { grid.Columns["Custo"].HeaderText     = "Custo R$";     grid.Columns["Custo"].FillWeight     = 12; }
+                if (grid.Columns["Nome"]    != null) { grid.Columns["Nome"].HeaderText    = "Nome / Item"; }
+                if (grid.Columns["Unidade"] != null) { grid.Columns["Unidade"].HeaderText = "Unid."; }
+                if (grid.Columns["Qtde"]    != null)
+                {
+                    grid.Columns["Qtde"].HeaderText = "Qtde";
+                    grid.Columns["Qtde"].DefaultCellStyle.Format = "N2";
+                }
+                if (grid.Columns["Custo"]   != null)
+                {
+                    grid.Columns["Custo"].HeaderText = "Custo R$";
+                    grid.Columns["Custo"].DefaultCellStyle.Format = "N2";
+                }
+                // All content columns size to content; Nome column fills remaining space
+                grid.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.AllCells;
+                if (grid.Columns["Nome"] != null)
+                    grid.Columns["Nome"].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
                 ModoNeutro();
             }
             catch (Exception ex) { MessageBox.Show("Erro: " + ex.Message); }

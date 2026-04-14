@@ -579,6 +579,26 @@ namespace Pedeai.DB
                         Situacao         CHAR(1)       NOT NULL DEFAULT 'A'
                     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
 
+                // ── marmita ───────────────────────────────────────────────────
+                Exec(conn, @"
+                    CREATE TABLE IF NOT EXISTS marmita (
+                        Codigo       INT           NOT NULL AUTO_INCREMENT PRIMARY KEY,
+                        auxCodigo    INT           NOT NULL DEFAULT 1,
+                        marDescricao VARCHAR(200)  NOT NULL DEFAULT '',
+                        marValor     DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+                        Situacao     CHAR(1)       NOT NULL DEFAULT 'A'
+                    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+
+                Exec(conn, @"
+                    CREATE TABLE IF NOT EXISTS marmita_item (
+                        Codigo             INT           NOT NULL AUTO_INCREMENT PRIMARY KEY,
+                        auxCodigo          INT           NOT NULL DEFAULT 1,
+                        Codigo_Marmita     INT           NOT NULL,
+                        maritmCodigo_Merc  INT           NOT NULL DEFAULT 0,
+                        maritmNome         VARCHAR(200)  NOT NULL DEFAULT '',
+                        maritmQtde         DECIMAL(10,3) NOT NULL DEFAULT 1.000
+                    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+
                 // ── config_whatsapp (centralizada no banco para funcionar em rede) ─
                 Exec(conn, @"
                     CREATE TABLE IF NOT EXISTS config_whatsapp (

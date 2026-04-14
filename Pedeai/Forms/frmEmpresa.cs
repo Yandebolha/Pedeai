@@ -221,6 +221,7 @@ namespace Pedeai.Forms
             if (chkModFidelizacao.Checked)       mods.Add("Fidelizacao");
             if (chkModWhatsApp.Checked)            mods.Add("WhatsApp");
             if (chkModBairros.Checked)             mods.Add("Bairros");
+            if (chkModMarmitas.Checked)            mods.Add("Marmitas");
             return string.Join(",", mods);
         }
 
@@ -248,6 +249,7 @@ namespace Pedeai.Forms
             chkModFidelizacao.Checked        = tem("Fidelizacao");
             chkModWhatsApp.Checked             = tem("WhatsApp");
             chkModBairros.Checked              = tem("Bairros");
+            chkModMarmitas.Checked             = tem("Marmitas");
         }
 
         private void LimparFormUsuario()

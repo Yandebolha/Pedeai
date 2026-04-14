@@ -176,6 +176,22 @@ namespace Pedeai.Forms
             CarregarConfigDetalhe(cod);
         }
 
+        private static int MetaTipoParaIndice(string tipo) => tipo switch
+        {
+            "GASTO_ANO"   => 1,
+            "PEDIDOS"     => 2,
+            "PEDIDOS_MES" => 3,
+            _             => 0,   // VALOR (padrão)
+        };
+
+        private static string IndiceParaMetaTipo(int idx) => idx switch
+        {
+            1 => "GASTO_ANO",
+            2 => "PEDIDOS",
+            3 => "PEDIDOS_MES",
+            _ => "VALOR",
+        };
+
         private void CarregarConfigDetalhe(int codigo)
         {
             var cfg = _bll.Carregar(codigo);
@@ -183,7 +199,7 @@ namespace Pedeai.Forms
             txtNomeRegra.Text       = cfg.fidNome;
             chkAtivo.Checked        = cfg.fidAtivo;
             numMeta.Value           = cfg.fidMeta_Gasto > 0 ? cfg.fidMeta_Gasto : 500m;
-            cmbMetaTipo.SelectedIndex = cfg.fidMeta_Tipo == "PEDIDOS" ? 1 : 0;
+            cmbMetaTipo.SelectedIndex = MetaTipoParaIndice(cfg.fidMeta_Tipo);
             AtualizarLblMeta();
             rdCupom.Checked         = cfg.fidPremio_Tipo != "PRODUTO";
             rdProduto.Checked       = cfg.fidPremio_Tipo == "PRODUTO";
@@ -207,7 +223,7 @@ namespace Pedeai.Forms
             txtNomeRegra.Text       = "Nova Regra";
             chkAtivo.Checked        = true;
             numMeta.Value           = 500m;
-            cmbMetaTipo.SelectedIndex = 0;
+            cmbMetaTipo.SelectedIndex = 0; // VALOR (Gasto Mês)
             AtualizarLblMeta();
             rdCupom.Checked         = true;
             rdProduto.Checked       = false;
@@ -248,7 +264,7 @@ namespace Pedeai.Forms
                 fidNome           = txtNomeRegra.Text.Trim(),
                 fidAtivo          = chkAtivo.Checked,
                 fidMeta_Gasto     = numMeta.Value,
-                fidMeta_Tipo      = cmbMetaTipo.SelectedIndex == 1 ? "PEDIDOS" : "VALOR",
+                fidMeta_Tipo      = IndiceParaMetaTipo(cmbMetaTipo.SelectedIndex),
                 fidPremio_Tipo    = rdProduto.Checked ? "PRODUTO" : "CUPOM",
                 fidCupom_Tipo     = cmbCupomTipo.SelectedIndex == 1 ? "FIXO" : "PERCENTUAL",
                 fidCupom_Valor    = numCupomValor.Value,
@@ -377,10 +393,18 @@ namespace Pedeai.Forms
 
         private void AtualizarLblMeta()
         {
-            bool isPedidos = cmbMetaTipo.SelectedIndex == 1;
-            lblMeta.Text          = isPedidos ? "Meta (Pedidos/mês):" : "Meta de Gasto (R$):";
-            numMeta.DecimalPlaces = isPedidos ? 0 : 2;
-            if (isPedidos && numMeta.Value != Math.Floor(numMeta.Value))
+            int idx = cmbMetaTipo.SelectedIndex;
+            bool isCurrency = idx == 0 || idx == 1;  // VALOR ou GASTO_ANO
+            lblMeta.Text          = idx switch
+            {
+                0 => "Meta Gasto Mês (R$):",
+                1 => "Meta Gasto Ano (R$):",
+                2 => "Meta Pedidos Total:",
+                3 => "Meta Pedidos Mês:",
+                _ => "Meta:"
+            };
+            numMeta.DecimalPlaces = isCurrency ? 2 : 0;
+            if (!isCurrency && numMeta.Value != Math.Floor(numMeta.Value))
                 numMeta.Value = Math.Floor(numMeta.Value);
         }
 

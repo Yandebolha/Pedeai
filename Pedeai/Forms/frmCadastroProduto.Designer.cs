@@ -133,10 +133,10 @@ namespace Pedeai.Forms
             this.lblPrm.Text="Promo R$:"; this.lblPrm.AutoSize=true; this.lblPrm.Left=320; this.lblPrm.Top=79; this.lblPrm.Visible=false;
             this.numPromo.Left=382; this.numPromo.Top=76; this.numPromo.Width=85; this.numPromo.Visible=false;
             this.numPromo.DecimalPlaces=2; this.numPromo.Maximum=999999;
-            this.lblEst.Text="Estoque:"; this.lblEst.AutoSize=true; this.lblEst.Left=474; this.lblEst.Top=79;
-            this.numEstoque.Left=530; this.numEstoque.Top=76; this.numEstoque.Width=75;
+            this.lblEst.Text="Estoque:"; this.lblEst.AutoSize=true; this.lblEst.Left=320; this.lblEst.Top=79;
+            this.numEstoque.Left=385; this.numEstoque.Top=76; this.numEstoque.Width=85;
             this.numEstoque.DecimalPlaces=2; this.numEstoque.Minimum=-999999; this.numEstoque.Maximum=999999;
-            this.chkControlaEstoque.Text="Controla estoque"; this.chkControlaEstoque.Left=615; this.chkControlaEstoque.Top=78; this.chkControlaEstoque.AutoSize=true;
+            this.chkControlaEstoque.Text="Controla estoque"; this.chkControlaEstoque.Left=480; this.chkControlaEstoque.Top=78; this.chkControlaEstoque.AutoSize=true;
             // row 4
             this.lblPub.Text="Publica\u00e7\u00f5es:"; this.lblPub.AutoSize=true; this.lblPub.Left=10; this.lblPub.Top=119; this.lblPub.ForeColor=System.Drawing.Color.FromArgb(70,70,70);
             this.chkSite.Text="No site"; this.chkSite.Left=90; this.chkSite.Top=116; this.chkSite.AutoSize=true;

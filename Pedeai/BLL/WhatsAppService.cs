@@ -317,7 +317,7 @@ namespace Pedeai.BLL
             if (!string.IsNullOrWhiteSpace(observacao))
             {
                 sb.AppendLine();
-                sb.AppendLine($"_{observacao}_");
+                sb.AppendLine(observacao);
             }
             sb.AppendLine("\nFaça seu pedido agora! 📱");
             EnviarBackground(telefone, sb.ToString().Trim());

@@ -16,6 +16,8 @@ namespace Pedeai.DAL
                                c.clieTelefone         AS Telefone,
                                c.clieCelular          AS Celular,
                                c.clieEmail            AS Email,
+                               CONCAT(c.clieEndereco,
+                                      IF(c.clieNumero <> '', CONCAT(', ', c.clieNumero), '')) AS Endereco,
                                c.clieCidade           AS Cidade,
                                COALESCE((SELECT COUNT(*) FROM pedido_web pw
                                          WHERE pw.Codigo_Cliente = c.Codigo

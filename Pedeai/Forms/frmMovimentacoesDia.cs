@@ -126,8 +126,8 @@ namespace Pedeai.Forms
                 { col.Visible = false; continue; }
                 col.Visible    = true;
                 col.HeaderText = show[col.Name].header;
-                col.FillWeight = show[col.Name].fill;
             }
+            g.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.AllCells;
         }
 
         private static void MostrarItensDialog(string numPedido, string cliente, DataTable dtItens)

@@ -211,7 +211,8 @@ namespace Pedeai.Forms
                     var p = new ProdItem(
                         Convert.ToInt32(r["Codigo"]),
                         r["Nome"]?.ToString() ?? "",
-                        r["Preco"] == System.DBNull.Value ? 0 : Convert.ToDecimal(r["Preco"]));
+                        r["Preco"] == System.DBNull.Value ? 0 : Convert.ToDecimal(r["Preco"]),
+                        r.Table.Columns.Contains("Categoria") ? r["Categoria"]?.ToString() ?? "" : "");
                     _produtos.Add(p);
                     collection.Add(p.Nome);
                 }
@@ -232,11 +233,35 @@ namespace Pedeai.Forms
             dlg.MaximizeBox     = dlg.MinimizeBox = false;
             dlg.BackColor       = Color.FromArgb(245, 237, 216);
 
-            var txtFiltro = new TextBox { Dock = DockStyle.Top, Height = 28,
+            // ── Filtros: nome + categoria ─────────────────────────────────────
+            var pnlFiltros = new Panel { Dock = DockStyle.Top, Height = 30,
+                BackColor = Color.FromArgb(235, 228, 214) };
+
+            var txtFiltro = new TextBox
+            {
+                Left = 4, Top = 4, Width = 280, Height = 22,
                 BackColor = Color.White, ForeColor = Color.FromArgb(50, 50, 50),
                 BorderStyle = BorderStyle.FixedSingle,
-                Font = new Font("Segoe UI", 10F),
-                PlaceholderText = "Filtrar por nome..." };
+                Font = new Font("Segoe UI", 9.5F),
+                PlaceholderText = "Filtrar por nome..."
+            };
+            var cmbCat = new ComboBox
+            {
+                Left = 292, Top = 3, Width = 200, Height = 22,
+                FlatStyle = FlatStyle.Flat,
+                Font = new Font("Segoe UI", 9F),
+                DropDownStyle = ComboBoxStyle.DropDownList
+            };
+            // Preencher categorias
+            var cats = new System.Collections.Generic.List<string> { "-- Todas as categorias --" };
+            foreach (var p2 in _produtos)
+                if (!string.IsNullOrWhiteSpace(p2.Categoria) && !cats.Contains(p2.Categoria))
+                    cats.Add(p2.Categoria);
+            cats.Sort(1, cats.Count - 1, System.Collections.Generic.Comparer<string>.Default);
+            cmbCat.Items.AddRange(cats.ToArray());
+            cmbCat.SelectedIndex = 0;
+            pnlFiltros.Controls.Add(txtFiltro);
+            pnlFiltros.Controls.Add(cmbCat);
 
             var grid = new DataGridView
             {
@@ -256,15 +281,21 @@ namespace Pedeai.Forms
 
             void Preencher(string filtro)
             {
+                string catFiltro = cmbCat.SelectedIndex > 0 ? cmbCat.SelectedItem?.ToString() ?? "" : "";
                 grid.Rows.Clear();
                 foreach (var p in _produtos)
-                    if (string.IsNullOrWhiteSpace(filtro) ||
-                        p.Nome.IndexOf(filtro, StringComparison.OrdinalIgnoreCase) >= 0)
-                        grid.Rows.Add(p.Nome, p.Preco.ToString("N2"));
+                {
+                    if (!string.IsNullOrWhiteSpace(filtro) &&
+                        p.Nome.IndexOf(filtro, StringComparison.OrdinalIgnoreCase) < 0) continue;
+                    if (!string.IsNullOrWhiteSpace(catFiltro) &&
+                        !string.Equals(p.Categoria, catFiltro, StringComparison.OrdinalIgnoreCase)) continue;
+                    grid.Rows.Add(p.Nome, p.Preco.ToString("N2"));
+                }
             }
             Preencher("");
 
             txtFiltro.TextChanged += (_, __) => Preencher(txtFiltro.Text.Trim());
+            cmbCat.SelectedIndexChanged += (_, __) => Preencher(txtFiltro.Text.Trim());
 
             ProdItem escolhido = null;
             grid.CellDoubleClick += (_, __) =>
@@ -289,7 +320,7 @@ namespace Pedeai.Forms
 
             dlg.Controls.Add(grid);
             dlg.Controls.Add(btnOk);
-            dlg.Controls.Add(txtFiltro);
+            dlg.Controls.Add(pnlFiltros);
 
             if (dlg.ShowDialog(this) == DialogResult.OK && escolhido != null)
             {
@@ -552,9 +583,136 @@ namespace Pedeai.Forms
             AtualizarTotal();
         }
 
-        // -- Meio a Meio -----------------------------------------------------
-        private void BtnMeioAMeio_Click(object sender, EventArgs e)
+        // -- Marmita ---------------------------------------------------------
+        private void BtnMarmita_Click(object sender, EventArgs e)
         {
+            var bll = new BLL.MarmitaBLL();
+            var dtMarmitas = bll.Listar(apenasAtivas: true);
+            if (dtMarmitas.Rows.Count == 0)
+            {
+                MessageBox.Show("Nenhuma marmita cadastrada. Acesse o m\u00f3dulo Marmitas para cadastrar.", "Marmitas", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+            using var dlg = new Form();
+            dlg.Text            = "Adicionar Marmita ao Pedido";
+            dlg.StartPosition   = FormStartPosition.CenterParent;
+            dlg.Size            = new Size(620, 480);
+            dlg.FormBorderStyle = FormBorderStyle.FixedDialog;
+            dlg.MaximizeBox     = dlg.MinimizeBox = false;
+            dlg.BackColor       = Color.FromArgb(245, 237, 216);
+
+            var pnlTop = new Panel { Dock = DockStyle.Top, Height = 44, BackColor = Color.FromArgb(176, 110, 42) };
+            var lblTit = new Label { Text = "\U0001F96B  Selecionar Marmita", ForeColor = Color.White, Font = new Font("Segoe UI", 11F, FontStyle.Bold), Dock = DockStyle.Fill, TextAlign = ContentAlignment.MiddleCenter };
+            pnlTop.Controls.Add(lblTit);
+
+            // Marmitas grid
+            var lblMarTit = new Label { Text = "Tipos de Marmita:", Left = 10, Top = 54, AutoSize = true, ForeColor = Color.FromArgb(100, 80, 50), Font = new Font("Segoe UI", 8.5F, FontStyle.Bold) };
+            var gridMar = new DataGridView
+            {
+                Left = 10, Top = 72, Width = 580, Height = 150,
+                ReadOnly = true, AllowUserToAddRows = false,
+                SelectionMode = DataGridViewSelectionMode.FullRowSelect,
+                RowHeadersVisible = false, AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill,
+                MultiSelect = false, BackgroundColor = Color.FromArgb(250, 246, 238),
+                DefaultCellStyle = { BackColor = Color.FromArgb(250, 246, 238), ForeColor = Color.FromArgb(50, 40, 25), SelectionBackColor = Color.FromArgb(224, 113, 42), SelectionForeColor = Color.White },
+                ColumnHeadersDefaultCellStyle = { BackColor = Color.FromArgb(176, 110, 42), ForeColor = Color.White, Font = new Font("Segoe UI", 9F, FontStyle.Bold) },
+                BorderStyle = BorderStyle.None, Font = new Font("Segoe UI", 9F),
+                GridColor = Color.FromArgb(210, 195, 165)
+            };
+            gridMar.DataError += (_, ev) => ev.ThrowException = false;
+            gridMar.DataSource = dtMarmitas;
+            if (gridMar.Columns.Contains("Codigo"))   gridMar.Columns["Codigo"].Visible   = false;
+            if (gridMar.Columns.Contains("Situacao")) gridMar.Columns["Situacao"].Visible = false;
+            if (gridMar.Columns.Contains("Descricao")) { gridMar.Columns["Descricao"].HeaderText = "Descri\u00e7\u00e3o"; gridMar.Columns["Descricao"].FillWeight = 65; }
+            if (gridMar.Columns.Contains("Valor R$"))  { gridMar.Columns["Valor R$"].HeaderText  = "Valor R$";  gridMar.Columns["Valor R$"].FillWeight  = 25; gridMar.Columns["Valor R$"].DefaultCellStyle.Format = "N2"; }
+
+            // Ingredientes grid
+            var lblItemsTit = new Label { Text = "Ingredientes / Produtos:", Left = 10, Top = 232, AutoSize = true, ForeColor = Color.FromArgb(100, 80, 50), Font = new Font("Segoe UI", 8.5F, FontStyle.Bold) };
+            var gridItens2 = new DataGridView
+            {
+                Left = 10, Top = 250, Width = 580, Height = 130,
+                ReadOnly = true, AllowUserToAddRows = false,
+                SelectionMode = DataGridViewSelectionMode.FullRowSelect,
+                RowHeadersVisible = false, AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill,
+                MultiSelect = false, BackgroundColor = Color.FromArgb(250, 246, 238),
+                DefaultCellStyle = { BackColor = Color.FromArgb(250, 246, 238), ForeColor = Color.FromArgb(50, 40, 25), SelectionBackColor = Color.FromArgb(224, 113, 42), SelectionForeColor = Color.White },
+                ColumnHeadersDefaultCellStyle = { BackColor = Color.FromArgb(176, 110, 42), ForeColor = Color.White, Font = new Font("Segoe UI", 9F, FontStyle.Bold) },
+                BorderStyle = BorderStyle.None, Font = new Font("Segoe UI", 9F),
+                GridColor = Color.FromArgb(210, 195, 165)
+            };
+            gridItens2.DataError += (_, ev) => ev.ThrowException = false;
+
+            void CarregarItensDialog(int codMar)
+            {
+                gridItens2.DataSource = null;
+                gridItens2.Columns.Clear();
+                if (codMar <= 0) return;
+                var lista = bll.ListarItens(codMar);
+                var dt2 = new System.Data.DataTable();
+                dt2.Columns.Add("Produto", typeof(string));
+                dt2.Columns.Add("Qtde",    typeof(decimal));
+                foreach (var it in lista) dt2.Rows.Add(it.maritmNome, it.maritmQtde);
+                gridItens2.DataSource = dt2;
+                if (gridItens2.Columns.Contains("Qtde")) { gridItens2.Columns["Qtde"].HeaderText = "Qtde"; gridItens2.Columns["Qtde"].FillWeight = 20; gridItens2.Columns["Qtde"].DefaultCellStyle.Format = "N2"; }
+            }
+            gridMar.SelectionChanged += (_, __) =>
+            {
+                if (gridMar.SelectedRows.Count == 0) return;
+                var v = gridMar.SelectedRows[0].Cells["Codigo"]?.Value;
+                if (v == null || v == DBNull.Value) return;
+                CarregarItensDialog(Convert.ToInt32(v));
+            };
+
+            // Qtde da marmita
+            var lblQ = new Label { Text = "Qtde:", Left = 10, Top = 392, AutoSize = true, ForeColor = Color.FromArgb(100, 80, 50), Font = new Font("Segoe UI", 9F, FontStyle.Bold) };
+            var numQ = new NumericUpDown { Left = 58, Top = 388, Width = 70, Height = 26, Value = 1, Minimum = 1, Maximum = 99, DecimalPlaces = 0, BackColor = Color.White, ForeColor = Color.FromArgb(50, 40, 25) };
+
+            var pnlFoot = new Panel { Dock = DockStyle.Bottom, Height = 46, BackColor = Color.FromArgb(235, 226, 208) };
+            var btnCnc = new Button { Text = "\u2715  Cancelar", Left = 12, Top = 8, Width = 120, Height = 30, BackColor = Color.FromArgb(120, 100, 68), ForeColor = Color.White, FlatStyle = FlatStyle.Flat, Font = new Font("Segoe UI", 9F, FontStyle.Bold), Cursor = Cursors.Hand };
+            btnCnc.FlatAppearance.BorderSize = 0;
+            btnCnc.Click += (_, __) => dlg.DialogResult = DialogResult.Cancel;
+            var btnOk = new Button { Text = "Adicionar Marmita  \u2192", Left = 460, Top = 8, Width = 148, Height = 30, BackColor = Color.FromArgb(224, 113, 42), ForeColor = Color.White, FlatStyle = FlatStyle.Flat, Font = new Font("Segoe UI", 9F, FontStyle.Bold), Cursor = Cursors.Hand };
+            btnOk.FlatAppearance.BorderSize = 0;
+            pnlFoot.Controls.Add(btnCnc); pnlFoot.Controls.Add(btnOk);
+
+            (string Nome, decimal Valor) resultado = default;
+            btnOk.Click += (_, __) =>
+            {
+                if (gridMar.SelectedRows.Count == 0) { MessageBox.Show("Selecione uma marmita."); return; }
+                var rowMar = gridMar.SelectedRows[0];
+                string desc  = rowMar.Cells["Descricao"]?.Value?.ToString() ?? "";
+                var    valV  = rowMar.Cells["Valor R$"]?.Value;
+                decimal val  = valV == null || valV == DBNull.Value ? 0m : Convert.ToDecimal(valV);
+                resultado = (desc, val * (int)numQ.Value);
+                dlg.DialogResult = DialogResult.OK;
+            };
+            gridMar.CellDoubleClick += (_, __) => btnOk.PerformClick();
+
+            dlg.Controls.Add(numQ); dlg.Controls.Add(lblQ);
+            dlg.Controls.Add(gridItens2); dlg.Controls.Add(lblItemsTit);
+            dlg.Controls.Add(gridMar); dlg.Controls.Add(lblMarTit);
+            dlg.Controls.Add(pnlFoot); dlg.Controls.Add(pnlTop);
+
+            if (dlg.ShowDialog(this) != DialogResult.OK) return;
+
+            // Adicionar como item do pedido
+            var item = new ItemPedidoWeb
+            {
+                Codigo_Mercadoria   = 0,
+                itpwNome_Mercadoria = resultado.Nome,
+                itpwQtde            = 1,
+                itpwPreco_Unitario  = resultado.Valor,
+                itpwDesconto_Pct    = 0,
+                itpwSubtotal        = resultado.Valor,
+            };
+            _itens.Add(item);
+            gridItens.Rows.Add(item.itpwNome_Mercadoria, item.itpwQtde, item.itpwPreco_Unitario.ToString("N2"), "", item.itpwSubtotal.ToString("N2"));
+            AtualizarTotal();
+        }
+
+        // -- Meio a Meio -----------------------------------------------------
+        private void BtnMeioAMeio_Click(object sender, EventArgs e)        {
             if (_produtos.Count == 0) { MessageBox.Show("Nenhum produto carregado."); return; }
 
             using var dlg = new Form();
@@ -662,8 +820,8 @@ namespace Pedeai.Forms
 
         private class ProdItem
         {
-            public int Codigo; public string Nome; public decimal Preco;
-            public ProdItem(int c, string n, decimal p) { Codigo = c; Nome = n; Preco = p; }
+            public int Codigo; public string Nome; public decimal Preco; public string Categoria;
+            public ProdItem(int c, string n, decimal p, string cat = "") { Codigo = c; Nome = n; Preco = p; Categoria = cat ?? ""; }
         }
     }
 }

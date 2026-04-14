@@ -79,13 +79,24 @@ namespace Pedeai.BLL
                     var cfg = _dal.Carregar(codigoConfig);
                     if (cfg.fidMeta_Gasto <= 0) continue;
 
-                    // Verifica se cliente atingiu a meta (por valor gasto ou por nº de pedidos no mês)
+                    // Verifica se cliente atingiu a meta de acordo com o critério configurado
                     decimal metaAtingida;
-                    if (cfg.fidMeta_Tipo == "PEDIDOS")
-                        metaAtingida = _dal.ContarPedidosClienteMes(
-                            codigoCliente, DateTime.Today.Year, DateTime.Today.Month);
-                    else
-                        metaAtingida = cliente.clieGasto_Mensal; // VALOR (padrão)
+                    switch (cfg.fidMeta_Tipo)
+                    {
+                        case "PEDIDOS":
+                            metaAtingida = _dal.ContarPedidosClienteMes(
+                                codigoCliente, DateTime.Today.Year, DateTime.Today.Month);
+                            break;
+                        case "PEDIDOS_MES":
+                            metaAtingida = cliente.cliePedidos_Mensal;
+                            break;
+                        case "GASTO_ANO":
+                            metaAtingida = cliente.clieTotalGasto;
+                            break;
+                        default:  // "VALOR" — gasto mensal
+                            metaAtingida = cliente.clieGasto_Mensal;
+                            break;
+                    }
 
                     if (metaAtingida < cfg.fidMeta_Gasto) continue;
 

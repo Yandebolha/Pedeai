@@ -1,4 +1,5 @@
 using System;
+using System.Data;
 using System.Windows.Forms;
 using Pedeai.BLL;
 
@@ -176,9 +177,30 @@ namespace Pedeai.Forms
                 string aut = pedido.pediAutorizador ?? "";
                 lblAutorizador.Text = string.IsNullOrWhiteSpace(aut) ? "\u2014" : aut;
 
-                // Itens
-                gridItens.DataSource = _bll.ListarItens(pedido.Codigo);
+                // Itens — carregar e acrescentar taxa de entrega como linha
+                var dtItensConsulta = _bll.ListarItens(pedido.Codigo);
+                if (pedido.pediTaxa_Entrega > 0 && dtItensConsulta != null)
+                {
+                    var rowEnt = dtItensConsulta.NewRow();
+                    rowEnt["Produto"]  = "\U0001F69A Taxa de Entrega";
+                    rowEnt["Qtde"]     = 1m;
+                    rowEnt["Unitario"] = pedido.pediTaxa_Entrega;
+                    if (dtItensConsulta.Columns.Contains("Desconto")) rowEnt["Desconto"] = 0m;
+                    rowEnt["Subtotal"] = pedido.pediTaxa_Entrega;
+                    if (dtItensConsulta.Columns.Contains("Obs"))      rowEnt["Obs"]      = "";
+                    dtItensConsulta.Rows.Add(rowEnt);
+                }
+                gridItens.DataSource = dtItensConsulta;
                 ConfigurarGridItens();
+
+                // Título dos itens
+                string sitTxt = pedido.pediSituacao switch
+                {
+                    0 => "Pendente", 1 => "Confirmado", 2 => "Em Preparo",
+                    3 => "Pronto", 4 => "Saiu p/ Entrega", 5 => "Entregue",
+                    6 => "Cancelado", _ => pedido.pediSituacao.ToString()
+                };
+                lblItensTitle.Text = $"Itens - Pedido #{pedido.pediNumero}  |  \u2713 {sitTxt}  |  Total: R$ {pedido.pediValor_Total:N2}";
 
                 pnlInfo.Visible = true;
             }

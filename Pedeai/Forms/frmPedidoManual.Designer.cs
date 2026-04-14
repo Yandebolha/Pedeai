@@ -45,6 +45,7 @@ namespace Pedeai.Forms
             this.numDescontoItem = new System.Windows.Forms.NumericUpDown();
             this.lblDesconto = new System.Windows.Forms.Label();
             this.btnMeioAMeio = new System.Windows.Forms.Button();
+            this.btnMarmita   = new System.Windows.Forms.Button();
             this.btnAdd = new System.Windows.Forms.Button();
             this.sideDiv = new System.Windows.Forms.Panel();
             this.sidebar = new System.Windows.Forms.Panel();
@@ -322,6 +323,7 @@ namespace Pedeai.Forms
             this.pnlAddItem.Controls.Add(this.numDescontoItem);
             this.pnlAddItem.Controls.Add(this.lblDesconto);
             this.pnlAddItem.Controls.Add(this.btnMeioAMeio);
+            this.pnlAddItem.Controls.Add(this.btnMarmita);
             this.pnlAddItem.Controls.Add(this.btnAdd);
             this.pnlAddItem.Dock = System.Windows.Forms.DockStyle.Top;
             this.pnlAddItem.Location = new System.Drawing.Point(0, 0);
@@ -496,6 +498,23 @@ namespace Pedeai.Forms
             this.btnMeioAMeio.Text = "Pedido Fracionado";
             this.btnMeioAMeio.UseVisualStyleBackColor = false;
             this.btnMeioAMeio.Click += new System.EventHandler(this.BtnMeioAMeio_Click);
+            // 
+            // btnMarmita
+            // 
+            this.btnMarmita.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnMarmita.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(139)))), ((int)(((byte)(90)))), ((int)(((byte)(43)))));
+            this.btnMarmita.FlatAppearance.BorderSize = 0;
+            this.btnMarmita.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnMarmita.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.btnMarmita.ForeColor = System.Drawing.Color.White;
+            this.btnMarmita.Location = new System.Drawing.Point(356, 58);
+            this.btnMarmita.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.btnMarmita.Name = "btnMarmita";
+            this.btnMarmita.Size = new System.Drawing.Size(148, 30);
+            this.btnMarmita.TabIndex = 11;
+            this.btnMarmita.Text = "\U0001F96B Marmita";
+            this.btnMarmita.UseVisualStyleBackColor = false;
+            this.btnMarmita.Click += new System.EventHandler(this.BtnMarmita_Click);
             // 
             // btnAdd
             // 
@@ -1004,6 +1023,7 @@ namespace Pedeai.Forms
             numDescontoItem.SetBounds(x, 57, 68, 26); x += 76;
             lblDesconto.SetBounds(x, 61, 120, 16);
             btnMeioAMeio.SetBounds(pw - 270, 57, 152, 26);
+            btnMarmita.SetBounds(pw - 430, 57, 152, 26);
             btnAdd.SetBounds(pw - 134, 57, 148, 26);
         }
 
@@ -1069,6 +1089,7 @@ namespace Pedeai.Forms
         private System.Windows.Forms.Button        btnAplicarCupom;
         private System.Windows.Forms.Label         lblCupomInfo;
         private System.Windows.Forms.Button        btnMeioAMeio;
+        private System.Windows.Forms.Button        btnMarmita;
         private System.Windows.Forms.DataGridViewTextBoxColumn        colNome;
         private System.Windows.Forms.DataGridViewTextBoxColumn        colQtde;
         private System.Windows.Forms.DataGridViewTextBoxColumn        colUnitario;

@@ -51,6 +51,7 @@ namespace Pedeai.Forms
             this.chkModFidelizacao = new System.Windows.Forms.CheckBox();
             this.chkModWhatsApp = new System.Windows.Forms.CheckBox();
             this.chkModBairros = new System.Windows.Forms.CheckBox();
+            this.chkModMarmitas = new System.Windows.Forms.CheckBox();
             this.txtImpNomeEmpresa = new System.Windows.Forms.TextBox();
             this.txtImpEndereco = new System.Windows.Forms.TextBox();
             this.txtImpTelefone = new System.Windows.Forms.TextBox();
@@ -483,6 +484,15 @@ namespace Pedeai.Forms
             this.chkModWhatsApp.Text = "WhatsApp";
             this.chkModWhatsApp.ForeColor = System.Drawing.Color.FromArgb(50, 50, 50);
             // 
+            // chkModMarmitas
+            // 
+            this.chkModMarmitas.Location = new System.Drawing.Point(516, 364);
+            this.chkModMarmitas.Name = "chkModMarmitas";
+            this.chkModMarmitas.Size = new System.Drawing.Size(164, 22);
+            this.chkModMarmitas.TabIndex = 30;
+            this.chkModMarmitas.Text = "Marmitas";
+            this.chkModMarmitas.ForeColor = System.Drawing.Color.FromArgb(50, 50, 50);
+            // 
             // txtImpNomeEmpresa
             // 
             this.txtImpNomeEmpresa.BackColor = System.Drawing.Color.White;
@@ -764,6 +774,7 @@ namespace Pedeai.Forms
             this.tabUsr.Controls.Add(this.chkModFidelizacao);
             this.tabUsr.Controls.Add(this.chkModWhatsApp);
             this.tabUsr.Controls.Add(this.chkModBairros);
+            this.tabUsr.Controls.Add(this.chkModMarmitas);
             this.tabUsr.Controls.Add(this.btnNovoUsr);
             this.tabUsr.Controls.Add(this.btnPesquisarUsr);
             this.tabUsr.Controls.Add(this.btnSalvUsr);
@@ -979,6 +990,7 @@ namespace Pedeai.Forms
         internal System.Windows.Forms.CheckBox chkModFidelizacao;
         internal System.Windows.Forms.CheckBox chkModWhatsApp;
         internal System.Windows.Forms.CheckBox chkModBairros;
+        internal System.Windows.Forms.CheckBox chkModMarmitas;
         // Impressao
         internal System.Windows.Forms.TextBox        txtImpNomeEmpresa;
         internal System.Windows.Forms.TextBox        txtImpEndereco;

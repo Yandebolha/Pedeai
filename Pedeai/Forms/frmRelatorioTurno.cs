@@ -76,7 +76,6 @@ namespace Pedeai.Forms
             {
                 ["Codigo"]              = "N\u00ba",
                 ["pediNome_Cliente"]    = "Cliente",
-                ["pediSituacao"]        = "Sit.",
                 ["pediValor_Total"]     = "Total R$",
                 ["pediPago_Dinheiro"]   = "Dinheiro",
                 ["pediPago_Cartao"]     = "Cart\u00e3o",
@@ -163,14 +162,13 @@ namespace Pedeai.Forms
                     // Larguras proporcionais por coluna para evitar sobreposição
                     var colWeightMap = new System.Collections.Generic.Dictionary<string, float>
                     {
-                        ["Codigo"]              = 0.4f,
-                        ["pediNome_Cliente"]    = 2.2f,
-                        ["pediSituacao"]        = 0.4f,
-                        ["pediValor_Total"]     = 0.9f,
-                        ["pediPago_Dinheiro"]   = 0.9f,
-                        ["pediPago_Cartao"]     = 0.9f,
-                        ["pediPago_Pix"]        = 0.7f,
-                        ["pediData_Lancamento"] = 1.4f,
+                        ["Codigo"]              = 0.5f,
+                        ["pediNome_Cliente"]    = 2.5f,
+                        ["pediValor_Total"]     = 1.0f,
+                        ["pediPago_Dinheiro"]   = 1.0f,
+                        ["pediPago_Cartao"]     = 1.0f,
+                        ["pediPago_Pix"]        = 0.8f,
+                        ["pediData_Lancamento"] = 1.5f,
                     };
                     float totalWeight = 0f;
                     foreach (var col in cols)

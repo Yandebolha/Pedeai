@@ -1820,6 +1820,7 @@ namespace Pedeai
                 NavSe("Estoque",           "\U0001F4E6  Estoque",           () => AbrirForm(new frmEstoque()));
                 NavSe("EntradaMercadoria", "\U0001F69A  Entrada Mercad.",  () => AbrirForm(new frmEntradaMercadoria()));
                 NavSe("Bairros",           "\U0001F4CD  Bairros / Taxa",   () => AbrirForm(new frmCadastroBairro()));
+                NavSe("Marmitas",          "\U0001F96B  Marmitas",          () => AbrirForm(new Forms.frmCadastroMarmita()));
                 NavSe("Avisos",            "\U0001F514  Avisos",           () => AbrirForm(new frmAvisos()));
             }
 

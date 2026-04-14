@@ -89,6 +89,7 @@ namespace Pedeai.Forms
             // Hide unused columns before setting fill mode
             if (grid.Columns.Contains("Situacao")) grid.Columns["Situacao"].Visible = false;
             if (grid.Columns.Contains("Telefone")) grid.Columns["Telefone"].Visible = false;
+            if (grid.Columns.Contains("Email"))    grid.Columns["Email"].Visible    = false;
 
             grid.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
 
@@ -101,14 +102,14 @@ namespace Pedeai.Forms
             }
 
             if (grid.Columns.Contains("Codigo")) grid.Columns["Codigo"].Visible = false;
-            Col("Nome",           "Nome / Raz\u00e3o Social", 220);
-            Col("Celular",        "Celular",             110,  DataGridViewContentAlignment.MiddleCenter);
-            Col("Email",          "E-mail",              180);
-            Col("Cidade",         "Cidade",              110);
-            Col("TotalPedidos",   "Pedidos",              60,  DataGridViewContentAlignment.MiddleCenter);
-            Col("TotalGasto",     "Total Gasto",          90,  DataGridViewContentAlignment.MiddleRight);
-            Col("GastoMensal",    "Gasto M\u00eas",         80,  DataGridViewContentAlignment.MiddleRight);
-            Col("PedidosMensal",  "Pedidos M\u00eas",       70,  DataGridViewContentAlignment.MiddleCenter);
+            Col("Nome",          "Nome / Raz\u00e3o Social", 200);
+            Col("Celular",       "Celular",              90,  DataGridViewContentAlignment.MiddleCenter);
+            Col("Endereco",      "Endere\u00e7o",           180);
+            Col("Cidade",        "Cidade",               90);
+            Col("PedidosMensal", "Pedidos M\u00eas",         70,  DataGridViewContentAlignment.MiddleCenter);
+            Col("TotalPedidos",  "Pedidos Total",         70,  DataGridViewContentAlignment.MiddleCenter);
+            Col("GastoMensal",   "Gasto M\u00eas R$",        90,  DataGridViewContentAlignment.MiddleRight);
+            Col("TotalGasto",    "Gasto Total R$",        90,  DataGridViewContentAlignment.MiddleRight);
 
             // Formata valores monetários
             foreach (DataGridViewRow row in grid.Rows)

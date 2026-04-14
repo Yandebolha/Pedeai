@@ -1,0 +1,436 @@
+using System;
+using System.Collections.Generic;
+using System.Drawing;
+using System.Windows.Forms;
+using Pedeai.BLL;
+using Pedeai.Modelo;
+
+namespace Pedeai.Forms
+{
+    public class frmCadastroMarmita : Form
+    {
+        private readonly MarmitaBLL   _bll     = new MarmitaBLL();
+        private readonly MercadoriaBLL _mercBll = new MercadoriaBLL();
+
+        // Paleta de cores do sistema
+        private static readonly Color ClrBg     = Color.FromArgb(245, 237, 216);
+        private static readonly Color ClrHeader = Color.FromArgb(176, 110, 42);
+        private static readonly Color ClrText   = Color.FromArgb(50, 40, 25);
+        private static readonly Color ClrFoot   = Color.FromArgb(235, 226, 208);
+        private static readonly Color ClrOrange = Color.FromArgb(224, 113, 42);
+        private static readonly Color ClrBrown  = Color.FromArgb(120, 100, 68);
+        private static readonly Color ClrRed    = Color.FromArgb(192, 57, 43);
+        private static readonly Color ClrGreen  = Color.FromArgb(39, 130, 57);
+        private static readonly Color ClrGrid1  = Color.FromArgb(250, 246, 238);
+        private static readonly Color ClrGrid2  = Color.FromArgb(240, 234, 218);
+        private static readonly Color ClrGHdr   = Color.FromArgb(176, 110, 42);
+
+        // Marmita em edição
+        private int _codigoEditando = 0;
+
+        // Produtos disponíveis (para adicionar aos itens)
+        private readonly List<(int Codigo, string Nome, decimal Preco)> _produtos
+            = new List<(int, string, decimal)>();
+
+        // Controles
+        private DataGridView gridMarmitas;
+        private DataGridView gridItens;
+        private Panel pnlForm;
+        private TextBox txtDescricao;
+        private NumericUpDown numValor;
+        private Label lblFormTitulo;
+        private Button btnNovaMAR, btnSalvar, btnExcluir, btnFechar;
+        private Button btnAddItem, btnRemItem;
+
+        public frmCadastroMarmita()
+        {
+            InitUI();
+            if (System.ComponentModel.LicenseManager.UsageMode
+                    == System.ComponentModel.LicenseUsageMode.Designtime) return;
+            Load += (_, __) => { CarregarProdutos(); CarregarGrid(); };
+        }
+
+        // ── Construção da UI ─────────────────────────────────────────────────
+
+        private void InitUI()
+        {
+            Text            = "Cadastro de Marmitas";
+            BackColor       = ClrBg;
+            Font            = new Font("Segoe UI", 9F);
+            StartPosition   = FormStartPosition.CenterScreen;
+            Size            = new Size(900, 640);
+            MinimumSize     = new Size(700, 520);
+
+            // ── Cabeçalho ──────────────────────────────────────────────────
+            var pnlTop = new Panel { Dock = DockStyle.Top, Height = 48, BackColor = ClrHeader };
+            var lblTit = new Label
+            {
+                Text      = "\U0001F96B  Marmitas",
+                ForeColor = Color.White,
+                Font      = new Font("Segoe UI", 13F, FontStyle.Bold),
+                Dock      = DockStyle.Fill, TextAlign = ContentAlignment.MiddleCenter
+            };
+            pnlTop.Controls.Add(lblTit);
+
+            // ── Toolbar ───────────────────────────────────────────────────
+            var pnlTool = new Panel
+                { Dock = DockStyle.Top, Height = 44, BackColor = ClrFoot, Padding = new Padding(8, 6, 8, 6) };
+            btnNovaMAR = MkBtn("+ Nova Marmita", ClrOrange, 160);
+            btnNovaMAR.Click += BtnNova_Click;
+            btnExcluir = MkBtn("Excluir", ClrRed, 100);
+            btnExcluir.Click += BtnExcluir_Click;
+            btnFechar = MkBtn("Fechar", ClrBrown, 90);
+            btnFechar.Click += (_, __) => Close();
+            btnExcluir.Left = 176; btnFechar.Left = 284;
+            pnlTool.Controls.Add(btnNovaMAR);
+            pnlTool.Controls.Add(btnExcluir);
+            pnlTool.Controls.Add(btnFechar);
+
+            // ── Grid marmitas ─────────────────────────────────────────────
+            var pnlGridTop = new Panel { Dock = DockStyle.Left, Width = 420, Padding = new Padding(8, 6, 4, 6) };
+            pnlGridTop.BackColor = ClrBg;
+
+            var lblGridTit = new Label
+            {
+                Text = "Marmitas cadastradas",
+                ForeColor = Color.FromArgb(100, 80, 50),
+                Font = new Font("Segoe UI", 8.5F, FontStyle.Bold),
+                Dock = DockStyle.Top, Height = 22
+            };
+            gridMarmitas = MkGrid();
+            gridMarmitas.Dock = DockStyle.Fill;
+            gridMarmitas.SelectionChanged += GridMarmitas_SelectionChanged;
+            gridMarmitas.CellDoubleClick  += GridMarmitas_DoubleClick;
+            pnlGridTop.Controls.Add(gridMarmitas);
+            pnlGridTop.Controls.Add(lblGridTit);
+
+            // ── Painel direito: form + itens ──────────────────────────────
+            var pnlRight = new Panel { Dock = DockStyle.Fill, Padding = new Padding(4, 6, 8, 6), BackColor = ClrBg };
+
+            // Formulário de cadastro
+            pnlForm = new Panel
+            {
+                Dock = DockStyle.Top, Height = 130, BackColor = ClrFoot,
+                Padding = new Padding(10, 8, 10, 8), Visible = false
+            };
+            lblFormTitulo = new Label
+            {
+                Text = "Nova Marmita",
+                ForeColor = Color.FromArgb(100, 80, 50),
+                Font = new Font("Segoe UI", 9F, FontStyle.Bold),
+                Dock = DockStyle.Top, Height = 22
+            };
+            var pnlFields = new Panel { Dock = DockStyle.Top, Height = 62 };
+            var lblDesc = new Label { Text = "Descrição:", Left = 0, Top = 4, Width = 70, TextAlign = ContentAlignment.MiddleLeft, ForeColor = Color.FromArgb(100, 80, 50) };
+            txtDescricao = new TextBox { Left = 75, Top = 2, Width = 260, Height = 24, BorderStyle = BorderStyle.FixedSingle, BackColor = Color.White, ForeColor = ClrText, Font = new Font("Segoe UI", 10F) };
+            var lblVal = new Label { Text = "Valor R$:", Left = 346, Top = 4, Width = 65, TextAlign = ContentAlignment.MiddleLeft, ForeColor = Color.FromArgb(100, 80, 50) };
+            numValor = new NumericUpDown { Left = 416, Top = 2, Width = 110, Height = 24, DecimalPlaces = 2, Minimum = 0, Maximum = 99999, Font = new Font("Segoe UI", 10F, FontStyle.Bold), BackColor = Color.White, ForeColor = ClrText, ThousandsSeparator = true };
+            pnlFields.Controls.AddRange(new Control[] { lblDesc, txtDescricao, lblVal, numValor });
+
+            var pnlBtns = new Panel { Dock = DockStyle.Bottom, Height = 34 };
+            btnSalvar = MkBtn("Salvar", ClrGreen, 100);
+            btnSalvar.Click += BtnSalvar_Click;
+            var btnCancelar = MkBtn("Cancelar", ClrBrown, 100);
+            btnCancelar.Left = 108;
+            btnCancelar.Click += (_, __) => { pnlForm.Visible = false; _codigoEditando = 0; };
+            pnlBtns.Controls.Add(btnSalvar);
+            pnlBtns.Controls.Add(btnCancelar);
+
+            pnlForm.Controls.Add(pnlBtns);
+            pnlForm.Controls.Add(pnlFields);
+            pnlForm.Controls.Add(lblFormTitulo);
+
+            // Sub-grid: Itens da marmita selecionada
+            var pnlItemsSec = new Panel { Dock = DockStyle.Fill, BackColor = ClrBg };
+            var pnlItemsTool = new Panel { Dock = DockStyle.Top, Height = 36, BackColor = ClrFoot };
+            var lblItemsTit = new Label
+            {
+                Text = "Ingredientes / Produtos da marmita selecionada",
+                ForeColor = Color.FromArgb(100, 80, 50),
+                Font = new Font("Segoe UI", 8.5F, FontStyle.Bold),
+                Dock = DockStyle.Left, Width = 310, TextAlign = ContentAlignment.MiddleLeft
+            };
+            btnAddItem = MkBtn("+ Adicionar Produto", ClrOrange, 160);
+            btnAddItem.Dock = DockStyle.Right;
+            btnAddItem.Click += BtnAddItem_Click;
+            btnRemItem = MkBtn("Remover", ClrRed, 90);
+            btnRemItem.Dock = DockStyle.Right;
+            btnRemItem.Click += BtnRemItem_Click;
+            pnlItemsTool.Controls.Add(btnRemItem);
+            pnlItemsTool.Controls.Add(btnAddItem);
+            pnlItemsTool.Controls.Add(lblItemsTit);
+
+            gridItens = MkGrid();
+            gridItens.Dock = DockStyle.Fill;
+
+            pnlItemsSec.Controls.Add(gridItens);
+            pnlItemsSec.Controls.Add(pnlItemsTool);
+
+            pnlRight.Controls.Add(pnlItemsSec);
+            pnlRight.Controls.Add(pnlForm);
+
+            var pnlContent = new Panel { Dock = DockStyle.Fill };
+            pnlContent.Controls.Add(pnlRight);
+            pnlContent.Controls.Add(pnlGridTop);
+
+            Controls.Add(pnlContent);
+            Controls.Add(pnlTool);
+            Controls.Add(pnlTop);
+        }
+
+        private Button MkBtn(string text, Color back, int width)
+        {
+            var b = new Button
+            {
+                Text = text, Width = width, Height = 28, Top = 0,
+                BackColor = back, ForeColor = Color.White,
+                FlatStyle = FlatStyle.Flat, Cursor = Cursors.Hand,
+                Font = new Font("Segoe UI", 8.5F, FontStyle.Bold)
+            };
+            b.FlatAppearance.BorderSize = 0;
+            return b;
+        }
+
+        private DataGridView MkGrid()
+        {
+            var g = new DataGridView
+            {
+                ReadOnly = true, AllowUserToAddRows = false,
+                SelectionMode = DataGridViewSelectionMode.FullRowSelect,
+                RowHeadersVisible = false, MultiSelect = false,
+                AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill,
+                BackgroundColor = ClrGrid1,
+                DefaultCellStyle =
+                {
+                    BackColor = ClrGrid1, ForeColor = ClrText,
+                    SelectionBackColor = ClrOrange, SelectionForeColor = Color.White
+                },
+                AlternatingRowsDefaultCellStyle = { BackColor = ClrGrid2 },
+                ColumnHeadersDefaultCellStyle =
+                {
+                    BackColor = ClrGHdr, ForeColor = Color.White,
+                    Font = new Font("Segoe UI", 9F, FontStyle.Bold)
+                },
+                ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.DisableResizing,
+                ColumnHeadersHeight = 32, RowTemplate = { Height = 26 },
+                GridColor = Color.FromArgb(210, 195, 165),
+                EnableHeadersVisualStyles = false,
+                BorderStyle = BorderStyle.None,
+                Font = new Font("Segoe UI", 9F)
+            };
+            g.DataError += (_, e) => e.ThrowException = false;
+            return g;
+        }
+
+        // ── Dados ────────────────────────────────────────────────────────────
+
+        private void CarregarProdutos()
+        {
+            _produtos.Clear();
+            try
+            {
+                var dt = _mercBll.Listar();
+                foreach (System.Data.DataRow r in dt.Rows)
+                    if (r["Situacao"]?.ToString() == "A")
+                        _produtos.Add((
+                            Convert.ToInt32(r["Codigo"]),
+                            r["Nome"]?.ToString() ?? "",
+                            r["Preco"] == DBNull.Value ? 0m : Convert.ToDecimal(r["Preco"])));
+            }
+            catch { }
+        }
+
+        private void CarregarGrid()
+        {
+            try
+            {
+                gridMarmitas.DataSource = null;
+                var dt = _bll.Listar();
+                gridMarmitas.DataSource = dt;
+                if (gridMarmitas.Columns.Contains("Codigo"))
+                    gridMarmitas.Columns["Codigo"].Visible = false;
+                if (gridMarmitas.Columns.Contains("Situacao"))
+                    gridMarmitas.Columns["Situacao"].Visible = false;
+                if (gridMarmitas.Columns.Contains("Descricao"))
+                { gridMarmitas.Columns["Descricao"].HeaderText = "Descrição"; gridMarmitas.Columns["Descricao"].FillWeight = 60; }
+                if (gridMarmitas.Columns.Contains("Valor R$"))
+                { gridMarmitas.Columns["Valor R$"].HeaderText = "Valor R$"; gridMarmitas.Columns["Valor R$"].FillWeight = 20;
+                  gridMarmitas.Columns["Valor R$"].DefaultCellStyle.Format = "N2"; }
+            }
+            catch (Exception ex) { MessageBox.Show("Erro: " + ex.Message); }
+        }
+
+        private void CarregarItens(int codigoMarmita)
+        {
+            gridItens.DataSource = null;
+            gridItens.Columns.Clear();
+            if (codigoMarmita <= 0) return;
+            var itens = _bll.ListarItens(codigoMarmita);
+            var dt = new System.Data.DataTable();
+            dt.Columns.Add("Codigo",   typeof(int));
+            dt.Columns.Add("Produto",  typeof(string));
+            dt.Columns.Add("Qtde",     typeof(decimal));
+            foreach (var i in itens)
+                dt.Rows.Add(i.Codigo, i.maritmNome, i.maritmQtde);
+            gridItens.DataSource = dt;
+            if (gridItens.Columns.Contains("Codigo")) gridItens.Columns["Codigo"].Visible = false;
+            if (gridItens.Columns.Contains("Produto")) { gridItens.Columns["Produto"].HeaderText = "Produto"; gridItens.Columns["Produto"].FillWeight = 70; }
+            if (gridItens.Columns.Contains("Qtde")) { gridItens.Columns["Qtde"].HeaderText = "Qtde"; gridItens.Columns["Qtde"].FillWeight = 20; gridItens.Columns["Qtde"].DefaultCellStyle.Format = "N2"; }
+        }
+
+        private int GetSelectedMarmitaCod()
+        {
+            if (gridMarmitas.SelectedRows.Count == 0) return 0;
+            var val = gridMarmitas.SelectedRows[0].Cells["Codigo"]?.Value;
+            return val == null || val == DBNull.Value ? 0 : Convert.ToInt32(val);
+        }
+
+        // ── Eventos ──────────────────────────────────────────────────────────
+
+        private void GridMarmitas_SelectionChanged(object sender, EventArgs e)
+            => CarregarItens(GetSelectedMarmitaCod());
+
+        private void GridMarmitas_DoubleClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex < 0) return;
+            int cod = GetSelectedMarmitaCod();
+            if (cod <= 0) return;
+            var obj = _bll.PesquisaCodigo(cod);
+            if (obj == null) return;
+            _codigoEditando      = cod;
+            txtDescricao.Text    = obj.marDescricao;
+            numValor.Value       = obj.marValor > numValor.Maximum ? numValor.Maximum : obj.marValor;
+            lblFormTitulo.Text   = "Editar Marmita";
+            pnlForm.Visible      = true;
+            txtDescricao.Focus();
+        }
+
+        private void BtnNova_Click(object sender, EventArgs e)
+        {
+            _codigoEditando = 0;
+            txtDescricao.Text  = "";
+            numValor.Value     = 0;
+            lblFormTitulo.Text = "Nova Marmita";
+            pnlForm.Visible    = true;
+            txtDescricao.Focus();
+        }
+
+        private void BtnSalvar_Click(object sender, EventArgs e)
+        {
+            var obj = new Marmita
+            {
+                Codigo       = _codigoEditando,
+                marDescricao = txtDescricao.Text.Trim(),
+                marValor     = numValor.Value,
+                Situacao     = 'A'
+            };
+            var erro = _bll.Salvar(obj);
+            if (!string.IsNullOrEmpty(erro)) { MessageBox.Show(erro, "Erro", MessageBoxButtons.OK, MessageBoxIcon.Error); return; }
+            pnlForm.Visible = false;
+            _codigoEditando = 0;
+            CarregarGrid();
+        }
+
+        private void BtnExcluir_Click(object sender, EventArgs e)
+        {
+            int cod = GetSelectedMarmitaCod();
+            if (cod <= 0) { MessageBox.Show("Selecione uma marmita."); return; }
+            if (MessageBox.Show("Excluir esta marmita e todos os seus itens?", "Confirmar",
+                MessageBoxButtons.YesNo, MessageBoxIcon.Warning) != DialogResult.Yes) return;
+            var erro = _bll.Excluir(cod);
+            if (!string.IsNullOrEmpty(erro)) { MessageBox.Show(erro); return; }
+            CarregarGrid();
+            gridItens.DataSource = null;
+        }
+
+        private void BtnAddItem_Click(object sender, EventArgs e)
+        {
+            int codMar = GetSelectedMarmitaCod();
+            if (codMar <= 0) { MessageBox.Show("Selecione uma marmita primeiro."); return; }
+
+            // Diálogo de seleção de produto
+            using var dlg = new Form();
+            dlg.Text = "Adicionar Produto à Marmita";
+            dlg.StartPosition = FormStartPosition.CenterParent;
+            dlg.Size = new Size(540, 440);
+            dlg.FormBorderStyle = FormBorderStyle.FixedDialog;
+            dlg.MaximizeBox = dlg.MinimizeBox = false;
+            dlg.BackColor = ClrBg;
+
+            var pnlTop = new Panel { Dock = DockStyle.Top, Height = 48, BackColor = ClrHeader };
+            var lblTit = new Label { Text = "Selecionar Produto", ForeColor = Color.White, Font = new Font("Segoe UI", 10F, FontStyle.Bold), Dock = DockStyle.Fill, TextAlign = ContentAlignment.MiddleCenter };
+            pnlTop.Controls.Add(lblTit);
+
+            var txtF = new TextBox { Dock = DockStyle.Top, Height = 28, BackColor = Color.White, ForeColor = ClrText, Font = new Font("Segoe UI", 10F), PlaceholderText = "Filtrar por nome...", BorderStyle = BorderStyle.FixedSingle };
+
+            var grid2 = MkGrid();
+            grid2.Dock = DockStyle.Fill;
+            grid2.Columns.Add(new DataGridViewTextBoxColumn { Name = "Nome", HeaderText = "Produto", FillWeight = 70 });
+            var Preencher = new Action<string>(f =>
+            {
+                grid2.Rows.Clear();
+                foreach (var p in _produtos)
+                    if (string.IsNullOrWhiteSpace(f) || p.Nome.IndexOf(f, StringComparison.OrdinalIgnoreCase) >= 0)
+                        grid2.Rows.Add(p.Nome);
+            });
+            Preencher("");
+            txtF.TextChanged += (_, __) => Preencher(txtF.Text);
+
+            var pnlBottom = new Panel { Dock = DockStyle.Bottom, Height = 80, BackColor = ClrFoot, Padding = new Padding(8, 4, 8, 4) };
+            var lblQ = new Label { Text = "Qtde:", Left = 8, Top = 10, AutoSize = true, ForeColor = Color.FromArgb(100, 80, 50) };
+            var numQ = new NumericUpDown { Left = 60, Top = 6, Width = 80, Height = 26, Value = 1, Minimum = 0.001m, Maximum = 9999, DecimalPlaces = 3, BackColor = Color.White, ForeColor = ClrText };
+            var btnOk = MkBtn("Adicionar", ClrGreen, 110);
+            btnOk.Top = 42; btnOk.Left = 8;
+            var btnCnc = MkBtn("Cancelar", ClrBrown, 100);
+            btnCnc.Top = 42; btnCnc.Left = 125;
+            btnCnc.Click += (_, __) => dlg.DialogResult = DialogResult.Cancel;
+            pnlBottom.Controls.AddRange(new Control[] { lblQ, numQ, btnOk, btnCnc });
+
+            (int Codigo, string Nome, decimal Preco) escolhido = default;
+            btnOk.Click += (_, __) =>
+            {
+                if (grid2.CurrentRow == null) return;
+                string nome = grid2.CurrentRow.Cells["Nome"].Value?.ToString() ?? "";
+                escolhido = _produtos.Find(p => p.Nome == nome);
+                if (string.IsNullOrEmpty(escolhido.Nome)) return;
+                dlg.DialogResult = DialogResult.OK;
+            };
+            grid2.CellDoubleClick += (_, __) => btnOk.PerformClick();
+
+            dlg.Controls.Add(grid2);
+            dlg.Controls.Add(pnlBottom);
+            dlg.Controls.Add(txtF);
+            dlg.Controls.Add(pnlTop);
+
+            if (dlg.ShowDialog(this) != DialogResult.OK) return;
+
+            var item = new MarmitaItem
+            {
+                Codigo_Marmita    = codMar,
+                maritmCodigo_Merc = escolhido.Codigo,
+                maritmNome        = escolhido.Nome,
+                maritmQtde        = numQ.Value
+            };
+            var erro = _bll.AdicionarItem(item);
+            if (!string.IsNullOrEmpty(erro)) { MessageBox.Show(erro); return; }
+            CarregarItens(codMar);
+        }
+
+        private void BtnRemItem_Click(object sender, EventArgs e)
+        {
+            if (gridItens.SelectedRows.Count == 0 || !gridItens.Columns.Contains("Codigo")) return;
+            var val = gridItens.SelectedRows[0].Cells["Codigo"]?.Value;
+            if (val == null || val == DBNull.Value) return;
+            int cod = Convert.ToInt32(val);
+            var erro = _bll.RemoverItem(cod);
+            if (!string.IsNullOrEmpty(erro)) { MessageBox.Show(erro); return; }
+            CarregarItens(GetSelectedMarmitaCod());
+        }
+
+        protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
+        {
+            if (keyData == Keys.Escape) { if (pnlForm.Visible) pnlForm.Visible = false; else Close(); return true; }
+            return base.ProcessCmdKey(ref msg, keyData);
+        }
+    }
+}

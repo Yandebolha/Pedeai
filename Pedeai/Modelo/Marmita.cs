@@ -1,0 +1,21 @@
+namespace Pedeai.Modelo
+{
+    public class Marmita
+    {
+        public int     Codigo       { get; set; }
+        public int     auxCodigo    { get; set; }
+        public string  marDescricao { get; set; } = "";
+        public decimal marValor     { get; set; }
+        public char    Situacao     { get; set; } = 'A';
+    }
+
+    public class MarmitaItem
+    {
+        public int     Codigo              { get; set; }
+        public int     auxCodigo           { get; set; }
+        public int     Codigo_Marmita      { get; set; }
+        public int     maritmCodigo_Merc   { get; set; }
+        public string  maritmNome          { get; set; } = "";
+        public decimal maritmQtde          { get; set; } = 1;
+    }
+}
