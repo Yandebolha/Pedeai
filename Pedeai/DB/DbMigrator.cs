@@ -503,6 +503,10 @@ namespace Pedeai.DB
                 AddColumnIfNotExists(conn, db, "cliente", "clieGasto_Mensal",
                     "DECIMAL(10,2) NOT NULL DEFAULT 0.00");
                 AddColumnIfNotExists(conn, db, "cliente", "clieGasto_Mes_Ref",
+                    "VARCHAR(7) NOT NULL DEFAULT ''");
+                AddColumnIfNotExists(conn, db, "cliente", "cliePedidos_Mensal",
+                    "INT NOT NULL DEFAULT 0");
+                AddColumnIfNotExists(conn, db, "cliente", "cliePedidos_Mes_Ref",
                     "VARCHAR(7) NOT NULL DEFAULT ''");                AddColumnIfNotExists(conn, db, "itens_pedido_web", "itpwDesconto_Pct",
                     "DECIMAL(5,2) NOT NULL DEFAULT 0.00");
 

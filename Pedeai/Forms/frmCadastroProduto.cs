@@ -79,13 +79,12 @@ namespace Pedeai.Forms
             if (grid.Columns.Count == 0) return;
             foreach (DataGridViewColumn col in grid.Columns)
                 col.Visible = false;
-            var show = new[] { "Nome", "Categoria", "Preco", "Promocional", "Estoque" };
+            var show = new[] { "Nome", "Categoria", "Preco", "Estoque" };
             foreach (var name in show)
                 if (grid.Columns.Contains(name)) grid.Columns[name].Visible = true;
             var caps = new System.Collections.Generic.Dictionary<string, string>
             {
-                ["Preco"]       = "Pre\u00e7o",
-                ["Promocional"] = "Pre\u00e7o Promo.",
+                ["Preco"] = "Pre\u00e7o",
             };
             foreach (var kv in caps)
                 if (grid.Columns.Contains(kv.Key)) grid.Columns[kv.Key].HeaderText = kv.Value;

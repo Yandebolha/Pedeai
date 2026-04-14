@@ -24,6 +24,7 @@ namespace Pedeai.DAL
                                          WHERE pw.Codigo_Cliente = c.Codigo
                                            AND pw.pediSituacao <> 6), 0) AS TotalGasto,
                                COALESCE(c.clieGasto_Mensal, 0) AS GastoMensal,
+                               COALESCE(c.cliePedidos_Mensal, 0) AS PedidosMensal,
                                c.Situacao
                         FROM cliente c WHERE 1=1";
             if (!string.IsNullOrWhiteSpace(busca))
@@ -153,6 +154,8 @@ namespace Pedeai.DAL
                 clieTotalGasto       = r["clieTotalGasto"] == DBNull.Value ? 0 : Convert.ToDecimal(r["clieTotalGasto"]),
                 clieGasto_Mensal     = r["clieGasto_Mensal"] == DBNull.Value ? 0 : Convert.ToDecimal(r["clieGasto_Mensal"]),
                 clieGasto_Mes_Ref    = r["clieGasto_Mes_Ref"] == DBNull.Value ? "" : r["clieGasto_Mes_Ref"].ToString(),
+                cliePedidos_Mensal   = r["cliePedidos_Mensal"] == DBNull.Value ? 0 : Convert.ToInt32(r["cliePedidos_Mensal"]),
+                cliePedidos_Mes_Ref  = r["cliePedidos_Mes_Ref"] == DBNull.Value ? "" : r["cliePedidos_Mes_Ref"].ToString(),
                 clieData_Cadastro    = r["clieData_Cadastro"] == DBNull.Value ? DateTime.Now : Convert.ToDateTime(r["clieData_Cadastro"]),
                 Situacao             = r["Situacao"]?.ToString() ?? "A",
                 Status_Transmissao   = r["Status_Transmissao"]?.ToString() ?? "N",
@@ -173,7 +176,12 @@ namespace Pedeai.DAL
                         WHEN clieGasto_Mes_Ref = @mes THEN clieGasto_Mensal + @val
                         ELSE @val
                     END,
-                    clieGasto_Mes_Ref = @mes
+                    clieGasto_Mes_Ref = @mes,
+                    cliePedidos_Mensal = CASE
+                        WHEN cliePedidos_Mes_Ref = @mes THEN cliePedidos_Mensal + 1
+                        ELSE 1
+                    END,
+                    cliePedidos_Mes_Ref = @mes
                   WHERE Codigo = @cod", conn);
             cmd.Parameters.AddWithValue("@val", valorPedido);
             cmd.Parameters.AddWithValue("@mes", mesAtual);

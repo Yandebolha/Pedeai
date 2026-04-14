@@ -101,13 +101,14 @@ namespace Pedeai.Forms
             }
 
             if (grid.Columns.Contains("Codigo")) grid.Columns["Codigo"].Visible = false;
-            Col("Nome",         "Nome / Razão Social", 220);
-            Col("Celular",      "Celular",             110,  DataGridViewContentAlignment.MiddleCenter);
-            Col("Email",        "E-mail",              180);
-            Col("Cidade",       "Cidade",              110);
-            Col("TotalPedidos", "Pedidos",              60,  DataGridViewContentAlignment.MiddleCenter);
-            Col("TotalGasto",   "Total Gasto",          90,  DataGridViewContentAlignment.MiddleRight);
-            Col("GastoMensal",  "Gasto Mês",            80,  DataGridViewContentAlignment.MiddleRight);
+            Col("Nome",           "Nome / Raz\u00e3o Social", 220);
+            Col("Celular",        "Celular",             110,  DataGridViewContentAlignment.MiddleCenter);
+            Col("Email",          "E-mail",              180);
+            Col("Cidade",         "Cidade",              110);
+            Col("TotalPedidos",   "Pedidos",              60,  DataGridViewContentAlignment.MiddleCenter);
+            Col("TotalGasto",     "Total Gasto",          90,  DataGridViewContentAlignment.MiddleRight);
+            Col("GastoMensal",    "Gasto M\u00eas",         80,  DataGridViewContentAlignment.MiddleRight);
+            Col("PedidosMensal",  "Pedidos M\u00eas",       70,  DataGridViewContentAlignment.MiddleCenter);
 
             // Formata valores monetários
             foreach (DataGridViewRow row in grid.Rows)

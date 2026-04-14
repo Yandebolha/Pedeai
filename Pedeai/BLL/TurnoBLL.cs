@@ -64,6 +64,30 @@ namespace Pedeai.BLL
             catch { return 0; }
         }
 
+        public (decimal totalVendas, decimal totalDin, decimal totalCar, decimal totalPix, int qtdPedidos)
+            GetResumoMovimentado(Turno t)
+        {
+            try
+            {
+                var fim = t.turFechamento ?? DateTime.Now;
+                var dt = _dal.GetPedidosTurno(t.turAbertura, fim);
+                decimal totalVendas = 0, totalDin = 0, totalCar = 0, totalPix = 0;
+
+                decimal C(System.Data.DataRow r, string c) =>
+                    r[c] == System.DBNull.Value ? 0m : Convert.ToDecimal(r[c]);
+
+                foreach (System.Data.DataRow r in dt.Rows)
+                {
+                    totalVendas += C(r, "pediValor_Total");
+                    totalDin    += C(r, "pediPago_Dinheiro");
+                    totalCar    += C(r, "pediPago_Cartao");
+                    totalPix    += C(r, "pediPago_Pix");
+                }
+                return (totalVendas, totalDin, totalCar, totalPix, dt.Rows.Count);
+            }
+            catch { return (0, 0, 0, 0, 0); }
+        }
+
         public DataTable Listar(DateTime de, DateTime ate) => _dal.Listar(de, ate);
 
         public DataTable GetPedidosTurno(DateTime abertura, DateTime fechamento)

@@ -130,8 +130,8 @@ namespace Pedeai.Forms
             this.lblCst.Text="Custo R$:"; this.lblCst.AutoSize=true; this.lblCst.Left=166; this.lblCst.Top=79;
             this.numCusto.Left=228; this.numCusto.Top=76; this.numCusto.Width=85;
             this.numCusto.DecimalPlaces=2; this.numCusto.Maximum=999999;
-            this.lblPrm.Text="Promo R$:"; this.lblPrm.AutoSize=true; this.lblPrm.Left=320; this.lblPrm.Top=79;
-            this.numPromo.Left=382; this.numPromo.Top=76; this.numPromo.Width=85;
+            this.lblPrm.Text="Promo R$:"; this.lblPrm.AutoSize=true; this.lblPrm.Left=320; this.lblPrm.Top=79; this.lblPrm.Visible=false;
+            this.numPromo.Left=382; this.numPromo.Top=76; this.numPromo.Width=85; this.numPromo.Visible=false;
             this.numPromo.DecimalPlaces=2; this.numPromo.Maximum=999999;
             this.lblEst.Text="Estoque:"; this.lblEst.AutoSize=true; this.lblEst.Left=474; this.lblEst.Top=79;
             this.numEstoque.Left=530; this.numEstoque.Top=76; this.numEstoque.Width=75;

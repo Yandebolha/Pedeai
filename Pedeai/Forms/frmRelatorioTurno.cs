@@ -160,8 +160,24 @@ namespace Pedeai.Forms
                     float pw = pe.MarginBounds.Width;
                     if (pw <= 0) { pw = 650; x = 75; y = 75; }  // fallback se não houver impressora
 
-                    float colN = cols.Count > 0 ? cols.Count : 1;
-                    float colW = pw / colN;
+                    // Larguras proporcionais por coluna para evitar sobreposição
+                    var colWeightMap = new System.Collections.Generic.Dictionary<string, float>
+                    {
+                        ["Codigo"]              = 0.4f,
+                        ["pediNome_Cliente"]    = 2.2f,
+                        ["pediSituacao"]        = 0.4f,
+                        ["pediValor_Total"]     = 0.9f,
+                        ["pediPago_Dinheiro"]   = 0.9f,
+                        ["pediPago_Cartao"]     = 0.9f,
+                        ["pediPago_Pix"]        = 0.7f,
+                        ["pediData_Lancamento"] = 1.4f,
+                    };
+                    float totalWeight = 0f;
+                    foreach (var col in cols)
+                        totalWeight += colWeightMap.TryGetValue(col.Name, out var ww) ? ww : 1.0f;
+                    float[] colWidths = new float[cols.Count];
+                    for (int ci = 0; ci < cols.Count; ci++)
+                        colWidths[ci] = pw * (colWeightMap.TryGetValue(cols[ci].Name, out var cw) ? cw : 1.0f) / totalWeight;
 
                     if (printRow == 0)
                     {
@@ -175,10 +191,10 @@ namespace Pedeai.Forms
 
                         float cx = x;
                         g.FillRectangle(brushHdrBg, cx, y, pw, 20);
-                        foreach (var col in cols)
+                        for (int ci = 0; ci < cols.Count; ci++)
                         {
-                            g.DrawString(col.HeaderText, bold, Brushes.White, cx + 3, y + 3);
-                            cx += colW;
+                            g.DrawString(cols[ci].HeaderText, bold, Brushes.White, cx + 3, y + 3);
+                            cx += colWidths[ci];
                         }
                         y += 22;
                     }
@@ -190,12 +206,13 @@ namespace Pedeai.Forms
                         float cx = x;
                         if (printRow % 2 == 1)
                             g.FillRectangle(brushAlt, cx, y, pw, rowH);
-                        foreach (var col in cols)
+                        for (int ci = 0; ci < cols.Count; ci++)
                         {
+                            var col = cols[ci];
                             var val = row.Table.Columns.Contains(col.Name) && row[col.Name] != DBNull.Value
                                 ? (row[col.Name]?.ToString() ?? "") : "";
                             g.DrawString(val, fnt, brushDark, cx + 3, y + 3);
-                            cx += colW;
+                            cx += colWidths[ci];
                         }
                         y += rowH;
                         printRow++;

@@ -73,21 +73,20 @@ namespace Pedeai.Forms
             decimal caixaFin = numCaixaFinal.Value;
             string obs       = txtObsFechar.Text.Trim();
 
-            decimal movimentado = _bll.GetTotalMovimentado(_turnoAtivo);
+            var resumo      = _bll.GetResumoMovimentado(_turnoAtivo);
+            decimal movimentado = resumo.totalVendas;
             decimal esperado    = _turnoAtivo.turCaixa_Inicial + movimentado;
             decimal diferenca   = esperado - caixaFin;
 
             if (diferenca > 0.01m)
             {
-                bool autorizado = MostrarDialogDiferencaCaixa(esperado, caixaFin, diferenca);
+                bool autorizado = MostrarDialogDiferencaCaixa(esperado, caixaFin, diferenca, resumo);
                 if (!autorizado) return;
             }
             else
             {
-                if (MessageBox.Show(
-                        $"Confirma o fechamento do turno #{_turnoAtivo?.Codigo}?\n\nCaixa final: R$ {caixaFin:N2}",
-                        "Fechar Turno", MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes)
-                    return;
+                bool confirmado = MostrarDialogConfirmarFechamento(caixaFin, resumo);
+                if (!confirmado) return;
             }
 
             var erro = _bll.Fechar(caixaFin, obs);
@@ -102,12 +101,76 @@ namespace Pedeai.Forms
             AtualizarEstado();
         }
 
-        private bool MostrarDialogDiferencaCaixa(decimal esperado, decimal informado, decimal diferenca)
+        private bool MostrarDialogConfirmarFechamento(decimal caixaFin,
+            (decimal totalVendas, decimal totalDin, decimal totalCar, decimal totalPix, int qtdPedidos) resumo)
+        {
+            using var dlg = new Form();
+            dlg.Text            = "Confirmar Fechamento";
+            dlg.StartPosition   = FormStartPosition.CenterParent;
+            dlg.Size            = new Size(420, 320);
+            dlg.FormBorderStyle = FormBorderStyle.FixedDialog;
+            dlg.MaximizeBox     = dlg.MinimizeBox = false;
+            dlg.BackColor       = Color.FromArgb(28, 37, 65);
+
+            var pnlTop = new Panel { Dock = DockStyle.Top, Height = 48, BackColor = Color.FromArgb(52, 68, 105) };
+            var lblTit = new Label
+            {
+                Text = $"\U0001F512  Fechar Turno #{_turnoAtivo?.Codigo}",
+                ForeColor = Color.White,
+                Font = new Font("Segoe UI", 11F, FontStyle.Bold),
+                Dock = DockStyle.Fill, TextAlign = ContentAlignment.MiddleCenter
+            };
+            pnlTop.Controls.Add(lblTit);
+
+            int y2 = 64;
+            Color clrLbl = Color.FromArgb(150, 175, 220);
+            Color clrVal = Color.White;
+
+            void AddRow(string lbl, string val)
+            {
+                dlg.Controls.Add(new Label { Text = lbl, Left = 30, Top = y2, AutoSize = true,
+                    ForeColor = clrLbl, Font = new Font("Segoe UI", 9.5F) });
+                dlg.Controls.Add(new Label { Text = val, Left = 250, Top = y2, AutoSize = true,
+                    ForeColor = clrVal, Font = new Font("Segoe UI", 10F, FontStyle.Bold) });
+                y2 += 28;
+            }
+
+            AddRow($"Pedidos: {resumo.qtdPedidos}", $"Total Vendas: R$ {resumo.totalVendas:N2}");
+            y2 += 4;
+            AddRow("  Dinheiro:",  $"R$ {resumo.totalDin:N2}");
+            AddRow("  Cartão:",    $"R$ {resumo.totalCar:N2}");
+            AddRow("  Pix:",       $"R$ {resumo.totalPix:N2}");
+            y2 += 4;
+            AddRow("Caixa Final:", $"R$ {caixaFin:N2}");
+
+            var pnlBtns = new Panel { Dock = DockStyle.Bottom, Height = 58, BackColor = Color.FromArgb(22, 30, 55) };
+            var btnNao = new Button { Text = "Cancelar", Left = 16, Top = 12, Width = 160, Height = 34,
+                BackColor = Color.FromArgb(52, 68, 105), ForeColor = Color.White,
+                FlatStyle = FlatStyle.Flat, Font = new Font("Segoe UI", 9F, FontStyle.Bold), Cursor = Cursors.Hand };
+            btnNao.FlatAppearance.BorderSize = 0;
+            btnNao.Click += (_, __) => { dlg.DialogResult = DialogResult.Cancel; };
+
+            var btnSim = new Button { Text = "Confirmar Fechamento  \u2192", Left = 194, Top = 12, Width = 210, Height = 34,
+                BackColor = Color.FromArgb(39, 174, 96), ForeColor = Color.White,
+                FlatStyle = FlatStyle.Flat, Font = new Font("Segoe UI", 9F, FontStyle.Bold), Cursor = Cursors.Hand };
+            btnSim.FlatAppearance.BorderSize = 0;
+            btnSim.Click += (_, __) => { dlg.DialogResult = DialogResult.OK; };
+
+            pnlBtns.Controls.Add(btnNao);
+            pnlBtns.Controls.Add(btnSim);
+            dlg.Controls.Add(pnlBtns);
+            dlg.Controls.Add(pnlTop);
+
+            return dlg.ShowDialog(this) == DialogResult.OK;
+        }
+
+        private bool MostrarDialogDiferencaCaixa(decimal esperado, decimal informado, decimal diferenca,
+            (decimal totalVendas, decimal totalDin, decimal totalCar, decimal totalPix, int qtdPedidos) resumo)
         {
             using var dlg = new Form();
             dlg.Text            = "Diferen\u00e7a de Caixa";
             dlg.StartPosition   = FormStartPosition.CenterParent;
-            dlg.Size            = new Size(460, 310);
+            dlg.Size            = new Size(460, 420);
             dlg.FormBorderStyle = FormBorderStyle.FixedDialog;
             dlg.MaximizeBox     = dlg.MinimizeBox = false;
             dlg.BackColor       = Color.FromArgb(28, 37, 65);
@@ -130,8 +193,13 @@ namespace Pedeai.Forms
                     ForeColor = Color.FromArgb(150, 175, 220), Font = new Font("Segoe UI", 9.5F) });
                 dlg.Controls.Add(new Label { Text = val, Left = 250, Top = y, AutoSize = true,
                     ForeColor = valColor, Font = new Font("Segoe UI", 10F, FontStyle.Bold) });
-                y += 34;
+                y += 28;
             }
+            AddRow($"Pedidos ({resumo.qtdPedidos}):",  $"Total Vendas: R$ {resumo.totalVendas:N2}", Color.White);
+            AddRow("  Dinheiro:", $"R$ {resumo.totalDin:N2}", Color.White);
+            AddRow("  Cart\u00e3o:",   $"R$ {resumo.totalCar:N2}", Color.White);
+            AddRow("  Pix:",      $"R$ {resumo.totalPix:N2}", Color.White);
+            y += 6;
             AddRow("Caixa esperado (Ini + Vendas):", $"R$ {esperado:N2}",  Color.White);
             AddRow("Caixa informado:",               $"R$ {informado:N2}", Color.White);
             AddRow("Diferen\u00e7a:",                $"R$ {diferenca:N2}", Color.FromArgb(231, 76, 60));

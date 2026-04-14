@@ -12,6 +12,7 @@ namespace Pedeai.Forms
         private int _codigoConfigEditando = 0;
         private int _produtoCodigo         = 0;   // produto selecionado do cardápio
         private bool _carregandoConfigs = false;
+        private DataGridView _gridClientes;
 
         public frmFidelizacao()
         {
@@ -25,6 +26,121 @@ namespace Pedeai.Forms
         {
             CarregarListaConfigs();
             CarregarHistorico();
+            CriarAbaClientes();
+        }
+
+        // ── Aba Clientes ──────────────────────────────────────────────────────
+
+        private void CriarAbaClientes()
+        {
+            var tabClientes = new TabPage
+            {
+                Text = "Clientes",
+                BackColor = Color.FromArgb(248, 245, 240),
+                Padding = new Padding(8)
+            };
+
+            var pnlBusca = new Panel
+            {
+                Dock = DockStyle.Top, Height = 42,
+                BackColor = Color.FromArgb(235, 226, 208)
+            };
+            var txtBusca = new TextBox
+            {
+                Left = 8, Top = 8, Width = 280,
+                Font = new Font("Segoe UI", 9.5F),
+                PlaceholderText = "Buscar por nome ou celular..."
+            };
+            var btnBuscar = new Button
+            {
+                Left = 296, Top = 7, Width = 90, Height = 26,
+                Text = "Buscar",
+                BackColor = Color.FromArgb(176, 110, 42), ForeColor = Color.White,
+                FlatStyle = FlatStyle.Flat, Font = new Font("Segoe UI", 9F, FontStyle.Bold),
+                Cursor = Cursors.Hand
+            };
+            btnBuscar.FlatAppearance.BorderSize = 0;
+
+            _gridClientes = new DataGridView
+            {
+                Dock = DockStyle.Fill,
+                AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill,
+                ReadOnly = true, AllowUserToAddRows = false,
+                SelectionMode = DataGridViewSelectionMode.FullRowSelect,
+                RowHeadersVisible = false, MultiSelect = false,
+                BackgroundColor = Color.FromArgb(250, 246, 238),
+                GridColor = Color.FromArgb(210, 200, 180),
+                BorderStyle = BorderStyle.None,
+                Font = new Font("Segoe UI", 9F),
+            };
+            _gridClientes.ColumnHeadersDefaultCellStyle.BackColor  = Color.FromArgb(176, 110, 42);
+            _gridClientes.ColumnHeadersDefaultCellStyle.ForeColor  = Color.White;
+            _gridClientes.ColumnHeadersDefaultCellStyle.Font       = new Font("Segoe UI", 8.5F, FontStyle.Bold);
+            _gridClientes.DefaultCellStyle.BackColor               = Color.FromArgb(250, 246, 238);
+            _gridClientes.DefaultCellStyle.ForeColor               = Color.FromArgb(50, 40, 25);
+            _gridClientes.DefaultCellStyle.SelectionBackColor      = Color.FromArgb(224, 113, 42);
+            _gridClientes.DefaultCellStyle.SelectionForeColor      = Color.White;
+            _gridClientes.AlternatingRowsDefaultCellStyle.BackColor = Color.FromArgb(240, 234, 218);
+            _gridClientes.EnableHeadersVisualStyles = false;
+            _gridClientes.DataError += (s, e) => ((DataGridViewDataErrorEventArgs)e).ThrowException = false;
+
+            pnlBusca.Controls.Add(btnBuscar);
+            pnlBusca.Controls.Add(txtBusca);
+            tabClientes.Controls.Add(_gridClientes);
+            tabClientes.Controls.Add(pnlBusca);
+            tabControl.Controls.Add(tabClientes);
+
+            btnBuscar.Click += (_, __) => CarregarClientes(txtBusca.Text);
+            txtBusca.KeyDown += (_, e) => { if (e.KeyCode == Keys.Enter) CarregarClientes(txtBusca.Text); };
+            tabControl.SelectedIndexChanged += (_, __) =>
+            {
+                if (tabControl.SelectedTab == tabClientes)
+                    CarregarClientes(txtBusca.Text);
+            };
+        }
+
+        private void CarregarClientes(string busca = "")
+        {
+            try
+            {
+                var dt = new ClienteBLL().Listar(busca?.Trim() ?? "");
+                _gridClientes.DataSource = dt;
+                ConfigurarGridClientes();
+            }
+            catch (Exception ex) { MessageBox.Show("Erro: " + ex.Message); }
+        }
+
+        private void ConfigurarGridClientes()
+        {
+            if (_gridClientes == null || _gridClientes.Columns.Count == 0) return;
+            foreach (DataGridViewColumn col in _gridClientes.Columns)
+                col.Visible = false;
+
+            void Col(string name, string header, float fill,
+                DataGridViewContentAlignment align = DataGridViewContentAlignment.MiddleLeft)
+            {
+                if (!_gridClientes.Columns.Contains(name)) return;
+                _gridClientes.Columns[name].Visible    = true;
+                _gridClientes.Columns[name].HeaderText = header;
+                _gridClientes.Columns[name].FillWeight = fill;
+                _gridClientes.Columns[name].DefaultCellStyle.Alignment = align;
+            }
+
+            Col("Nome",          "Nome / Raz\u00e3o Social", 220);
+            Col("Celular",       "Celular",       90,  DataGridViewContentAlignment.MiddleCenter);
+            Col("TotalPedidos",  "Pedidos",        55,  DataGridViewContentAlignment.MiddleCenter);
+            Col("PedidosMensal", "Pedidos M\u00eas", 65, DataGridViewContentAlignment.MiddleCenter);
+            Col("TotalGasto",    "Gasto Ano R$",   90,  DataGridViewContentAlignment.MiddleRight);
+            Col("GastoMensal",   "Gasto M\u00eas R$", 90, DataGridViewContentAlignment.MiddleRight);
+
+            foreach (DataGridViewRow row in _gridClientes.Rows)
+            {
+                if (row.IsNewRow) continue;
+                if (_gridClientes.Columns.Contains("TotalGasto") && row.Cells["TotalGasto"].Value is decimal d)
+                    row.Cells["TotalGasto"].Value = d.ToString("N2");
+                if (_gridClientes.Columns.Contains("GastoMensal") && row.Cells["GastoMensal"].Value is decimal dm)
+                    row.Cells["GastoMensal"].Value = dm.ToString("N2");
+            }
         }
 
         // ── Configuração ──────────────────────────────────────────────────────

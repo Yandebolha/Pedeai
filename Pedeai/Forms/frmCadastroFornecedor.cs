@@ -28,7 +28,8 @@ namespace Pedeai.Forms
             try
             {
                 grid.DataSource = _bll.Listar();
-                if (grid.Columns.Contains("Codigo")) grid.Columns["Codigo"].Visible = false;
+                if (grid.Columns.Contains("Codigo"))  grid.Columns["Codigo"].Visible  = false;
+                if (grid.Columns.Contains("Contato")) grid.Columns["Contato"].Visible = false;
             }
             catch (Exception ex) { MessageBox.Show("Erro: " + ex.Message); }
         }
