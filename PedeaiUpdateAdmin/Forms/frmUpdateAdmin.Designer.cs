@@ -55,6 +55,7 @@ namespace PedeaiUpdateAdmin.Forms
             this.txtAdminToken       = new System.Windows.Forms.TextBox();
             this.txtServiceRoleKey  = new System.Windows.Forms.TextBox();
             this.lblServiceRoleKey  = new System.Windows.Forms.Label();
+            this.btnSalvarConfig     = new System.Windows.Forms.Button();
             this.btnTestarConexao    = new System.Windows.Forms.Button();
             this.lblConfigInfo       = new System.Windows.Forms.Label();
 
