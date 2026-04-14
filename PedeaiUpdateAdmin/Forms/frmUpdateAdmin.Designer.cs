@@ -55,6 +55,7 @@ namespace PedeaiUpdateAdmin.Forms
             this.txtAdminToken       = new System.Windows.Forms.TextBox();
             this.btnSalvarConfig     = new System.Windows.Forms.Button();
             this.btnTestarConexao    = new System.Windows.Forms.Button();
+            this.lblConfigInfo       = new System.Windows.Forms.Label();
 
             // Status bar
             this.lblStatusBar        = new System.Windows.Forms.Label();
@@ -228,10 +229,11 @@ namespace PedeaiUpdateAdmin.Forms
             this.tabConfig.Controls.Add(this.txtAdminToken);
             this.tabConfig.Controls.Add(this.btnSalvarConfig);
             this.tabConfig.Controls.Add(this.btnTestarConexao);
+            this.tabConfig.Controls.Add(this.lblConfigInfo);
 
-            this.lblVpsUrl.Text    = "URL da VPS:";            this.lblVpsUrl.SetBounds(8, 24, 130, 20);
+            this.lblVpsUrl.Text    = "URL do Supabase:";       this.lblVpsUrl.SetBounds(8, 24, 130, 20);
             this.txtVpsUrl.SetBounds(140, 22, 400, 23);
-            this.lblAdminToken.Text= "Admin Token:";           this.lblAdminToken.SetBounds(8, 56, 130, 20);
+            this.lblAdminToken.Text= "service_role Key:";       this.lblAdminToken.SetBounds(8, 56, 130, 20);
             this.txtAdminToken.SetBounds(140, 54, 400, 23);   this.txtAdminToken.PasswordChar = '●';
             this.btnSalvarConfig.Text  = "💾 Salvar";          this.btnSalvarConfig.SetBounds(140, 90, 120, 28);
             this.btnSalvarConfig.BackColor = System.Drawing.Color.FromArgb(87, 120, 38);
@@ -245,6 +247,14 @@ namespace PedeaiUpdateAdmin.Forms
             this.btnTestarConexao.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnTestarConexao.FlatAppearance.BorderSize = 0;
             this.btnTestarConexao.Click += new System.EventHandler(this.BtnTestarConexao_Click);
+
+            this.lblConfigInfo.Text =
+                "ℹ️  Supabase Dashboard → Settings → API → \"Project API keys\"\r\n" +
+                "    • URL do Supabase: campo \"Project URL\"\r\n" +
+                "    • service_role Key: chave \"service_role\" (começa com eyJ...)\r\n" +
+                "    ATENÇÃO: NÃO use a chave sb_publishable_* — ela não é um JWT válido para REST.";
+            this.lblConfigInfo.SetBounds(8, 130, 700, 80);
+            this.lblConfigInfo.ForeColor = System.Drawing.Color.FromArgb(120, 80, 30);
 
             // ── Status bar ───────────────────────────────────────────────────────────
             this.lblStatusBar.Text = "Pronto.";
@@ -301,6 +311,7 @@ namespace PedeaiUpdateAdmin.Forms
         private System.Windows.Forms.TextBox                txtVpsUrl;
         private System.Windows.Forms.Label                  lblAdminToken;
         private System.Windows.Forms.TextBox                txtAdminToken;
+        private System.Windows.Forms.Label                  lblConfigInfo;
         private System.Windows.Forms.Button                 btnSalvarConfig;
         private System.Windows.Forms.Button                 btnTestarConexao;
         private System.Windows.Forms.Label                  lblStatusBar;

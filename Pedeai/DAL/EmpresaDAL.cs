@@ -24,15 +24,27 @@ namespace Pedeai.DAL
                 empEmail         = r["empEmail"]?.ToString() ?? "",
                 empEndereco      = r["empEndereco"]?.ToString() ?? "",
                 Info             = r["Info"]?.ToString() ?? "",
-                empCodigo_Empresa = TryGet(r, "empCodigo_Empresa"),
-                empChave_Licenca  = TryGet(r, "empChave_Licenca"),
-                empData_Graca     = TryGetDate(r, "empData_Graca"),
+                empCodigo_Empresa    = TryGet(r, "empCodigo_Empresa"),
+                empChave_Licenca     = TryGet(r, "empChave_Licenca"),
+                empData_Graca        = TryGetDate(r, "empData_Graca"),
+                empNivel_Atualizacao = TryGetInt(r, "empNivel_Atualizacao", 2),
             };
         }
 
         private static string TryGet(MySqlDataReader r, string col)
         {
             try { return r[col]?.ToString() ?? ""; } catch { return ""; }
+        }
+
+        private static int TryGetInt(MySqlDataReader r, string col, int def)
+        {
+            try
+            {
+                var v = r[col];
+                if (v == null || v == DBNull.Value) return def;
+                return Convert.ToInt32(v);
+            }
+            catch { return def; }
         }
 
         private static DateTime? TryGetDate(MySqlDataReader r, string col)
@@ -115,6 +127,17 @@ namespace Pedeai.DAL
                 "UPDATE empresa SET empData_Graca=@data WHERE Codigo=@cod", conn);
             cmd.Parameters.AddWithValue("@data", data.HasValue ? (object)data.Value.Date : DBNull.Value);
             cmd.Parameters.AddWithValue("@cod",  codEmpresa);
+            cmd.ExecuteNonQuery();
+        }
+
+        /// <summary>Persiste o nível de atualização sincronizado do Supabase.</summary>
+        public void SalvarNivelAtualizacao(int codEmpresa, int nivel)
+        {
+            using var conn = AbrirConexao();
+            using var cmd  = new MySqlCommand(
+                "UPDATE empresa SET empNivel_Atualizacao=@nivel WHERE Codigo=@cod", conn);
+            cmd.Parameters.AddWithValue("@nivel", nivel);
+            cmd.Parameters.AddWithValue("@cod",   codEmpresa);
             cmd.ExecuteNonQuery();
         }
     }

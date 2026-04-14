@@ -21,20 +21,20 @@ namespace PedeaiUpdateAdmin.Forms
 
         private void FrmUpdateAdmin_Load(object sender, EventArgs e)
         {
-            var (url, token) = AdminApiClient.CarregarConfig();
+            var (url, key) = AdminApiClient.CarregarConfig();
             txtVpsUrl.Text    = url;
-            txtAdminToken.Text = token;
+            txtAdminToken.Text = key;
 
-            if (!string.IsNullOrWhiteSpace(url) && !string.IsNullOrWhiteSpace(token))
+            if (!string.IsNullOrWhiteSpace(url) && !string.IsNullOrWhiteSpace(key))
             {
-                _api = new AdminApiClient(url, token);
+                _api = new AdminApiClient(url, key);
                 CarregarClientes();
                 CarregarPacotes();
             }
             else
             {
                 tabControl.SelectedTab = tabConfig;
-                SetStatus("Configure a URL da VPS e o Admin Token antes de continuar.");
+                SetStatus("Configure a URL do Supabase e a Chave antes de continuar.");
             }
         }
 
@@ -115,17 +115,21 @@ namespace PedeaiUpdateAdmin.Forms
 
             foreach (dynamic c in _clientes)
             {
-                int nivel = (int)c.nivel;
+                int nivel = c.Nivel != null ? (int)c.Nivel : 2;
                 if (filtro > 0 && nivel != filtro) continue;
 
+                string nome   = (string)c.NomeEmpresa   ?? "";
+                string codigo = (string)c.CodigoEmpresa ?? "";
+                if (string.IsNullOrWhiteSpace(nome)) nome = codigo; // fallback
+
                 dgvClientes.Rows.Add(
-                    (long)c.id,
-                    (string)c.nomeEmpresa,
-                    (string)c.codigoEmpresa,
+                    c.Id != null ? (long)c.Id : 0L,
+                    nome,
+                    codigo,
                     NivelLabel(nivel),
-                    (string)c.versaoAtual ?? "—",
-                    (bool)c.bloqueado ? "SIM" : "não",
-                    (string)c.ultimaConsulta ?? "—");
+                    (string)c.VersaoAtual    ?? "—",
+                    c.Bloqueado != null && (bool)c.Bloqueado ? "SIM" : "não",
+                    (string)c.UltimaConsulta ?? "—");
             }
         }
 
@@ -192,11 +196,16 @@ namespace PedeaiUpdateAdmin.Forms
 
                 foreach (dynamic p in _pacotes)
                 {
+                    int nivel = p.Nivel != null ? (int)p.Nivel : 2;
                     dgvPacotes.Rows.Add(
-                        (long)p.id, (string)p.versao, NivelLabel((int)p.nivel),
-                        (string)p.descricao, FormatarBytes((long)p.tamanhoBytes),
-                        (bool)p.temSQL ? "Sim" : "—", (bool)p.ativo ? "Sim" : "Não",
-                        (string)p.dataPublicacao);
+                        p.Id != null ? (long)p.Id : 0L,
+                        (string)p.Versao         ?? "",
+                        NivelLabel(nivel),
+                        (string)p.Descricao      ?? "",
+                        FormatarBytes(p.TamanhoBytes != null ? (long)p.TamanhoBytes : 0L),
+                        p.TemSQL  != null && (bool)p.TemSQL  ? "Sim" : "—",
+                        p.Ativo   != null && (bool)p.Ativo   ? "Sim" : "Não",
+                        (string)p.DataPublicacao ?? "");
                 }
             }
             catch (Exception ex) { SetStatus($"Erro ao carregar pacotes: {ex.Message}"); }

@@ -16,5 +16,7 @@ namespace Pedeai.Modelo
         public string empChave_Licenca { get; set; } = "";
         /// <summary>Data de início do período de graça (null = graça ainda não iniciada).</summary>
         public System.DateTime? empData_Graca { get; set; }
+        /// <summary>Nível de atualização sincronizado do Supabase. 1=Beta · 2=Standard · 3=Legacy.</summary>
+        public int empNivel_Atualizacao { get; set; } = 2;
     }
 }

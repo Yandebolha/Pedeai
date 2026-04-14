@@ -73,7 +73,7 @@ namespace PedeaiUpdateService
             string versaoAtual = _cfg["VersaoAtual"] ?? "1.0.0";
             _log.LogInformation("Verificando atualização... ClienteId={Id} VersaoAtual={V}", clienteId, versaoAtual);
 
-            var (tem, pacoteId, versao) = await _updater.VerificarAsync(clienteId, versaoAtual, ct);
+            var (tem, pacoteId, versao, caminhoArquivo) = await _updater.VerificarAsync(clienteId, versaoAtual, ct);
 
             if (!tem)
             {
@@ -83,7 +83,7 @@ namespace PedeaiUpdateService
 
             _log.LogInformation("Atualização disponível: v{V} (pacote {P}). Baixando...", versao, pacoteId);
 
-            string zipPath = await _updater.BaixarAsync(clienteId, pacoteId, ct);
+            string zipPath = await _updater.BaixarAsync(clienteId, pacoteId, caminhoArquivo, ct);
             _log.LogInformation("Download concluído. Aplicando...");
 
             var (ok, erro) = await _updater.AplicarAsync(zipPath, versao, ct);
