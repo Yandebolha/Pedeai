@@ -19,59 +19,22 @@ namespace Pedeai.Forms
             SendMessagePlaceholder(txtLogin.Handle, EM_SETCUEBANNER, (System.IntPtr)1, "Usuário");
             SendMessagePlaceholder(txtSenha.Handle,  EM_SETCUEBANNER, (System.IntPtr)1, "Senha");
 
-            // Carrega e recorta a logo num quadrado central — sem letterbox
-            try
-            {
-                string imgPath = null;
-                var candidatos = new[]
-                {
-                    System.IO.Path.Combine(Application.StartupPath, "RanGoFood.png"),
-                    System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "RanGoFood.png"),
-                    System.IO.Path.Combine(
-                        System.IO.Path.GetDirectoryName(Application.ExecutablePath) ?? "", "RanGoFood.png"),
-                };
-                foreach (var c in candidatos)
-                    if (System.IO.File.Exists(c)) { imgPath = c; break; }
-
-                if (imgPath != null)
-                {
-                    using var full = new Bitmap(imgPath);
-                    int size = Math.Min(full.Width, full.Height);
-                    int cx   = (full.Width  - size) / 2;
-                    int cy   = (full.Height - size) / 2;
-                    picLogo.Image = full.Clone(
-                        new Rectangle(cx, cy, size, size),
-                        full.PixelFormat);
-                }
-            }
-            catch { }
-
-            // Borda arredondada no card
-            pnlCard.Paint += (s, e) =>
-            {
-                var g = e.Graphics;
-                g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
-                var rc = new Rectangle(1, 1, pnlCard.Width - 3, pnlCard.Height - 3);
-                using var pen = new Pen(Color.FromArgb(200, 165, 110), 2f);
-                DrawRoundedRect(g, pen, rc, 18);
-            };
+            // Cantos arredondados no form (janela sem borda)
+            Load += (s, e) => AplicarCantosArredondados();
+            Resize += (s, e) => AplicarCantosArredondados();
         }
 
-        private static void DrawRoundedRect(Graphics g, Pen pen, Rectangle rc, int radius)
+        private void AplicarCantosArredondados()
         {
-            using var path = RoundedPath(rc, radius);
-            g.DrawPath(pen, path);
-        }
-
-        private static System.Drawing.Drawing2D.GraphicsPath RoundedPath(Rectangle rc, int r)
-        {
+            const int r = 18;
+            var rc   = new Rectangle(0, 0, Width, Height);
             var path = new System.Drawing.Drawing2D.GraphicsPath();
             path.AddArc(rc.X, rc.Y, r * 2, r * 2, 180, 90);
             path.AddArc(rc.Right - r * 2, rc.Y, r * 2, r * 2, 270, 90);
             path.AddArc(rc.Right - r * 2, rc.Bottom - r * 2, r * 2, r * 2, 0, 90);
             path.AddArc(rc.X, rc.Bottom - r * 2, r * 2, r * 2, 90, 90);
             path.CloseFigure();
-            return path;
+            Region = new Region(path);
         }
 
         private void BtnEntrar_Click(object sender, EventArgs e)
@@ -156,7 +119,6 @@ namespace Pedeai.Forms
         }
 
         private void BtnFechar_Click(object s, EventArgs e) { DialogResult = DialogResult.Cancel; Close(); }
-
         private const int WM_NCLBUTTONDOWN = 0xA1;
         private const int HT_CAPTION       = 0x2;
         private const int EM_SETCUEBANNER  = 0x1501;
@@ -176,15 +138,7 @@ namespace Pedeai.Forms
             }
         }
 
-        private void picLogo_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void pnlCard_Paint(object sender, PaintEventArgs e)
-        {
-
-        }
+        private void pnlCard_Paint(object sender, PaintEventArgs e) { }
 
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
         {

@@ -59,6 +59,16 @@ namespace Pedeai
                 return;
             }
 
+            // Limite de máquinas simultâneas excedido
+            if (_maquinasExcedidas)
+            {
+                MessageBox.Show(
+                    "O número máximo de máquinas simultâneas desta licença já foi atingido.\n" +
+                    "Encerre o sistema em outra máquina e tente novamente.",
+                    "Limite de Acessos", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
             // Sync periódico a cada 10 min (nível + licença + bloqueio)
             var syncTimer = new System.Threading.Timer(_ =>
             {
@@ -76,6 +86,17 @@ namespace Pedeai
                             MessageBox.Show(
                                 "Este sistema foi bloqueado pelo administrador.\nO sistema será encerrado.",
                                 "Acesso Bloqueado", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            Application.Exit();
+                        }));
+                    }
+                    if (_maquinasExcedidas)
+                    {
+                        var form = Application.OpenForms.Count > 0 ? Application.OpenForms[0] : null;
+                        form?.Invoke(new Action(() =>
+                        {
+                            MessageBox.Show(
+                                "Limite de máquinas simultâneas atingido. O sistema será encerrado.",
+                                "Limite de Acessos", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                             Application.Exit();
                         }));
                     }
@@ -129,6 +150,7 @@ namespace Pedeai
         }
 
         private static volatile bool _clienteBloqueado = false;
+        private static volatile bool _maquinasExcedidas = false;
 
         
         private static void TentarAutoRenovarLicenca(Modelo.Empresa empresa)
@@ -187,7 +209,7 @@ namespace Pedeai
 
                 // 1. Verifica se já existe
                     var getResp = await http.GetAsync(
-                    restBase + "Clientes?CodigoEmpresa=eq." + Uri.EscapeDataString(cod) + "&select=Id,Nivel,ChaveLicenca,Bloqueado,VersaoAtual");
+                    restBase + "Clientes?CodigoEmpresa=eq." + Uri.EscapeDataString(cod) + "&select=Id,Nivel,ChaveLicenca,Bloqueado,VersaoAtual,MaxMaquinas");
                 string getBody = await getResp.Content.ReadAsStringAsync();
 
                 if (!getResp.IsSuccessStatusCode) return;
@@ -207,7 +229,36 @@ namespace Pedeai
                         _clienteBloqueado = true;
                         return;
                     }
-
+                    // ── Limite de máquinas simultâneas ───────────────────────
+                    int maxMaq = existentes[0].MaxMaquinas;
+                    if (maxMaq > 0)
+                    {
+                        // Conta quantas instalações da mesma chave consultaram nos últimos 15 min
+                        string chaveCliente = existentes[0].ChaveLicenca ?? "";
+                        if (!string.IsNullOrWhiteSpace(chaveCliente))
+                        {
+                            string limite = DateTime.UtcNow.AddMinutes(-15).ToString("o");
+                            string urlAtivas = restBase + "Clientes?ChaveLicenca=eq."
+                                + Uri.EscapeDataString(chaveCliente)
+                                + "&UltimaConsulta=gte." + Uri.EscapeDataString(limite)
+                                + "&select=Id";
+                            var rAtivas = await http.GetAsync(urlAtivas);
+                            if (rAtivas.IsSuccessStatusCode)
+                            {
+                                var bAtivas = await rAtivas.Content.ReadAsStringAsync();
+                                var ativas  = JsonSerializer.Deserialize<ClienteIdNivel[]>(bAtivas, opts);
+                                // Se já tem maxMaq ativas E esta instalação ainda não está entre elas
+                                // (não bloqueamos se esta máquina já está contada)
+                                bool estaAtiva = ativas != null && System.Array.Exists(
+                                    ativas, a => a.Id == id);
+                                if (!estaAtiva && ativas != null && ativas.Length >= maxMaq)
+                                {
+                                    _maquinasExcedidas = true;
+                                    return;
+                                }
+                            }
+                        }
+                    }
                     // ── Sync Nível ──────────────────────────────────────────
                     if (nivel > 0 && nivel != empresa.empNivel_Atualizacao)
                         new EmpresaDAL().SalvarNivelAtualizacao(empresa.Codigo, nivel);
@@ -271,6 +322,7 @@ namespace Pedeai
             public string ChaveLicenca  { get; set; }
             public bool   Bloqueado     { get; set; }
             public string VersaoAtual   { get; set; }
+            public int    MaxMaquinas   { get; set; }
         }
 
         // ── Atualização automática ─────────────────────────────────────────────

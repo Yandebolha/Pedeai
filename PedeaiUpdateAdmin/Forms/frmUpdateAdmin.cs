@@ -134,6 +134,7 @@ namespace PedeaiUpdateAdmin.Forms
             dgvClientes.Columns.Add("Codigo",      "Código Emp.");
             dgvClientes.Columns.Add("Nivel",       "Nível");
             dgvClientes.Columns.Add("Versao",      "Versão Atual");
+            dgvClientes.Columns.Add("MaxMaquinas", "Máx. Máq.");
             dgvClientes.Columns.Add("Bloqueado",   "Bloqueado");
             dgvClientes.Columns.Add("UltConsulta", "Última Consulta");
 
@@ -152,6 +153,7 @@ namespace PedeaiUpdateAdmin.Forms
                     codigo,
                     NivelLabel(nivel),
                     (string)c.VersaoAtual    ?? "—",
+                    c.MaxMaquinas != null ? (int)c.MaxMaquinas : 0,
                     c.Bloqueado != null && (bool)c.Bloqueado ? "SIM" : "não",
                     (string)c.UltimaConsulta ?? "—");
             }
@@ -170,6 +172,20 @@ namespace PedeaiUpdateAdmin.Forms
             {
                 await _api.AlterarNivelAsync(id, dlg.NivelSelecionado);
                 SetStatus($"Nível do cliente {id} alterado para {dlg.NivelSelecionado}.");
+                CarregarClientes();
+            }
+            catch (Exception ex) { SetStatus($"Erro: {ex.Message}"); }
+        }
+
+        private async void BtnMaxMaquinas_Click(object sender, EventArgs e)
+        {
+            if (!ObterClienteSelecionado(out long id)) return;
+            using var dlg = new frmAlterarMaxMaquinas();
+            if (dlg.ShowDialog() != DialogResult.OK) return;
+            try
+            {
+                await _api.AlterarMaxMaquinasAsync(id, dlg.MaxSelecionado);
+                SetStatus($"Limite de máquinas do cliente {id} alterado para {dlg.MaxSelecionado}.");
                 CarregarClientes();
             }
             catch (Exception ex) { SetStatus($"Erro: {ex.Message}"); }
@@ -336,6 +352,48 @@ namespace PedeaiUpdateAdmin.Forms
         private void BtnOk_Click(object sender, EventArgs e)
         {
             NivelSelecionado = _cbo.SelectedIndex + 1;
+        }
+    }
+
+    // ── Diálogo para definir máximo de máquinas simultâneas ────────────────────────
+    internal class frmAlterarMaxMaquinas : Form
+    {
+        internal int MaxSelecionado { get; private set; } = 1;
+        private System.Windows.Forms.NumericUpDown _num;
+
+        internal frmAlterarMaxMaquinas()
+        {
+            Text = "Máx. Máquinas Simultâneas";
+            ClientSize = new System.Drawing.Size(280, 130);
+            FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
+            StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
+            MaximizeBox = false;
+            MinimizeBox = false;
+
+            var lbl = new System.Windows.Forms.Label();
+            lbl.Text = "Quantidade máxima de máquinas ao mesmo tempo:";
+            lbl.SetBounds(8, 12, 264, 36);
+
+            _num = new System.Windows.Forms.NumericUpDown();
+            _num.Minimum = 0; _num.Maximum = 50; _num.Value = 1;
+            _num.SetBounds(8, 52, 80, 23);
+
+            var lblHint = new System.Windows.Forms.Label();
+            lblHint.Text = "(0 = sem limite)";
+            lblHint.ForeColor = System.Drawing.Color.Gray;
+            lblHint.SetBounds(96, 54, 160, 20);
+
+            var btnOk = new System.Windows.Forms.Button();
+            btnOk.Text = "OK";
+            btnOk.DialogResult = System.Windows.Forms.DialogResult.OK;
+            btnOk.SetBounds(8, 86, 80, 28);
+            btnOk.Click += (s, e) => MaxSelecionado = (int)_num.Value;
+
+            Controls.Add(lbl);
+            Controls.Add(_num);
+            Controls.Add(lblHint);
+            Controls.Add(btnOk);
+            AcceptButton = btnOk;
         }
     }
 }

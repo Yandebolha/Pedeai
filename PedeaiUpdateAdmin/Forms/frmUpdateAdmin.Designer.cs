@@ -39,6 +39,7 @@ namespace PedeaiUpdateAdmin.Forms
             this.dgvClientes         = new System.Windows.Forms.DataGridView();
             this.btnRefreshClientes  = new System.Windows.Forms.Button();
             this.btnAlterarNivel     = new System.Windows.Forms.Button();
+            this.btnMaxMaquinas      = new System.Windows.Forms.Button();
             this.btnBloquear         = new System.Windows.Forms.Button();
             this.btnDesbloquear      = new System.Windows.Forms.Button();
             this.cboFiltroNivel      = new System.Windows.Forms.ComboBox();
@@ -149,6 +150,7 @@ namespace PedeaiUpdateAdmin.Forms
             this.tabClientes.Controls.Add(this.dgvClientes);
             this.tabClientes.Controls.Add(this.btnRefreshClientes);
             this.tabClientes.Controls.Add(this.btnAlterarNivel);
+            this.tabClientes.Controls.Add(this.btnMaxMaquinas);
             this.tabClientes.Controls.Add(this.btnBloquear);
             this.tabClientes.Controls.Add(this.btnDesbloquear);
             this.tabClientes.Controls.Add(this.lblFiltroNivel);
@@ -191,13 +193,19 @@ namespace PedeaiUpdateAdmin.Forms
             this.btnAlterarNivel.FlatStyle   = System.Windows.Forms.FlatStyle.Flat;
             this.btnAlterarNivel.FlatAppearance.BorderSize = 0;
             this.btnAlterarNivel.Click      += new System.EventHandler(this.BtnAlterarNivel_Click);
-            this.btnBloquear.Text            = "Bloquear";        this.btnBloquear.SetBounds(510, 456, 100, 28);
+            this.btnMaxMaquinas.Text         = "🖥 Máx. Máq.";  this.btnMaxMaquinas.SetBounds(510, 456, 110, 28);
+            this.btnMaxMaquinas.BackColor    = System.Drawing.Color.FromArgb(100, 100, 180);
+            this.btnMaxMaquinas.ForeColor    = System.Drawing.Color.White;
+            this.btnMaxMaquinas.FlatStyle    = System.Windows.Forms.FlatStyle.Flat;
+            this.btnMaxMaquinas.FlatAppearance.BorderSize = 0;
+            this.btnMaxMaquinas.Click       += new System.EventHandler(this.BtnMaxMaquinas_Click);
+            this.btnBloquear.Text            = "Bloquear";        this.btnBloquear.SetBounds(630, 456, 100, 28);
             this.btnBloquear.BackColor       = System.Drawing.Color.FromArgb(192, 57, 43);
             this.btnBloquear.ForeColor       = System.Drawing.Color.White;
             this.btnBloquear.FlatStyle       = System.Windows.Forms.FlatStyle.Flat;
             this.btnBloquear.FlatAppearance.BorderSize = 0;
             this.btnBloquear.Click          += new System.EventHandler(this.BtnBloquear_Click);
-            this.btnDesbloquear.Text         = "Desbloquear";     this.btnDesbloquear.SetBounds(620, 456, 110, 28);
+            this.btnDesbloquear.Text         = "Desbloquear";     this.btnDesbloquear.SetBounds(740, 456, 110, 28);
             this.btnDesbloquear.BackColor    = System.Drawing.Color.FromArgb(87, 120, 38);
             this.btnDesbloquear.ForeColor    = System.Drawing.Color.White;
             this.btnDesbloquear.FlatStyle    = System.Windows.Forms.FlatStyle.Flat;
@@ -323,6 +331,7 @@ namespace PedeaiUpdateAdmin.Forms
         private System.Windows.Forms.DataGridView           dgvClientes;
         private System.Windows.Forms.Button                 btnRefreshClientes;
         private System.Windows.Forms.Button                 btnAlterarNivel;
+        private System.Windows.Forms.Button                 btnMaxMaquinas;
         private System.Windows.Forms.Button                 btnBloquear;
         private System.Windows.Forms.Button                 btnDesbloquear;
         private System.Windows.Forms.ComboBox               cboFiltroNivel;

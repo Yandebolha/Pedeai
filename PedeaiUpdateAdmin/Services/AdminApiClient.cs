@@ -176,6 +176,9 @@ namespace PedeaiUpdateAdmin.Services
         public async Task AlterarNivelAsync(long clienteId, int nivel)
             => await PatchAsync("Clientes", "Id=eq." + clienteId, new { Nivel = nivel });
 
+        public async Task AlterarMaxMaquinasAsync(long clienteId, int max)
+            => await PatchAsync("Clientes", "Id=eq." + clienteId, new { MaxMaquinas = max });
+
         public async Task BloquearClienteAsync(long clienteId, bool bloquear)
             => await PatchAsync("Clientes", "Id=eq." + clienteId, new { Bloqueado = bloquear });
 
