@@ -23,6 +23,9 @@ namespace Pedeai
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
 
+            // Garante limpeza de sessão em QUALQUER tipo de saída (crash, kill, Environment.Exit, bat)
+            AppDomain.CurrentDomain.ProcessExit += (_, __) => LimparSessao(_maqNome);
+
             // Testa servidor MySQL e abre configuração se não conectar.
             // Loop: repete até conectar ou usuário cancelar.
             while (!DB.DbHelper.TestarConexao())
@@ -74,7 +77,7 @@ namespace Pedeai
             var heartbeatTimer = new System.Threading.Timer(_ =>
             {
                 try { AtualizarSessao(_maqNome); } catch { }
-            }, null, TimeSpan.FromMinutes(5), TimeSpan.FromMinutes(5));
+            }, null, TimeSpan.FromMinutes(2), TimeSpan.FromMinutes(2));
             GC.KeepAlive(heartbeatTimer);
 
             // Sync periódico a cada 10 min (nível + licença + bloqueio)
@@ -174,10 +177,16 @@ namespace Pedeai
             using var c = new MySqlConnector.MySqlConnection(conn);
             c.Open();
 
-            // Conta sessões ativas nos últimos 15 min (excluindo esta máquina)
+            // Conta sessões ativas nos últimos 5 min (excluindo esta máquina)
+            // Primeiro: apaga sessões antigas (> 5 min) para limpar possíveis travamentos
+            using var cmdPurge = new MySqlConnector.MySqlCommand(
+                "DELETE FROM sessao_maquina " +
+                "WHERE ultima_atividade < DATE_SUB(NOW(), INTERVAL 5 MINUTE)", c);
+            cmdPurge.ExecuteNonQuery();
+
             using var cmdCount = new MySqlConnector.MySqlCommand(
                 "SELECT COUNT(*) FROM sessao_maquina " +
-                "WHERE maq_nome <> @maq AND ultima_atividade >= DATE_SUB(NOW(), INTERVAL 15 MINUTE)", c);
+                "WHERE maq_nome <> @maq AND ultima_atividade >= DATE_SUB(NOW(), INTERVAL 5 MINUTE)", c);
             cmdCount.Parameters.AddWithValue("@maq", _maqNome);
             int ativas = Convert.ToInt32(cmdCount.ExecuteScalar());
 
