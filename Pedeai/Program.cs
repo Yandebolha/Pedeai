@@ -281,6 +281,11 @@ namespace Pedeai
                         && versaoSup != empresa.empVersao_Atual)
                         new EmpresaDAL().SalvarVersaoAtual(empresa.Codigo, versaoSup);
 
+                    // ── Sync MaxMaquinas ─────────────────────────────────────
+                    int maxMaqSup = existentes[0].MaxMaquinas;
+                    if (maxMaqSup != empresa.empMax_Maquinas)
+                        new EmpresaDAL().SalvarMaxMaquinas(empresa.Codigo, maxMaqSup);
+
                     var patch = JsonSerializer.Serialize(new
                     {
                         NomeEmpresa    = nome ?? "",

@@ -556,6 +556,8 @@ namespace Pedeai.DB
                     "TINYINT NOT NULL DEFAULT 2");
                 AddColumnIfNotExists(conn, db, "empresa", "empVersao_Atual",
                     "VARCHAR(20) NOT NULL DEFAULT ''");
+                AddColumnIfNotExists(conn, db, "empresa", "empMax_Maquinas",
+                    "INT NOT NULL DEFAULT 0");
 
                 // Gera o código de empresa se ainda não existir
                 {

@@ -29,6 +29,7 @@ namespace Pedeai.DAL
                 empData_Graca        = TryGetDate(r, "empData_Graca"),
                 empNivel_Atualizacao = TryGetInt(r, "empNivel_Atualizacao", 2),
                 empVersao_Atual      = TryGet(r, "empVersao_Atual"),
+                empMax_Maquinas      = TryGetInt(r, "empMax_Maquinas", 0),
             };
         }
 
@@ -149,6 +150,16 @@ namespace Pedeai.DAL
                 "UPDATE empresa SET empVersao_Atual=@versao WHERE Codigo=@cod", conn);
             cmd.Parameters.AddWithValue("@versao", versao ?? "");
             cmd.Parameters.AddWithValue("@cod",    codEmpresa);
+            cmd.ExecuteNonQuery();
+        }
+        /// <summary>Persiste o número máximo de máquinas simultâneas (sincronizado do Supabase).</summary>
+        public void SalvarMaxMaquinas(int codEmpresa, int max)
+        {
+            using var conn = AbrirConexao();
+            using var cmd  = new MySqlCommand(
+                "UPDATE empresa SET empMax_Maquinas=@max WHERE Codigo=@cod", conn);
+            cmd.Parameters.AddWithValue("@max", max);
+            cmd.Parameters.AddWithValue("@cod", codEmpresa);
             cmd.ExecuteNonQuery();
         }
     }

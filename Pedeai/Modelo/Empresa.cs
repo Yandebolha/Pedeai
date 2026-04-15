@@ -20,5 +20,7 @@ namespace Pedeai.Modelo
         public int empNivel_Atualizacao { get; set; } = 2;
         /// <summary>Versão atual instalada, sincronizada com Supabase via PedeaiUpdateService.</summary>
         public string empVersao_Atual { get; set; } = "";
+        /// <summary>Número máximo de máquinas simultâneas permitidas. 0 = sem limite. Sincronizado do Supabase.</summary>
+        public int empMax_Maquinas { get; set; } = 0;
     }
 }
