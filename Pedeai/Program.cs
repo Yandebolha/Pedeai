@@ -331,26 +331,38 @@ namespace Pedeai
         private const string PASTA_APP      = @"C:\Pedeai";
 
         /// <summary>
-        /// Se existir uma pasta de atualização pendente, copia os arquivos para C:\Pedeai
-        /// e apaga a pasta. Roda ANTES de qualquer form ser aberto.
+        /// Se existir uma pasta de atualização pendente, lança um script oculto que:
+        /// 1. Aguarda este processo encerrar (3 s)
+        /// 2. Copia os arquivos com xcopy
+        /// 3. Apaga a pasta pendente
+        /// 4. Reinicia o Pedeai.exe
+        /// Encerra o processo atual imediatamente para liberar os arquivos bloqueados.
         /// </summary>
         private static void AplicarAtualizacaoPendente()
         {
+            if (!Directory.Exists(PASTA_PENDENTE)) return;
             try
             {
-                if (!Directory.Exists(PASTA_PENDENTE)) return;
-
-                // Copia todos os arquivos preservando subpastas
-                foreach (string arquivo in Directory.GetFiles(PASTA_PENDENTE, "*", SearchOption.AllDirectories))
+                string exePath = Path.Combine(PASTA_APP, "RanGoFood.exe");
+                string bat = $@"@echo off
+timeout /t 3 /nobreak > nul
+xcopy /E /Y /I ""{PASTA_PENDENTE}"" ""{PASTA_APP}""
+rmdir /S /Q ""{PASTA_PENDENTE}""
+if exist ""{exePath}"" start """" ""{exePath}""
+del ""%~f0""
+";
+                string batPath = Path.Combine(Path.GetTempPath(), "pedeai_apply_update.bat");
+                File.WriteAllText(batPath, bat, System.Text.Encoding.Default);
+                System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
                 {
-                    string rel    = arquivo.Substring(PASTA_PENDENTE.Length).TrimStart('\\', '/');
-                    string destino = Path.Combine(PASTA_APP, rel);
-                    Directory.CreateDirectory(Path.GetDirectoryName(destino));
-                    File.Copy(arquivo, destino, overwrite: true);
-                }
-                Directory.Delete(PASTA_PENDENTE, recursive: true);
+                    FileName        = batPath,
+                    WindowStyle     = System.Diagnostics.ProcessWindowStyle.Hidden,
+                    CreateNoWindow  = true,
+                    UseShellExecute = true
+                });
+                Environment.Exit(0); // libera o bloqueio dos arquivos
             }
-            catch { /* falha silenciosa — não impede o sistema de abrir */ }
+            catch { /* se falhar, ignora e continua normalmente */ }
         }
 
         /// <summary>
