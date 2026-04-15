@@ -59,8 +59,9 @@ namespace Pedeai
                 return;
             }
 
-            // Limite de máquinas simultâneas excedido
-            if (_maquinasExcedidas)
+            // ── Limite de máquinas simultâneas (MySQL compartilhado) ──────────
+            empresa = new EmpresaDAL().Carregar(); // recarrega para pegar empMax_Maquinas atualizado
+            if (!VerificarERegistrarSessao(empresa))
             {
                 MessageBox.Show(
                     "O número máximo de máquinas simultâneas desta licença já foi atingido.\n" +
@@ -68,6 +69,13 @@ namespace Pedeai
                     "Limite de Acessos", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
+
+            // Heartbeat: mantém sessão ativa enquanto o sistema estiver aberto
+            var heartbeatTimer = new System.Threading.Timer(_ =>
+            {
+                try { AtualizarSessao(_maqNome); } catch { }
+            }, null, TimeSpan.FromMinutes(5), TimeSpan.FromMinutes(5));
+            GC.KeepAlive(heartbeatTimer);
 
             // Sync periódico a cada 10 min (nível + licença + bloqueio)
             var syncTimer = new System.Threading.Timer(_ =>
@@ -86,17 +94,6 @@ namespace Pedeai
                             MessageBox.Show(
                                 "Este sistema foi bloqueado pelo administrador.\nO sistema será encerrado.",
                                 "Acesso Bloqueado", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                            Application.Exit();
-                        }));
-                    }
-                    if (_maquinasExcedidas)
-                    {
-                        var form = Application.OpenForms.Count > 0 ? Application.OpenForms[0] : null;
-                        form?.Invoke(new Action(() =>
-                        {
-                            MessageBox.Show(
-                                "Limite de máquinas simultâneas atingido. O sistema será encerrado.",
-                                "Limite de Acessos", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                             Application.Exit();
                         }));
                     }
@@ -148,17 +145,74 @@ namespace Pedeai
 
             Application.Run(new Form1());
 
-            // Ao fechar, libera a sessão imediatamente para outras máquinas
+            // Ao fechar, libera a sessão desta máquina imediatamente
+            LimparSessao(_maqNome);
+            // Notifica o Supabase que esta máquina saiu
             try { Task.Run(LimparSessaoAsync).Wait(TimeSpan.FromSeconds(5)); } catch { }
         }
 
         private static volatile bool _clienteBloqueado = false;
-        private static volatile bool _maquinasExcedidas = false;
+
+        // Nome desta máquina — chave de sessão no MySQL
+        private static readonly string _maqNome = System.Environment.MachineName;
 
         // Dados da sessão ativa — usados para limpar UltimaConsulta ao fechar
         private static string _sessaoSupabaseUrl = "";
         private static string _sessaoSupabaseKey = "";
         private static long   _sessaoClienteId   = 0;
+
+        // ── Sessão MySQL (máquinas simultâneas) ────────────────────────────────
+
+        /// <summary>
+        /// Verifica se ainda há vagas (MaxMaquinas) e, se houver, registra esta máquina.
+        /// Retorna false se o limite foi excedido.
+        /// </summary>
+        private static bool VerificarERegistrarSessao(Modelo.Empresa empresa)
+        {
+            int maxMaq = empresa.empMax_Maquinas;
+            string conn = DB.DbHelper.ConnectionString;
+            using var c = new MySqlConnector.MySqlConnection(conn);
+            c.Open();
+
+            // Conta sessões ativas nos últimos 15 min (excluindo esta máquina)
+            using var cmdCount = new MySqlConnector.MySqlCommand(
+                "SELECT COUNT(*) FROM sessao_maquina " +
+                "WHERE maq_nome <> @maq AND ultima_atividade >= DATE_SUB(NOW(), INTERVAL 15 MINUTE)", c);
+            cmdCount.Parameters.AddWithValue("@maq", _maqNome);
+            int ativas = Convert.ToInt32(cmdCount.ExecuteScalar());
+
+            if (maxMaq > 0 && ativas >= maxMaq)
+                return false;
+
+            // Registra (ou renova) sessão desta máquina
+            AtualizarSessao(_maqNome);
+            return true;
+        }
+
+        private static void AtualizarSessao(string maqNome)
+        {
+            using var c = new MySqlConnector.MySqlConnection(DB.DbHelper.ConnectionString);
+            c.Open();
+            using var cmd = new MySqlConnector.MySqlCommand(
+                "INSERT INTO sessao_maquina (maq_nome, ultima_atividade) VALUES (@maq, NOW()) " +
+                "ON DUPLICATE KEY UPDATE ultima_atividade = NOW()", c);
+            cmd.Parameters.AddWithValue("@maq", maqNome);
+            cmd.ExecuteNonQuery();
+        }
+
+        private static void LimparSessao(string maqNome)
+        {
+            try
+            {
+                using var c = new MySqlConnector.MySqlConnection(DB.DbHelper.ConnectionString);
+                c.Open();
+                using var cmd = new MySqlConnector.MySqlCommand(
+                    "DELETE FROM sessao_maquina WHERE maq_nome = @maq", c);
+                cmd.Parameters.AddWithValue("@maq", maqNome);
+                cmd.ExecuteNonQuery();
+            }
+            catch { }
+        }
 
         
         private static void TentarAutoRenovarLicenca(Modelo.Empresa empresa)
@@ -217,7 +271,7 @@ namespace Pedeai
 
                 // 1. Verifica se já existe
                     var getResp = await http.GetAsync(
-                    restBase + "Clientes?CodigoEmpresa=eq." + Uri.EscapeDataString(cod) + "&select=Id,Nivel,ChaveLicenca,Bloqueado,VersaoAtual,MaxMaquinas,CodigoEmpresa");
+                    restBase + "Clientes?CodigoEmpresa=eq." + Uri.EscapeDataString(cod) + "&select=Id,Nivel,ChaveLicenca,Bloqueado,VersaoAtual,MaxMaquinas");
                 string getBody = await getResp.Content.ReadAsStringAsync();
 
                 if (!getResp.IsSuccessStatusCode) return;
@@ -236,32 +290,6 @@ namespace Pedeai
                     {
                         _clienteBloqueado = true;
                         return;
-                    }
-                    // ── Limite de máquinas simultâneas ───────────────────────
-                    int maxMaq = existentes[0].MaxMaquinas;
-                    if (maxMaq > 0)
-                    {
-                        // Conta todas as máquinas do mesmo restaurante ativas nos últimos 15 min
-                        // Agrupadas por NomeEmpresa (mesmo nome = mesmo restaurante em máquinas diferentes)
-                        string limite = DateTime.UtcNow.AddMinutes(-15).ToString("o");
-                        string urlAtivas = restBase + "Clientes?NomeEmpresa=eq."
-                            + Uri.EscapeDataString(nome)
-                            + "&UltimaConsulta=gte." + Uri.EscapeDataString(limite)
-                            + "&select=Id,CodigoEmpresa";
-                        var rAtivas = await http.GetAsync(urlAtivas);
-                        if (rAtivas.IsSuccessStatusCode)
-                        {
-                            var bAtivas = await rAtivas.Content.ReadAsStringAsync();
-                            var ativas  = JsonSerializer.Deserialize<ClienteIdNivel[]>(bAtivas, opts);
-                            // Esta máquina já está contada se o seu próprio CodigoEmpresa aparece na lista
-                            bool estaAtiva = ativas != null && System.Array.Exists(
-                                ativas, a => a.CodigoEmpresa == cod);
-                            if (!estaAtiva && ativas != null && ativas.Length >= maxMaq)
-                            {
-                                _maquinasExcedidas = true;
-                                return;
-                            }
-                        }
                     }
                     // ── Sync Nível ──────────────────────────────────────────
                     if (nivel > 0 && nivel != empresa.empNivel_Atualizacao)
@@ -334,7 +362,6 @@ namespace Pedeai
             public long   Id            { get; set; }
             public int    Nivel         { get; set; }
             public string ChaveLicenca  { get; set; }
-            public string CodigoEmpresa { get; set; }
             public bool   Bloqueado     { get; set; }
             public string VersaoAtual   { get; set; }
             public int    MaxMaquinas   { get; set; }

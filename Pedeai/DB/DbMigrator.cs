@@ -559,6 +559,13 @@ namespace Pedeai.DB
                 AddColumnIfNotExists(conn, db, "empresa", "empMax_Maquinas",
                     "INT NOT NULL DEFAULT 0");
 
+                // ── Sessões ativas por máquina (controle de máquinas simultâneas) ──
+                Exec(conn, @"
+                    CREATE TABLE IF NOT EXISTS sessao_maquina (
+                        maq_nome          VARCHAR(100) NOT NULL PRIMARY KEY,
+                        ultima_atividade  DATETIME     NOT NULL
+                    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+
                 // Gera o código de empresa se ainda não existir
                 {
                     using var chkCod = new MySqlCommand(
