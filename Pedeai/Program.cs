@@ -307,12 +307,6 @@ namespace Pedeai
                             new EmpresaDAL().SalvarDataGraca(empresa.Codigo, null);
                     }
 
-                    // ── Sync VersaoAtual ────────────────────────────────────
-                    string versaoSup = existentes[0].VersaoAtual ?? "";
-                    if (!string.IsNullOrWhiteSpace(versaoSup)
-                        && versaoSup != empresa.empVersao_Atual)
-                        new EmpresaDAL().SalvarVersaoAtual(empresa.Codigo, versaoSup);
-
                     // ── Sync MaxMaquinas ─────────────────────────────────────
                     int maxMaqSup = existentes[0].MaxMaquinas;
                     if (maxMaqSup != empresa.empMax_Maquinas)
