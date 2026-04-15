@@ -10,6 +10,7 @@ namespace PedeaiUpdateAdmin.Forms
         private AdminApiClient _api;
         private List<dynamic>  _clientes;
         private List<dynamic>  _pacotes;
+        private readonly List<string> _arquivosSelecionados = new List<string>();
 
         public frmUpdateAdmin()
         {
@@ -41,19 +42,39 @@ namespace PedeaiUpdateAdmin.Forms
 
         // ── Publicar ──────────────────────────────────────────────────────────────
 
-        private void BtnBrowseZip_Click(object sender, EventArgs e)
+        private void BtnAdicionarArquivos_Click(object sender, EventArgs e)
         {
             using var dlg = new OpenFileDialog();
-            dlg.Title  = "Selecionar pacote ZIP de atualização";
-            dlg.Filter = "Arquivos ZIP|*.zip";
-            if (dlg.ShowDialog() == DialogResult.OK)
-                txtArquivo.Text = dlg.FileName;
+            dlg.Title       = "Selecionar arquivos modificados";
+            dlg.Filter      = "Todos os arquivos|*.*";
+            dlg.Multiselect = true;
+            if (dlg.ShowDialog() != DialogResult.OK) return;
+
+            foreach (string f in dlg.FileNames)
+            {
+                if (!_arquivosSelecionados.Contains(f))
+                    _arquivosSelecionados.Add(f);
+            }
+            AtualizarListaArquivos();
+        }
+
+        private void BtnLimpar_Click(object sender, EventArgs e)
+        {
+            _arquivosSelecionados.Clear();
+            AtualizarListaArquivos();
+        }
+
+        private void AtualizarListaArquivos()
+        {
+            lstArquivos.Items.Clear();
+            foreach (string f in _arquivosSelecionados)
+                lstArquivos.Items.Add(f);
         }
 
         private async void BtnPublicar_Click(object sender, EventArgs e)
         {
-            if (string.IsNullOrWhiteSpace(txtArquivo.Text))
-            { MessageBox.Show("Selecione o arquivo ZIP.", "Atenção", MessageBoxButtons.OK, MessageBoxIcon.Warning); return; }
+            if (_arquivosSelecionados.Count == 0)
+            { MessageBox.Show("Adicione ao menos um arquivo.", "Atenção", MessageBoxButtons.OK, MessageBoxIcon.Warning); return; }
             if (string.IsNullOrWhiteSpace(txtVersao.Text))
             { MessageBox.Show("Informe a versão.", "Atenção", MessageBoxButtons.OK, MessageBoxIcon.Warning); return; }
             if (_api == null) { SetStatus("Configure a conexão primeiro."); return; }
@@ -62,15 +83,17 @@ namespace PedeaiUpdateAdmin.Forms
             btnPublicar.Enabled = false;
             pbUpload.Visible    = true;
             pbUpload.Style      = ProgressBarStyle.Marquee;
-            SetStatus("Enviando pacote...");
+            SetStatus("Criando pacote e enviando...");
 
             try
             {
-                long id = await _api.PublicarAsync(
-                    txtArquivo.Text, txtVersao.Text.Trim(), nivel, txtDescricao.Text.Trim());
+                long id = await _api.PublicarArquivosAsync(
+                    _arquivosSelecionados, txtVersao.Text.Trim(), nivel, txtDescricao.Text.Trim());
                 SetStatus($"Publicado com sucesso! ID do pacote: {id}");
                 lblStatusPublicacao.Text = $"✔ Publicado — ID {id} | Versão {txtVersao.Text} | Nível {nivel}";
                 lblStatusPublicacao.ForeColor = System.Drawing.Color.Green;
+                _arquivosSelecionados.Clear();
+                AtualizarListaArquivos();
                 CarregarPacotes();
             }
             catch (Exception ex)

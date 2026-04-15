@@ -6,6 +6,7 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
+using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
@@ -171,7 +172,7 @@ namespace PedeaiUpdateService
         public async Task<string> BaixarAsync(long pacoteId, string caminhoArquivo, CancellationToken ct)
         {
             string url  = StorageBase + "object/" + BUCKET + "/" +
-                          Uri.EscapeDataString(caminhoArquivo);
+                          EncodeStoragePath(caminhoArquivo);
             string dest = Path.Combine(Path.GetTempPath(), $"pedeai_update_{pacoteId}.zip");
 
             using var resp = await _http.GetAsync(url, HttpCompletionOption.ResponseHeadersRead, ct);
@@ -196,7 +197,7 @@ namespace PedeaiUpdateService
         public async Task<string> BaixarAsync(long clienteId, long pacoteId, string caminhoArquivo, CancellationToken ct)
         {
             string url  = StorageBase + "object/" + BUCKET + "/" +
-                          Uri.EscapeDataString(caminhoArquivo);
+                          EncodeStoragePath(caminhoArquivo);
             string dest = Path.Combine(Path.GetTempPath(), $"pedeai_update_{pacoteId}.zip");
 
             using var resp = await _http.GetAsync(url, HttpCompletionOption.ResponseHeadersRead, ct);
@@ -488,6 +489,10 @@ namespace PedeaiUpdateService
         }
 
         // ── Helpers REST ──────────────────────────────────────────────────────────
+
+        /// <summary>Codifica cada segmento do caminho separadamente, preservando as barras '/'.</summary>
+        private static string EncodeStoragePath(string path)
+            => string.Join("/", (path ?? "").Split('/').Select(Uri.EscapeDataString));
 
         private async Task PostAsync(string table, object body, CancellationToken ct)
         {

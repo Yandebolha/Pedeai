@@ -45,13 +45,82 @@ namespace PedeaiUpdateAdmin.Services
 
         // ── Pacotes ───────────────────────────────────────────────────────────────
 
+        public async Task<long> PublicarArquivosAsync(
+            IList<string> arquivos, string versao, int nivel, string descricao)
+        {
+            if (arquivos == null || arquivos.Count == 0)
+                throw new ArgumentException("Nenhum arquivo selecionado.");
+
+            // Detecta a pasta-base em comum (maior caminho que é prefixo de todos os arquivos)
+            string baseDir = PastaEmComum(arquivos);
+
+            // Cria ZIP temporário com paths relativos a partir da pasta-base
+            string zipTemp = System.IO.Path.Combine(
+                System.IO.Path.GetTempPath(), $"pedeai_pub_{versao.Replace(".", "-")}_{Guid.NewGuid():N}.zip");
+            try
+            {
+                using (var zip = System.IO.Compression.ZipFile.Open(
+                    zipTemp, System.IO.Compression.ZipArchiveMode.Create))
+                {
+                    foreach (string arquivo in arquivos)
+                    {
+                        if (!System.IO.File.Exists(arquivo)) continue;
+                        string relPath = System.IO.Path.GetFullPath(arquivo)
+                            .Substring(baseDir.Length)
+                            .TrimStart(System.IO.Path.DirectorySeparatorChar,
+                                       System.IO.Path.AltDirectorySeparatorChar);
+                        // Normaliza separador para '/' dentro do ZIP
+                        relPath = relPath.Replace('\\', '/');
+                        zip.CreateEntryFromFile(arquivo, relPath,
+                            System.IO.Compression.CompressionLevel.Optimal);
+                    }
+                }
+                return await PublicarAsync(zipTemp, versao, nivel, descricao);
+            }
+            finally
+            {
+                try { System.IO.File.Delete(zipTemp); } catch { }
+            }
+        }
+
+        /// <summary>Retorna o diretório-base em comum de uma lista de caminhos (com separador final).</summary>
+        private static string PastaEmComum(IList<string> arquivos)
+        {
+            if (arquivos.Count == 1)
+                return System.IO.Path.GetDirectoryName(
+                    System.IO.Path.GetFullPath(arquivos[0])) + System.IO.Path.DirectorySeparatorChar;
+
+            string[] parts = System.IO.Path.GetFullPath(arquivos[0]).Split(
+                System.IO.Path.DirectorySeparatorChar);
+            int comum = parts.Length - 1; // exclui o nome do arquivo
+
+            for (int i = 1; i < arquivos.Count; i++)
+            {
+                string[] cur = System.IO.Path.GetFullPath(arquivos[i]).Split(
+                    System.IO.Path.DirectorySeparatorChar);
+                int maxCmp = Math.Min(comum, cur.Length - 1);
+                int match = 0;
+                for (int j = 0; j < maxCmp; j++)
+                {
+                    if (string.Equals(parts[j], cur[j],
+                        StringComparison.OrdinalIgnoreCase)) match++;
+                    else break;
+                }
+                comum = match;
+            }
+
+            return string.Join(System.IO.Path.DirectorySeparatorChar.ToString(),
+                parts, 0, comum) + System.IO.Path.DirectorySeparatorChar;
+        }
+
         public async Task<long> PublicarAsync(string arquivoZip, string versao, int nivel, string descricao)
         {
             // 0. Garante que o bucket existe (cria se necessário)
             await GarantirBucketAsync();
 
             // 1. Upload do ZIP para o Supabase Storage (usa _httpStorage com service_role)
-            string fileName = versao.Replace(".", "-") + "_" + Path.GetFileName(arquivoZip);
+            // Armazena na pasta nomeada pela versão: {versao}/files.zip
+            string fileName = versao + "/files.zip";
             using var fileContent = new StreamContent(File.OpenRead(arquivoZip));
             fileContent.Headers.ContentType = new MediaTypeHeaderValue("application/octet-stream");
             var uploadReq = new HttpRequestMessage(HttpMethod.Post,

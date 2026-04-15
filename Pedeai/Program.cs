@@ -1,5 +1,8 @@
 ﻿using System;
 using System.Configuration;
+using System.IO;
+using System.IO.Compression;
+using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Text.Json;
@@ -31,6 +34,12 @@ namespace Pedeai
 
             // Cria banco (se não existir) + tabelas + dados iniciais
             if (!DbMigrator.Executar()) return;
+
+            // ── Atualização automática silenciosa ─────────────────────────
+            // 1. Aplica qualquer atualização já baixada na inicialização anterior
+            AplicarAtualizacaoPendente();
+            // 2. Verifica + baixa nova atualização em background (aplica no próximo start)
+            _ = Task.Run(() => VerificarEBaixarAtualizacao());
 
             // ── Auto-renovação de licença via VPS ───────────────────────────
             var empresa = new EmpresaDAL().Carregar();
@@ -262,6 +271,109 @@ namespace Pedeai
             public string ChaveLicenca  { get; set; }
             public bool   Bloqueado     { get; set; }
             public string VersaoAtual   { get; set; }
+        }
+
+        // ── Atualização automática ─────────────────────────────────────────────
+
+        private const string PASTA_PENDENTE = @"C:\Pedeai\_update_pending";
+        private const string PASTA_APP      = @"C:\Pedeai";
+
+        /// <summary>
+        /// Se existir uma pasta de atualização pendente, copia os arquivos para C:\Pedeai
+        /// e apaga a pasta. Roda ANTES de qualquer form ser aberto.
+        /// </summary>
+        private static void AplicarAtualizacaoPendente()
+        {
+            try
+            {
+                if (!Directory.Exists(PASTA_PENDENTE)) return;
+
+                // Copia todos os arquivos preservando subpastas
+                foreach (string arquivo in Directory.GetFiles(PASTA_PENDENTE, "*", SearchOption.AllDirectories))
+                {
+                    string rel    = arquivo.Substring(PASTA_PENDENTE.Length).TrimStart('\\', '/');
+                    string destino = Path.Combine(PASTA_APP, rel);
+                    Directory.CreateDirectory(Path.GetDirectoryName(destino));
+                    File.Copy(arquivo, destino, overwrite: true);
+                }
+                Directory.Delete(PASTA_PENDENTE, recursive: true);
+            }
+            catch { /* falha silenciosa — não impede o sistema de abrir */ }
+        }
+
+        /// <summary>
+        /// Consulta o Supabase para verificar se há versão mais nova do que a instalada.
+        /// Se houver, baixa o ZIP e extrai em C:\Pedeai\_update_pending\ para aplicar no próximo start.
+        /// </summary>
+        private static async Task VerificarEBaixarAtualizacao()
+        {
+            try
+            {
+                string url = ConfigurationManager.AppSettings["SupabaseUrl"] ?? "";
+                string key = ConfigurationManager.AppSettings["SupabaseKey"] ?? "";
+                if (string.IsNullOrWhiteSpace(url) || string.IsNullOrWhiteSpace(key)) return;
+
+                var empresa = new EmpresaDAL().Carregar();
+                int nivel         = empresa.empNivel_Atualizacao > 0 ? empresa.empNivel_Atualizacao : 2;
+                string versaoAtual = empresa.empVersao_Atual ?? "";
+
+                string restBase    = url.TrimEnd('/') + "/rest/v1/";
+                string storageBase = url.TrimEnd('/') + "/storage/v1/";
+
+                using var http = new HttpClient { Timeout = TimeSpan.FromMinutes(10) };
+                http.DefaultRequestHeaders.Add("apikey", key);
+                http.DefaultRequestHeaders.Add("Authorization", "Bearer " + key);
+
+                // Busca pacote mais recente com Versao > versaoAtual e Nivel <= nivel do cliente
+                string versaoEnc = Uri.EscapeDataString(versaoAtual);
+                string pkgUrl = restBase + "Pacotes?Ativo=eq.true&Nivel=lte." + nivel
+                              + "&Versao=gt." + versaoEnc
+                              + "&order=Versao.desc&limit=1";
+
+                var resp = await http.GetAsync(pkgUrl);
+                if (!resp.IsSuccessStatusCode) return;
+
+                string body = await resp.Content.ReadAsStringAsync();
+                var opts    = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+                var pacotes = JsonSerializer.Deserialize<PacoteInfo[]>(body, opts);
+                if (pacotes == null || pacotes.Length == 0) return;
+
+                var pacote = pacotes[0];
+
+                // Baixa o ZIP
+                string caminho = pacote.CaminhoArquivo ?? "";
+                if (string.IsNullOrWhiteSpace(caminho)) return;
+
+                // Codifica segmentos do path preservando '/'
+                string pathCodificado = string.Join("/",
+                    caminho.Split('/').Select(Uri.EscapeDataString));
+                string downloadUrl = storageBase + "object/pacotes/" + pathCodificado;
+
+                using var dlResp = await http.GetAsync(downloadUrl, HttpCompletionOption.ResponseHeadersRead);
+                if (!dlResp.IsSuccessStatusCode) return;
+
+                string zipTemp = Path.Combine(Path.GetTempPath(), $"pedeai_dl_{pacote.Id}.zip");
+                using (var fs = new FileStream(zipTemp, FileMode.Create, FileAccess.Write))
+                    await dlResp.Content.CopyToAsync(fs);
+
+                // Extrai para pasta pendente (vazia antes)
+                if (Directory.Exists(PASTA_PENDENTE))
+                    Directory.Delete(PASTA_PENDENTE, recursive: true);
+                ZipFile.ExtractToDirectory(zipTemp, PASTA_PENDENTE);
+                File.Delete(zipTemp);
+
+                // Salva nova versão no banco (para que na próxima consulta não baixe de novo)
+                new EmpresaDAL().SalvarVersaoAtual(empresa.Codigo, pacote.Versao);
+            }
+            catch { /* background — falha silenciosa */ }
+        }
+
+        private class PacoteInfo
+        {
+            public long   Id             { get; set; }
+            public string Versao         { get; set; }
+            public string CaminhoArquivo { get; set; }
+            public int    Nivel          { get; set; }
         }
     }
 }
