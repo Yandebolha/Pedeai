@@ -234,9 +234,23 @@ namespace PedeaiUpdateService
                 string filesDir = Path.Combine(stagingDir, "files");
                 string appDir   = _cfg["AppDir"] ?? AppDomain.CurrentDomain.BaseDirectory;
 
-                // Se não há subpasta 'files/', trata a raiz do staging como origem
-                // (útil quando o usuário zipa uma pasta diretamente)
-                string origemCopia = Directory.Exists(filesDir) ? filesDir : stagingDir;
+                // Se não há subpasta 'files/', trata a raiz do staging como origem.
+                // Caso especial: se a raiz do staging tiver apenas UMA pasta (e nenhum arquivo),
+                // significa que o ZIP foi criado comprimindo a pasta inteira — desempacota um nível.
+                string origemCopia;
+                if (Directory.Exists(filesDir))
+                {
+                    origemCopia = filesDir;
+                }
+                else
+                {
+                    var rootFolders = Directory.GetDirectories(stagingDir);
+                    var rootFiles   = Directory.GetFiles(stagingDir);
+                    if (rootFolders.Length == 1 && rootFiles.Length == 0)
+                        origemCopia = rootFolders[0];   // desempacota o wrapper
+                    else
+                        origemCopia = stagingDir;
+                }
 
                 // Para subdiretórios de primeiro nível presentes na origem,
                 // apaga o correspondente no AppDir antes de copiar — substituição completa
@@ -455,6 +469,20 @@ namespace PedeaiUpdateService
                 dynamic json = JsonConvert.DeserializeObject(File.ReadAllText(path));
                 json.VersaoAtual = versao;
                 File.WriteAllText(path, JsonConvert.SerializeObject(json, Formatting.Indented));
+            }
+            catch { }
+
+            // Persiste também na tabela local para exibição no sistema
+            try
+            {
+                string cs = _cfg["ConnectionString"] ?? "";
+                if (string.IsNullOrWhiteSpace(cs)) return;
+                using var conn = new MySqlConnection(cs);
+                conn.Open();
+                using var cmd = new MySqlCommand(
+                    "UPDATE empresa SET empVersao_Atual=@v WHERE Codigo=1", conn);
+                cmd.Parameters.AddWithValue("@v", versao ?? "");
+                cmd.ExecuteNonQuery();
             }
             catch { }
         }

@@ -41,13 +41,35 @@ namespace Pedeai
             // até 8s para que a ChaveLicenca já esteja salva antes do reload.
             try { Task.Run(() => RegistrarNoSupabase(empresa)).Wait(TimeSpan.FromSeconds(8)); } catch { }
 
-            // ── Sync periódico a cada 10 min (nível + licença) ──────────────
+            // Se o administrador bloqueou este cliente no Supabase, impede o acesso
+            if (_clienteBloqueado)
+            {
+                MessageBox.Show(
+                    "Este sistema foi bloqueado pelo administrador.\nEntre em contato com o suporte.",
+                    "Acesso Bloqueado", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            // Sync periódico a cada 10 min (nível + licença + bloqueio)
             var syncTimer = new System.Threading.Timer(_ =>
             {
                 try
                 {
                     var emp = new EmpresaDAL().Carregar();
                     _ = RegistrarNoSupabase(emp);
+
+                    // Verifica bloqueio detectado na última sync
+                    if (_clienteBloqueado)
+                    {
+                        var form = Application.OpenForms.Count > 0 ? Application.OpenForms[0] : null;
+                        form?.Invoke(new Action(() =>
+                        {
+                            MessageBox.Show(
+                                "Este sistema foi bloqueado pelo administrador.\nO sistema será encerrado.",
+                                "Acesso Bloqueado", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            Application.Exit();
+                        }));
+                    }
                 }
                 catch { }
             }, null, TimeSpan.FromMinutes(10), TimeSpan.FromMinutes(10));
@@ -97,10 +119,9 @@ namespace Pedeai
             Application.Run(new Form1());
         }
 
-        /// <summary>
-        /// Tenta renovar automaticamente a licença via VPS se ela estiver vencida ou próxima do vencimento.
-        /// Falha silenciosamente se a VPS estiver offline ou não configurada.
-        /// </summary>
+        private static volatile bool _clienteBloqueado = false;
+
+        
         private static void TentarAutoRenovarLicenca(Modelo.Empresa empresa)
         {
             string vpsUrl = ConfigurationManager.AppSettings["LicencaVpsUrl"] ?? "";
@@ -156,8 +177,8 @@ namespace Pedeai
                 http.DefaultRequestHeaders.Add("Authorization", "Bearer " + key);
 
                 // 1. Verifica se já existe
-                var getResp = await http.GetAsync(
-                    restBase + "Clientes?CodigoEmpresa=eq." + Uri.EscapeDataString(cod) + "&select=Id,Nivel,ChaveLicenca");
+                    var getResp = await http.GetAsync(
+                    restBase + "Clientes?CodigoEmpresa=eq." + Uri.EscapeDataString(cod) + "&select=Id,Nivel,ChaveLicenca,Bloqueado,VersaoAtual");
                 string getBody = await getResp.Content.ReadAsStringAsync();
 
                 if (!getResp.IsSuccessStatusCode) return;
@@ -167,9 +188,16 @@ namespace Pedeai
 
                 if (existentes != null && existentes.Length > 0)
                 {
-                    // Já existe — atualiza NomeEmpresa e UltimaConsulta
                     long id    = existentes[0].Id;
                     int  nivel = existentes[0].Nivel;
+                    bool bloq  = existentes[0].Bloqueado;
+
+                    // ── Bloqueio ────────────────────────────────────────────
+                    if (bloq)
+                    {
+                        _clienteBloqueado = true;
+                        return;
+                    }
 
                     // ── Sync Nível ──────────────────────────────────────────
                     if (nivel > 0 && nivel != empresa.empNivel_Atualizacao)
@@ -187,9 +215,16 @@ namespace Pedeai
                             new EmpresaDAL().SalvarDataGraca(empresa.Codigo, null);
                     }
 
+                    // ── Sync VersaoAtual ────────────────────────────────────
+                    string versaoSup = existentes[0].VersaoAtual ?? "";
+                    if (!string.IsNullOrWhiteSpace(versaoSup)
+                        && versaoSup != empresa.empVersao_Atual)
+                        new EmpresaDAL().SalvarVersaoAtual(empresa.Codigo, versaoSup);
+
                     var patch = JsonSerializer.Serialize(new
                     {
                         NomeEmpresa    = nome ?? "",
+                        VersaoAtual    = empresa.empVersao_Atual,
                         UltimaConsulta = DateTime.UtcNow
                     });
                     var patchReq = new HttpRequestMessage(new HttpMethod("PATCH"),
@@ -225,6 +260,8 @@ namespace Pedeai
             public long   Id            { get; set; }
             public int    Nivel         { get; set; }
             public string ChaveLicenca  { get; set; }
+            public bool   Bloqueado     { get; set; }
+            public string VersaoAtual   { get; set; }
         }
     }
 }

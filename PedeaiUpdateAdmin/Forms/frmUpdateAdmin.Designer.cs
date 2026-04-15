@@ -21,8 +21,9 @@ namespace PedeaiUpdateAdmin.Forms
             // Tab Publicar
             this.grpArquivo          = new System.Windows.Forms.GroupBox();
             this.lblArquivo          = new System.Windows.Forms.Label();
-            this.txtArquivo          = new System.Windows.Forms.TextBox();
-            this.btnBrowseZip        = new System.Windows.Forms.Button();
+            this.lstArquivos         = new System.Windows.Forms.ListBox();
+            this.btnAdicionarArquivos = new System.Windows.Forms.Button();
+            this.btnLimpar           = new System.Windows.Forms.Button();
             this.lblVersao           = new System.Windows.Forms.Label();
             this.txtVersao           = new System.Windows.Forms.TextBox();
             this.lblNivel            = new System.Windows.Forms.Label();
@@ -79,11 +80,12 @@ namespace PedeaiUpdateAdmin.Forms
             this.tabPublicar.Controls.Add(this.pbUpload);
             this.tabPublicar.Controls.Add(this.lblStatusPublicacao);
 
-            this.grpArquivo.Text = "Pacote de Atualização";
-            this.grpArquivo.SetBounds(8, 8, 590, 260);
+            this.grpArquivo.Text = "Arquivos para Atualizar";
+            this.grpArquivo.SetBounds(8, 8, 620, 310);
             this.grpArquivo.Controls.Add(this.lblArquivo);
-            this.grpArquivo.Controls.Add(this.txtArquivo);
-            this.grpArquivo.Controls.Add(this.btnBrowseZip);
+            this.grpArquivo.Controls.Add(this.lstArquivos);
+            this.grpArquivo.Controls.Add(this.btnAdicionarArquivos);
+            this.grpArquivo.Controls.Add(this.btnLimpar);
             this.grpArquivo.Controls.Add(this.lblVersao);
             this.grpArquivo.Controls.Add(this.txtVersao);
             this.grpArquivo.Controls.Add(this.lblNivel);
@@ -92,39 +94,55 @@ namespace PedeaiUpdateAdmin.Forms
             this.grpArquivo.Controls.Add(this.txtDescricao);
             this.grpArquivo.Controls.Add(this.lblPublicarInfo);
 
-            this.lblArquivo.Text    = "Arquivo ZIP:"; this.lblArquivo.SetBounds(8, 24, 100, 20);
-            this.txtArquivo.SetBounds(112, 22, 360, 23); this.txtArquivo.ReadOnly = true;
-            this.btnBrowseZip.Text  = "...";         this.btnBrowseZip.SetBounds(478, 22, 34, 23);
-            this.btnBrowseZip.Click += new System.EventHandler(this.BtnBrowseZip_Click);
+            this.lblArquivo.Text    = "Arquivos:"; this.lblArquivo.SetBounds(8, 24, 100, 20);
 
-            this.lblVersao.Text     = "Versão:";     this.lblVersao.SetBounds(8, 56, 100, 20);
-            this.txtVersao.SetBounds(112, 54, 120, 23);
-            this.lblNivel.Text      = "Nível:";      this.lblNivel.SetBounds(8, 86, 100, 20);
-            this.cboNivel.SetBounds(112, 84, 200, 23);
+            this.lstArquivos.SetBounds(8, 44, 500, 90);
+            this.lstArquivos.SelectionMode = System.Windows.Forms.SelectionMode.None;
+
+            this.btnAdicionarArquivos.Text = "Adicionar...";
+            this.btnAdicionarArquivos.SetBounds(514, 44, 96, 26);
+            this.btnAdicionarArquivos.BackColor = System.Drawing.Color.FromArgb(176, 110, 42);
+            this.btnAdicionarArquivos.ForeColor = System.Drawing.Color.White;
+            this.btnAdicionarArquivos.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnAdicionarArquivos.FlatAppearance.BorderSize = 0;
+            this.btnAdicionarArquivos.Click += new System.EventHandler(this.BtnAdicionarArquivos_Click);
+
+            this.btnLimpar.Text = "Limpar";
+            this.btnLimpar.SetBounds(514, 76, 96, 26);
+            this.btnLimpar.BackColor = System.Drawing.Color.FromArgb(130, 130, 130);
+            this.btnLimpar.ForeColor = System.Drawing.Color.White;
+            this.btnLimpar.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnLimpar.FlatAppearance.BorderSize = 0;
+            this.btnLimpar.Click += new System.EventHandler(this.BtnLimpar_Click);
+
+            this.lblVersao.Text     = "Versão:";     this.lblVersao.SetBounds(8, 144, 100, 20);
+            this.txtVersao.SetBounds(112, 142, 120, 23);
+            this.lblNivel.Text      = "Nível:";      this.lblNivel.SetBounds(8, 174, 100, 20);
+            this.cboNivel.SetBounds(112, 172, 200, 23);
             this.cboNivel.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cboNivel.Items.Add("1 — Beta (recebe primeiro)");
             this.cboNivel.Items.Add("2 — Standard (estável)");
             this.cboNivel.Items.Add("3 — Legacy (somente críticos)");
             this.cboNivel.SelectedIndex = 1;
 
-            this.lblDescricao.Text  = "Descrição:"; this.lblDescricao.SetBounds(8, 116, 100, 20);
-            this.txtDescricao.SetBounds(112, 114, 400, 60);
+            this.lblDescricao.Text  = "Descrição:"; this.lblDescricao.SetBounds(8, 204, 100, 20);
+            this.txtDescricao.SetBounds(112, 202, 400, 56);
             this.txtDescricao.Multiline = true; this.txtDescricao.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
 
-            this.lblPublicarInfo.Text = "ℹ️  O ZIP deve conter: pasta files/ com executáveis, e opcionalmente update.sql.";
-            this.lblPublicarInfo.SetBounds(8, 190, 570, 40);
+            this.lblPublicarInfo.Text = "ℹ️  Selecione os arquivos modificados. O caminho relativo à pasta em comum será preservado.";
+            this.lblPublicarInfo.SetBounds(8, 266, 600, 36);
             this.lblPublicarInfo.ForeColor = System.Drawing.Color.FromArgb(130, 115, 90);
 
             this.btnPublicar.Text      = "🚀  Publicar Atualização";
-            this.btnPublicar.SetBounds(8, 280, 200, 36);
+            this.btnPublicar.SetBounds(8, 330, 200, 36);
             this.btnPublicar.BackColor = System.Drawing.Color.FromArgb(176, 110, 42);
             this.btnPublicar.ForeColor = System.Drawing.Color.White;
             this.btnPublicar.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnPublicar.FlatAppearance.BorderSize = 0;
             this.btnPublicar.Click += new System.EventHandler(this.BtnPublicar_Click);
 
-            this.pbUpload.SetBounds(8, 324, 590, 16); this.pbUpload.Visible = false;
-            this.lblStatusPublicacao.Text = ""; this.lblStatusPublicacao.SetBounds(8, 346, 590, 20);
+            this.pbUpload.SetBounds(8, 374, 620, 16); this.pbUpload.Visible = false;
+            this.lblStatusPublicacao.Text = ""; this.lblStatusPublicacao.SetBounds(8, 396, 620, 20);
 
             // ── tabClientes ──────────────────────────────────────────────────────────
             this.tabClientes.Text = "Clientes";
@@ -289,8 +307,9 @@ namespace PedeaiUpdateAdmin.Forms
         private System.Windows.Forms.TabPage                tabConfig;
         private System.Windows.Forms.GroupBox               grpArquivo;
         private System.Windows.Forms.Label                  lblArquivo;
-        private System.Windows.Forms.TextBox                txtArquivo;
-        private System.Windows.Forms.Button                 btnBrowseZip;
+        private System.Windows.Forms.ListBox                lstArquivos;
+        private System.Windows.Forms.Button                 btnAdicionarArquivos;
+        private System.Windows.Forms.Button                 btnLimpar;
         private System.Windows.Forms.Label                  lblVersao;
         private System.Windows.Forms.TextBox                txtVersao;
         private System.Windows.Forms.Label                  lblNivel;

@@ -18,5 +18,7 @@ namespace Pedeai.Modelo
         public System.DateTime? empData_Graca { get; set; }
         /// <summary>Nível de atualização sincronizado do Supabase. 1=Beta · 2=Standard · 3=Legacy.</summary>
         public int empNivel_Atualizacao { get; set; } = 2;
+        /// <summary>Versão atual instalada, sincronizada com Supabase via PedeaiUpdateService.</summary>
+        public string empVersao_Atual { get; set; } = "";
     }
 }

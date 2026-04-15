@@ -81,14 +81,10 @@ namespace Pedeai.DAL
             {
                 foreach (var p in parcelas)
                 {
-                    p.Codigo    = ProximoCodigo("parcela_entrada_mercadoria",    conn, trans);
-                    p.auxCodigo = ProximoAuxCodigo("parcela_entrada_mercadoria", conn, trans);
                     const string sql = @"INSERT INTO parcela_entrada_mercadoria
-                        (auxCodigo, Codigo, Codigo_Entrada, parNumero, parVencimento, parValor, parObservacao, Situacao)
-                        VALUES (@aux,@cod,@ent,@num,@vcto,@val,@obs,'A')";
+                        (auxCodigo, Codigo_Entrada, parNumero, parVencimento, parValor, parObservacao, Situacao)
+                        VALUES (1,@ent,@num,@vcto,@val,@obs,'A')";
                     using var cmd = new MySqlCommand(sql, conn, trans);
-                    cmd.Parameters.AddWithValue("@aux", p.auxCodigo);
-                    cmd.Parameters.AddWithValue("@cod", p.Codigo);
                     cmd.Parameters.AddWithValue("@ent", p.Codigo_Entrada);
                     cmd.Parameters.AddWithValue("@num", p.parNumero);
                     cmd.Parameters.AddWithValue("@vcto",p.parVencimento.Date);

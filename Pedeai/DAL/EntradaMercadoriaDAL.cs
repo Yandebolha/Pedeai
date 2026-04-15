@@ -158,20 +158,16 @@ namespace Pedeai.DAL
                     }
                 }
 
-                // Inserir parcelas (se houver)
+                // Inserir parcelas (se houver) — Codigo gerado via AUTO_INCREMENT
                 if (parcelas != null && parcelas.Count > 0)
                 {
                     foreach (var p in parcelas)
                     {
                         p.Codigo_Entrada = entrada.Codigo;
-                        p.Codigo    = ProximoCodigo("parcela_entrada_mercadoria",    conn, trans);
-                        p.auxCodigo = ProximoAuxCodigo("parcela_entrada_mercadoria", conn, trans);
                         const string sqlP = @"INSERT INTO parcela_entrada_mercadoria
-                            (auxCodigo,Codigo,Codigo_Entrada,parNumero,parVencimento,parValor,parObservacao,Situacao)
-                            VALUES (@aux,@cod,@ent,@num,@vcto,@val,@obs,'A')";
+                            (auxCodigo,Codigo_Entrada,parNumero,parVencimento,parValor,parObservacao,Situacao)
+                            VALUES (1,@ent,@num,@vcto,@val,@obs,'A')";
                         using var cmdP = new MySqlCommand(sqlP, conn, trans);
-                        cmdP.Parameters.AddWithValue("@aux", p.auxCodigo);
-                        cmdP.Parameters.AddWithValue("@cod", p.Codigo);
                         cmdP.Parameters.AddWithValue("@ent", p.Codigo_Entrada);
                         cmdP.Parameters.AddWithValue("@num", p.parNumero);
                         cmdP.Parameters.AddWithValue("@vcto",p.parVencimento.Date);
@@ -227,33 +223,18 @@ namespace Pedeai.DAL
         public decimal TotalPeriodo(DateTime de, DateTime ate)
         {
             using var conn = AbrirConexao();
-            // Sum parcelas whose vencimento falls in the period
-            // Plus entries that have no parcelas (paid upfront), using their entData
+            // Soma o valor total de cada entrada pelo dia de lânçamento (entData),
+            // independentemente de ser parcelada ou à vista.
             using var cmd = new MySqlCommand(
-                @"SELECT COALESCE(SUM(p.parValor), 0)
-                  FROM parcela_entrada_mercadoria p
-                  JOIN entrada_mercadoria e ON e.Codigo = p.Codigo_Entrada
-                  WHERE e.Situacao = 'A'
-                    AND p.parVencimento >= @de1
-                    AND p.parVencimento <= @ate1
-                  UNION ALL
-                  SELECT COALESCE(SUM(e.entValorTotal), 0)
+                @"SELECT COALESCE(SUM(e.entValorTotal), 0)
                   FROM entrada_mercadoria e
                   WHERE e.Situacao = 'A'
-                    AND e.entData >= @de2
-                    AND e.entData <= @ate2
-                    AND NOT EXISTS (
-                        SELECT 1 FROM parcela_entrada_mercadoria p2
-                        WHERE p2.Codigo_Entrada = e.Codigo
-                    )", conn);
-            cmd.Parameters.AddWithValue("@de1",  de.Date);
-            cmd.Parameters.AddWithValue("@ate1", ate.Date);
-            cmd.Parameters.AddWithValue("@de2",  de.Date);
-            cmd.Parameters.AddWithValue("@ate2", ate.Date);
-            decimal total = 0;
-            using var r = cmd.ExecuteReader();
-            while (r.Read()) total += r[0] == DBNull.Value ? 0m : Convert.ToDecimal(r[0]);
-            return total;
+                    AND DATE(e.entData) >= @de
+                    AND DATE(e.entData) <= @ate", conn);
+            cmd.Parameters.AddWithValue("@de",  de.Date);
+            cmd.Parameters.AddWithValue("@ate", ate.Date);
+            var result = cmd.ExecuteScalar();
+            return result == null || result == DBNull.Value ? 0m : Convert.ToDecimal(result);
         }
 
         // ── Atualizar entrada existente (reverte estoque antigo, aplica novo) ─
@@ -372,20 +353,16 @@ namespace Pedeai.DAL
                     }
                 }
 
-                // 5. Inserir novas parcelas
+                // 5. Inserir novas parcelas — Codigo gerado via AUTO_INCREMENT
                 if (parcelas != null && parcelas.Count > 0)
                 {
                     foreach (var p in parcelas)
                     {
                         p.Codigo_Entrada = entrada.Codigo;
-                        p.Codigo    = ProximoCodigo("parcela_entrada_mercadoria",    conn, trans);
-                        p.auxCodigo = ProximoAuxCodigo("parcela_entrada_mercadoria", conn, trans);
                         const string sqlP = @"INSERT INTO parcela_entrada_mercadoria
-                            (auxCodigo,Codigo,Codigo_Entrada,parNumero,parVencimento,parValor,parObservacao,Situacao)
-                            VALUES (@aux,@cod,@ent,@num,@vcto,@val,@obs,'A')";
+                            (auxCodigo,Codigo_Entrada,parNumero,parVencimento,parValor,parObservacao,Situacao)
+                            VALUES (1,@ent,@num,@vcto,@val,@obs,'A')";
                         using var cmdP = new MySqlCommand(sqlP, conn, trans);
-                        cmdP.Parameters.AddWithValue("@aux", p.auxCodigo);
-                        cmdP.Parameters.AddWithValue("@cod", p.Codigo);
                         cmdP.Parameters.AddWithValue("@ent", p.Codigo_Entrada);
                         cmdP.Parameters.AddWithValue("@num", p.parNumero);
                         cmdP.Parameters.AddWithValue("@vcto",p.parVencimento.Date);

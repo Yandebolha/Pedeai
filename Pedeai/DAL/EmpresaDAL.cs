@@ -28,6 +28,7 @@ namespace Pedeai.DAL
                 empChave_Licenca     = TryGet(r, "empChave_Licenca"),
                 empData_Graca        = TryGetDate(r, "empData_Graca"),
                 empNivel_Atualizacao = TryGetInt(r, "empNivel_Atualizacao", 2),
+                empVersao_Atual      = TryGet(r, "empVersao_Atual"),
             };
         }
 
@@ -138,6 +139,16 @@ namespace Pedeai.DAL
                 "UPDATE empresa SET empNivel_Atualizacao=@nivel WHERE Codigo=@cod", conn);
             cmd.Parameters.AddWithValue("@nivel", nivel);
             cmd.Parameters.AddWithValue("@cod",   codEmpresa);
+            cmd.ExecuteNonQuery();
+        }
+        /// <summary>Persiste a versão atual instalada (sincronizada pelo PedeaiUpdateService).</summary>
+        public void SalvarVersaoAtual(int codEmpresa, string versao)
+        {
+            using var conn = AbrirConexao();
+            using var cmd  = new MySqlCommand(
+                "UPDATE empresa SET empVersao_Atual=@versao WHERE Codigo=@cod", conn);
+            cmd.Parameters.AddWithValue("@versao", versao ?? "");
+            cmd.Parameters.AddWithValue("@cod",    codEmpresa);
             cmd.ExecuteNonQuery();
         }
     }

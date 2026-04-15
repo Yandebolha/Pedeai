@@ -494,22 +494,51 @@ namespace Pedeai.DAL
                 WHERE DATE(p.pediData_Lancamento) BETWEEN @de AND @ate
                   AND p.pediSituacao NOT IN (6)
                 UNION ALL
+                -- Entradas sem parcelas (\u00e0 vista) — filtra por entData
                 SELECT
                     e.entData_Lancamento    AS Horario,
                     'Compra'                AS Tipo,
                     CONCAT('#', e.Codigo)  AS Referencia,
-                    CONCAT('Entrada - ', e.entNome_Fornecedor) AS Descricao,
+                    CONCAT('Entrada - ', e.entNome_Fornecedor, ' (\u00e0 vista)') AS Descricao,
                     -e.entValorTotal        AS Valor,
                     NULL                    AS ValorOriginal,
                     NULL                    AS ValorRecebido,
                     NULL                    AS Desconto,
                     NULL                    AS Autorizador,
                     ''                      AS Pagamento,
-                    'Lançado'               AS Status,
+                    'Lan\u00e7ado'               AS Status,
                     0                       AS CodigoPedido
                 FROM entrada_mercadoria e
                 WHERE DATE(e.entData) BETWEEN @de AND @ate
                   AND e.Situacao = 'A'
+                  AND NOT EXISTS (
+                      SELECT 1 FROM parcela_entrada_mercadoria px
+                      WHERE px.Codigo_Entrada = e.Codigo
+                        AND px.Situacao IN ('A','P')
+                  )
+                UNION ALL
+                -- Entradas parceladas — uma linha por parcela, filtra por parVencimento
+                SELECT
+                    p.parVencimento         AS Horario,
+                    'Compra'                AS Tipo,
+                    CONCAT('#', e.Codigo, '-', p.parNumero) AS Referencia,
+                    CONCAT('Entrada - ', e.entNome_Fornecedor,
+                           ' (Parcela ', p.parNumero, '/',
+                           (SELECT COUNT(*) FROM parcela_entrada_mercadoria xc
+                            WHERE xc.Codigo_Entrada = e.Codigo), ')') AS Descricao,
+                    -p.parValor             AS Valor,
+                    p.parValor              AS ValorOriginal,
+                    NULL                    AS ValorRecebido,
+                    NULL                    AS Desconto,
+                    NULL                    AS Autorizador,
+                    CASE WHEN p.Situacao='P' THEN 'Pago' ELSE 'Em aberto' END AS Pagamento,
+                    CASE WHEN p.Situacao='P' THEN 'Pago' ELSE 'Lan\u00e7ado' END AS Status,
+                    0                       AS CodigoPedido
+                FROM parcela_entrada_mercadoria p
+                JOIN entrada_mercadoria e ON e.Codigo = p.Codigo_Entrada
+                WHERE p.parVencimento BETWEEN @de AND @ate
+                  AND e.Situacao = 'A'
+                  AND p.Situacao IN ('A','P')
                 ORDER BY Horario ASC";
             using var cmd = new MySqlCommand(sql, conn);
             cmd.Parameters.AddWithValue("@de",  de.Date);
@@ -557,11 +586,11 @@ namespace Pedeai.DAL
                     CONCAT('#', e.Codigo)  AS Referencia,
                     CONCAT('Entrada - ', e.entNome_Fornecedor) AS Descricao,
                     -e.entValorTotal        AS Valor,
-                    NULL                    AS ValorOriginal,
+                    e.entValorTotal         AS ValorOriginal,
                     NULL                    AS ValorRecebido,
                     NULL                    AS Desconto,
                     NULL                    AS Autorizador,
-                    ''                      AS Pagamento,
+                    'à vista'               AS Pagamento,
                     'Lançado'               AS Status,
                     0                       AS CodigoPedido
                 FROM entrada_mercadoria e
