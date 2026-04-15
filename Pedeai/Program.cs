@@ -147,10 +147,18 @@ namespace Pedeai
             }
 
             Application.Run(new Form1());
+
+            // Ao fechar, libera a sessão imediatamente para outras máquinas
+            try { Task.Run(LimparSessaoAsync).Wait(TimeSpan.FromSeconds(5)); } catch { }
         }
 
         private static volatile bool _clienteBloqueado = false;
         private static volatile bool _maquinasExcedidas = false;
+
+        // Dados da sessão ativa — usados para limpar UltimaConsulta ao fechar
+        private static string _sessaoSupabaseUrl = "";
+        private static string _sessaoSupabaseKey = "";
+        private static long   _sessaoClienteId   = 0;
 
         
         private static void TentarAutoRenovarLicenca(Modelo.Empresa empresa)
@@ -209,7 +217,7 @@ namespace Pedeai
 
                 // 1. Verifica se já existe
                     var getResp = await http.GetAsync(
-                    restBase + "Clientes?CodigoEmpresa=eq." + Uri.EscapeDataString(cod) + "&select=Id,Nivel,ChaveLicenca,Bloqueado,VersaoAtual,MaxMaquinas");
+                    restBase + "Clientes?CodigoEmpresa=eq." + Uri.EscapeDataString(cod) + "&select=Id,Nivel,ChaveLicenca,Bloqueado,VersaoAtual,MaxMaquinas,CodigoEmpresa");
                 string getBody = await getResp.Content.ReadAsStringAsync();
 
                 if (!getResp.IsSuccessStatusCode) return;
@@ -233,29 +241,25 @@ namespace Pedeai
                     int maxMaq = existentes[0].MaxMaquinas;
                     if (maxMaq > 0)
                     {
-                        // Conta quantas instalações da mesma chave consultaram nos últimos 15 min
-                        string chaveCliente = existentes[0].ChaveLicenca ?? "";
-                        if (!string.IsNullOrWhiteSpace(chaveCliente))
+                        // Conta todas as máquinas do mesmo restaurante ativas nos últimos 15 min
+                        // Agrupadas por NomeEmpresa (mesmo nome = mesmo restaurante em máquinas diferentes)
+                        string limite = DateTime.UtcNow.AddMinutes(-15).ToString("o");
+                        string urlAtivas = restBase + "Clientes?NomeEmpresa=eq."
+                            + Uri.EscapeDataString(nome)
+                            + "&UltimaConsulta=gte." + Uri.EscapeDataString(limite)
+                            + "&select=Id,CodigoEmpresa";
+                        var rAtivas = await http.GetAsync(urlAtivas);
+                        if (rAtivas.IsSuccessStatusCode)
                         {
-                            string limite = DateTime.UtcNow.AddMinutes(-15).ToString("o");
-                            string urlAtivas = restBase + "Clientes?ChaveLicenca=eq."
-                                + Uri.EscapeDataString(chaveCliente)
-                                + "&UltimaConsulta=gte." + Uri.EscapeDataString(limite)
-                                + "&select=Id";
-                            var rAtivas = await http.GetAsync(urlAtivas);
-                            if (rAtivas.IsSuccessStatusCode)
+                            var bAtivas = await rAtivas.Content.ReadAsStringAsync();
+                            var ativas  = JsonSerializer.Deserialize<ClienteIdNivel[]>(bAtivas, opts);
+                            // Esta máquina já está contada se o seu próprio CodigoEmpresa aparece na lista
+                            bool estaAtiva = ativas != null && System.Array.Exists(
+                                ativas, a => a.CodigoEmpresa == cod);
+                            if (!estaAtiva && ativas != null && ativas.Length >= maxMaq)
                             {
-                                var bAtivas = await rAtivas.Content.ReadAsStringAsync();
-                                var ativas  = JsonSerializer.Deserialize<ClienteIdNivel[]>(bAtivas, opts);
-                                // Se já tem maxMaq ativas E esta instalação ainda não está entre elas
-                                // (não bloqueamos se esta máquina já está contada)
-                                bool estaAtiva = ativas != null && System.Array.Exists(
-                                    ativas, a => a.Id == id);
-                                if (!estaAtiva && ativas != null && ativas.Length >= maxMaq)
-                                {
-                                    _maquinasExcedidas = true;
-                                    return;
-                                }
+                                _maquinasExcedidas = true;
+                                return;
                             }
                         }
                     }
@@ -285,6 +289,11 @@ namespace Pedeai
                     int maxMaqSup = existentes[0].MaxMaquinas;
                     if (maxMaqSup != empresa.empMax_Maquinas)
                         new EmpresaDAL().SalvarMaxMaquinas(empresa.Codigo, maxMaqSup);
+
+                    // Armazena dados para limpar sessão ao fechar o sistema
+                    _sessaoSupabaseUrl = url;
+                    _sessaoSupabaseKey = key;
+                    _sessaoClienteId   = id;
 
                     var patch = JsonSerializer.Serialize(new
                     {
@@ -325,9 +334,32 @@ namespace Pedeai
             public long   Id            { get; set; }
             public int    Nivel         { get; set; }
             public string ChaveLicenca  { get; set; }
+            public string CodigoEmpresa { get; set; }
             public bool   Bloqueado     { get; set; }
             public string VersaoAtual   { get; set; }
             public int    MaxMaquinas   { get; set; }
+        }
+
+        /// <summary>
+        /// Limpa UltimaConsulta desta máquina no Supabase ao fechar o sistema,
+        /// permitindo que outra máquina do mesmo cliente abra imediatamente.
+        /// </summary>
+        private static async Task LimparSessaoAsync()
+        {
+            if (string.IsNullOrWhiteSpace(_sessaoSupabaseUrl) || _sessaoClienteId == 0) return;
+            try
+            {
+                using var http = new HttpClient { Timeout = TimeSpan.FromSeconds(8) };
+                http.DefaultRequestHeaders.Add("apikey", _sessaoSupabaseKey);
+                http.DefaultRequestHeaders.Add("Authorization", "Bearer " + _sessaoSupabaseKey);
+                string restBase = _sessaoSupabaseUrl.TrimEnd('/') + "/rest/v1/";
+                var body = JsonSerializer.Serialize(new { UltimaConsulta = (DateTime?)null });
+                var req  = new HttpRequestMessage(new HttpMethod("PATCH"),
+                    restBase + "Clientes?Id=eq." + _sessaoClienteId);
+                req.Content = new StringContent(body, Encoding.UTF8, "application/json");
+                await http.SendAsync(req);
+            }
+            catch { }
         }
 
         // ── Atualização automática ─────────────────────────────────────────────
