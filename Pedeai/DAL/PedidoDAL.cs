@@ -431,7 +431,7 @@ namespace Pedeai.DAL
                 var bruto  = row["TotalBruto"]         == DBNull.Value ? 0m : Convert.ToDecimal(row["TotalBruto"]);
                 var custo  = row["CustoMercadorias"]   == DBNull.Value ? 0m : Convert.ToDecimal(row["CustoMercadorias"]);
                 var taxa   = row["TaxaEntrega"]         == DBNull.Value ? 0m : Convert.ToDecimal(row["TaxaEntrega"]);
-                row["TotalLiquido"] = bruto - custo - taxa;
+                row["TotalLiquido"] = bruto - custo;
             }
             return dt;
         }

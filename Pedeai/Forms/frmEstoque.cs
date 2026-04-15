@@ -31,10 +31,10 @@ namespace Pedeai.Forms
                 foreach (DataGridViewColumn c in grid.Columns)
                     c.Visible = !Array.Exists(hide, h => h == c.Name);
                 if (grid.Columns["Nome"]    != null) { grid.Columns["Nome"].HeaderText    = "Nome / Item"; }
-                if (grid.Columns["Unidade"] != null) { grid.Columns["Unidade"].HeaderText = "Unid."; }
+                if (grid.Columns["Unidade"] != null) { grid.Columns["Unidade"].HeaderText = "Unidade"; }
                 if (grid.Columns["Qtde"]    != null)
                 {
-                    grid.Columns["Qtde"].HeaderText = "Qtde";
+                    grid.Columns["Qtde"].HeaderText = "Quantidade";
                     grid.Columns["Qtde"].DefaultCellStyle.Format = "N2";
                 }
                 if (grid.Columns["Custo"]   != null)

@@ -13,7 +13,7 @@ namespace Pedeai.DAL
             var lista = new List<ParcelaEntradaMercadoria>();
             using var conn = AbrirConexao();
             using var cmd  = new MySqlCommand(
-                "SELECT * FROM parcela_entrada_mercadoria WHERE Codigo_Entrada=@cod ORDER BY parNumero", conn);
+                "SELECT * FROM parcela_entrada_mercadoria WHERE Codigo_Entrada=@cod AND Situacao='A' ORDER BY parNumero", conn);
             cmd.Parameters.AddWithValue("@cod", codigoEntrada);
             using var r = cmd.ExecuteReader();
             while (r.Read()) lista.Add(Mapear(r));

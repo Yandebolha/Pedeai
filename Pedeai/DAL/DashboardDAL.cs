@@ -64,7 +64,9 @@ namespace Pedeai.DAL
             var dt = new DataTable();
             using var conn = AbrirConexao();
             int limit = Math.Max(1, Math.Min(top, 50));
-            var sql = $@"SELECT sub.Produto,
+            var sql = $@"SELECT CASE WHEN sub.Produto LIKE 'Marmita %'
+                              THEN SUBSTRING_INDEX(sub.Produto, ' (', 1)
+                              ELSE sub.Produto END AS Produto,
                 COALESCE(SUM(sub.Quantidade), 0) AS Quantidade,
                 COALESCE(SUM(sub.TotalVendas), 0) AS TotalVendas
             FROM (
@@ -95,7 +97,9 @@ namespace Pedeai.DAL
                   AND i.itpwNome_Mercadoria LIKE '½% + ½%'
                 GROUP BY SUBSTRING_INDEX(i.itpwNome_Mercadoria,' + ½ ',-1)
             ) sub
-            GROUP BY sub.Produto
+            GROUP BY CASE WHEN sub.Produto LIKE 'Marmita %'
+                          THEN SUBSTRING_INDEX(sub.Produto, ' (', 1)
+                          ELSE sub.Produto END
             ORDER BY Quantidade DESC
             LIMIT {limit}";
             using var cmd = new MySqlCommand(sql, conn);
@@ -169,7 +173,10 @@ namespace Pedeai.DAL
         {
             var dt = new DataTable();
             using var conn = AbrirConexao();
-            var sql = $@"SELECT sub.Produto, COALESCE(SUM(sub.Quantidade), 0) AS Quantidade
+            var sql = $@"SELECT CASE WHEN sub.Produto LIKE 'Marmita %'
+                              THEN SUBSTRING_INDEX(sub.Produto, ' (', 1)
+                              ELSE sub.Produto END AS Produto,
+                           COALESCE(SUM(sub.Quantidade), 0) AS Quantidade
             FROM (
                 SELECT i.itpwNome_Mercadoria AS Produto, SUM(i.itpwQtde) AS Quantidade
                 FROM itens_pedido_web i JOIN pedido_web p ON p.Codigo = i.Codigo_Pedido
@@ -194,7 +201,9 @@ namespace Pedeai.DAL
                   AND i.itpwNome_Mercadoria LIKE '½% + ½%'
                 GROUP BY SUBSTRING_INDEX(i.itpwNome_Mercadoria,' + ½ ',-1)
             ) sub
-            GROUP BY sub.Produto
+            GROUP BY CASE WHEN sub.Produto LIKE 'Marmita %'
+                          THEN SUBSTRING_INDEX(sub.Produto, ' (', 1)
+                          ELSE sub.Produto END
             ORDER BY Quantidade DESC
             LIMIT {top}";
             using var cmd = new MySqlCommand(sql, conn);
@@ -215,7 +224,10 @@ namespace Pedeai.DAL
                 where = "p.pediData_Lancamento >= CURDATE() - INTERVAL 3 YEAR";
             else // dia
                 where = "DATE(p.pediData_Lancamento) = CURDATE()";
-            var sql = $@"SELECT sub.Produto, COALESCE(SUM(sub.Quantidade), 0) AS Quantidade
+            var sql = $@"SELECT CASE WHEN sub.Produto LIKE 'Marmita %'
+                              THEN SUBSTRING_INDEX(sub.Produto, ' (', 1)
+                              ELSE sub.Produto END AS Produto,
+                           COALESCE(SUM(sub.Quantidade), 0) AS Quantidade
             FROM (
                 SELECT i.itpwNome_Mercadoria AS Produto, SUM(i.itpwQtde) AS Quantidade
                 FROM itens_pedido_web i JOIN pedido_web p ON p.Codigo = i.Codigo_Pedido
@@ -237,7 +249,9 @@ namespace Pedeai.DAL
                   AND i.itpwNome_Mercadoria LIKE '½% + ½%'
                 GROUP BY SUBSTRING_INDEX(i.itpwNome_Mercadoria,' + ½ ',-1)
             ) sub
-            GROUP BY sub.Produto
+            GROUP BY CASE WHEN sub.Produto LIKE 'Marmita %'
+                          THEN SUBSTRING_INDEX(sub.Produto, ' (', 1)
+                          ELSE sub.Produto END
             ORDER BY Quantidade DESC
             LIMIT {top}";
             using var cmd = new MySqlCommand(sql, conn);

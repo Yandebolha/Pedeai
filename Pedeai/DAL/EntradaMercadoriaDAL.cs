@@ -51,7 +51,7 @@ namespace Pedeai.DAL
             var lista = new List<ItemEntradaMercadoria>();
             using var conn = AbrirConexao();
             using var cmd  = new MySqlCommand(
-                "SELECT * FROM item_entrada_mercadoria WHERE Codigo_Entrada=@cod ORDER BY Codigo", conn);
+                "SELECT * FROM item_entrada_mercadoria WHERE Codigo_Entrada=@cod AND Situacao='A' ORDER BY Codigo", conn);
             cmd.Parameters.AddWithValue("@cod", codigoEntrada);
             using var r = cmd.ExecuteReader();
             while (r.Read()) lista.Add(MapearItem(r));

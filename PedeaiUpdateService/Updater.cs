@@ -230,11 +230,27 @@ namespace PedeaiUpdateService
                 // 2. Para a aplicação principal
                 PararAplicacao();
 
-                // 3. Copia arquivos (pasta files/ → AppDir)
+                // 3. Copia arquivos (pasta files/ → AppDir; se não houver files/, usa raiz do staging)
                 string filesDir = Path.Combine(stagingDir, "files");
                 string appDir   = _cfg["AppDir"] ?? AppDomain.CurrentDomain.BaseDirectory;
-                if (Directory.Exists(filesDir))
-                    CopiarDiretorio(filesDir, appDir);
+
+                // Se não há subpasta 'files/', trata a raiz do staging como origem
+                // (útil quando o usuário zipa uma pasta diretamente)
+                string origemCopia = Directory.Exists(filesDir) ? filesDir : stagingDir;
+
+                // Para subdiretórios de primeiro nível presentes na origem,
+                // apaga o correspondente no AppDir antes de copiar — substituição completa
+                foreach (string subDir in Directory.GetDirectories(origemCopia))
+                {
+                    string nomePasta  = Path.GetFileName(subDir);
+                    string destinoDir = Path.Combine(appDir, nomePasta);
+                    if (Directory.Exists(destinoDir))
+                        try { Directory.Delete(destinoDir, true); } catch { }
+                }
+
+                // Copia (excluindo update.sql quando a origem é o staging root)
+                string[] excluir = origemCopia == stagingDir ? new[] { "update.sql" } : Array.Empty<string>();
+                CopiarDiretorio(origemCopia, appDir, excluir);
 
                 // 4. Executa script SQL, se houver
                 string sqlFile = Path.Combine(stagingDir, "update.sql");
@@ -322,12 +338,18 @@ namespace PedeaiUpdateService
                 Process.Start(new ProcessStartInfo(appExe) { UseShellExecute = true });
         }
 
-        private static void CopiarDiretorio(string origem, string destino)
+        private static void CopiarDiretorio(string origem, string destino, string[] excluir = null)
         {
             Directory.CreateDirectory(destino);
             foreach (string arq in Directory.GetFiles(origem, "*", SearchOption.AllDirectories))
             {
                 string relativo = arq.Substring(origem.Length).TrimStart(Path.DirectorySeparatorChar);
+                // Ignora arquivos da lista de excluídos (caminho relativo ou apenas nome na raiz)
+                if (excluir != null && Array.Exists(excluir, ex =>
+                    string.Equals(relativo, ex, StringComparison.OrdinalIgnoreCase) ||
+                    string.Equals(Path.GetFileName(arq), ex, StringComparison.OrdinalIgnoreCase) &&
+                    !relativo.Contains(Path.DirectorySeparatorChar)))
+                    continue;
                 string destArq  = Path.Combine(destino, relativo);
                 Directory.CreateDirectory(Path.GetDirectoryName(destArq));
                 for (int i = 0; i < 5; i++)

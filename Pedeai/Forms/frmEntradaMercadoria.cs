@@ -319,6 +319,7 @@ namespace Pedeai.Forms
         private void AbrirNovaEntrada()
         {
             _itens.Clear();
+            _parcelas.Clear();
             _codigoEditando     = 0;
             _fornecedorCodigo   = 0;
             _produtoAtualCodigo = 0;
