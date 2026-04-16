@@ -6,6 +6,7 @@ namespace Pedeai.Modelo
         public int Codigo { get; set; }
         public int Codigo_Pedido { get; set; }
         public int Codigo_Mercadoria { get; set; }
+        public int itpwCodigo_Marmita { get; set; } = 0;
 
         public string itpwNome_Mercadoria { get; set; }
         public decimal itpwQtde { get; set; }

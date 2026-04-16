@@ -180,7 +180,7 @@ namespace Pedeai.DB
                         Codigo               INT           NOT NULL AUTO_INCREMENT PRIMARY KEY,
                         Codigo_Pedido        INT           NOT NULL,
                         Codigo_Mercadoria    INT           NOT NULL DEFAULT 0,
-                        itpwNome_Mercadoria  VARCHAR(200)  NOT NULL DEFAULT '',
+                        itpwNome_Mercadoria  VARCHAR(500)  NOT NULL DEFAULT '',
                         itpwQtde             DECIMAL(10,4) NOT NULL DEFAULT 0,
                         itpwPreco_Unitario   DECIMAL(10,2) NOT NULL DEFAULT 0.00,
                         itpwSubtotal         DECIMAL(10,2) NOT NULL DEFAULT 0.00,
@@ -606,6 +606,10 @@ namespace Pedeai.DB
                     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
                 AddColumnIfNotExists(conn, db, "marmita", "marCusto",
                     "DECIMAL(10,2) NOT NULL DEFAULT 0.00");
+                // Corrige bancos existentes com coluna mais curta
+                Exec(conn, "ALTER TABLE itens_pedido_web MODIFY COLUMN itpwNome_Mercadoria VARCHAR(500) NOT NULL DEFAULT ''");
+                AddColumnIfNotExists(conn, db, "itens_pedido_web", "itpwCodigo_Marmita",
+                    "INT NOT NULL DEFAULT 0");
 
                 Exec(conn, @"
                     CREATE TABLE IF NOT EXISTS marmita_item (

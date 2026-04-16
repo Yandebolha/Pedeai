@@ -115,7 +115,7 @@ namespace Pedeai.BLL
                     }
                     else
                     {
-                        cupomGerado = GerarCodigoCupom(cliente.clieNome_RazaoSocial);
+                        cupomGerado = GerarCodigoCupom(cliente.clieNome_RazaoSocial, codigoConfig);
                         _dal.CriarCupomFidelizacao(cupomGerado, cfg);
                         descricao = $"Cupom {cupomGerado} ({cfg.fidCupom_Tipo} {cfg.fidCupom_Valor:N2})";
                     }
@@ -163,7 +163,7 @@ namespace Pedeai.BLL
         // ─────────────────────────────────────────────────────────────────────
         // ─────────────────────────────────────────────────────────────────────
 
-        private static string GerarCodigoCupom(string nomeCliente)
+        private static string GerarCodigoCupom(string nomeCliente, int codigoConfig = 0)
         {
             string sufixo = "";
             if (!string.IsNullOrWhiteSpace(nomeCliente))
@@ -171,8 +171,10 @@ namespace Pedeai.BLL
                 var partes = nomeCliente.Trim().ToUpperInvariant().Split(' ');
                 sufixo = partes[0].Length > 4 ? partes[0].Substring(0, 4) : partes[0];
             }
-            // Inclui segundos + sufixo aleatório para evitar duplicatas
-            return $"FID{DateTime.Now:yyyyMMddHHmmss}{sufixo}";
+            // Inclui código da config para garantir unicidade quando múltiplas regras
+            // disparam para o mesmo cliente no mesmo segundo
+            string configSufixo = codigoConfig > 0 ? $"R{codigoConfig}" : "";
+            return $"FID{DateTime.Now:yyyyMMddHHmmss}{configSufixo}{sufixo}";
         }
 
         /// <summary>Retorna o prêmio PRODUTO pendente mais recente do cliente, ou (0,0,"",0).</summary>

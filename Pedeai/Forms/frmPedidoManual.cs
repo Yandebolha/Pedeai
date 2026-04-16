@@ -766,7 +766,7 @@ namespace Pedeai.Forms
             dlg.Controls.Add(pnlTop);
 
             // Confirmar
-            (string NomeMarmita, decimal Valor, string Ingredientes) resultado = default;
+            (string NomeMarmita, decimal Valor, string Ingredientes, int CodigoMarmita) resultado = default;
             btnOk.Click += (_, __) =>
             {
                 if (gridMar.SelectedRows.Count == 0) { MessageBox.Show("Selecione um tipo de marmita."); return; }
@@ -776,12 +776,14 @@ namespace Pedeai.Forms
                 string desc = rowMar.Cells["Descricao"]?.Value?.ToString() ?? "";
                 var    valV = rowMar.Cells["Valor R$"]?.Value;
                 decimal val = valV == null || valV == DBNull.Value ? 0m : Convert.ToDecimal(valV);
+                var    codV = rowMar.Cells["Codigo"]?.Value;
+                int codMar  = codV == null || codV == DBNull.Value ? 0 : Convert.ToInt32(codV);
 
                 var selecionados = new System.Collections.Generic.List<string>();
                 foreach (var item in chkList.CheckedItems) selecionados.Add(item.ToString());
                 string ings = string.Join(", ", selecionados);
 
-                resultado = (desc, val * (int)numQ.Value, ings);
+                resultado = (desc, val * (int)numQ.Value, ings, codMar);
                 dlg.DialogResult = DialogResult.OK;
             };
             gridMar.CellDoubleClick += (_, __) => btnOk.PerformClick();
@@ -799,6 +801,7 @@ namespace Pedeai.Forms
             var pedItem = new ItemPedidoWeb
             {
                 Codigo_Mercadoria   = 0,
+                itpwCodigo_Marmita  = resultado.CodigoMarmita,
                 itpwNome_Mercadoria = nomeItem,
                 itpwQtde            = qtdeMar,
                 itpwPreco_Unitario  = precoUn,

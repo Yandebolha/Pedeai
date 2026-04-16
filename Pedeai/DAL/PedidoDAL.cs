@@ -230,15 +230,17 @@ namespace Pedeai.DAL
                     item.Codigo_Pedido = pedido.Codigo;
 
                     var sqlI = @"INSERT INTO itens_pedido_web
-                        (auxCodigo,Codigo,Codigo_Pedido,Codigo_Mercadoria,
+                        (auxCodigo,Codigo,Codigo_Pedido,Codigo_Mercadoria,itpwCodigo_Marmita,
                          itpwNome_Mercadoria,itpwQtde,itpwPreco_Unitario,itpwDesconto_Pct,itpwSubtotal,itpwObservacoes,Situacao)
-                        VALUES(@aux,@cod,@pedido,@merc,@nome,@qtde,@unit,@desc_pct,@sub,@obs,'A')";
+                        VALUES(@aux,@cod,@pedido,@merc,@codMar,@nome,@qtde,@unit,@desc_pct,@sub,@obs,'A')";
                     using var cmdI = new MySqlCommand(sqlI, conn, trans);
                     cmdI.Parameters.AddWithValue("@aux",    item.auxCodigo);
                     cmdI.Parameters.AddWithValue("@cod",    item.Codigo);
                     cmdI.Parameters.AddWithValue("@pedido", item.Codigo_Pedido);
                     cmdI.Parameters.AddWithValue("@merc",   item.Codigo_Mercadoria);
-                    cmdI.Parameters.AddWithValue("@nome",   item.itpwNome_Mercadoria ?? "");
+                    cmdI.Parameters.AddWithValue("@codMar", item.itpwCodigo_Marmita);
+                    cmdI.Parameters.AddWithValue("@nome",   (item.itpwNome_Mercadoria ?? "").Length > 500
+                        ? (item.itpwNome_Mercadoria ?? "").Substring(0, 500) : (item.itpwNome_Mercadoria ?? ""));
                     cmdI.Parameters.AddWithValue("@qtde",   item.itpwQtde);
                     cmdI.Parameters.AddWithValue("@unit",   item.itpwPreco_Unitario);
                     cmdI.Parameters.AddWithValue("@desc_pct", item.itpwDesconto_Pct);
@@ -412,9 +414,13 @@ namespace Pedeai.DAL
               FROM pedido_web p
               LEFT JOIN (
                   SELECT i.Codigo_Pedido,
-                         SUM(i.itpwQtde * COALESCE(m.mercPreco_Custo, 0)) AS CustoMerc
+                         SUM(i.itpwQtde * COALESCE(
+                             CASE WHEN i.itpwCodigo_Marmita > 0 THEN mar.marCusto
+                                  ELSE m.mercPreco_Custo END, 0)) AS CustoMerc
                   FROM itens_pedido_web i
                   LEFT JOIN mercadoria m ON m.Codigo = i.Codigo_Mercadoria
+                  LEFT JOIN marmita mar ON mar.Codigo = i.itpwCodigo_Marmita
+                                       AND i.itpwCodigo_Marmita > 0
                   GROUP BY i.Codigo_Pedido
               ) custo ON custo.Codigo_Pedido = p.Codigo
               WHERE DATE(p.pediData_Lancamento) BETWEEN @de AND @ate
