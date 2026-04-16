@@ -85,7 +85,7 @@ namespace Pedeai.Forms
             this.pnlSearch.Controls.Add(this._txtFiltro); this.pnlSearch.Controls.Add(this.btnPesq);
             this._txtFiltro.Left=8; this._txtFiltro.Top=7; this._txtFiltro.Width=260; this._txtFiltro.Font=new System.Drawing.Font("Segoe UI",9.5F);
             this._txtFiltro.KeyDown+=new System.Windows.Forms.KeyEventHandler(this.TxtFiltro_KeyDown);
-            this.btnPesq.Text="Pesquisar"; this.btnPesq.Left=276; this.btnPesq.Top=6; this.btnPesq.Width=90; this.btnPesq.Height=26;
+            this.btnPesq.Text="Pesquisar"; this.btnPesq.Left=464; this.btnPesq.Top=6; this.btnPesq.Width=90; this.btnPesq.Height=26;
             this.btnPesq.BackColor=System.Drawing.Color.FromArgb(224,113,42); this.btnPesq.ForeColor=System.Drawing.Color.White;
             this.btnPesq.FlatStyle=System.Windows.Forms.FlatStyle.Flat; this.btnPesq.Cursor=System.Windows.Forms.Cursors.Hand;
             this.btnPesq.FlatAppearance.BorderSize=0; this.btnPesq.Click+=new System.EventHandler(this.BtnPesqProd_Click);

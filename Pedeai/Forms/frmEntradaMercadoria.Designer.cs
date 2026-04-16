@@ -813,7 +813,7 @@ namespace Pedeai.Forms
             this.btnFiltrar.FlatAppearance.BorderSize = 0;
             this.btnFiltrar.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnFiltrar.ForeColor = System.Drawing.Color.White;
-            this.btnFiltrar.Location = new System.Drawing.Point(366, 10);
+            this.btnFiltrar.Location = new System.Drawing.Point(668, 10);
             this.btnFiltrar.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.btnFiltrar.Name = "btnFiltrar";
             this.btnFiltrar.Size = new System.Drawing.Size(93, 30);
@@ -827,7 +827,7 @@ namespace Pedeai.Forms
             this.btnLimparFiltro.FlatAppearance.BorderSize = 0;
             this.btnLimparFiltro.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnLimparFiltro.ForeColor = System.Drawing.Color.White;
-            this.btnLimparFiltro.Location = new System.Drawing.Point(468, 10);
+            this.btnLimparFiltro.Location = new System.Drawing.Point(769, 10);
             this.btnLimparFiltro.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.btnLimparFiltro.Name = "btnLimparFiltro";
             this.btnLimparFiltro.Size = new System.Drawing.Size(93, 30);

@@ -53,10 +53,10 @@ namespace Pedeai.Forms
         private void AdicionarFiltroPorFornecedor()
         {
             var lblFiltroForn = new System.Windows.Forms.Label
-            { Text = "Fornecedor:", Left = 576, Top = 16, AutoSize = true,
+            { Text = "Fornecedor:", Left = 368, Top = 16, AutoSize = true,
               ForeColor = System.Drawing.Color.FromArgb(50, 50, 50) };
             _txtFiltroForn = new System.Windows.Forms.TextBox
-            { Left = 650, Top = 12, Width = 220,
+            { Left = 440, Top = 12, Width = 220,
               Font = new System.Drawing.Font("Segoe UI", 9F),
               PlaceholderText = "Filtrar por fornecedor..." };
             pnlFiltro.Controls.Add(lblFiltroForn);

@@ -98,8 +98,8 @@ namespace Pedeai.Forms
             BackColor     = System.Drawing.Color.FromArgb(245, 237, 216);
             ForeColor     = System.Drawing.Color.White;
             Font          = new Font("Segoe UI", 9F);
-            ClientSize    = new System.Drawing.Size(900, 520);
-            MinimumSize   = new System.Drawing.Size(700, 400);
+            ClientSize    = new System.Drawing.Size(1250, 560);
+            MinimumSize   = new System.Drawing.Size(1000, 430);
             StartPosition = FormStartPosition.CenterParent;
         }
 

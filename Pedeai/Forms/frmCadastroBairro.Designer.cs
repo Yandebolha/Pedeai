@@ -21,6 +21,9 @@ namespace Pedeai.Forms
             this.btnEditar   = new System.Windows.Forms.Button();
             this.lblBusca    = new System.Windows.Forms.Label();
             this.txtBusca    = new System.Windows.Forms.TextBox();
+            this.lblCidFiltro = new System.Windows.Forms.Label();
+            this.txtCidFiltro = new System.Windows.Forms.TextBox();
+            this.btnPesquisar = new System.Windows.Forms.Button();
             this.pnlForm     = new System.Windows.Forms.Panel();
             this.pnlBtns     = new System.Windows.Forms.Panel();
             this.btnS        = new System.Windows.Forms.Button();
@@ -69,6 +72,9 @@ namespace Pedeai.Forms
             this.topBar.Controls.Add(this.btnEditar);
             this.topBar.Controls.Add(this.lblBusca);
             this.topBar.Controls.Add(this.txtBusca);
+            this.topBar.Controls.Add(this.lblCidFiltro);
+            this.topBar.Controls.Add(this.txtCidFiltro);
+            this.topBar.Controls.Add(this.btnPesquisar);
 
             // btnNovo
             this.btnNovo.Text = "+ Novo";
@@ -107,13 +113,45 @@ namespace Pedeai.Forms
             // txtBusca
             this.txtBusca.Left        = 338;
             this.txtBusca.Top         = 10;
-            this.txtBusca.Width       = 200;
+            this.txtBusca.Width       = 160;
             this.txtBusca.Height      = 24;
             this.txtBusca.Font        = new System.Drawing.Font("Segoe UI", 9.5F);
             this.txtBusca.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.txtBusca.BackColor   = System.Drawing.Color.White;
             this.txtBusca.PlaceholderText = "Digite o nome do bairro...";
             this.txtBusca.TextChanged += new System.EventHandler(this.TxtBusca_TextChanged);
+
+            // lblCidFiltro
+            this.lblCidFiltro.Text      = "Cidade:";
+            this.lblCidFiltro.Left      = 508;
+            this.lblCidFiltro.Top       = 14;
+            this.lblCidFiltro.AutoSize  = true;
+            this.lblCidFiltro.Font      = new System.Drawing.Font("Segoe UI", 8.5F);
+            this.lblCidFiltro.ForeColor = System.Drawing.Color.White;
+
+            // txtCidFiltro
+            this.txtCidFiltro.Left        = 556;
+            this.txtCidFiltro.Top         = 10;
+            this.txtCidFiltro.Width       = 120;
+            this.txtCidFiltro.Height      = 24;
+            this.txtCidFiltro.Font        = new System.Drawing.Font("Segoe UI", 9.5F);
+            this.txtCidFiltro.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.txtCidFiltro.BackColor   = System.Drawing.Color.White;
+            this.txtCidFiltro.PlaceholderText = "Filtrar por cidade...";
+
+            // btnPesquisar
+            this.btnPesquisar.Text = "\U0001F50D Pesquisar";
+            this.btnPesquisar.Left = 684;
+            this.btnPesquisar.Top  = 8;
+            this.btnPesquisar.Width  = 104;
+            this.btnPesquisar.Height = 28;
+            this.btnPesquisar.BackColor = System.Drawing.Color.FromArgb(224, 113, 42);
+            this.btnPesquisar.ForeColor = System.Drawing.Color.White;
+            this.btnPesquisar.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnPesquisar.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
+            this.btnPesquisar.FlatAppearance.BorderSize = 0;
+            this.btnPesquisar.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.btnPesquisar.Click += new System.EventHandler(this.BtnPesquisar_Click);
 
             // pnlForm
             this.pnlForm.Dock = System.Windows.Forms.DockStyle.Bottom;
@@ -251,6 +289,7 @@ namespace Pedeai.Forms
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 520);
+            this.KeyPreview = true;
             this.Controls.Add(this.grid);
             this.Controls.Add(this.pnlForm);
             this.Controls.Add(this.topBar);
@@ -267,6 +306,9 @@ namespace Pedeai.Forms
         private System.Windows.Forms.Button        btnEditar;
         private System.Windows.Forms.Label         lblBusca;
         private System.Windows.Forms.TextBox       txtBusca;
+        private System.Windows.Forms.Label         lblCidFiltro;
+        private System.Windows.Forms.TextBox       txtCidFiltro;
+        private System.Windows.Forms.Button        btnPesquisar;
         private System.Windows.Forms.Panel         pnlForm;
         private System.Windows.Forms.Panel         pnlBtns;
         private System.Windows.Forms.Button        btnS;

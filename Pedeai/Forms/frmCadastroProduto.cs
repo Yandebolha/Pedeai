@@ -43,12 +43,13 @@ namespace Pedeai.Forms
         private void AdicionarFiltroCat()
         {
             _cmbCatFiltro = new System.Windows.Forms.ComboBox
-            { Left = 380, Top = 7, Width = 180,
+            { Left = _txtFiltro.Right + 8, Top = 7, Width = 180,
               DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList,
               Font = new System.Drawing.Font("Segoe UI", 9F) };
             _cmbCatFiltro.Items.Add("(Todas as categorias)");
             _cmbCatFiltro.SelectedIndex = 0;
             pnlSearch.Controls.Add(_cmbCatFiltro);
+            btnPesq.Left = _cmbCatFiltro.Right + 8;
             _cmbCatFiltro.SelectedIndexChanged += (_, __) => FiltrarGrid(_txtFiltro?.Text ?? "");
         }
 

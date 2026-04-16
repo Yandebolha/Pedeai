@@ -37,14 +37,28 @@ namespace Pedeai.Forms
 
         private void AplicarFiltro()
         {
-            string termo = txtBusca.Text.Trim();
+            string termoBairro = txtBusca.Text.Trim();
+            string termoCidade = txtCidFiltro?.Text.Trim() ?? "";
             if (_bs.DataSource is DataTable dt)
-                dt.DefaultView.RowFilter = string.IsNullOrEmpty(termo)
-                    ? ""
-                    : $"Bairro LIKE '%{termo.Replace("'", "''")}%'";
+            {
+                var filtros = new System.Collections.Generic.List<string>();
+                if (!string.IsNullOrEmpty(termoBairro))
+                    filtros.Add($"Bairro LIKE '%{termoBairro.Replace("'", "''")}%'");
+                if (!string.IsNullOrEmpty(termoCidade))
+                    filtros.Add($"Cidade LIKE '%{termoCidade.Replace("'", "''")}%'");
+                dt.DefaultView.RowFilter = string.Join(" AND ", filtros);
+            }
         }
 
         private void TxtBusca_TextChanged(object sender, EventArgs e) => AplicarFiltro();
+
+        private void BtnPesquisar_Click(object sender, EventArgs e) => AplicarFiltro();
+
+        protected override void OnKeyDown(KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Escape) { e.Handled = true; Close(); return; }
+            base.OnKeyDown(e);
+        }
 
         private void ModoNovo()
         {
