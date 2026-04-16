@@ -54,10 +54,15 @@ namespace Pedeai.Forms
 
         private void BtnPesquisar_Click(object sender, EventArgs e) => AplicarFiltro();
 
-        protected override void OnKeyDown(KeyEventArgs e)
+        protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
         {
-            if (e.KeyCode == Keys.Escape) { e.Handled = true; Close(); return; }
-            base.OnKeyDown(e);
+            if (keyData == Keys.Escape)
+            {
+                if (pnlForm.Visible) { pnlForm.Visible = false; _codigoEditando = 0; return true; }
+                Close(); return true;
+            }
+            if (keyData == Keys.F2) { ModoNovo(); return true; }
+            return base.ProcessCmdKey(ref msg, keyData);
         }
 
         private void ModoNovo()
@@ -130,11 +135,5 @@ namespace Pedeai.Forms
             Carregar();
         }
 
-        protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
-        {
-            if (keyData == Keys.Escape) { pnlForm.Visible = false; _codigoEditando = 0; return true; }
-            if (keyData == Keys.F2)     { ModoNovo(); return true; }
-            return base.ProcessCmdKey(ref msg, keyData);
-        }
     }
 }
