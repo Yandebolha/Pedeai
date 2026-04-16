@@ -15,7 +15,7 @@ namespace Pedeai.DAL
             var dt = new DataTable();
             using var conn = AbrirConexao();
             string where = apenasAtivas ? "WHERE Situacao = 'A'" : "";
-            var sql = $"SELECT Codigo, marDescricao AS Descricao, marValor AS `Valor R$`, Situacao FROM marmita {where} ORDER BY marDescricao";
+            var sql = $"SELECT Codigo, marDescricao AS Descricao, marValor AS `Valor R$`, marCusto AS `Custo R$`, Situacao FROM marmita {where} ORDER BY marDescricao";
             using var cmd = new MySqlCommand(sql, conn);
             new MySqlDataAdapter(cmd).Fill(dt);
             return dt;
@@ -34,6 +34,7 @@ namespace Pedeai.DAL
                 auxCodigo    = Convert.ToInt32(r["auxCodigo"]),
                 marDescricao = r["marDescricao"]?.ToString() ?? "",
                 marValor     = Convert.ToDecimal(r["marValor"]),
+                marCusto     = r["marCusto"] == DBNull.Value ? 0m : Convert.ToDecimal(r["marCusto"]),
                 Situacao     = (r["Situacao"]?.ToString() ?? "A")[0]
             };
         }
@@ -46,12 +47,13 @@ namespace Pedeai.DAL
                 obj.Codigo    = ProximoCodigo("marmita", conn);
                 obj.auxCodigo = ProximoAuxCodigo("marmita", conn);
                 using var cmd = new MySqlCommand(@"
-                    INSERT INTO marmita (Codigo, auxCodigo, marDescricao, marValor, Situacao)
-                    VALUES (@cod, @aux, @desc, @val, @sit)", conn);
+                    INSERT INTO marmita (Codigo, auxCodigo, marDescricao, marValor, marCusto, Situacao)
+                    VALUES (@cod, @aux, @desc, @val, @cst, @sit)", conn);
                 cmd.Parameters.AddWithValue("@cod",  obj.Codigo);
                 cmd.Parameters.AddWithValue("@aux",  obj.auxCodigo);
                 cmd.Parameters.AddWithValue("@desc", obj.marDescricao);
                 cmd.Parameters.AddWithValue("@val",  obj.marValor);
+                cmd.Parameters.AddWithValue("@cst",  obj.marCusto);
                 cmd.Parameters.AddWithValue("@sit",  obj.Situacao.ToString());
                 cmd.ExecuteNonQuery();
                 return "";
@@ -65,10 +67,11 @@ namespace Pedeai.DAL
             {
                 using var conn = AbrirConexao();
                 using var cmd = new MySqlCommand(@"
-                    UPDATE marmita SET marDescricao=@desc, marValor=@val, Situacao=@sit
+                    UPDATE marmita SET marDescricao=@desc, marValor=@val, marCusto=@cst, Situacao=@sit
                     WHERE Codigo=@cod", conn);
                 cmd.Parameters.AddWithValue("@desc", obj.marDescricao);
                 cmd.Parameters.AddWithValue("@val",  obj.marValor);
+                cmd.Parameters.AddWithValue("@cst",  obj.marCusto);
                 cmd.Parameters.AddWithValue("@sit",  obj.Situacao.ToString());
                 cmd.Parameters.AddWithValue("@cod",  obj.Codigo);
                 cmd.ExecuteNonQuery();

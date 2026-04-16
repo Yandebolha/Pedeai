@@ -33,17 +33,34 @@ namespace Pedeai.Forms
             Load += OnLoad;
         }
 
+        private System.Data.DataTable _dtEntradas;
+        private System.Windows.Forms.TextBox _txtFiltroForn;
+
         // ── Inicialização ────────────────────────────────────────────────────
         private void OnLoad(object sender, EventArgs e)
         {
             dtpDe.Value  = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1);
             dtpAte.Value = DateTime.Today;
 
+            AdicionarFiltroPorFornecedor();
             CarregarGrid();
             CarregarLookups();
             ConfigurarGridItens();
             ConfigurarGridParcelas();
             ConectarEventos();
+        }
+
+        private void AdicionarFiltroPorFornecedor()
+        {
+            var lblFiltroForn = new System.Windows.Forms.Label
+            { Text = "Fornecedor:", Left = 576, Top = 16, AutoSize = true,
+              ForeColor = System.Drawing.Color.FromArgb(50, 50, 50) };
+            _txtFiltroForn = new System.Windows.Forms.TextBox
+            { Left = 650, Top = 12, Width = 220,
+              Font = new System.Drawing.Font("Segoe UI", 9F),
+              PlaceholderText = "Filtrar por fornecedor..." };
+            pnlFiltro.Controls.Add(lblFiltroForn);
+            pnlFiltro.Controls.Add(_txtFiltroForn);
         }
 
         private void CarregarLookups()
@@ -105,7 +122,15 @@ namespace Pedeai.Forms
             btnNovaEntrada.Click      += (_, __) => AbrirNovaEntrada();
             btnCancelarSel.Click      += BtnCancelarSel_Click;
             btnFiltrar.Click          += (_, __) => CarregarGrid();
-            btnLimparFiltro.Click     += (_, __) => { dtpDe.Value = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1); dtpAte.Value = DateTime.Today; CarregarGrid(); };
+            btnLimparFiltro.Click     += (_, __) =>
+            {
+                dtpDe.Value = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1);
+                dtpAte.Value = DateTime.Today;
+                if (_txtFiltroForn != null) _txtFiltroForn.Clear();
+                CarregarGrid();
+            };
+            if (_txtFiltroForn != null)
+                _txtFiltroForn.KeyDown += (s, ev) => { if (ev.KeyCode == Keys.Enter) FiltrarGridPorFornecedor(_txtFiltroForn.Text); };
             gridEntradas.CellDoubleClick += GridEntradas_CellDoubleClick;
 
             // Fornecedor: resolver por código
@@ -178,11 +203,23 @@ namespace Pedeai.Forms
         {
             try
             {
-                var dt = _bll.Listar(dtpDe.Value.Date, dtpAte.Value.Date);
-                gridEntradas.DataSource = dt;
-                ConfigurarColunasEntradas();
+                _dtEntradas = _bll.Listar(dtpDe.Value.Date, dtpAte.Value.Date);
+                FiltrarGridPorFornecedor(_txtFiltroForn?.Text ?? "");
             }
             catch (Exception ex) { MessageBox.Show("Erro ao carregar: " + ex.Message); }
+        }
+
+        private void FiltrarGridPorFornecedor(string filtro)
+        {
+            if (_dtEntradas == null) return;
+            var dv = new System.Data.DataView(_dtEntradas);
+            if (!string.IsNullOrWhiteSpace(filtro))
+            {
+                var f = filtro.Replace("'", "''");
+                dv.RowFilter = $"Fornecedor LIKE '%{f}%'";
+            }
+            gridEntradas.DataSource = dv;
+            ConfigurarColunasEntradas();
         }
 
         private void ConfigurarColunasEntradas()

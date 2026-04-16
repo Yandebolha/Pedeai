@@ -6,6 +6,7 @@ namespace Pedeai.Modelo
         public int     auxCodigo    { get; set; }
         public string  marDescricao { get; set; } = "";
         public decimal marValor     { get; set; }
+        public decimal marCusto     { get; set; }
         public char    Situacao     { get; set; } = 'A';
     }
 

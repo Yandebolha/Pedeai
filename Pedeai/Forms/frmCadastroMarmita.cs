@@ -41,6 +41,7 @@ namespace Pedeai.Forms
         private Label lblFormTitulo;
         private Button btnNovaMAR, btnSalvar, btnExcluir, btnFechar;
         private Button btnAddItem, btnRemItem;
+        private NumericUpDown numCusto;
 
         public frmCadastroMarmita()
         {
@@ -124,14 +125,27 @@ namespace Pedeai.Forms
             // Valor R$ — fixed width on the right
             var lblVal = new Label
             {
-                Text = "Valor R$:", Width = 65, Dock = DockStyle.Right,
+                Text = "Valor R$:", Width = 60, Dock = DockStyle.Right,
                 TextAlign = ContentAlignment.MiddleLeft, ForeColor = Color.FromArgb(100, 80, 50)
             };
             numValor = new NumericUpDown
             {
-                Width = 120, Dock = DockStyle.Right,
+                Width = 90, Dock = DockStyle.Right,
                 DecimalPlaces = 2, Minimum = 0, Maximum = 99999,
                 Font = new Font("Segoe UI", 10F, FontStyle.Bold),
+                BackColor = Color.White, ForeColor = ClrText, ThousandsSeparator = true,
+                Margin = new Padding(0, 4, 4, 4)
+            };
+            var lblCusto = new Label
+            {
+                Text = "Custo R$:", Width = 60, Dock = DockStyle.Right,
+                TextAlign = ContentAlignment.MiddleLeft, ForeColor = Color.FromArgb(100, 80, 50)
+            };
+            numCusto = new NumericUpDown
+            {
+                Width = 90, Dock = DockStyle.Right,
+                DecimalPlaces = 2, Minimum = 0, Maximum = 99999,
+                Font = new Font("Segoe UI", 10F),
                 BackColor = Color.White, ForeColor = ClrText, ThousandsSeparator = true,
                 Margin = new Padding(0, 4, 4, 4)
             };
@@ -147,8 +161,10 @@ namespace Pedeai.Forms
                 Text = "Descri\u00e7\u00e3o:", Width = 75, Dock = DockStyle.Left,
                 TextAlign = ContentAlignment.MiddleLeft, ForeColor = Color.FromArgb(100, 80, 50)
             };
-            // Right-to-left: numValor then lblVal, then txtDescricao fills middle
+            // Right-to-left: numCusto, lblCusto, numValor, lblVal, then txtDescricao fills middle
             pnlFields.Controls.Add(txtDescricao);
+            pnlFields.Controls.Add(numCusto);
+            pnlFields.Controls.Add(lblCusto);
             pnlFields.Controls.Add(numValor);
             pnlFields.Controls.Add(lblVal);
             pnlFields.Controls.Add(lblDesc);
@@ -278,10 +294,13 @@ namespace Pedeai.Forms
                 if (gridMarmitas.Columns.Contains("Situacao"))
                     gridMarmitas.Columns["Situacao"].Visible = false;
                 if (gridMarmitas.Columns.Contains("Descricao"))
-                { gridMarmitas.Columns["Descricao"].HeaderText = "Descrição"; gridMarmitas.Columns["Descricao"].FillWeight = 60; }
+                { gridMarmitas.Columns["Descricao"].HeaderText = "Descrição"; gridMarmitas.Columns["Descricao"].FillWeight = 55; }
                 if (gridMarmitas.Columns.Contains("Valor R$"))
-                { gridMarmitas.Columns["Valor R$"].HeaderText = "Valor R$"; gridMarmitas.Columns["Valor R$"].FillWeight = 20;
+                { gridMarmitas.Columns["Valor R$"].HeaderText = "Valor R$"; gridMarmitas.Columns["Valor R$"].FillWeight = 18;
                   gridMarmitas.Columns["Valor R$"].DefaultCellStyle.Format = "N2"; }
+                if (gridMarmitas.Columns.Contains("Custo R$"))
+                { gridMarmitas.Columns["Custo R$"].HeaderText = "Custo R$"; gridMarmitas.Columns["Custo R$"].FillWeight = 18;
+                  gridMarmitas.Columns["Custo R$"].DefaultCellStyle.Format = "N2"; }
             }
             catch (Exception ex) { MessageBox.Show("Erro: " + ex.Message); }
         }
@@ -326,6 +345,7 @@ namespace Pedeai.Forms
             _codigoEditando      = cod;
             txtDescricao.Text    = obj.marDescricao;
             numValor.Value       = obj.marValor > numValor.Maximum ? numValor.Maximum : obj.marValor;
+            numCusto.Value       = obj.marCusto > numCusto.Maximum ? numCusto.Maximum : obj.marCusto;
             lblFormTitulo.Text   = "Editar Marmita";
             pnlForm.Visible      = true;
             txtDescricao.Focus();
@@ -336,6 +356,7 @@ namespace Pedeai.Forms
             _codigoEditando = 0;
             txtDescricao.Text  = "";
             numValor.Value     = 0;
+            numCusto.Value     = 0;
             lblFormTitulo.Text = "Nova Marmita";
             pnlForm.Visible    = true;
             txtDescricao.Focus();
@@ -348,6 +369,7 @@ namespace Pedeai.Forms
                 Codigo       = _codigoEditando,
                 marDescricao = txtDescricao.Text.Trim(),
                 marValor     = numValor.Value,
+                marCusto     = numCusto.Value,
                 Situacao     = 'A'
             };
             var erro = _bll.Salvar(obj);

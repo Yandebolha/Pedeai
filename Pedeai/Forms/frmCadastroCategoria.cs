@@ -10,26 +10,65 @@ namespace Pedeai.Forms
     {
         private GrupoMercadoriaBLL _bll;
         private int _codigoEditando = 0;
+        private System.Data.DataTable _allCategorias;
+        private System.Windows.Forms.TextBox _txtBuscaCategoria;
 
         public frmCadastroCategoria()
         {
             InitializeComponent();
             if (System.ComponentModel.LicenseManager.UsageMode == System.ComponentModel.LicenseUsageMode.Designtime) return;
             _bll = new GrupoMercadoriaBLL();
-            Load += (_, __) => Carregar();
+            Load += (_, __) => { AdicionarPainelBusca(); Carregar(); };
+        }
+
+        private void AdicionarPainelBusca()
+        {
+            var pnlSearch = new System.Windows.Forms.Panel
+            { Dock = System.Windows.Forms.DockStyle.Top, Height = 38,
+              BackColor = System.Drawing.Color.FromArgb(235, 226, 208) };
+            _txtBuscaCategoria = new System.Windows.Forms.TextBox
+            { Left = 8, Top = 8, Width = 260,
+              Font = new System.Drawing.Font("Segoe UI", 9.5F),
+              PlaceholderText = "Buscar pelo nome da categoria..." };
+            var btnBuscar = new System.Windows.Forms.Button
+            { Left = 276, Top = 7, Width = 90, Height = 26, Text = "Buscar",
+              BackColor = System.Drawing.Color.FromArgb(224, 113, 42),
+              ForeColor = System.Drawing.Color.White,
+              FlatStyle = System.Windows.Forms.FlatStyle.Flat,
+              Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold),
+              Cursor = Cursors.Hand };
+            btnBuscar.FlatAppearance.BorderSize = 0;
+            btnBuscar.Click += (_, __) => FiltrarGrid(_txtBuscaCategoria.Text);
+            _txtBuscaCategoria.KeyDown += (s, ev) => { if (ev.KeyCode == System.Windows.Forms.Keys.Enter) FiltrarGrid(_txtBuscaCategoria.Text); };
+            pnlSearch.Controls.Add(_txtBuscaCategoria);
+            pnlSearch.Controls.Add(btnBuscar);
+            Controls.Add(pnlSearch);
+            Controls.SetChildIndex(pnlSearch, 1);
         }
 
         private void Carregar()
         {
             try
             {
-                grid.DataSource = _bll.Listar();
-                // show only Codigo (hidden, for editing) and Nome
-                foreach (DataGridViewColumn col in grid.Columns)
-                    col.Visible = col.Name == "Codigo" || col.Name == "Nome";
-                if (grid.Columns.Contains("Codigo")) grid.Columns["Codigo"].Visible = false;
+                _allCategorias = _bll.Listar();
+                FiltrarGrid(_txtBuscaCategoria?.Text ?? "");
             }
             catch (Exception ex) { MessageBox.Show("Erro: " + ex.Message); }
+        }
+
+        private void FiltrarGrid(string filtro)
+        {
+            if (_allCategorias == null) return;
+            var dv = new System.Data.DataView(_allCategorias);
+            if (!string.IsNullOrWhiteSpace(filtro))
+            {
+                var f = filtro.Replace("'", "''");
+                dv.RowFilter = $"Nome LIKE '%{f}%'";
+            }
+            grid.DataSource = dv;
+            foreach (DataGridViewColumn col in grid.Columns)
+                col.Visible = col.Name == "Codigo" || col.Name == "Nome";
+            if (grid.Columns.Contains("Codigo")) grid.Columns["Codigo"].Visible = false;
         }
 
         private void ModoNovo()

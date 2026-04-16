@@ -10,24 +10,63 @@ namespace Pedeai.Forms
     {
         private CupomBLL _bll;
         private int _codigoEditando = 0;
+        private System.Data.DataTable _allCupons;
+        private System.Windows.Forms.TextBox _txtBuscaCupom;
 
         public frmCadastroCupom()
         {
             InitializeComponent();
             if (System.ComponentModel.LicenseManager.UsageMode == System.ComponentModel.LicenseUsageMode.Designtime) return;
             _bll = new CupomBLL();
-            Load += (_, __) => CarregarGrid();
+            Load += (_, __) => { AdicionarPainelBusca(); CarregarGrid(); };
         }
 
+        private void AdicionarPainelBusca()
+        {
+            var pnlSearch = new System.Windows.Forms.Panel
+            { Dock = System.Windows.Forms.DockStyle.Top, Height = 38,
+              BackColor = System.Drawing.Color.FromArgb(235, 226, 208) };
+            _txtBuscaCupom = new System.Windows.Forms.TextBox
+            { Left = 8, Top = 8, Width = 280,
+              Font = new System.Drawing.Font("Segoe UI", 9.5F),
+              PlaceholderText = "Buscar pelo código ou descrição do cupom..." };
+            var btnBuscar = new System.Windows.Forms.Button
+            { Left = 296, Top = 7, Width = 90, Height = 26, Text = "Buscar",
+              BackColor = System.Drawing.Color.FromArgb(224, 113, 42),
+              ForeColor = System.Drawing.Color.White,
+              FlatStyle = System.Windows.Forms.FlatStyle.Flat,
+              Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold),
+              Cursor = Cursors.Hand };
+            btnBuscar.FlatAppearance.BorderSize = 0;
+            btnBuscar.Click += (_, __) => FiltrarGrid(_txtBuscaCupom.Text);
+            _txtBuscaCupom.KeyDown += (s, ev) => { if (ev.KeyCode == System.Windows.Forms.Keys.Enter) FiltrarGrid(_txtBuscaCupom.Text); };
+            pnlSearch.Controls.Add(_txtBuscaCupom);
+            pnlSearch.Controls.Add(btnBuscar);
+            Controls.Add(pnlSearch);
+            Controls.SetChildIndex(pnlSearch, 1);
+        }
 
         private void CarregarGrid()
         {
             try
             {
-                grid.DataSource = _bll.Listar();
-                if (grid.Columns.Contains("Codigo")) grid.Columns["Codigo"].Visible = false;
+                _allCupons = _bll.Listar();
+                FiltrarGrid(_txtBuscaCupom?.Text ?? "");
             }
             catch (Exception ex) { MessageBox.Show("Erro: " + ex.Message); }
+        }
+
+        private void FiltrarGrid(string filtro)
+        {
+            if (_allCupons == null) return;
+            var dv = new System.Data.DataView(_allCupons);
+            if (!string.IsNullOrWhiteSpace(filtro))
+            {
+                var f = filtro.Replace("'", "''");
+                dv.RowFilter = $"Cupom LIKE '%{f}%' OR Descricao LIKE '%{f}%'";
+            }
+            grid.DataSource = dv;
+            if (grid.Columns.Contains("Codigo")) grid.Columns["Codigo"].Visible = false;
         }
 
         private void ModoNovo()

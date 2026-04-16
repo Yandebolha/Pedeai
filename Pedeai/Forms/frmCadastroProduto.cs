@@ -14,13 +14,14 @@ namespace Pedeai.Forms
         private string    _caminhoImagem = "";
         private int       _codigoEditando = 0;
         private System.Data.DataTable _dtProdutos;
+        private System.Windows.Forms.ComboBox _cmbCatFiltro;
 
         public frmCadastroProduto()
         {
             InitializeComponent();
             if (System.ComponentModel.LicenseManager.UsageMode == System.ComponentModel.LicenseUsageMode.Designtime) return;
             _bll = new MercadoriaBLL(); _grpBLL = new GrupoMercadoriaBLL();
-            Load += (_, __) => CarregarGrid();
+            Load += (_, __) => { AdicionarFiltroCat(); CarregarGrid(); };
         }
 
 
@@ -37,6 +38,18 @@ namespace Pedeai.Forms
                 lblImagem.Text = Path.GetFileName(_caminhoImagem);
                 lblImagem.ForeColor = Color.FromArgb(30, 120, 30);
             }
+        }
+
+        private void AdicionarFiltroCat()
+        {
+            _cmbCatFiltro = new System.Windows.Forms.ComboBox
+            { Left = 380, Top = 7, Width = 180,
+              DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList,
+              Font = new System.Drawing.Font("Segoe UI", 9F) };
+            _cmbCatFiltro.Items.Add("(Todas as categorias)");
+            _cmbCatFiltro.SelectedIndex = 0;
+            pnlSearch.Controls.Add(_cmbCatFiltro);
+            _cmbCatFiltro.SelectedIndexChanged += (_, __) => FiltrarGrid(_txtFiltro?.Text ?? "");
         }
 
         private void CarrecarComboCategorias()
@@ -56,6 +69,23 @@ namespace Pedeai.Forms
             try
             {
                 _dtProdutos = _bll.Listar();
+                // Atualiza combo de categorias de filtro
+                if (_cmbCatFiltro != null)
+                {
+                    string selCat = _cmbCatFiltro.SelectedIndex > 0 ? _cmbCatFiltro.SelectedItem?.ToString() : null;
+                    _cmbCatFiltro.Items.Clear();
+                    _cmbCatFiltro.Items.Add("(Todas as categorias)");
+                    var categorias = new System.Collections.Generic.HashSet<string>();
+                    foreach (System.Data.DataRow r in _dtProdutos.Rows)
+                    {
+                        string cat = r["Categoria"]?.ToString() ?? "";
+                        if (!string.IsNullOrWhiteSpace(cat)) categorias.Add(cat);
+                    }
+                    foreach (var c in categorias)
+                        _cmbCatFiltro.Items.Add(c);
+                    _cmbCatFiltro.SelectedIndex = selCat != null && _cmbCatFiltro.Items.Contains(selCat)
+                        ? _cmbCatFiltro.Items.IndexOf(selCat) : 0;
+                }
                 FiltrarGrid(_txtFiltro?.Text ?? "");
             }
             catch (Exception ex) { MessageBox.Show("Erro: " + ex.Message); }
@@ -65,11 +95,19 @@ namespace Pedeai.Forms
         {
             if (_dtProdutos == null) return;
             var dv = new System.Data.DataView(_dtProdutos);
+            var conditions = new System.Collections.Generic.List<string>();
             if (!string.IsNullOrWhiteSpace(filtro))
             {
                 var f = filtro.Replace("'", "''");
-                dv.RowFilter = $"Nome LIKE '%{f}%' OR Categoria LIKE '%{f}%'";
+                conditions.Add($"(Nome LIKE '%{f}%' OR Categoria LIKE '%{f}%')");
             }
+            if (_cmbCatFiltro != null && _cmbCatFiltro.SelectedIndex > 0)
+            {
+                var cat = (_cmbCatFiltro.SelectedItem?.ToString() ?? "").Replace("'", "''");
+                conditions.Add($"Categoria = '{cat}'");
+            }
+            if (conditions.Count > 0)
+                dv.RowFilter = string.Join(" AND ", conditions);
             grid.DataSource = dv;
             ConfigurarColunasProdutos();
         }

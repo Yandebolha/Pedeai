@@ -475,7 +475,7 @@ namespace Pedeai.Forms
             this.lblCondPgto.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(40)))), ((int)(((byte)(30)))), ((int)(((byte)(20)))));
             this.lblCondPgto.Location = new System.Drawing.Point(412, 68);
             this.lblCondPgto.Name = "lblCondPgto";
-            this.lblCondPgto.Size = new System.Drawing.Size(260, 23);
+            this.lblCondPgto.Size = new System.Drawing.Size(460, 23);
             this.lblCondPgto.TabIndex = 7;
             this.lblCondPgto.Text = "—";
             // 

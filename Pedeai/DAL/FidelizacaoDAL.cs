@@ -129,9 +129,9 @@ namespace Pedeai.DAL
             using var cmd = new MySqlCommand(
                 @"SELECT COUNT(*) FROM pedido_web
                   WHERE Codigo_Cliente = @cli
-                    AND YEAR(pediData_Pedido) = @ano
-                    AND MONTH(pediData_Pedido) = @mes
-                    AND pediCancelado != 1", conn);
+                    AND YEAR(pediData_Lancamento) = @ano
+                    AND MONTH(pediData_Lancamento) = @mes
+                    AND pediSituacao != 6", conn);
             cmd.Parameters.AddWithValue("@cli", codigoCliente);
             cmd.Parameters.AddWithValue("@ano", ano);
             cmd.Parameters.AddWithValue("@mes", mes);

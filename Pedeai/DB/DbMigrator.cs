@@ -484,7 +484,9 @@ namespace Pedeai.DB
                     "VARCHAR(100) NOT NULL DEFAULT 'Regra Padrão'");                AddColumnIfNotExists(conn, db, "config_fidelizacao", "fidProduto_Qtde",
                     "INT NOT NULL DEFAULT 1");
                 AddColumnIfNotExists(conn, db, "config_fidelizacao", "fidMeta_Tipo",
-                    "VARCHAR(10) NOT NULL DEFAULT 'VALOR'");
+                    "VARCHAR(20) NOT NULL DEFAULT 'VALOR'");
+                // Corrige bancos existentes que gravaram a coluna como VARCHAR(10)
+                Exec(conn, "ALTER TABLE config_fidelizacao MODIFY COLUMN fidMeta_Tipo VARCHAR(20) NOT NULL DEFAULT 'VALOR'");
                 // ── historico_fidelizacao ─────────────────────────────────────
                 Exec(conn, @"
                     CREATE TABLE IF NOT EXISTS historico_fidelizacao (
@@ -599,8 +601,11 @@ namespace Pedeai.DB
                         auxCodigo    INT           NOT NULL DEFAULT 1,
                         marDescricao VARCHAR(200)  NOT NULL DEFAULT '',
                         marValor     DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+                        marCusto     DECIMAL(10,2) NOT NULL DEFAULT 0.00,
                         Situacao     CHAR(1)       NOT NULL DEFAULT 'A'
                     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+                AddColumnIfNotExists(conn, db, "marmita", "marCusto",
+                    "DECIMAL(10,2) NOT NULL DEFAULT 0.00");
 
                 Exec(conn, @"
                     CREATE TABLE IF NOT EXISTS marmita_item (

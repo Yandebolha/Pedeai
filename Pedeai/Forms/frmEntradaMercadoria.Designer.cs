@@ -555,8 +555,8 @@ namespace Pedeai.Forms
             // 
             // numFracao
             // 
-            this.numFracao.DecimalPlaces = 4;
-            this.numFracao.Location = new System.Drawing.Point(180, 51);
+            this.numFracao.DecimalPlaces = 2;
+            this.numFracao.Location = new System.Drawing.Point(187, 51);
             this.numFracao.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.numFracao.Maximum = new decimal(new int[] {
             99999,
@@ -582,7 +582,7 @@ namespace Pedeai.Forms
             this.txtUnidSaida.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.txtUnidSaida.CharacterCasing = System.Windows.Forms.CharacterCasing.Upper;
             this.txtUnidSaida.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.txtUnidSaida.Location = new System.Drawing.Point(257, 51);
+            this.txtUnidSaida.Location = new System.Drawing.Point(264, 51);
             this.txtUnidSaida.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.txtUnidSaida.MaxLength = 10;
             this.txtUnidSaida.Name = "txtUnidSaida";
@@ -593,7 +593,7 @@ namespace Pedeai.Forms
             // 
             this.lblUnidadesEntrada.Font = new System.Drawing.Font("Segoe UI", 8.5F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.lblUnidadesEntrada.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(87)))), ((int)(((byte)(120)))), ((int)(((byte)(38)))));
-            this.lblUnidadesEntrada.Location = new System.Drawing.Point(303, 54);
+            this.lblUnidadesEntrada.Location = new System.Drawing.Point(310, 54);
             this.lblUnidadesEntrada.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.lblUnidadesEntrada.Name = "lblUnidadesEntrada";
             this.lblUnidadesEntrada.Size = new System.Drawing.Size(128, 27);
