@@ -134,36 +134,36 @@ namespace Pedeai.DAL
             using var conn = AbrirConexao();
             string sql;
             if (periodo == "semana")
-                // Semana atual: segunda-feira 00:00 até domingo 23:59:59
+                // Semana atual: segunda-feira 00:00:00 até domingo 23:59:59
                 sql = @"SELECT DATE_FORMAT(pediData_Lancamento,'%d/%m') AS Periodo,
                         COALESCE(SUM(pediValor_Total),0) AS TotalVendas
                         FROM pedido_web
-                        WHERE pediData_Lancamento >= DATE_SUB(CURDATE(), INTERVAL (DAYOFWEEK(CURDATE())+5) % 7 DAY)
-                          AND pediData_Lancamento < DATE_ADD(DATE_SUB(CURDATE(), INTERVAL (DAYOFWEEK(CURDATE())+5) % 7 DAY), INTERVAL 7 DAY)
+                        WHERE pediData_Lancamento >= DATE_SUB(CURDATE(), INTERVAL WEEKDAY(CURDATE()) DAY)
+                          AND pediData_Lancamento  <  DATE_SUB(CURDATE(), INTERVAL WEEKDAY(CURDATE()) DAY) + INTERVAL 7 DAY
                           AND pediSituacao <> 6
                         GROUP BY DATE(pediData_Lancamento)
                         ORDER BY DATE(pediData_Lancamento)";
             else if (periodo == "mes")
-                // Mês atual: primeiro dia 00:00 até último dia 23:59:59
+                // Mês atual: 1º dia 00:00:00 até último dia 23:59:59
                 sql = @"SELECT DATE_FORMAT(pediData_Lancamento,'%d/%m') AS Periodo,
                         COALESCE(SUM(pediValor_Total),0) AS TotalVendas
                         FROM pedido_web
                         WHERE pediData_Lancamento >= DATE_FORMAT(CURDATE(),'%Y-%m-01')
-                          AND pediData_Lancamento < DATE_ADD(DATE_FORMAT(CURDATE(),'%Y-%m-01'), INTERVAL 1 MONTH)
+                          AND pediData_Lancamento  <  DATE_FORMAT(CURDATE(),'%Y-%m-01') + INTERVAL 1 MONTH
                           AND pediSituacao <> 6
                         GROUP BY DATE(pediData_Lancamento)
                         ORDER BY DATE(pediData_Lancamento)";
             else if (periodo == "ano")
-                // Ano atual: 01/01 00:00 até 31/12 23:59:59, agrupado por mês
+                // Ano atual: 1º janeiro 00:00:00 até 31 dezembro 23:59:59
                 sql = @"SELECT DATE_FORMAT(pediData_Lancamento,'%m/%Y') AS Periodo,
                         COALESCE(SUM(pediValor_Total),0) AS TotalVendas
                         FROM pedido_web
                         WHERE pediData_Lancamento >= DATE_FORMAT(CURDATE(),'%Y-01-01')
-                          AND pediData_Lancamento < DATE_FORMAT(DATE_ADD(CURDATE(), INTERVAL 1 YEAR),'%Y-01-01')
+                          AND pediData_Lancamento  <  DATE_FORMAT(CURDATE(),'%Y-01-01') + INTERVAL 1 YEAR
                           AND pediSituacao <> 6
                         GROUP BY DATE_FORMAT(pediData_Lancamento,'%Y-%m')
                         ORDER BY DATE_FORMAT(pediData_Lancamento,'%Y-%m')";
-            else // dia — hoje 00:00 até 23:59:59
+            else // dia — hoje 00:00:00 até 23:59:59
                 sql = @"SELECT DATE_FORMAT(pediData_Lancamento,'%H:00') AS Periodo,
                         COALESCE(SUM(pediValor_Total),0) AS TotalVendas
                         FROM pedido_web
@@ -224,15 +224,18 @@ namespace Pedeai.DAL
             using var conn = AbrirConexao();
             string where;
             if (periodo == "semana")
-                where = "p.pediData_Lancamento >= DATE_SUB(CURDATE(), INTERVAL (DAYOFWEEK(CURDATE())+5) % 7 DAY)" +
-                        " AND p.pediData_Lancamento < DATE_ADD(DATE_SUB(CURDATE(), INTERVAL (DAYOFWEEK(CURDATE())+5) % 7 DAY), INTERVAL 7 DAY)";
+                // Semana atual completa (seg–dom)
+                where = "p.pediData_Lancamento >= DATE_SUB(CURDATE(), INTERVAL WEEKDAY(CURDATE()) DAY)" +
+                        " AND p.pediData_Lancamento < DATE_SUB(CURDATE(), INTERVAL WEEKDAY(CURDATE()) DAY) + INTERVAL 7 DAY";
             else if (periodo == "mes")
+                // Mês atual completo
                 where = "p.pediData_Lancamento >= DATE_FORMAT(CURDATE(),'%Y-%m-01')" +
-                        " AND p.pediData_Lancamento < DATE_ADD(DATE_FORMAT(CURDATE(),'%Y-%m-01'), INTERVAL 1 MONTH)";
+                        " AND p.pediData_Lancamento < DATE_FORMAT(CURDATE(),'%Y-%m-01') + INTERVAL 1 MONTH";
             else if (periodo == "ano")
+                // Ano atual completo
                 where = "p.pediData_Lancamento >= DATE_FORMAT(CURDATE(),'%Y-01-01')" +
-                        " AND p.pediData_Lancamento < DATE_FORMAT(DATE_ADD(CURDATE(), INTERVAL 1 YEAR),'%Y-01-01')";
-            else // dia
+                        " AND p.pediData_Lancamento < DATE_FORMAT(CURDATE(),'%Y-01-01') + INTERVAL 1 YEAR";
+            else // dia — hoje 00:00:00 até 23:59:59
                 where = "DATE(p.pediData_Lancamento) = CURDATE()";
             var sql = $@"SELECT CASE WHEN sub.Produto LIKE 'Marmita %'
                               THEN SUBSTRING_INDEX(sub.Produto, ' (', 1)
