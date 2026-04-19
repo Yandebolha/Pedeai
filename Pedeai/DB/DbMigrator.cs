@@ -216,6 +216,9 @@ namespace Pedeai.DB
                 AddColumnIfNotExists(conn, db, "pedido_web", "pediAutorizador",
                     "VARCHAR(150) NULL DEFAULT NULL");
 
+                // Garante DEFAULT na coluna pediTroco_Para (pode existir sem default em bancos antigos)
+                Exec(conn, "ALTER TABLE `pedido_web` MODIFY COLUMN `pediTroco_Para` DECIMAL(10,2) NOT NULL DEFAULT 0.00");
+
                 // ── 4b. Colunas em grupo_mercadoria ─────────────────────────────
                 AddColumnIfNotExists(conn, db, "grupo_mercadoria", "grmeData_Cadastro",
                     "DATETIME NULL DEFAULT NULL");
