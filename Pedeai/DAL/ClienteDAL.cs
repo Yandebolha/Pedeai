@@ -164,6 +164,30 @@ namespace Pedeai.DAL
             };
         }
 
+        /// <summary>Retorna todos os clientes ativos que possuem celular ou telefone cadastrado.</summary>
+        public System.Collections.Generic.List<(string fone, string nome)> ListarComCelular()
+        {
+            var lista = new System.Collections.Generic.List<(string, string)>();
+            using var conn = AbrirConexao();
+            var sql = @"SELECT clieNome_RazaoSocial, clieCelular, clieTelefone
+                        FROM cliente
+                        WHERE Situacao = 'A'
+                          AND (TRIM(COALESCE(clieCelular,'')) <> '' OR TRIM(COALESCE(clieTelefone,'')) <> '')
+                        ORDER BY clieNome_RazaoSocial ASC";
+            using var cmd = new MySqlCommand(sql, conn);
+            using var r = cmd.ExecuteReader();
+            while (r.Read())
+            {
+                string cel  = r["clieCelular"]?.ToString()  ?? "";
+                string tel  = r["clieTelefone"]?.ToString() ?? "";
+                string nome = r["clieNome_RazaoSocial"]?.ToString() ?? "";
+                string fone = !string.IsNullOrWhiteSpace(cel) ? cel : tel;
+                if (!string.IsNullOrWhiteSpace(fone) && !string.IsNullOrWhiteSpace(nome))
+                    lista.Add((fone, nome));
+            }
+            return lista;
+        }
+
         public void IncrementarTotais(int codigoCliente, decimal valorPedido)
         {
             if (codigoCliente <= 0) return;

@@ -162,6 +162,10 @@ namespace Pedeai.Forms
             if (string.IsNullOrWhiteSpace(txtNome.Text))
                 { MessageBox.Show("Informe o nome / razão social.", "Campo obrigatório", MessageBoxButtons.OK, MessageBoxIcon.Warning); txtNome.Focus(); return; }
 
+            var cpfDigs = new string(System.Array.FindAll(txtCpf.Text.ToCharArray(), char.IsDigit));
+            if (cpfDigs.Length < 11)
+                { MessageBox.Show("Informe o CPF completo (11 dígitos).", "Campo obrigatório", MessageBoxButtons.OK, MessageBoxIcon.Warning); txtCpf.Focus(); return; }
+
             var celDigs = new string(System.Array.FindAll(txtCelular.Text.ToCharArray(), char.IsDigit));
             if (celDigs.Length < 10)
                 { MessageBox.Show("Informe o celular completo.", "Campo obrigatório", MessageBoxButtons.OK, MessageBoxIcon.Warning); txtCelular.Focus(); return; }
@@ -170,8 +174,20 @@ namespace Pedeai.Forms
             if (cepDigs.Length < 8)
                 { MessageBox.Show("Informe o CEP completo (8 dígitos).", "Campo obrigatório", MessageBoxButtons.OK, MessageBoxIcon.Warning); txtCep.Focus(); return; }
 
+            if (string.IsNullOrWhiteSpace(txtEndereco.Text))
+                { MessageBox.Show("Informe o endereço.", "Campo obrigatório", MessageBoxButtons.OK, MessageBoxIcon.Warning); txtEndereco.Focus(); return; }
+
             if (string.IsNullOrWhiteSpace(txtNumero.Text))
                 { MessageBox.Show("Informe o número do endereço.", "Campo obrigatório", MessageBoxButtons.OK, MessageBoxIcon.Warning); txtNumero.Focus(); return; }
+
+            if (string.IsNullOrWhiteSpace(txtBairro.Text))
+                { MessageBox.Show("Informe o bairro.", "Campo obrigatório", MessageBoxButtons.OK, MessageBoxIcon.Warning); txtBairro.Focus(); return; }
+
+            if (string.IsNullOrWhiteSpace(txtCidade.Text))
+                { MessageBox.Show("Informe a cidade.", "Campo obrigatório", MessageBoxButtons.OK, MessageBoxIcon.Warning); txtCidade.Focus(); return; }
+
+            if (string.IsNullOrWhiteSpace(txtEstado.Text))
+                { MessageBox.Show("Informe o estado (UF).", "Campo obrigatório", MessageBoxButtons.OK, MessageBoxIcon.Warning); txtEstado.Focus(); return; }
             var obj = new Cliente
             {
                 Codigo               = _codigoEditando,

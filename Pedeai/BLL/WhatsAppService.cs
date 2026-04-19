@@ -323,25 +323,14 @@ namespace Pedeai.BLL
             EnviarBackground(telefone, sb.ToString().Trim());
         }
 
-        /// <summary>Lista todos os clientes com telefone disponível.</summary>
+        /// <summary>Lista todos os clientes ativos com telefone/celular disponível.</summary>
         public static System.Collections.Generic.List<(string fone, string nome)> ListarClientesComFone()
         {
-            var lista = new System.Collections.Generic.List<(string, string)>();
             try
             {
-                var dt = new DAL.ClienteDAL().Listar();
-                foreach (System.Data.DataRow r in dt.Rows)
-                {
-                    string cel  = r["Celular"]?.ToString()  ?? "";
-                    string tel  = r["Telefone"]?.ToString() ?? "";
-                    string nome = r["Nome"]?.ToString()     ?? "";
-                    string fone = !string.IsNullOrWhiteSpace(cel) ? cel : tel;
-                    if (!string.IsNullOrWhiteSpace(fone) && !string.IsNullOrWhiteSpace(nome))
-                        lista.Add((fone, nome));
-                }
+                return new DAL.ClienteDAL().ListarComCelular();
             }
-            catch { }
-            return lista;
+            catch { return new System.Collections.Generic.List<(string, string)>(); }
         }
 
         // ── Utilitário ────────────────────────────────────────────────────────
