@@ -617,7 +617,7 @@ namespace Pedeai
                     : DataTableParaChart(_dashBLL.GetVendasPorPeriodo(_periodoCanal), "Periodo", "TotalVendas");
                 _pnlChartCanal.Refresh();
             }
-            catch { }
+            catch (Exception ex) { MessageBox.Show("Erro Canal: " + ex.Message); }
         }
 
         private void CarregarChartProdutos()
@@ -630,7 +630,7 @@ namespace Pedeai
                     : DataTableParaChart(_dashBLL.GetTopProdutosPeriodo(_periodoProd, 5), "Produto", "Quantidade");
                 _pnlChartProdutos.Refresh();
             }
-            catch { }
+            catch (Exception ex) { MessageBox.Show("Erro Produtos: " + ex.Message); }
         }
 
         private void CarregarChartDias()
@@ -643,7 +643,7 @@ namespace Pedeai
                     : DataTableParaChart(_dashBLL.GetVendasPorPeriodo(_periodoDias), "Periodo", "TotalVendas");
                 _pnlChartDias.Refresh();
             }
-            catch { }
+            catch (Exception ex) { MessageBox.Show("Erro Dias: " + ex.Message); }
         }
 
         private Label CriarCard(FlowLayoutPanel pai, string titulo, string valor, Color cor, Action onClick = null)

@@ -127,6 +127,9 @@ namespace Pedeai.Forms
             };
             foreach (var kv in caps)
                 if (grid.Columns.Contains(kv.Key)) grid.Columns[kv.Key].HeaderText = kv.Value;
+            // Formato decimal com 2 casas
+            if (grid.Columns.Contains("Preco"))   grid.Columns["Preco"].DefaultCellStyle.Format   = "N2";
+            if (grid.Columns.Contains("Estoque")) grid.Columns["Estoque"].DefaultCellStyle.Format = "N2";
         }
 
         private void ModoNovo()

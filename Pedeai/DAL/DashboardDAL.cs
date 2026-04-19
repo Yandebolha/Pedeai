@@ -140,7 +140,7 @@ namespace Pedeai.DAL
                         FROM pedido_web
                         WHERE YEARWEEK(pediData_Lancamento, 1) = YEARWEEK(CURDATE(), 1)
                           AND pediSituacao <> 6
-                        GROUP BY DATE(pediData_Lancamento)
+                        GROUP BY DATE_FORMAT(pediData_Lancamento,'%d/%m'), DATE(pediData_Lancamento)
                         ORDER BY DATE(pediData_Lancamento)";
             else if (periodo == "mes")
                 // Mês atual: 1º dia 00:00:00 até último dia 23:59:59
@@ -150,7 +150,7 @@ namespace Pedeai.DAL
                         WHERE YEAR(pediData_Lancamento)  = YEAR(CURDATE())
                           AND MONTH(pediData_Lancamento) = MONTH(CURDATE())
                           AND pediSituacao <> 6
-                        GROUP BY DATE(pediData_Lancamento)
+                        GROUP BY DATE_FORMAT(pediData_Lancamento,'%d/%m'), DATE(pediData_Lancamento)
                         ORDER BY DATE(pediData_Lancamento)";
             else if (periodo == "ano")
                 // Ano atual: 1º janeiro 00:00:00 até 31 dezembro 23:59:59
@@ -159,7 +159,7 @@ namespace Pedeai.DAL
                         FROM pedido_web
                         WHERE YEAR(pediData_Lancamento) = YEAR(CURDATE())
                           AND pediSituacao <> 6
-                        GROUP BY DATE_FORMAT(pediData_Lancamento,'%Y-%m')
+                        GROUP BY DATE_FORMAT(pediData_Lancamento,'%m/%Y'), DATE_FORMAT(pediData_Lancamento,'%Y-%m')
                         ORDER BY DATE_FORMAT(pediData_Lancamento,'%Y-%m')";
             else // dia — hoje 00:00:00 até 23:59:59
                 sql = @"SELECT DATE_FORMAT(pediData_Lancamento,'%H:00') AS Periodo,
@@ -167,7 +167,7 @@ namespace Pedeai.DAL
                         FROM pedido_web
                         WHERE DATE(pediData_Lancamento) = CURDATE()
                           AND pediSituacao <> 6
-                        GROUP BY HOUR(pediData_Lancamento)
+                        GROUP BY DATE_FORMAT(pediData_Lancamento,'%H:00'), HOUR(pediData_Lancamento)
                         ORDER BY HOUR(pediData_Lancamento)";
             using var cmd = new MySqlCommand(sql, conn);
             new MySqlDataAdapter(cmd).Fill(dt);
@@ -196,7 +196,7 @@ namespace Pedeai.DAL
                 WHERE DATE(p.pediData_Lancamento) = CURDATE()
                   AND p.pediSituacao <> 6
                   AND i.itpwNome_Mercadoria LIKE '½% + ½%'
-                GROUP BY SUBSTRING_INDEX(i.itpwNome_Mercadoria,' + ½ ',1)
+                GROUP BY TRIM(REPLACE(SUBSTRING_INDEX(i.itpwNome_Mercadoria,' + ½ ',1),'½ ',''))
                 UNION ALL
                 SELECT TRIM(SUBSTRING_INDEX(i.itpwNome_Mercadoria,' + ½ ',-1)),
                        SUM(i.itpwQtde * 0.5)
@@ -204,7 +204,7 @@ namespace Pedeai.DAL
                 WHERE DATE(p.pediData_Lancamento) = CURDATE()
                   AND p.pediSituacao <> 6
                   AND i.itpwNome_Mercadoria LIKE '½% + ½%'
-                GROUP BY SUBSTRING_INDEX(i.itpwNome_Mercadoria,' + ½ ',-1)
+                GROUP BY TRIM(SUBSTRING_INDEX(i.itpwNome_Mercadoria,' + ½ ',-1))
             ) sub
             GROUP BY CASE WHEN sub.Produto LIKE 'Marmita %'
                           THEN SUBSTRING_INDEX(sub.Produto, ' (', 1)
@@ -248,14 +248,14 @@ namespace Pedeai.DAL
                 FROM itens_pedido_web i JOIN pedido_web p ON p.Codigo = i.Codigo_Pedido
                 WHERE {where} AND p.pediSituacao <> 6
                   AND i.itpwNome_Mercadoria LIKE '½% + ½%'
-                GROUP BY SUBSTRING_INDEX(i.itpwNome_Mercadoria,' + ½ ',1)
+                GROUP BY TRIM(REPLACE(SUBSTRING_INDEX(i.itpwNome_Mercadoria,' + ½ ',1),'½ ',''))
                 UNION ALL
                 SELECT TRIM(SUBSTRING_INDEX(i.itpwNome_Mercadoria,' + ½ ',-1)),
                        SUM(i.itpwQtde * 0.5)
                 FROM itens_pedido_web i JOIN pedido_web p ON p.Codigo = i.Codigo_Pedido
                 WHERE {where} AND p.pediSituacao <> 6
                   AND i.itpwNome_Mercadoria LIKE '½% + ½%'
-                GROUP BY SUBSTRING_INDEX(i.itpwNome_Mercadoria,' + ½ ',-1)
+                GROUP BY TRIM(SUBSTRING_INDEX(i.itpwNome_Mercadoria,' + ½ ',-1))
             ) sub
             GROUP BY CASE WHEN sub.Produto LIKE 'Marmita %'
                           THEN SUBSTRING_INDEX(sub.Produto, ' (', 1)

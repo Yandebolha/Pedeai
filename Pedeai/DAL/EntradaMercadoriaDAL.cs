@@ -223,18 +223,28 @@ namespace Pedeai.DAL
         public decimal TotalPeriodo(DateTime de, DateTime ate)
         {
             using var conn = AbrirConexao();
-            // Para entradas parceladas: soma apenas as parcelas com vencimento no período.
-            // Para entradas à vista (parcela única ou sem parcelas): soma o valor total da entrada.
+            // Soma as parcelas com vencimento no período (entrada ativa).
+            // Se a entrada não tiver parcelas cadastradas, soma o valor total pelo entData.
             using var cmd = new MySqlCommand(
                 @"SELECT COALESCE(
-                    -- Entradas com parcelas: soma o valor das parcelas que vencem no período
-                    (SELECT SUM(p.parValor)
-                     FROM parcela_entrada_mercadoria p
-                     JOIN entrada_mercadoria e ON e.Codigo = p.Codigo_Entrada
+                    (SELECT SUM(par.parValor)
+                     FROM parcela_entrada_mercadoria par
+                     JOIN entrada_mercadoria e ON e.Codigo = par.Codigo_Entrada
                      WHERE e.Situacao = 'A'
-                       AND p.Situacao = 'A'
-                       AND p.parVencimento >= @de
-                       AND p.parVencimento <= @ate)
+                       AND par.parVencimento >= @de
+                       AND par.parVencimento <= @ate)
+                  , 0)
+                  +
+                  COALESCE(
+                    (SELECT SUM(e2.entValorTotal)
+                     FROM entrada_mercadoria e2
+                     WHERE e2.Situacao = 'A'
+                       AND DATE(e2.entData) >= @de
+                       AND DATE(e2.entData) <= @ate
+                       AND NOT EXISTS (
+                           SELECT 1 FROM parcela_entrada_mercadoria par2
+                           WHERE par2.Codigo_Entrada = e2.Codigo
+                       ))
                   , 0)", conn);
             cmd.Parameters.AddWithValue("@de",  de.Date);
             cmd.Parameters.AddWithValue("@ate", ate.Date);
