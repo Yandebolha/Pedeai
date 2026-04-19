@@ -223,14 +223,19 @@ namespace Pedeai.DAL
         public decimal TotalPeriodo(DateTime de, DateTime ate)
         {
             using var conn = AbrirConexao();
-            // Soma o valor total de cada entrada pelo dia de lânçamento (entData),
-            // independentemente de ser parcelada ou à vista.
+            // Para entradas parceladas: soma apenas as parcelas com vencimento no período.
+            // Para entradas à vista (parcela única ou sem parcelas): soma o valor total da entrada.
             using var cmd = new MySqlCommand(
-                @"SELECT COALESCE(SUM(e.entValorTotal), 0)
-                  FROM entrada_mercadoria e
-                  WHERE e.Situacao = 'A'
-                    AND DATE(e.entData) >= @de
-                    AND DATE(e.entData) <= @ate", conn);
+                @"SELECT COALESCE(
+                    -- Entradas com parcelas: soma o valor das parcelas que vencem no período
+                    (SELECT SUM(p.parValor)
+                     FROM parcela_entrada_mercadoria p
+                     JOIN entrada_mercadoria e ON e.Codigo = p.Codigo_Entrada
+                     WHERE e.Situacao = 'A'
+                       AND p.Situacao = 'A'
+                       AND p.parVencimento >= @de
+                       AND p.parVencimento <= @ate)
+                  , 0)", conn);
             cmd.Parameters.AddWithValue("@de",  de.Date);
             cmd.Parameters.AddWithValue("@ate", ate.Date);
             var result = cmd.ExecuteScalar();

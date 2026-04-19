@@ -138,8 +138,7 @@ namespace Pedeai.DAL
                 sql = @"SELECT DATE_FORMAT(pediData_Lancamento,'%d/%m') AS Periodo,
                         COALESCE(SUM(pediValor_Total),0) AS TotalVendas
                         FROM pedido_web
-                        WHERE pediData_Lancamento >= DATE_SUB(CURDATE(), INTERVAL WEEKDAY(CURDATE()) DAY)
-                          AND pediData_Lancamento  <  DATE_SUB(CURDATE(), INTERVAL WEEKDAY(CURDATE()) DAY) + INTERVAL 7 DAY
+                        WHERE YEARWEEK(pediData_Lancamento, 1) = YEARWEEK(CURDATE(), 1)
                           AND pediSituacao <> 6
                         GROUP BY DATE(pediData_Lancamento)
                         ORDER BY DATE(pediData_Lancamento)";
@@ -148,8 +147,8 @@ namespace Pedeai.DAL
                 sql = @"SELECT DATE_FORMAT(pediData_Lancamento,'%d/%m') AS Periodo,
                         COALESCE(SUM(pediValor_Total),0) AS TotalVendas
                         FROM pedido_web
-                        WHERE pediData_Lancamento >= DATE_FORMAT(CURDATE(),'%Y-%m-01')
-                          AND pediData_Lancamento  <  DATE_FORMAT(CURDATE(),'%Y-%m-01') + INTERVAL 1 MONTH
+                        WHERE YEAR(pediData_Lancamento)  = YEAR(CURDATE())
+                          AND MONTH(pediData_Lancamento) = MONTH(CURDATE())
                           AND pediSituacao <> 6
                         GROUP BY DATE(pediData_Lancamento)
                         ORDER BY DATE(pediData_Lancamento)";
@@ -158,8 +157,7 @@ namespace Pedeai.DAL
                 sql = @"SELECT DATE_FORMAT(pediData_Lancamento,'%m/%Y') AS Periodo,
                         COALESCE(SUM(pediValor_Total),0) AS TotalVendas
                         FROM pedido_web
-                        WHERE pediData_Lancamento >= DATE_FORMAT(CURDATE(),'%Y-01-01')
-                          AND pediData_Lancamento  <  DATE_FORMAT(CURDATE(),'%Y-01-01') + INTERVAL 1 YEAR
+                        WHERE YEAR(pediData_Lancamento) = YEAR(CURDATE())
                           AND pediSituacao <> 6
                         GROUP BY DATE_FORMAT(pediData_Lancamento,'%Y-%m')
                         ORDER BY DATE_FORMAT(pediData_Lancamento,'%Y-%m')";
@@ -225,16 +223,13 @@ namespace Pedeai.DAL
             string where;
             if (periodo == "semana")
                 // Semana atual completa (seg–dom)
-                where = "p.pediData_Lancamento >= DATE_SUB(CURDATE(), INTERVAL WEEKDAY(CURDATE()) DAY)" +
-                        " AND p.pediData_Lancamento < DATE_SUB(CURDATE(), INTERVAL WEEKDAY(CURDATE()) DAY) + INTERVAL 7 DAY";
+                where = "YEARWEEK(p.pediData_Lancamento, 1) = YEARWEEK(CURDATE(), 1)";
             else if (periodo == "mes")
                 // Mês atual completo
-                where = "p.pediData_Lancamento >= DATE_FORMAT(CURDATE(),'%Y-%m-01')" +
-                        " AND p.pediData_Lancamento < DATE_FORMAT(CURDATE(),'%Y-%m-01') + INTERVAL 1 MONTH";
+                where = "YEAR(p.pediData_Lancamento) = YEAR(CURDATE()) AND MONTH(p.pediData_Lancamento) = MONTH(CURDATE())";
             else if (periodo == "ano")
                 // Ano atual completo
-                where = "p.pediData_Lancamento >= DATE_FORMAT(CURDATE(),'%Y-01-01')" +
-                        " AND p.pediData_Lancamento < DATE_FORMAT(CURDATE(),'%Y-01-01') + INTERVAL 1 YEAR";
+                where = "YEAR(p.pediData_Lancamento) = YEAR(CURDATE())";
             else // dia — hoje 00:00:00 até 23:59:59
                 where = "DATE(p.pediData_Lancamento) = CURDATE()";
             var sql = $@"SELECT CASE WHEN sub.Produto LIKE 'Marmita %'
