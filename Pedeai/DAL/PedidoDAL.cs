@@ -249,6 +249,8 @@ namespace Pedeai.DAL
                     cmdI.ExecuteNonQuery();
 
                     // Verificar estoque disponível antes da baixa
+                    bool isFracCheck = item.Codigo_Mercadoria2 > 0;
+                    decimal qtdeCheck = isFracCheck ? item.itpwQtde * 0.5m : item.itpwQtde;
                     var sqlChkEst = @"SELECT mercMercadoria, mercEstoque_Atual, mercControla_Estoque
                                       FROM mercadoria WHERE Codigo = @merc LIMIT 1";
                     // Verificar estoque: ler dados para fora do reader antes de qualquer rollback,
@@ -266,7 +268,7 @@ namespace Pedeai.DAL
                                 var estRdr  = rdr["mercEstoque_Atual"] == DBNull.Value
                                                  ? 0m
                                                  : Convert.ToDecimal(rdr["mercEstoque_Atual"]);
-                                if (item.itpwQtde > estRdr)
+                                if (qtdeCheck > estRdr)
                                 {
                                     nomeProdInsuf = nomeRdr;
                                     estDispInsuf  = estRdr;
@@ -278,17 +280,30 @@ namespace Pedeai.DAL
                     {
                         trans.Rollback();
                         return $"Estoque insuficiente para \"{nomeProdInsuf}\": " +
-                               $"disponível {estDispInsuf:0.##}, solicitado {item.itpwQtde:0.##}.";
+                               $"disponível {estDispInsuf:0.##}, solicitado {qtdeCheck:0.##}.";
                     }
 
                     // Baixa de estoque (apenas quando o produto controla estoque)
+                    bool isFracionado = item.Codigo_Mercadoria2 > 0;
+                    decimal qtdeProd1  = isFracionado ? item.itpwQtde * 0.5m : item.itpwQtde;
+                    decimal qtdeProd2  = isFracionado ? item.itpwQtde * 0.5m : 0m;
+
                     var sqlEst = @"UPDATE mercadoria
                                    SET mercEstoque_Atual = mercEstoque_Atual - @qtde
                                    WHERE Codigo = @merc AND mercControla_Estoque = 1";
                     using var cmdEst = new MySqlCommand(sqlEst, conn, trans);
-                    cmdEst.Parameters.AddWithValue("@qtde", item.itpwQtde);
+                    cmdEst.Parameters.AddWithValue("@qtde", qtdeProd1);
                     cmdEst.Parameters.AddWithValue("@merc", item.Codigo_Mercadoria);
                     cmdEst.ExecuteNonQuery();
+
+                    // Para fracionado: baixar também o segundo produto
+                    if (isFracionado)
+                    {
+                        using var cmdEst2 = new MySqlCommand(sqlEst, conn, trans);
+                        cmdEst2.Parameters.AddWithValue("@qtde", qtdeProd2);
+                        cmdEst2.Parameters.AddWithValue("@merc", item.Codigo_Mercadoria2);
+                        cmdEst2.ExecuteNonQuery();
+                    }
                 }
 
                 trans.Commit();

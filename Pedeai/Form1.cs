@@ -615,7 +615,7 @@ namespace Pedeai
                 _dadosCanal = _periodoCanal == "custom"
                     ? DataTableParaChart(_dashBLL.GetVendasPorCanal(_dtpIniCanal.Value, _dtpFimCanal.Value), "Canal", "TotalVendas")
                     : DataTableParaChart(_dashBLL.GetVendasPorPeriodo(_periodoCanal), "Periodo", "TotalVendas");
-                _pnlChartCanal.Invalidate();
+                _pnlChartCanal.Refresh();
             }
             catch { }
         }
@@ -628,7 +628,7 @@ namespace Pedeai
                 _dadosProdutos = _periodoProd == "custom"
                     ? DataTableParaChart(_dashBLL.GetTopProdutos(_dtpIniProd.Value, _dtpFimProd.Value, 5), "Produto", "Quantidade")
                     : DataTableParaChart(_dashBLL.GetTopProdutosPeriodo(_periodoProd, 5), "Produto", "Quantidade");
-                _pnlChartProdutos.Invalidate();
+                _pnlChartProdutos.Refresh();
             }
             catch { }
         }
@@ -641,7 +641,7 @@ namespace Pedeai
                 _dadosDias = _periodoDias == "custom"
                     ? DataTableParaChart(_dashBLL.GetVendasPorDia(_dtpIniDias.Value, _dtpFimDias.Value), "Dia", "TotalVendas", true)
                     : DataTableParaChart(_dashBLL.GetVendasPorPeriodo(_periodoDias), "Periodo", "TotalVendas");
-                _pnlChartDias.Invalidate();
+                _pnlChartDias.Refresh();
             }
             catch { }
         }
@@ -1682,6 +1682,11 @@ namespace Pedeai
             foreach (var kv in captions)
                 if (gridFinanceiro.Columns.Contains(kv.Key))
                     gridFinanceiro.Columns[kv.Key].HeaderText = kv.Value;
+
+            // Formato N2 para colunas decimais
+            foreach (var col in new[] { "TaxaEntrega", "TotalBruto", "Dinheiro", "Pix", "Cartao", "CustoMercadorias", "TotalLiquido" })
+                if (gridFinanceiro.Columns.Contains(col))
+                    gridFinanceiro.Columns[col].DefaultCellStyle.Format = "N2";
         }
 
         private void FinanceiroDia_DblClick(object sender, DataGridViewCellEventArgs e)

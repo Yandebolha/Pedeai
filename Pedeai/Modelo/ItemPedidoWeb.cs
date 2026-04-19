@@ -6,6 +6,11 @@ namespace Pedeai.Modelo
         public int Codigo { get; set; }
         public int Codigo_Pedido { get; set; }
         public int Codigo_Mercadoria { get; set; }
+        /// <summary>
+        /// Usado apenas em runtime para pedidos fracionados (½A + ½B).
+        /// Não é persistido no banco — serve só para baixa dupla de estoque.
+        /// </summary>
+        public int Codigo_Mercadoria2 { get; set; } = 0;
         public int itpwCodigo_Marmita { get; set; } = 0;
 
         public string itpwNome_Mercadoria { get; set; }

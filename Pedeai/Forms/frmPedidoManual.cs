@@ -949,6 +949,7 @@ namespace Pedeai.Forms
                 var item = new ItemPedidoWeb
                 {
                     Codigo_Mercadoria   = escolha1.Codigo,
+                    Codigo_Mercadoria2  = escolha2.Codigo,
                     itpwNome_Mercadoria = nome,
                     itpwQtde            = qty,
                     itpwPreco_Unitario  = precoFinal,

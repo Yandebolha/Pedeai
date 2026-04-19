@@ -775,6 +775,7 @@ namespace Pedeai.DB
                     "item_entrada_mercadoria", "parcela_entrada_mercadoria",
                     "entrada_mercadoria", "gasto_material", "necessidade_empresa",
                     "turno", "estoque_item", "cliente", "cupom", "fornecedor",
+                    "marmita_item", "marmita",
                     "mercadoria", "grupo_mercadoria",
                     // WhatsApp / Promoções / Cardápio
                     "promocao_item", "promocao",
