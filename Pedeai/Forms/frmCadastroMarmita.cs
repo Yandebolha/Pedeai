@@ -111,7 +111,7 @@ namespace Pedeai.Forms
             // Formulário de cadastro
             pnlForm = new Panel
             {
-                Dock = DockStyle.Top, Height = 130, BackColor = ClrFoot,
+                Dock = DockStyle.Top, Height = 165, BackColor = ClrFoot,
                 Padding = new Padding(10, 8, 10, 8), Visible = false
             };
             lblFormTitulo = new Label
@@ -121,6 +121,22 @@ namespace Pedeai.Forms
                 Font = new Font("Segoe UI", 9F, FontStyle.Bold),
                 Dock = DockStyle.Top, Height = 22
             };
+            // Row 1: description
+            var pnlRowDesc = new Panel { Dock = DockStyle.Top, Height = 36, BackColor = ClrFoot };
+            txtDescricao = new TextBox
+            {
+                Dock = DockStyle.Fill,
+                BorderStyle = BorderStyle.FixedSingle, BackColor = Color.White,
+                ForeColor = ClrText, Font = new Font("Segoe UI", 10F)
+            };
+            var lblDesc = new Label
+            {
+                Text = "Descri\u00e7\u00e3o:", Width = 75, Dock = DockStyle.Left,
+                TextAlign = ContentAlignment.MiddleLeft, ForeColor = Color.FromArgb(100, 80, 50)
+            };
+            pnlRowDesc.Controls.Add(txtDescricao);
+            pnlRowDesc.Controls.Add(lblDesc);
+            // Row 2: cost / value
             var pnlFields = new Panel { Dock = DockStyle.Top, Height = 36, BackColor = ClrFoot };
             // Valor R$ — fixed width on the right
             var lblVal = new Label
@@ -149,25 +165,11 @@ namespace Pedeai.Forms
                 BackColor = Color.White, ForeColor = ClrText, ThousandsSeparator = true,
                 Margin = new Padding(0, 4, 4, 4)
             };
-            // Descrição — fills the rest
-            txtDescricao = new TextBox
-            {
-                Dock = DockStyle.Fill,
-                BorderStyle = BorderStyle.FixedSingle, BackColor = Color.White,
-                ForeColor = ClrText, Font = new Font("Segoe UI", 10F)
-            };
-            var lblDesc = new Label
-            {
-                Text = "Descri\u00e7\u00e3o:", Width = 75, Dock = DockStyle.Left,
-                TextAlign = ContentAlignment.MiddleLeft, ForeColor = Color.FromArgb(100, 80, 50)
-            };
-            // Right-to-left: numCusto, lblCusto, numValor, lblVal, then txtDescricao fills middle
-            pnlFields.Controls.Add(txtDescricao);
-            pnlFields.Controls.Add(numCusto);
+            // Right-to-left: numCusto, lblCusto, numValor, lblVal
             pnlFields.Controls.Add(lblCusto);
-            pnlFields.Controls.Add(numValor);
+            pnlFields.Controls.Add(numCusto);
             pnlFields.Controls.Add(lblVal);
-            pnlFields.Controls.Add(lblDesc);
+            pnlFields.Controls.Add(numValor);
 
             var pnlBtns = new Panel { Dock = DockStyle.Bottom, Height = 34 };
             btnSalvar = MkBtn("Salvar", ClrGreen, 100);
@@ -180,6 +182,7 @@ namespace Pedeai.Forms
 
             pnlForm.Controls.Add(pnlBtns);
             pnlForm.Controls.Add(pnlFields);
+            pnlForm.Controls.Add(pnlRowDesc);
             pnlForm.Controls.Add(lblFormTitulo);
 
             // Sub-grid: Itens da marmita selecionada

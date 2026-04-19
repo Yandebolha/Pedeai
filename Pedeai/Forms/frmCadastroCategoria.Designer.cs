@@ -106,7 +106,7 @@ namespace Pedeai.Forms
             this.btnS.Top = 10;
             this.btnS.Width = 110;
             this.btnS.Height = 28;
-            this.btnS.BackColor = System.Drawing.Color.FromArgb(224, 113, 42);
+            this.btnS.BackColor = System.Drawing.Color.FromArgb(87, 120, 38);
             this.btnS.ForeColor = System.Drawing.Color.White;
             this.btnS.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnS.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);

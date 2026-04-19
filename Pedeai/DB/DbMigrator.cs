@@ -219,6 +219,10 @@ namespace Pedeai.DB
                 // ── 4b. Colunas em grupo_mercadoria ─────────────────────────────
                 AddColumnIfNotExists(conn, db, "grupo_mercadoria", "grmeData_Cadastro",
                     "DATETIME NULL DEFAULT NULL");
+                AddColumnIfNotExists(conn, db, "grupo_mercadoria", "Status_Transmissao",
+                    "CHAR(1) NOT NULL DEFAULT 'N'");
+                AddColumnIfNotExists(conn, db, "grupo_mercadoria", "Info",
+                    "VARCHAR(255) NOT NULL DEFAULT ''");
 
                 // ── 4c. Colunas em mercadoria ────────────────────────────────
                 AddColumnIfNotExists(conn, db, "mercadoria", "mercHabilitar_Site",
