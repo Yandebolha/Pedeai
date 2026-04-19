@@ -514,7 +514,7 @@ namespace Pedeai.Forms
                 pediDesconto         = _descontoCupom,
                 pediCodigo_Cupom     = _cupomAplicado != null ? (_cupomAplicado.cupomCodigo ?? "") : "",
                 pediValor_Total      = total,
-                pediTroco_Para       = cmbPagamento.SelectedIndex == 0 && numTroco.Value > 0 ? numTroco.Value : (decimal?)null,
+                pediTroco_Para       = cmbPagamento.SelectedIndex == 0 ? numTroco.Value : 0m,
                 pediEndereco_Entrega = ehEntrega ? txtEndereco.Text.Trim() : "",
                 pediObservacoes      = txtObs.Text.Trim(),
                 pediOrigem           = 2,

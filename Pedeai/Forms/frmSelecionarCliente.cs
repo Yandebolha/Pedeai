@@ -30,7 +30,8 @@ namespace Pedeai.Forms
                 // Sort by Codigo ascending
                 dt.DefaultView.Sort = "Codigo ASC";
                 grid.DataSource = dt.DefaultView.ToTable();
-                if (grid.Columns.Contains("Situacao")) grid.Columns["Situacao"].Visible = false;
+                if (grid.Columns.Contains("Situacao"))  grid.Columns["Situacao"].Visible  = false;
+                if (grid.Columns.Contains("Telefone")) grid.Columns["Telefone"].Visible = false;
             }
             catch (Exception ex) { MessageBox.Show("Erro ao carregar clientes: " + ex.Message); }
         }
