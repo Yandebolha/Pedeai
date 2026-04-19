@@ -214,7 +214,7 @@ namespace Pedeai.DAL
                 cmdP.Parameters.AddWithValue("@taxa",  pedido.pediTaxa_Entrega);
                 cmdP.Parameters.AddWithValue("@desc",  pedido.pediDesconto);
                 cmdP.Parameters.AddWithValue("@total", pedido.pediValor_Total);
-                cmdP.Parameters.AddWithValue("@troco", pedido.pediTroco_Para ?? (object)DBNull.Value);
+                cmdP.Parameters.AddWithValue("@troco", pedido.pediTroco_Para ?? 0m);
                 cmdP.Parameters.AddWithValue("@end",   pedido.pediEndereco_Entrega ?? "");
                 cmdP.Parameters.AddWithValue("@obs",   pedido.pediObservacoes ?? "");
                 cmdP.Parameters.AddWithValue("@dt",    pedido.pediData_Lancamento);
