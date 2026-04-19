@@ -217,6 +217,7 @@ namespace Pedeai.DB
                     "VARCHAR(150) NULL DEFAULT NULL");
 
                 // Garante DEFAULT na coluna pediTroco_Para (pode existir sem default em bancos antigos)
+                Exec(conn, "UPDATE `pedido_web` SET `pediTroco_Para` = 0.00 WHERE `pediTroco_Para` IS NULL");
                 Exec(conn, "ALTER TABLE `pedido_web` MODIFY COLUMN `pediTroco_Para` DECIMAL(10,2) NOT NULL DEFAULT 0.00");
 
                 // ── 4b. Colunas em grupo_mercadoria ─────────────────────────────

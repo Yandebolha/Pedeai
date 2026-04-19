@@ -13,7 +13,6 @@ namespace Pedeai.DAL
             using var conn = AbrirConexao();
             var sql = @"SELECT c.Codigo,
                                c.clieNome_RazaoSocial AS Nome,
-                               c.clieTelefone         AS Telefone,
                                c.clieCelular          AS Celular,
                                c.clieEmail            AS Email,
                                CONCAT(c.clieEndereco,
