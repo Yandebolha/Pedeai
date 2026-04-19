@@ -1,5 +1,6 @@
 using System;
 using System.Data;
+using Pedeai;
 using Pedeai.DAL;
 using Pedeai.Modelo;
 
@@ -63,7 +64,7 @@ namespace Pedeai.BLL
                 _dal.AtualizarSituacao(codigo, novaSituacao, canceladoPor);
                 return "";
             }
-            catch (Exception ex) { return ex.Message; }
+            catch (Exception ex) { Logger.Log("PedidoBLL", "AtualizarSituacao", $"Erro ao atualizar situacao do pedido #{codigo}", ex); return ex.Message; }
         }
 
         public string FinalizarPedido(int codigo, int novaSituacao, decimal valorPago, string transacao,
@@ -72,7 +73,7 @@ namespace Pedeai.BLL
         {
             if (codigo <= 0) return "Código de pedido inválido.";
             try { _dal.FinalizarPedido(codigo, novaSituacao, valorPago, transacao, pagoDinheiro, pagoCartao, pagoPix, autorizador); return ""; }
-            catch (Exception ex) { return ex.Message; }
+            catch (Exception ex) { Logger.Log("PedidoBLL", "FinalizarPedido", $"Erro ao finalizar pedido #{codigo}", ex); return ex.Message; }
         }
 
         public System.Data.DataTable GetFinanceiro(DateTime de, DateTime ate)

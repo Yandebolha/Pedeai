@@ -63,7 +63,7 @@ namespace Pedeai.Forms
                 return;
             }
 
-            Logger.Log("Turno aberto", $"Caixa inicial: R$ {caixaIni:N2}");
+            Logger.Log("frmTurno", "BtnAbrir_Click", $"Turno aberto | Caixa inicial: R$ {caixaIni:N2}");
             MessageBox.Show("Turno aberto com sucesso!", "Turno", MessageBoxButtons.OK, MessageBoxIcon.Information);
             AtualizarEstado();
         }
@@ -88,7 +88,7 @@ namespace Pedeai.Forms
                 return;
             }
 
-            Logger.Log("Turno fechado", $"Caixa final: R$ {caixaFin:N2}");
+            Logger.Log("frmTurno", "BtnFechar_Click", $"Turno fechado | Caixa final: R$ {caixaFin:N2}");
             MessageBox.Show("Turno fechado com sucesso!", "Turno", MessageBoxButtons.OK, MessageBoxIcon.Information);
             AtualizarEstado();
         }

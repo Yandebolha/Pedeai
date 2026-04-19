@@ -1,5 +1,6 @@
 using System;
 using System.Data;
+using Pedeai;
 using Pedeai.DAL;
 using Pedeai.Modelo;
 
@@ -61,7 +62,7 @@ namespace Pedeai.BLL
                         total += Convert.ToDecimal(r["pediValor_Total"]);
                 return total;
             }
-            catch { return 0; }
+            catch (Exception ex) { Logger.Log("TurnoBLL", "AtualizarSituacaoPedido", "Erro ao obter total movimentado", ex); return 0; }
         }
 
         public (decimal totalVendas, decimal totalDin, decimal totalCar, decimal totalPix, int qtdPedidos)
@@ -85,7 +86,7 @@ namespace Pedeai.BLL
                 }
                 return (totalVendas, totalDin, totalCar, totalPix, dt.Rows.Count);
             }
-            catch { return (0, 0, 0, 0, 0); }
+            catch (Exception ex) { Logger.Log("TurnoBLL", "GetResumoMovimentado", "Erro ao calcular resumo do turno", ex); return (0, 0, 0, 0, 0); }
         }
 
         public DataTable Listar(DateTime de, DateTime ate) => _dal.Listar(de, ate);

@@ -3,7 +3,7 @@ using System.IO;
 
 namespace Pedeai
 {
-    /// <summary>Registra ações do sistema em Log.txt na pasta do executável.</summary>
+    /// <summary>Registra ações e erros do sistema em Log_sistema.txt na pasta C:\Pedeai.</summary>
     public static class Logger
     {
         private static readonly object _lock = new object();
@@ -19,14 +19,18 @@ namespace Pedeai
             }
         }
 
-        public static void Log(string acao, string detalhe = "")
+        /// <summary>
+        /// Grava uma entrada no log no formato:
+        /// dd/MM/yyyy HH:mm:ss - {source} - {method} - {message}
+        ///    em {StackTrace}  (apenas quando ex != null)
+        /// </summary>
+        public static void Log(string source, string method, string message, Exception ex = null)
         {
             try
             {
-                string usuario = UsuarioSessao.NomeAtual;
-                string linha   = $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] [{usuario}] {acao}";
-                if (!string.IsNullOrWhiteSpace(detalhe))
-                    linha += $" | {detalhe}";
+                string linha = $"{DateTime.Now:dd/MM/yyyy HH:mm:ss} - {source} - {method} - {message}";
+                if (ex != null)
+                    linha += Environment.NewLine + ex.ToString();
 
                 lock (_lock)
                     File.AppendAllText(FilePath, linha + Environment.NewLine,

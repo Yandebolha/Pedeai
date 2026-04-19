@@ -94,7 +94,7 @@ namespace Pedeai.Forms
                             "Fidelização", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     }
                 }
-                catch { /* não crítico */ }
+                catch (Exception exPremio) { Logger.Log("frmPedidoManual", "BtnSelecionarCliente_Click", "Erro ao verificar prêmio de fidelidade", exPremio); }
             }
         }
 
@@ -158,7 +158,7 @@ namespace Pedeai.Forms
                         r["Bairro"]?.ToString() ?? "",
                         r["Taxa"] == System.DBNull.Value ? 0m : Convert.ToDecimal(r["Taxa"])));
             }
-            catch { /* não bloqueia se tabela ainda não existir */ }
+            catch (Exception exBairro) { Logger.Log("frmPedidoManual", "CarregarBairrosCadastrados", "Erro ao carregar bairros", exBairro); }
         }
 
         private void AplicarTaxaPorBairroCliente(string bairroCliente, string cidadeCliente)        {
@@ -224,7 +224,7 @@ namespace Pedeai.Forms
                 txtBuscaProduto.AutoCompleteMode         = AutoCompleteMode.SuggestAppend;
                 txtBuscaProduto.AutoCompleteSource       = AutoCompleteSource.CustomSource;
             }
-            catch { }
+            catch (Exception exProd) { Logger.Log("frmPedidoManual", "CarregarProdutos", "Erro ao carregar produtos", exProd); }
         }
 
         private void BtnBuscarProduto_Click(object sender, EventArgs e)
@@ -530,7 +530,7 @@ namespace Pedeai.Forms
             if (_premioFidelProdAplicado && _premioFidelProdHistoricoId > 0)
             {
                 try { _fidelBLL.MarcarPremioProdutoUsado(_premioFidelProdHistoricoId); }
-                catch { /* não crítico */ }
+                catch (Exception exMarcar) { Logger.Log("frmPedidoManual", "BtnSalvar_Click", "Erro ao marcar prêmio produto como usado", exMarcar); }
             }
 
             // Verificar se o cliente atingiu nova meta de fidelidade após esse pedido
@@ -816,16 +816,24 @@ namespace Pedeai.Forms
         }
 
         // -- Meio a Meio -----------------------------------------------------
-        private void BtnMeioAMeio_Click(object sender, EventArgs e)        {
+        private void BtnMeioAMeio_Click(object sender, EventArgs e)
+        {
             if (_produtos.Count == 0) { MessageBox.Show("Nenhum produto carregado."); return; }
 
             using var dlg = new Form();
             dlg.Text            = "Pedido Fracionado";
             dlg.StartPosition   = FormStartPosition.CenterParent;
-            dlg.Size            = new Size(700, 430);
+            dlg.Size            = new Size(700, 470);
             dlg.FormBorderStyle = FormBorderStyle.FixedDialog;
             dlg.MaximizeBox     = dlg.MinimizeBox = false;
             dlg.BackColor       = Color.FromArgb(245, 237, 216);
+
+            // -- Lista de categorias disponíveis nos produtos carregados -------
+            var cats = new System.Collections.Generic.List<string> { "-- Todas --" };
+            foreach (var p2 in _produtos)
+                if (!string.IsNullOrWhiteSpace(p2.Categoria) && !cats.Contains(p2.Categoria))
+                    cats.Add(p2.Categoria);
+            cats.Sort(1, cats.Count - 1, System.Collections.Generic.Comparer<string>.Default);
 
             DataGridView MkGrid()
             {
@@ -841,10 +849,39 @@ namespace Pedeai.Forms
                         Font = new Font("Segoe UI", 8.5F, FontStyle.Bold) },
                     BorderStyle = BorderStyle.None, Font = new Font("Segoe UI", 9F), MultiSelect = false,
                 };
-                g.Columns.Add(new DataGridViewTextBoxColumn { Name = "Nome",  HeaderText = "Produto",   FillWeight = 70 });
+                g.Columns.Add(new DataGridViewTextBoxColumn { Name = "Nome",  HeaderText = "Produto",    FillWeight = 70 });
                 g.Columns.Add(new DataGridViewTextBoxColumn { Name = "Preco", HeaderText = "Pre\u00e7o R$", FillWeight = 30 });
                 foreach (var p in _produtos) g.Rows.Add(p.Nome, p.Preco.ToString("N2"));
                 return g;
+            }
+
+            ComboBox MkCmbCat()
+            {
+                var c = new ComboBox
+                {
+                    Dock = DockStyle.Fill, DropDownStyle = ComboBoxStyle.DropDownList,
+                    FlatStyle = FlatStyle.Flat, Font = new Font("Segoe UI", 8.5F),
+                    BackColor = Color.White, ForeColor = Color.FromArgb(50, 50, 50),
+                    Margin = new Padding(4, 3, 4, 3)
+                };
+                c.Items.AddRange(cats.ToArray());
+                c.SelectedIndex = 0;
+                return c;
+            }
+
+            void FiltrarGrid(DataGridView g, string cat)
+            {
+                string nomeAtual = g.CurrentRow?.Cells["Nome"].Value?.ToString();
+                g.Rows.Clear();
+                foreach (var p in _produtos)
+                {
+                    if (cat != "-- Todas --" && p.Categoria != cat) continue;
+                    g.Rows.Add(p.Nome, p.Preco.ToString("N2"));
+                }
+                // Restaurar seleção anterior se ainda existir na lista filtrada
+                if (nomeAtual != null)
+                    foreach (DataGridViewRow row in g.Rows)
+                        if (row.Cells["Nome"].Value?.ToString() == nomeAtual) { row.Selected = true; break; }
             }
 
             var pnlTop = new Panel { Dock = DockStyle.Top, Height = 36, BackColor = Color.FromArgb(176, 110, 42) };
@@ -853,11 +890,12 @@ namespace Pedeai.Forms
                 TextAlign = ContentAlignment.MiddleLeft, Padding = new Padding(10, 0, 0, 0) };
             pnlTop.Controls.Add(lblTit);
 
-            var tbl = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 2, RowCount = 2, BackColor = Color.Transparent };
+            var tbl = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 2, RowCount = 3, BackColor = Color.Transparent };
             tbl.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50));
             tbl.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50));
-            tbl.RowStyles.Add(new RowStyle(SizeType.Absolute, 26));
-            tbl.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
+            tbl.RowStyles.Add(new RowStyle(SizeType.Absolute, 26));  // labels sabor
+            tbl.RowStyles.Add(new RowStyle(SizeType.Absolute, 32));  // filtros categoria
+            tbl.RowStyles.Add(new RowStyle(SizeType.Percent, 100));  // grids
 
             Label MkLbl(string t) => new Label { Text = t, Dock = DockStyle.Fill,
                 ForeColor = Color.FromArgb(70, 70, 70), Font = new Font("Segoe UI", 8.5F),
@@ -865,10 +903,18 @@ namespace Pedeai.Forms
 
             var grid1 = MkGrid();
             var grid2 = MkGrid();
+            var cmb1  = MkCmbCat();
+            var cmb2  = MkCmbCat();
+
+            cmb1.SelectedIndexChanged += (_, __) => FiltrarGrid(grid1, cmb1.SelectedItem?.ToString() ?? "-- Todas --");
+            cmb2.SelectedIndexChanged += (_, __) => FiltrarGrid(grid2, cmb2.SelectedItem?.ToString() ?? "-- Todas --");
+
             tbl.Controls.Add(MkLbl("1\u00ba Sabor"), 0, 0);
             tbl.Controls.Add(MkLbl("2\u00ba Sabor"), 1, 0);
-            tbl.Controls.Add(grid1, 0, 1);
-            tbl.Controls.Add(grid2, 1, 1);
+            tbl.Controls.Add(cmb1,  0, 1);
+            tbl.Controls.Add(cmb2,  1, 1);
+            tbl.Controls.Add(grid1, 0, 2);
+            tbl.Controls.Add(grid2, 1, 2);
 
             var btnOk = new Button { Text = "Adicionar Pedido Fracionado", Dock = DockStyle.Bottom, Height = 38,
                 BackColor = Color.FromArgb(87, 120, 38), ForeColor = Color.White,

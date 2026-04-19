@@ -49,7 +49,7 @@ namespace Pedeai
             CarregarTudo();
             NavIniciarPrimeiro();
             _timer.Start();
-            Logger.Log("Login", $"Usu\u00e1rio: {UsuarioSessao.NomeAtual}");
+            Logger.Log("Form1", "Form1_Load", $"Login | Usu\u00e1rio: {UsuarioSessao.NomeAtual}");
             BeginInvoke(new Action(VerificarAvisosIniciais));
         }
 
@@ -1091,7 +1091,7 @@ namespace Pedeai
                 if (!string.IsNullOrEmpty(eA)) MessageBox.Show("Erro: " + eA);
                 else
                 {
-                    Logger.Log("Pedido cancelado", $"#{cod} | Autorizado por: {canceladoPor}");
+                    Logger.Log("Form1", "AtualizarSituacaoPedido", $"Pedido cancelado | #{cod} | Autorizado por: {canceladoPor}");
                     CarregarPedidos();
                     RestaurarSelecaoPedido(cod);
                 }
@@ -1123,7 +1123,7 @@ namespace Pedeai
                             string logExtra = $"#{cod} | Sit={novaSit} | Total={pedido.pediValor_Total:N2} | Pago={vPago:N2} | Din={din:N2} Car={car:N2} Pix={pix:N2}";
                             if (!string.IsNullOrEmpty(autNome))
                                 logExtra += $" | DESCONTO R$ {(pedido.pediValor_Total - vPago):N2} autorizado por {autNome}";
-                            Logger.Log("Pedido finalizado", logExtra);
+                            Logger.Log("Form1", "AtualizarSituacaoPedido", $"Pedido finalizado | {logExtra}");
                             CarregarPedidos();
                             RestaurarSelecaoPedido(cod);
                             // Troco em dinheiro
@@ -1704,7 +1704,7 @@ namespace Pedeai
         // -- Autenticação ---------------------------------------------------- 
         private void BtnLogoff_Click(object sender, EventArgs e)
         {
-            Logger.Log("Logoff");
+            Logger.Log("Form1", "BtnLogoff_Click", "Logoff");
             UsuarioSessao.Encerrar();
             Application.Restart();
         }
@@ -1845,4 +1845,5 @@ namespace Pedeai
         }
     }
 }
+
 
