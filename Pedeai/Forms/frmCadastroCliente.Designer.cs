@@ -22,6 +22,7 @@ namespace Pedeai.Forms
             this.txtBusca = new System.Windows.Forms.TextBox();
             this.btnB = new System.Windows.Forms.Button();
             this.btnN = new System.Windows.Forms.Button();
+            this.btnBuscarWeb = new System.Windows.Forms.Button();
             this.pnlForm = new System.Windows.Forms.Panel();
             this.lblNome = new System.Windows.Forms.Label();
             this.txtNome = new System.Windows.Forms.TextBox();
@@ -104,6 +105,7 @@ namespace Pedeai.Forms
             this.topBar.Controls.Add(this.txtBusca);
             this.topBar.Controls.Add(this.btnB);
             this.topBar.Controls.Add(this.btnN);
+            this.topBar.Controls.Add(this.btnBuscarWeb);
             this.topBar.Dock = System.Windows.Forms.DockStyle.Top;
             this.topBar.Location = new System.Drawing.Point(0, 0);
             this.topBar.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
@@ -149,8 +151,24 @@ namespace Pedeai.Forms
             this.btnB.UseVisualStyleBackColor = false;
             this.btnB.Click += new System.EventHandler(this.BtnBuscar_Click);
             // 
-            // btnN
+            // btnBuscarWeb
             // 
+            this.btnBuscarWeb.BackColor = System.Drawing.Color.FromArgb(42, 100, 160);
+            this.btnBuscarWeb.FlatAppearance.BorderSize = 0;
+            this.btnBuscarWeb.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnBuscarWeb.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.btnBuscarWeb.ForeColor = System.Drawing.Color.White;
+            this.btnBuscarWeb.Location = new System.Drawing.Point(624, 9);
+            this.btnBuscarWeb.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.btnBuscarWeb.Name = "btnBuscarWeb";
+            this.btnBuscarWeb.Size = new System.Drawing.Size(120, 32);
+            this.btnBuscarWeb.TabIndex = 10;
+            this.btnBuscarWeb.Text = "\u2193 Buscar Web";
+            this.btnBuscarWeb.UseVisualStyleBackColor = false;
+            this.btnBuscarWeb.Click += new System.EventHandler(this.BtnBuscarWeb_Click);
+            //
+            // btnN
+            //
             this.btnN.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(87)))), ((int)(((byte)(120)))), ((int)(((byte)(38)))));
             this.btnN.FlatAppearance.BorderSize = 0;
             this.btnN.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
@@ -369,7 +387,7 @@ namespace Pedeai.Forms
             this.lblNum.Name = "lblNum";
             this.lblNum.Size = new System.Drawing.Size(24, 15);
             this.lblNum.TabIndex = 14;
-            this.lblNum.Text = "Nº:";
+            this.lblNum.Text = "NÂº:";
             // 
             // txtNumero
             // 
@@ -553,6 +571,7 @@ namespace Pedeai.Forms
         internal System.Windows.Forms.ComboBox       cmbSituacao;
         internal System.Windows.Forms.Button         btnB;
         internal System.Windows.Forms.Button         btnN;
+        internal System.Windows.Forms.Button         btnBuscarWeb;
         internal System.Windows.Forms.Button         btnS;
         internal System.Windows.Forms.Button         btnC;
         private  System.Windows.Forms.Panel          topBar;

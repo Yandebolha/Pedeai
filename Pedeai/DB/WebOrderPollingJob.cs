@@ -34,7 +34,7 @@ namespace Pedeai.DB
                 }
 
                 if (importados > 0)
-                    AppEvents.OnNovoPedidoWebRecebido(importados);
+                    AppEvents.OnNovoPedidoWebRecebido(importados); // silent grid refresh only
             }
             catch (Exception ex)
             {

@@ -30,6 +30,45 @@ namespace Pedeai.DB
             _http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", KEY);
         }
 
+        // ── Drive URL helper ─────────────────────────────────────────────────
+        /// <summary>
+        /// Returns the drive base URL configured in the empresa table, or empty string if not set.
+        /// </summary>
+        private static string GetImgBBKey()
+        {
+            try
+            {
+                using var conn = AbrirMysql();
+                using var cmd  = new MySqlCommand(
+                    "SELECT COALESCE(empImgBBKey,'') FROM empresa ORDER BY Codigo LIMIT 1", conn);
+                return cmd.ExecuteScalar()?.ToString() ?? "";
+            }
+            catch { return ""; }
+        }
+
+        /// <summary>
+        /// Uploads an image to ImgBB and returns the direct image URL.
+        /// API docs: https://api.imgbb.com/
+        /// </summary>
+        private static async Task<string> UploadImgBBAsync(string localPath, string apiKey)
+        {
+            var base64 = Convert.ToBase64String(System.IO.File.ReadAllBytes(localPath));
+            using var content = new FormUrlEncodedContent(new[]
+            {
+                new KeyValuePair<string,string>("key",   apiKey),
+                new KeyValuePair<string,string>("image", base64),
+                new KeyValuePair<string,string>("name",  System.IO.Path.GetFileNameWithoutExtension(localPath)),
+            });
+            var resp = await _http.PostAsync("https://api.imgbb.com/1/upload", content);
+            var body = await resp.Content.ReadAsStringAsync();
+            if (!resp.IsSuccessStatusCode)
+                throw new Exception($"ImgBB upload {resp.StatusCode}: {body}");
+            var j = JObject.Parse(body);
+            return j["data"]?["display_url"]?.ToString()
+                ?? j["data"]?["url"]?.ToString()
+                ?? throw new Exception("ImgBB: URL não encontrada na resposta.");
+        }
+
         private static string ConnStr =>
             ConfigurationManager.AppSettings["ConnectionString"]
             ?? "Server=localhost;Database=pedeai;User=root;Password=;Port=3306;CharSet=utf8mb4;SslMode=None;";
@@ -164,6 +203,11 @@ namespace Pedeai.DB
                     imagemUrl = r["grmeImagem_Url"]?.ToString() ?? "";
                 }
 
+                // Never send local file paths to Supabase
+                if (!string.IsNullOrWhiteSpace(imagemUrl) &&
+                    !imagemUrl.StartsWith("http", StringComparison.OrdinalIgnoreCase))
+                    imagemUrl = "";
+
                 // Only sync to Supabase if explicitly enabled for site
                 if (!habSite) return "";
 
@@ -181,7 +225,7 @@ namespace Pedeai.DB
                     }
                 }
 
-                var payload = new { nome, ordem, ativo, imagem_url = imagemUrl };
+                var payload = new { nome, ordem, ativo, url_da_imagem = imagemUrl };
 
                 if (!string.IsNullOrWhiteSpace(uuid))
                     await PatchAsync("grupo_mercadoria", $"id=eq.{uuid}", payload);
@@ -232,6 +276,11 @@ namespace Pedeai.DB
                     situacao    = r["Situacao"]?.ToString() ?? "A";
                 }
 
+                // Never send local file paths to Supabase
+                if (!string.IsNullOrWhiteSpace(imagemUrl) &&
+                    !imagemUrl.StartsWith("http", StringComparison.OrdinalIgnoreCase))
+                    imagemUrl = "";
+
                 string uuid = GetSupabaseUuid("mercadoria", "Codigo", codigoMercadoria);
 
                 if (!habSite || situacao != "A")
@@ -252,10 +301,10 @@ namespace Pedeai.DB
 
                 var payload = string.IsNullOrWhiteSpace(grupoUuid)
                     ? (object)new { nome, descricao, preco_venda = precoVenda, preco_promocional = precoPromo,
-                                    imagem_url = imagemUrl, ativo = true, destaque }
+                                    url_da_imagem = imagemUrl, ativo = true, destaque }
                     : (object)new { grupo_id = grupoUuid, nome, descricao,
                                     preco_venda = precoVenda, preco_promocional = precoPromo,
-                                    imagem_url = imagemUrl, ativo = true, destaque };
+                                    url_da_imagem = imagemUrl, ativo = true, destaque };
 
                 if (!string.IsNullOrWhiteSpace(uuid))
                     await PatchAsync("mercadoria", $"id=eq.{uuid}", payload);
@@ -318,7 +367,7 @@ namespace Pedeai.DB
         {
             try
             {
-                string descricao, situacao;
+                string descricao, situacao, imagemUrl;
                 decimal valor;
                 bool habSite, destaque;
 
@@ -326,7 +375,8 @@ namespace Pedeai.DB
                 using (var cmd  = new MySqlCommand(
                     "SELECT marDescricao, marValor, Situacao, " +
                     "COALESCE(marHabilitar_Site,0) AS marHabilitar_Site, " +
-                    "COALESCE(marDestaque,0) AS marDestaque " +
+                    "COALESCE(marDestaque,0) AS marDestaque, " +
+                    "COALESCE(marImagem_Url,'') AS marImagem_Url " +
                     "FROM marmita WHERE Codigo=@c LIMIT 1", conn))
                 {
                     cmd.Parameters.AddWithValue("@c", codigoMarmita);
@@ -337,7 +387,13 @@ namespace Pedeai.DB
                     situacao  = r["Situacao"]?.ToString() ?? "A";
                     habSite   = Convert.ToBoolean(r["marHabilitar_Site"]);
                     destaque  = Convert.ToBoolean(r["marDestaque"]);
+                    imagemUrl = r["marImagem_Url"]?.ToString() ?? "";
                 }
+
+                // Never send local file paths to Supabase
+                if (!string.IsNullOrWhiteSpace(imagemUrl) &&
+                    !imagemUrl.StartsWith("http", StringComparison.OrdinalIgnoreCase))
+                    imagemUrl = "";
 
                 string uuid = GetSupabaseUuid("marmita", "Codigo", codigoMarmita);
 
@@ -356,7 +412,7 @@ namespace Pedeai.DB
                     descricao         = "Marmita",
                     preco_venda       = valor,
                     preco_promocional = 0m,
-                    imagem_url        = "",
+                    url_da_imagem     = imagemUrl,
                     ativo             = true,
                     destaque
                 };
@@ -371,8 +427,7 @@ namespace Pedeai.DB
                         SaveSupabaseUuid("marmita", "Codigo", codigoMarmita, uuid);
                 }
 
-                // Sync the items that can be chosen for this marmita
-                await SincronizarItensMarmitaAsync(codigoMarmita);
+                // Items/complement groups are synced separately via SincronizarComplementosMarmitaAsync
                 return "";
             }
             catch (Exception ex)
@@ -395,7 +450,10 @@ namespace Pedeai.DB
                     while (r.Read()) codigos.Add(Convert.ToInt32(r["Codigo"]));
                 }
                 foreach (var cod in codigos)
+                {
                     await SincronizarMarmitaAsync(cod);
+                    await SincronizarComplementosMarmitaAsync(cod);
+                }
             }
             catch (Exception ex)
             {
@@ -648,17 +706,29 @@ namespace Pedeai.DB
             var result = new List<ItemPedidoWebSupabase>();
             try
             {
-                var arr = await GetAsync($"itens_pedido_web?pedido_id=eq.{pedidoId}");
+                // Try both common table names used by the website
+                JArray arr = null;
+                foreach (var tbl in new[] { "itens_pedido_web", "itens_pedido", "pedido_itens", "itens" })
+                {
+                    try
+                    {
+                        arr = await GetAsync($"{tbl}?pedido_id=eq.{pedidoId}");
+                        if (arr.Count > 0) break;
+                    }
+                    catch { }
+                }
+                if (arr == null) return result;
+
                 foreach (JObject item in arr)
                 {
                     result.Add(new ItemPedidoWebSupabase
                     {
                         Id            = item["id"]?.ToString()              ?? "",
                         PedidoId      = item["pedido_id"]?.ToString()       ?? "",
-                        MercadoriaId  = item["mercadoria_id"]?.ToString()   ?? "",
-                        Quantidade    = item["quantidade"]?.ToObject<decimal>()    ?? 1m,
-                        PrecoUnitario = item["preco_unitario"]?.ToObject<decimal>() ?? 0m,
-                        Observacao    = item["observacao"]?.ToString()      ?? "",
+                        MercadoriaId  = (item["mercadoria_id"] ?? item["produto_id"])?.ToString() ?? "",
+                        Quantidade    = (item["quantidade"] ?? item["qtde"])?.ToObject<decimal>()    ?? 1m,
+                        PrecoUnitario = (item["preco_unitario"] ?? item["preco"])?.ToObject<decimal>() ?? 0m,
+                        Observacao    = (item["observacao"] ?? item["obs"])?.ToString()      ?? "",
                     });
                 }
             }
@@ -677,24 +747,172 @@ namespace Pedeai.DB
                 var arr = await GetAsync($"cliente?id=eq.{clienteId}&limit=1");
                 if (arr.Count == 0) return null;
                 var item = (JObject)arr[0];
-                return new ClienteSupabase
-                {
-                    Id       = item["id"]?.ToString()        ?? "",
-                    Nome     = item["nome"]?.ToString()      ?? "",
-                    Telefone = item["telefone"]?.ToString()  ?? "",
-                    CpfCnpj  = item["cpf_cnpj"]?.ToString()  ?? "",
-                    Endereco = item["endereco"]?.ToString()  ?? "",
-                    Numero   = item["numero"]?.ToString()    ?? "",
-                    Bairro   = item["bairro"]?.ToString()    ?? "",
-                    Cidade   = item["cidade"]?.ToString()    ?? "",
-                    Cep      = item["cep"]?.ToString()       ?? "",
-                };
+                return MapearClienteSupabase(item);
             }
             catch (Exception ex)
             {
                 Logger.Log("SupabaseService", "BuscarClienteSupabaseAsync", "Erro", ex);
                 return null;
             }
+        }
+
+        private static ClienteSupabase MapearClienteSupabase(JObject item) => new ClienteSupabase
+        {
+            Id          = item["id"]?.ToString()           ?? "",
+            Nome        = item["nome"]?.ToString()         ?? "",
+            Telefone    = item["telefone"]?.ToString()     ?? "",
+            CpfCnpj     = item["cpf_cnpj"]?.ToString()    ?? "",
+            Endereco    = item["endereco"]?.ToString()     ?? "",
+            Numero      = item["numero"]?.ToString()       ?? "",
+            Complemento = item["complemento"]?.ToString() ?? "",
+            Bairro      = item["bairro"]?.ToString()       ?? "",
+            Cidade      = item["cidade"]?.ToString()       ?? "",
+            Uf          = (item["uf"] ?? item["estado"])?.ToString() ?? "",
+            Cep         = item["cep"]?.ToString()          ?? "",
+            Email       = item["email"]?.ToString()        ?? "",
+        };
+
+        /// <summary>Fetches all clients from Supabase and upserts them into local MySQL. Returns a diagnostic string.</summary>
+        public static async Task<string> ImportarClientesSupabaseAsync()
+        {
+            var sb = new System.Text.StringBuilder();
+            try
+            {
+                // Fetch all clients — paginate in batches of 1000
+                var todos = new List<JObject>();
+                int offset = 0;
+                while (true)
+                {
+                    var lote = await GetAsync($"cliente?order=nome.asc&limit=1000&offset={offset}");
+                    if (lote.Count == 0) break;
+                    foreach (JObject j in lote) todos.Add(j);
+                    if (lote.Count < 1000) break;
+                    offset += 1000;
+                }
+                sb.AppendLine($"Encontrados no Supabase: {todos.Count} cliente(s).");
+                int criados = 0, atualizados = 0, erros = 0;
+
+                foreach (JObject item in todos)
+                {
+                    try
+                    {
+                        var sc = MapearClienteSupabase(item);
+                        if (string.IsNullOrWhiteSpace(sc.Nome)) continue;
+
+                        string cpf = SanitizarDigitos(sc.CpfCnpj ?? "");
+                        string tel = SanitizarTelefone(sc.Telefone ?? "");
+                        string telMasked = FormatarTelefone(tel);
+                        string cpfMasked = FormatarCpf(cpf);
+                        string cep  = SanitizarDigitos(sc.Cep ?? "");
+
+                        using var conn = AbrirMysql();
+
+                        // Find existing by UUID, then CPF, then phone
+                        int existCod = 0;
+                        if (!string.IsNullOrWhiteSpace(sc.Id))
+                        {
+                            using var q = new MySqlCommand("SELECT Codigo FROM cliente WHERE supabase_uuid=@u LIMIT 1", conn);
+                            q.Parameters.AddWithValue("@u", sc.Id);
+                            var r0 = q.ExecuteScalar();
+                            if (r0 != null && r0 != DBNull.Value) existCod = Convert.ToInt32(r0);
+                        }
+                        if (existCod == 0 && !string.IsNullOrWhiteSpace(cpf) && cpf.Length >= 11)
+                        {
+                            using var q = new MySqlCommand(
+                                "SELECT Codigo FROM cliente WHERE " +
+                                "REPLACE(REPLACE(REPLACE(REPLACE(clieCPF_CNPJ_,'.',''),'-',''),'/',''),' ','')=@c AND Situacao='A' LIMIT 1", conn);
+                            q.Parameters.AddWithValue("@c", cpf);
+                            var r1 = q.ExecuteScalar();
+                            if (r1 != null && r1 != DBNull.Value) existCod = Convert.ToInt32(r1);
+                        }
+                        if (existCod == 0 && !string.IsNullOrWhiteSpace(tel) && tel.Length >= 8)
+                        {
+                            string tail = tel.Substring(tel.Length - 8);
+                            using var q = new MySqlCommand(
+                                "SELECT Codigo FROM cliente WHERE (" +
+                                "REPLACE(REPLACE(REPLACE(REPLACE(clieCelular,'(',''),')',''),'-',''),' ','') LIKE @t OR " +
+                                "REPLACE(REPLACE(REPLACE(REPLACE(clieTelefone,'(',''),')',''),'-',''),' ','') LIKE @t) " +
+                                "AND Situacao='A' LIMIT 1", conn);
+                            q.Parameters.AddWithValue("@t", "%" + tail);
+                            var r2 = q.ExecuteScalar();
+                            if (r2 != null && r2 != DBNull.Value) existCod = Convert.ToInt32(r2);
+                        }
+
+                        if (existCod > 0)
+                        {
+                            // Update existing record with Supabase data, filling any empty fields
+                            using var upd = new MySqlCommand(@"
+                                UPDATE cliente SET
+                                    clieNome_RazaoSocial = @nome,
+                                    clieCelular  = CASE WHEN COALESCE(clieCelular,'')='' THEN @cel ELSE clieCelular END,
+                                    clieTelefone = CASE WHEN COALESCE(clieTelefone,'')='' THEN @cel ELSE clieTelefone END,
+                                    clieCPF_CNPJ_= CASE WHEN COALESCE(clieCPF_CNPJ_,'')='' THEN @cpf ELSE clieCPF_CNPJ_ END,
+                                    clieEmail    = CASE WHEN COALESCE(clieEmail,'')='' THEN @email ELSE clieEmail END,
+                                    clieCEP      = CASE WHEN COALESCE(clieCEP,'')='' THEN @cep ELSE clieCEP END,
+                                    clieEndereco = CASE WHEN COALESCE(clieEndereco,'')='' THEN @end ELSE clieEndereco END,
+                                    clieNumero   = CASE WHEN COALESCE(clieNumero,'')='' THEN @num ELSE clieNumero END,
+                                    clieComplemento = CASE WHEN COALESCE(clieComplemento,'')='' THEN @comp ELSE clieComplemento END,
+                                    clieBairro   = CASE WHEN COALESCE(clieBairro,'')='' THEN @bairro ELSE clieBairro END,
+                                    clieCidade   = CASE WHEN COALESCE(clieCidade,'')='' THEN @cidade ELSE clieCidade END,
+                                    clieEstado   = CASE WHEN COALESCE(clieEstado,'')='' THEN @uf ELSE clieEstado END,
+                                    supabase_uuid= CASE WHEN COALESCE(supabase_uuid,'')='' THEN @uuid ELSE supabase_uuid END
+                                WHERE Codigo=@cod", conn);
+                            upd.Parameters.AddWithValue("@nome",   sc.Nome);
+                            upd.Parameters.AddWithValue("@cel",    telMasked);
+                            upd.Parameters.AddWithValue("@cpf",    cpfMasked);
+                            upd.Parameters.AddWithValue("@email",  sc.Email ?? "");
+                            upd.Parameters.AddWithValue("@cep",    cep);
+                            upd.Parameters.AddWithValue("@end",    sc.Endereco ?? "");
+                            upd.Parameters.AddWithValue("@num",    sc.Numero ?? "");
+                            upd.Parameters.AddWithValue("@comp",   sc.Complemento ?? "");
+                            upd.Parameters.AddWithValue("@bairro", sc.Bairro ?? "");
+                            upd.Parameters.AddWithValue("@cidade", sc.Cidade ?? "");
+                            upd.Parameters.AddWithValue("@uf",     sc.Uf ?? "");
+                            upd.Parameters.AddWithValue("@uuid",   sc.Id);
+                            upd.Parameters.AddWithValue("@cod",    existCod);
+                            upd.ExecuteNonQuery();
+                            atualizados++;
+                        }
+                        else
+                        {
+                            // Create new
+                            int nextCod = ProximoCodigo("cliente", conn);
+                            int nextAux = ProximoAuxCodigo("cliente", conn);
+                            using var ins = new MySqlCommand(@"
+                                INSERT INTO cliente
+                                (auxCodigo, Codigo, clieNome_RazaoSocial, clieCelular, clieTelefone,
+                                 clieCPF_CNPJ_, clieEmail, clieCEP, clieEndereco, clieNumero,
+                                 clieComplemento, clieBairro, clieCidade, clieEstado,
+                                 clieData_Cadastro, Situacao, Status_Transmissao, supabase_uuid)
+                                VALUES(@aux,@cod,@nome,@cel,@cel,@cpf,@email,@cep,@end,@num,
+                                       @comp,@bairro,@cidade,@uf,NOW(),'A','N',@uuid)", conn);
+                            ins.Parameters.AddWithValue("@aux",    nextAux);
+                            ins.Parameters.AddWithValue("@cod",    nextCod);
+                            ins.Parameters.AddWithValue("@nome",   sc.Nome);
+                            ins.Parameters.AddWithValue("@cel",    telMasked);
+                            ins.Parameters.AddWithValue("@cpf",    cpfMasked);
+                            ins.Parameters.AddWithValue("@email",  sc.Email ?? "");
+                            ins.Parameters.AddWithValue("@cep",    cep);
+                            ins.Parameters.AddWithValue("@end",    sc.Endereco ?? "");
+                            ins.Parameters.AddWithValue("@num",    sc.Numero ?? "");
+                            ins.Parameters.AddWithValue("@comp",   sc.Complemento ?? "");
+                            ins.Parameters.AddWithValue("@bairro", sc.Bairro ?? "");
+                            ins.Parameters.AddWithValue("@cidade", sc.Cidade ?? "");
+                            ins.Parameters.AddWithValue("@uf",     sc.Uf ?? "");
+                            ins.Parameters.AddWithValue("@uuid",   sc.Id);
+                            ins.ExecuteNonQuery();
+                            criados++;
+                        }
+                    }
+                    catch (Exception ex2) { erros++; Logger.Log("SupabaseService","ImportarClientesSupabaseAsync","Erro cliente",ex2); }
+                }
+                sb.AppendLine($"Criados: {criados} | Atualizados: {atualizados} | Erros: {erros}");
+            }
+            catch (Exception ex)
+            {
+                sb.AppendLine($"ERRO GERAL: {ex.Message}");
+            }
+            return sb.ToString();
         }
 
         public static async Task AtualizarStatusPedidoWebAsync(string supabaseId, string status)
@@ -709,19 +927,55 @@ namespace Pedeai.DB
             }
         }
 
-        /// <summary>Importa um pedido web do Supabase para o MySQL local.</summary>
+        /// <summary>Manual pull: returns diagnostic message showing how many were imported and any errors.</summary>
+        public static async Task<string> ImportarPedidosManuaisAsync()
+        {
+            var sb = new StringBuilder();
+            try
+            {
+                var pedidos = await BuscarPedidosPendentesAsync();
+                sb.AppendLine($"Encontrados no Supabase: {pedidos.Count} pedido(s) pendente(s).");
+                int ok = 0, erros = 0;
+                foreach (var p in pedidos)
+                {
+                    var itens = await BuscarItensPedidoAsync(p.Id);
+                    sb.AppendLine($"  Pedido {p.Id[..8]}... | status={p.Status} | itens={itens.Count}");
+                    var erro = await ImportarPedidoAsync(p);
+                    if (string.IsNullOrEmpty(erro))
+                    {
+                        ok++;
+                        await AtualizarStatusPedidoWebAsync(p.Id, "recebido");
+                    }
+                    else
+                    {
+                        erros++;
+                        sb.AppendLine($"    ERRO: {erro}");
+                    }
+                }
+                sb.AppendLine($"\nImportados: {ok} | Erros: {erros}");
+            }
+            catch (Exception ex)
+            {
+                sb.AppendLine($"ERRO GERAL: {ex.Message}");
+            }
+            return sb.ToString();
+        }
         public static async Task<string> ImportarPedidoAsync(PedidoWebSupabase supaPedido)
         {
             try
             {
-                // Check if already imported
+                // Check if already imported — if so, ensure Supabase status is updated and return
                 using (var conn = AbrirMysql())
                 using (var chk  = new MySqlCommand(
                     "SELECT COUNT(*) FROM pedido_web WHERE pediSupabase_Id=@sid", conn))
                 {
                     chk.Parameters.AddWithValue("@sid", supaPedido.Id);
                     if (Convert.ToInt32(chk.ExecuteScalar()) > 0)
+                    {
+                        // Ensure Supabase status is "recebido" so it stops appearing in polls
+                        try { await AtualizarStatusPedidoWebAsync(supaPedido.Id, "recebido"); } catch { }
                         return ""; // already imported
+                    }
                 }
 
                 // Fetch items and client
@@ -763,10 +1017,10 @@ namespace Pedeai.DB
                      pediSituacao, pediTipo_Entrega, pediForma_Pagamento, pediOrigem,
                      pediSubtotal, pediTaxa_Entrega, pediDesconto, pediValor_Total,
                      pediTroco_Para, pediEndereco_Entrega, pediObservacoes,
-                     pediData_Lancamento, Codigo_Cliente, pediSupabase_Id, Situacao, Info)
+                     pediData_Lancamento, Codigo_Cliente, pediSupabase_Id, Situacao)
                     VALUES(@aux, @cod, @num, @nomeCli, @tel, 0, @tipoEnt, @formaPag, 0,
                            @sub, @taxa, @desc, @total, @troco, @end, '',
-                           @dtLanc, @codCli, @supId, 'A', '')";
+                           @dtLanc, @codCli, @supId, 'A')";
 
                 using (var cmdP = new MySqlCommand(sqlP, connM, trans))
                 {
@@ -781,8 +1035,7 @@ namespace Pedeai.DB
                     cmdP.Parameters.AddWithValue("@taxa",   supaPedido.TaxaEntrega);
                     cmdP.Parameters.AddWithValue("@desc",   supaPedido.Desconto);
                     cmdP.Parameters.AddWithValue("@total",  supaPedido.Total);
-                    cmdP.Parameters.AddWithValue("@troco",  supaPedido.Troco.HasValue
-                        ? (object)supaPedido.Troco.Value : DBNull.Value);
+                    cmdP.Parameters.AddWithValue("@troco",  (object)(supaPedido.Troco ?? 0m));
                     cmdP.Parameters.AddWithValue("@end",    supaPedido.EnderecoEntrega ?? "");
                     cmdP.Parameters.AddWithValue("@dtLanc", supaPedido.CreatedAt);
                     cmdP.Parameters.AddWithValue("@codCli", codigoClienteLocal > 0
@@ -805,8 +1058,8 @@ namespace Pedeai.DB
                         INSERT INTO itens_pedido_web
                         (auxCodigo, Codigo, Codigo_Pedido, Codigo_Mercadoria, itpwNome_Mercadoria,
                          itpwQtde, itpwPreco_Unitario, itpwSubtotal, itpwObservacoes,
-                         itpwDesconto_Pct, Situacao, Info)
-                        VALUES(@aux, @cod, @pedCod, @merc, @nome, @qtde, @pu, @sub, @obs, 0, 'A', '')",
+                         itpwDesconto_Pct, Situacao)
+                        VALUES(@aux, @cod, @pedCod, @merc, @nome, @qtde, @pu, @sub, @obs, 0, 'A')",
                         connM, trans);
                     cmdI.Parameters.AddWithValue("@aux",    iAux);
                     cmdI.Parameters.AddWithValue("@cod",    iCod);
@@ -818,6 +1071,18 @@ namespace Pedeai.DB
                     cmdI.Parameters.AddWithValue("@sub",    subtotalItem);
                     cmdI.Parameters.AddWithValue("@obs",    it.Observacao ?? "");
                     cmdI.ExecuteNonQuery();
+
+                    // Decrement stock if product controls stock
+                    if (codMerc > 0)
+                    {
+                        using var cmdEst = new MySqlCommand(
+                            "UPDATE mercadoria SET mercEstoque_Atual = mercEstoque_Atual - @qtde " +
+                            "WHERE Codigo=@c AND mercControla_Estoque=1 AND mercEstoque_Atual > 0",
+                            connM, trans);
+                        cmdEst.Parameters.AddWithValue("@qtde", it.Quantidade);
+                        cmdEst.Parameters.AddWithValue("@c",    codMerc);
+                        cmdEst.ExecuteNonQuery();
+                    }
                 }
 
                 trans.Commit();
@@ -825,6 +1090,26 @@ namespace Pedeai.DB
                 // Register coupon usage if order had a coupon
                 if (!string.IsNullOrWhiteSpace(supaPedido.CupomId))
                     RegistrarUsoCupomLocal(supaPedido.CupomId);
+
+                // Send WhatsApp confirmation to client
+                string telWpp = supaCliente?.Telefone ?? supaPedido.EnderecoEntrega ?? "";
+                if (string.IsNullOrWhiteSpace(telWpp))
+                {
+                    // Try to load from local DB
+                    try
+                    {
+                        using var cW = AbrirMysql();
+                        using var cCmd = new MySqlCommand(
+                            "SELECT COALESCE(clieCelular,'') FROM cliente WHERE Codigo=@c LIMIT 1", cW);
+                        cCmd.Parameters.AddWithValue("@c", codigoClienteLocal);
+                        telWpp = cCmd.ExecuteScalar()?.ToString() ?? "";
+                    }
+                    catch { }
+                }
+                string nomeWpp   = supaCliente?.Nome ?? "Cliente";
+                string numeroWpp = numero;
+                decimal totalWpp = supaPedido.Total;
+                BLL.WhatsAppService.NotificarPedidoWebRecebido(telWpp, nomeWpp, numeroWpp, totalWpp);
 
                 return "";
             }
@@ -841,12 +1126,29 @@ namespace Pedeai.DB
         {
             try
             {
-                string cpf = SanitizarDigitos(supaCliente.CpfCnpj?.ToString() ?? "");
-                string tel = SanitizarTelefone(supaCliente.Telefone?.ToString() ?? "");
+                string cpf      = SanitizarDigitos(supaCliente.CpfCnpj?.ToString() ?? "");
+                string tel      = SanitizarTelefone(supaCliente.Telefone?.ToString() ?? "");
+                string supaUuid = supaCliente.Id ?? "";
+                string nome     = supaCliente.Nome?.Trim() ?? "";
 
                 using var conn = AbrirMysql();
 
-                // Search by CPF (compare digits-only to handle masks in DB)
+                // ── 1. Search by Supabase UUID (fastest — exact match) ─────
+                if (!string.IsNullOrWhiteSpace(supaUuid))
+                {
+                    using var chkU = new MySqlCommand(
+                        "SELECT Codigo FROM cliente WHERE supabase_uuid=@u AND Situacao='A' LIMIT 1", conn);
+                    chkU.Parameters.AddWithValue("@u", supaUuid);
+                    var existU = chkU.ExecuteScalar();
+                    if (existU != null && existU != DBNull.Value)
+                    {
+                        int cod = Convert.ToInt32(existU);
+                        TentarAtualizarEnderecoCliente(conn, cod, supaCliente, enderecoEntrega);
+                        return cod;
+                    }
+                }
+
+                // ── 2. Search by CPF (digits-only) ────────────────────────
                 if (!string.IsNullOrWhiteSpace(cpf) && cpf.Length >= 11)
                 {
                     using var chk = new MySqlCommand(
@@ -858,38 +1160,68 @@ namespace Pedeai.DB
                     if (existing != null && existing != DBNull.Value)
                     {
                         int cod = Convert.ToInt32(existing);
+                        // Save UUID so future lookups use path 1
+                        if (!string.IsNullOrWhiteSpace(supaUuid))
+                            SalvarUuidCliente(conn, cod, supaUuid);
                         TentarAtualizarEnderecoCliente(conn, cod, supaCliente, enderecoEntrega);
                         return cod;
                     }
                 }
 
-                // Search by phone (digits-only)
-                if (!string.IsNullOrWhiteSpace(tel))
+                // ── 3. Search by phone (last 8 digits) ────────────────────
+                if (!string.IsNullOrWhiteSpace(tel) && tel.Length >= 8)
                 {
+                    string tail = tel.Substring(tel.Length - 8);
                     using var chk2 = new MySqlCommand(
                         "SELECT Codigo FROM cliente WHERE (" +
-                        "REPLACE(REPLACE(clieCelular,'(',''),')','') LIKE @telPct OR " +
-                        "REPLACE(REPLACE(clieTelefone,'(',''),')','') LIKE @telPct) " +
+                        "REPLACE(REPLACE(REPLACE(REPLACE(clieCelular,'(',''),')',''),'-',''),' ','') LIKE @t OR " +
+                        "REPLACE(REPLACE(REPLACE(REPLACE(clieTelefone,'(',''),')',''),'-',''),' ','') LIKE @t) " +
                         "AND Situacao='A' LIMIT 1", conn);
-                    chk2.Parameters.AddWithValue("@telPct", "%" + tel.Substring(Math.Max(0, tel.Length - 8)));
+                    chk2.Parameters.AddWithValue("@t", "%" + tail);
                     var existing2 = chk2.ExecuteScalar();
                     if (existing2 != null && existing2 != DBNull.Value)
                     {
                         int cod2 = Convert.ToInt32(existing2);
+                        if (!string.IsNullOrWhiteSpace(supaUuid))
+                            SalvarUuidCliente(conn, cod2, supaUuid);
                         TentarAtualizarEnderecoCliente(conn, cod2, supaCliente, enderecoEntrega);
                         return cod2;
                     }
                 }
 
-                // Create new client — store with masks + address
+                // ── 4. Search by name + phone (no-CPF fallback) ───────────
+                if (!string.IsNullOrWhiteSpace(nome) && !string.IsNullOrWhiteSpace(tel) && tel.Length >= 8)
+                {
+                    string tail4 = tel.Substring(tel.Length - 8);
+                    using var chk3 = new MySqlCommand(
+                        "SELECT Codigo FROM cliente WHERE " +
+                        "clieNome_RazaoSocial=@nome AND (" +
+                        "REPLACE(REPLACE(REPLACE(REPLACE(clieCelular,'(',''),')',''),'-',''),' ','') LIKE @t OR " +
+                        "REPLACE(REPLACE(REPLACE(REPLACE(clieTelefone,'(',''),')',''),'-',''),' ','') LIKE @t) " +
+                        "AND Situacao='A' LIMIT 1", conn);
+                    chk3.Parameters.AddWithValue("@nome", nome);
+                    chk3.Parameters.AddWithValue("@t",    "%" + tail4);
+                    var existing3 = chk3.ExecuteScalar();
+                    if (existing3 != null && existing3 != DBNull.Value)
+                    {
+                        int cod3 = Convert.ToInt32(existing3);
+                        if (!string.IsNullOrWhiteSpace(supaUuid))
+                            SalvarUuidCliente(conn, cod3, supaUuid);
+                        TentarAtualizarEnderecoCliente(conn, cod3, supaCliente, enderecoEntrega);
+                        return cod3;
+                    }
+                }
+
+                // ── 5. Create new client ──────────────────────────────────
                 int nextCod = ProximoCodigo("cliente", conn);
                 int nextAux = ProximoAuxCodigo("cliente", conn);
                 string cpfMasked = FormatarCpf(cpf);
                 string telMasked = FormatarTelefone(tel);
 
-                // Determine address to save: prefer supaCliente fields, fallback parse enderecoEntrega
                 string rua = supaCliente.Endereco, numero = supaCliente.Numero,
+                       complemento = supaCliente.Complemento,
                        bairro = supaCliente.Bairro, cidade = supaCliente.Cidade,
+                       uf = supaCliente.Uf,
                        cep = SanitizarDigitos(supaCliente.Cep ?? "");
                 if (string.IsNullOrWhiteSpace(rua) && !string.IsNullOrWhiteSpace(enderecoEntrega))
                     (rua, numero, bairro, cidade) = ParseEndereco(enderecoEntrega);
@@ -897,21 +1229,31 @@ namespace Pedeai.DB
                 using var ins = new MySqlCommand(@"
                     INSERT INTO cliente
                     (auxCodigo, Codigo, clieNome_RazaoSocial, clieCelular, clieTelefone,
-                     clieCPF_CNPJ_, clieCEP, clieEndereco, clieNumero, clieBairro, clieCidade,
-                     clieData_Cadastro, Situacao, Status_Transmissao, Info)
-                    VALUES(@aux, @cod, @nome, @cel, @tel, @cpf, @cep, @end, @num, @bairro, @cidade, NOW(), 'A', 'N', '')", conn);
+                     clieCPF_CNPJ_, clieEmail, clieCEP, clieEndereco, clieNumero,
+                     clieComplemento, clieBairro, clieCidade, clieEstado,
+                     clieData_Cadastro, Situacao, Status_Transmissao, supabase_uuid)
+                    VALUES(@aux, @cod, @nome, @cel, @tel, @cpf, @email, @cep, @end, @num,
+                           @comp, @bairro, @cidade, @uf, NOW(), 'A', 'N', @uuid)", conn);
                 ins.Parameters.AddWithValue("@aux",    nextAux);
                 ins.Parameters.AddWithValue("@cod",    nextCod);
-                ins.Parameters.AddWithValue("@nome",   supaCliente.Nome ?? "Cliente Web");
+                ins.Parameters.AddWithValue("@nome",   nome.Length > 0 ? nome : "Cliente Web");
                 ins.Parameters.AddWithValue("@cel",    telMasked);
                 ins.Parameters.AddWithValue("@tel",    telMasked);
                 ins.Parameters.AddWithValue("@cpf",    cpfMasked);
+                ins.Parameters.AddWithValue("@email",  supaCliente.Email ?? "");
                 ins.Parameters.AddWithValue("@cep",    cep);
                 ins.Parameters.AddWithValue("@end",    rua ?? "");
                 ins.Parameters.AddWithValue("@num",    numero ?? "");
+                ins.Parameters.AddWithValue("@comp",   complemento ?? "");
                 ins.Parameters.AddWithValue("@bairro", bairro ?? "");
                 ins.Parameters.AddWithValue("@cidade", cidade ?? "");
+                ins.Parameters.AddWithValue("@uf",     uf ?? "");
+                ins.Parameters.AddWithValue("@uuid",   supaUuid);
                 ins.ExecuteNonQuery();
+
+                // Send WhatsApp welcome message for new web client
+                BLL.WhatsAppService.NotificarNovoCadastroWeb(tel, nome.Length > 0 ? nome : "Cliente");
+
                 return nextCod;
             }
             catch (Exception ex)
@@ -919,6 +1261,19 @@ namespace Pedeai.DB
                 Logger.Log("SupabaseService", "BuscarOuCriarClienteLocal", "Erro", ex);
                 return 0;
             }
+        }
+
+        private static void SalvarUuidCliente(MySqlConnection conn, int codigo, string uuid)
+        {
+            try
+            {
+                using var cmd = new MySqlCommand(
+                    "UPDATE cliente SET supabase_uuid=@u WHERE Codigo=@c AND (supabase_uuid IS NULL OR supabase_uuid='')", conn);
+                cmd.Parameters.AddWithValue("@u", uuid);
+                cmd.Parameters.AddWithValue("@c", codigo);
+                cmd.ExecuteNonQuery();
+            }
+            catch { }
         }
 
         private static void TentarAtualizarEnderecoCliente(
@@ -934,7 +1289,9 @@ namespace Pedeai.DB
                 if (!string.IsNullOrWhiteSpace(existingEnd)) return; // already has address
 
                 string rua = supaCliente.Endereco, numero = supaCliente.Numero,
+                       complemento = supaCliente.Complemento,
                        bairro = supaCliente.Bairro, cidade = supaCliente.Cidade,
+                       uf = supaCliente.Uf,
                        cep = SanitizarDigitos(supaCliente.Cep ?? "");
                 if (string.IsNullOrWhiteSpace(rua) && !string.IsNullOrWhiteSpace(enderecoEntrega))
                     (rua, numero, bairro, cidade) = ParseEndereco(enderecoEntrega);
@@ -942,12 +1299,15 @@ namespace Pedeai.DB
 
                 using var upd = new MySqlCommand(@"
                     UPDATE cliente SET clieEndereco=@end, clieNumero=@num,
-                        clieBairro=@bairro, clieCidade=@cidade, clieCEP=@cep
+                        clieComplemento=@comp, clieBairro=@bairro, clieCidade=@cidade,
+                        clieEstado=@uf, clieCEP=@cep
                     WHERE Codigo=@c", conn);
                 upd.Parameters.AddWithValue("@end",    rua);
                 upd.Parameters.AddWithValue("@num",    numero ?? "");
+                upd.Parameters.AddWithValue("@comp",   complemento ?? "");
                 upd.Parameters.AddWithValue("@bairro", bairro ?? "");
                 upd.Parameters.AddWithValue("@cidade", cidade ?? "");
+                upd.Parameters.AddWithValue("@uf",     uf ?? "");
                 upd.Parameters.AddWithValue("@cep",    cep);
                 upd.Parameters.AddWithValue("@c",      codigoCli);
                 upd.ExecuteNonQuery();
@@ -1062,11 +1422,12 @@ namespace Pedeai.DB
         {
             try
             {
-                string nome, celular, cpf, cep, endereco, numero, bairro, cidade;
+                string nome, celular, cpf, cep, endereco, numero, complemento, bairro, cidade, uf, email;
                 using (var conn = AbrirMysql())
                 using (var cmd  = new MySqlCommand(
                     "SELECT clieNome_RazaoSocial, clieCelular, clieTelefone, clieCPF_CNPJ_, " +
-                    "clieCEP, clieEndereco, clieNumero, clieBairro, clieCidade, Situacao " +
+                    "clieCEP, clieEndereco, clieNumero, clieComplemento, clieBairro, clieCidade, " +
+                    "COALESCE(clieEstado,'') AS clieEstado, COALESCE(clieEmail,'') AS clieEmail, Situacao " +
                     "FROM cliente WHERE Codigo=@c LIMIT 1", conn))
                 {
                     cmd.Parameters.AddWithValue("@c", codigoCliente);
@@ -1079,55 +1440,115 @@ namespace Pedeai.DB
                     celular  = SanitizarDigitos(string.IsNullOrWhiteSpace(cel) ? tel : cel);
                     cpf      = SanitizarDigitos(r["clieCPF_CNPJ_"]?.ToString() ?? "");
                     cep      = SanitizarDigitos(r["clieCEP"]?.ToString() ?? "");
-                    endereco = r["clieEndereco"]?.ToString() ?? "";
-                    numero   = r["clieNumero"]?.ToString() ?? "";
+                    endereco    = r["clieEndereco"]?.ToString() ?? "";
+                    numero      = r["clieNumero"]?.ToString() ?? "";
+                    complemento = r["clieComplemento"]?.ToString() ?? "";
                     bairro   = r["clieBairro"]?.ToString() ?? "";
                     cidade   = r["clieCidade"]?.ToString() ?? "";
+                    uf       = r["clieEstado"]?.ToString() ?? "";
+                    email    = r["clieEmail"]?.ToString() ?? "";
                 }
 
                 if (string.IsNullOrWhiteSpace(nome)) return "";
 
                 string uuid = GetSupabaseUuid("cliente", "Codigo", codigoCliente);
 
-                // Search Supabase by phone to avoid duplicates
-                if (string.IsNullOrWhiteSpace(uuid) && !string.IsNullOrWhiteSpace(celular))
+                // Search Supabase for existing record to avoid duplicates
+                if (string.IsNullOrWhiteSpace(uuid))
                 {
-                    if (long.TryParse(celular, out long telNum))
+                    // 1. By CPF as string (preserves leading zeros)
+                    if (!string.IsNullOrWhiteSpace(cpf) && cpf.Length >= 11)
                     {
-                        var existing = await GetAsync($"cliente?telefone=eq.{telNum}&limit=1");
-                        if (existing.Count > 0)
+                        var byCpf = await GetAsync($"cliente?cpf_cnpj=eq.{cpf}&limit=1");
+                        if (byCpf.Count > 0)
                         {
-                            uuid = existing[0]["id"]?.ToString() ?? "";
+                            uuid = byCpf[0]["id"]?.ToString() ?? "";
                             if (!string.IsNullOrWhiteSpace(uuid))
                                 SaveSupabaseUuid("cliente", "Codigo", codigoCliente, uuid);
+                        }
+                    }
+                    // 2. By phone
+                    if (string.IsNullOrWhiteSpace(uuid) && !string.IsNullOrWhiteSpace(celular))
+                    {
+                        if (long.TryParse(celular, out long telNum2))
+                        {
+                            var byTel = await GetAsync($"cliente?telefone=eq.{telNum2}&limit=1");
+                            if (byTel.Count > 0)
+                            {
+                                uuid = byTel[0]["id"]?.ToString() ?? "";
+                                if (!string.IsNullOrWhiteSpace(uuid))
+                                    SaveSupabaseUuid("cliente", "Codigo", codigoCliente, uuid);
+                            }
                         }
                     }
                 }
 
                 long telLong = long.TryParse(celular, out var tl) ? tl : 0;
-                long cpfLong = long.TryParse(cpf,     out var cl) ? cl : 0;
+
+                // Build formatted address string for endereco_padrao
+                string enderecoFormatado = endereco;
+                if (!string.IsNullOrWhiteSpace(numero))      enderecoFormatado += $", {numero}";
+                if (!string.IsNullOrWhiteSpace(complemento)) enderecoFormatado += $" - {complemento}";
+                if (!string.IsNullOrWhiteSpace(bairro))      enderecoFormatado += $", {bairro}";
+                if (!string.IsNullOrWhiteSpace(cidade))      enderecoFormatado += $" - {cidade}";
+
+                long cpfLong = long.TryParse(cpf, out var cl) ? cl : 0;
 
                 var payload = new
                 {
                     nome,
-                    telefone = telLong,
-                    cpf_cnpj = cpfLong > 0 ? (object)cpfLong : null,
-                    cep,
-                    endereco,
-                    numero,
-                    bairro,
-                    cidade,
+                    telefone         = telLong,
+                    cpf_cnpj         = cpfLong > 0 ? (object)cpfLong : null,
+                    endereco_padrao  = enderecoFormatado,
                 };
 
                 if (!string.IsNullOrWhiteSpace(uuid))
                     await PatchAsync("cliente", $"id=eq.{uuid}", payload);
                 else
                 {
-                    var result = await PostAsync("cliente", payload);
+                    var fullPayload = new
+                    {
+                        nome,
+                        telefone         = telLong,
+                        cpf_cnpj         = cpfLong > 0 ? (object)cpfLong : null,
+                        endereco_padrao  = enderecoFormatado,
+                    };
+                    var result = await PostAsync("cliente", fullPayload);
                     uuid = result?["id"]?.ToString() ?? "";
                     if (!string.IsNullOrWhiteSpace(uuid))
                         SaveSupabaseUuid("cliente", "Codigo", codigoCliente, uuid);
                 }
+
+                // Sync address to enderecos_salvo (upsert by whatsapp + endereco + bairro)
+                if (!string.IsNullOrWhiteSpace(celular) && !string.IsNullOrWhiteSpace(endereco))
+                {
+                    try
+                    {
+                        var byAddr = await GetAsync(
+                            $"enderecos_salvo?whatsapp=eq.{celular}&endereco=eq.{Uri.EscapeDataString(endereco)}&bairro=eq.{Uri.EscapeDataString(bairro)}&limit=1");
+                        var addrPayload = new
+                        {
+                            whatsapp    = celular,
+                            endereco,
+                            bairro,
+                            numero,
+                            complemento,
+                            cidade,
+                        };
+                        if (byAddr.Count > 0)
+                        {
+                            string addrId = byAddr[0]["id"]?.ToString() ?? "";
+                            if (!string.IsNullOrWhiteSpace(addrId))
+                                await PatchAsync("enderecos_salvo", $"id=eq.{addrId}", addrPayload);
+                        }
+                        else
+                        {
+                            await PostAsync("enderecos_salvo", addrPayload);
+                        }
+                    }
+                    catch { } // non-critical
+                }
+
                 return "";
             }
             catch (Exception ex)
@@ -1167,12 +1588,13 @@ namespace Pedeai.DB
                 string marmitaUuid = GetSupabaseUuid("marmita", "Codigo", codigoMarmita);
                 if (string.IsNullOrWhiteSpace(marmitaUuid)) return; // marmita not synced yet
 
-                // Load marmita items with their product's supabase_uuid
-                var itens = new List<(string nome, string mercUuid, int ordem)>();
+                // Load marmita items with their product's supabase_uuid and price
+                var itens = new List<(string nome, string mercUuid, decimal preco, int ordem)>();
                 using (var conn = AbrirMysql())
                 using (var cmd  = new MySqlCommand(@"
                     SELECT mi.maritmNome,
-                           COALESCE(m.supabase_uuid,'') AS mercUuid
+                           COALESCE(m.supabase_uuid,'') AS mercUuid,
+                           COALESCE(m.mercValorVenda, 0) AS preco
                     FROM marmita_item mi
                     LEFT JOIN mercadoria m ON m.Codigo = mi.maritmCodigo_Merc
                     WHERE mi.Codigo_Marmita = @c
@@ -1182,29 +1604,134 @@ namespace Pedeai.DB
                     using var r = cmd.ExecuteReader();
                     int ordem = 0;
                     while (r.Read())
-                        itens.Add((r["maritmNome"]?.ToString() ?? "", r["mercUuid"]?.ToString() ?? "", ordem++));
+                        itens.Add((
+                            r["maritmNome"]?.ToString() ?? "",
+                            r["mercUuid"]?.ToString() ?? "",
+                            r["preco"] == DBNull.Value ? 0m : Convert.ToDecimal(r["preco"]),
+                            ordem++));
                 }
 
-                // Delete existing items for this marmita in Supabase
-                try { await DeleteAsync("marmita_item", $"marmita_id=eq.{marmitaUuid}"); } catch { }
+                // Delete existing adicionais for this marmita in Supabase
+                try { await DeleteAsync("adicionais", $"mercadoria_id=eq.{marmitaUuid}"); } catch { }
 
-                // Insert new items
-                foreach (var (nome, mercUuid, ordem) in itens)
+                // Insert new items into adicionais table
+                foreach (var (nome, mercUuid, preco, ordem) in itens)
                 {
                     var payload = new
                     {
-                        marmita_id    = marmitaUuid,
-                        mercadoria_id = string.IsNullOrWhiteSpace(mercUuid) ? null : (string)mercUuid,
+                        mercadoria_id = marmitaUuid,  // parent marmita UUID
                         nome,
-                        ordem,
-                        ativo = true
+                        preco,
+                        opcional = false,
+                        ativo    = true,
+                        ordem
                     };
-                    try { await PostAsync("marmita_item", payload); } catch { }
+                    try { await PostAsync("adicionais", payload); } catch { }
                 }
             }
             catch (Exception ex)
             {
                 Logger.Log("SupabaseService", "SincronizarItensMarmitaAsync", $"Erro marmita {codigoMarmita}", ex);
+            }
+        }
+
+        /// <summary>
+        /// Syncs the marmita's complement groups to the Supabase 'adicionais' table.
+        /// Each group link from marmita_complemento_grupo is posted as optional=false.
+        /// This replaces SincronizarItensMarmitaAsync when complement groups are configured.
+        /// </summary>
+        public static async Task SincronizarComplementosMarmitaAsync(int codigoMarmita)
+        {
+            try
+            {
+                string marmitaUuid = GetSupabaseUuid("marmita", "Codigo", codigoMarmita);
+                if (string.IsNullOrWhiteSpace(marmitaUuid)) return;
+
+                // Read complement groups from MySQL
+                var grupos = new List<string>();
+                using (var conn = AbrirMysql())
+                {
+                    using var cmd = new MySqlCommand(
+                        "SELECT COALESCE(gm.grmeDescricao_, mcg.grmeDescricao, '') AS nome " +
+                        "FROM marmita_complemento_grupo mcg " +
+                        "LEFT JOIN grupo_mercadoria gm ON gm.Codigo = mcg.Codigo_Grupo " +
+                        "WHERE mcg.Codigo_Marmita = @c ORDER BY mcg.Codigo", conn);
+                    cmd.Parameters.AddWithValue("@c", codigoMarmita);
+                    using var dr = cmd.ExecuteReader();
+                    while (dr.Read())
+                    {
+                        var nome = dr.GetString(0);
+                        if (!string.IsNullOrWhiteSpace(nome))
+                            grupos.Add(nome);
+                    }
+                }
+
+                // If no complement groups configured, fall back to sync individual items
+                if (grupos.Count == 0)
+                {
+                    await SincronizarItensMarmitaAsync(codigoMarmita);
+                    return;
+                }
+
+                // Delete all existing adicionais for this marmita, then re-insert as groups
+                try { await DeleteAsync("adicionais", $"mercadoria_id=eq.{marmitaUuid}"); } catch { }
+
+                int ordem = 0;
+                foreach (var nome in grupos)
+                {
+                    var payload = new
+                    {
+                        mercadoria_id = marmitaUuid,
+                        nome,
+                        preco    = 0m,
+                        opcional = false,
+                        ativo    = true,
+                        ordem    = ordem++
+                    };
+                    try { await PostAsync("adicionais", payload); } catch { }
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.Log("SupabaseService", "SincronizarComplementosMarmitaAsync",
+                    $"Erro marmita {codigoMarmita}", ex);
+            }
+        }
+
+        /// <summary>
+        /// Syncs Adicionais and Complementos group links to Supabase.
+        /// adicionais (opcional=true) and complementos (opcional=false) are posted to the 'adicionais' table
+        /// keyed by the product's mercadoria_id, using the grupo_mercadoria name.
+        /// </summary>
+        public static async Task SincronizarVinculosGrupoAsync(
+            int codigoMercadoria,
+            IEnumerable<(int CodigoGrupo, string NomeGrupo)> adicionais,
+            IEnumerable<(int CodigoGrupo, string NomeGrupo)> complementos)
+        {
+            try
+            {
+                string mercUuid = GetSupabaseUuid("mercadoria", "Codigo", codigoMercadoria);
+                if (string.IsNullOrWhiteSpace(mercUuid)) return;
+
+                // Delete all existing adicionais/complementos-type records for this product
+                // Use filter: mercadoria_id=eq.{uuid}&tipo fields not present; rely on deleting all and re-inserting
+                try { await DeleteAsync("adicionais", $"mercadoria_id=eq.{mercUuid}"); } catch { }
+
+                int ordem = 0;
+                foreach (var (codGrupo, nome) in adicionais)
+                {
+                    var payload = new { mercadoria_id = mercUuid, nome, preco = 0m, opcional = true,  ativo = true, ordem = ordem++ };
+                    try { await PostAsync("adicionais", payload); } catch { }
+                }
+                foreach (var (codGrupo, nome) in complementos)
+                {
+                    var payload = new { mercadoria_id = mercUuid, nome, preco = 0m, opcional = false, ativo = true, ordem = ordem++ };
+                    try { await PostAsync("adicionais", payload); } catch { }
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.Log("SupabaseService", "SincronizarVinculosGrupoAsync", $"Erro produto {codigoMercadoria}", ex);
             }
         }
 
@@ -1280,6 +1807,7 @@ namespace Pedeai.DB
                 await SincronizarTodosGruposAsync();
                 await SincronizarTodosProdutosAsync();
                 await SincronizarTodasMarmitasAsync();
+                await SincronizarTodasImagensAsync();   // push any HTTP URLs still missing in Supabase
                 await SincronizarTodosCuponsAsync();
                 await SincronizarTodosBairrosAsync();
                 await SincronizarTodosClientesAsync();
@@ -1287,6 +1815,66 @@ namespace Pedeai.DB
             catch (Exception ex)
             {
                 Logger.Log("SupabaseService", "SincronizarTudoAsync", "Erro", ex);
+            }
+        }
+
+        /// <summary>
+        /// Force-patches url_da_imagem in Supabase for every local record that already has
+        /// a valid HTTP URL in MySQL but whose Supabase row still has an empty / stale URL.
+        /// Safe to call repeatedly — uses PATCH so it only updates the image column.
+        /// </summary>
+        public static async Task SincronizarTodasImagensAsync()
+        {
+            try
+            {
+                // ── Produtos (mercadoria MySQL → mercadoria Supabase) ──────────────
+                var rows = new List<(string uuid, string url)>();
+                using (var conn = AbrirMysql())
+                using (var cmd = new MySqlCommand(
+                    "SELECT supabase_uuid, mercImagem_Url FROM mercadoria " +
+                    "WHERE supabase_uuid IS NOT NULL AND supabase_uuid <> '' " +
+                    "AND mercImagem_Url LIKE 'http%'", conn))
+                {
+                    using var r = cmd.ExecuteReader();
+                    while (r.Read())
+                        rows.Add((r.GetString(0), r.GetString(1)));
+                }
+                foreach (var (uuid, url) in rows)
+                    try { await PatchAsync("mercadoria", $"id=eq.{uuid}", new { url_da_imagem = url }); } catch { }
+
+                // ── Categorias (grupo_mercadoria MySQL → grupo_mercadoria Supabase) ─
+                rows.Clear();
+                using (var conn = AbrirMysql())
+                using (var cmd = new MySqlCommand(
+                    "SELECT supabase_uuid, grmeImagem_Url FROM grupo_mercadoria " +
+                    "WHERE supabase_uuid IS NOT NULL AND supabase_uuid <> '' " +
+                    "AND grmeImagem_Url LIKE 'http%'", conn))
+                {
+                    using var r = cmd.ExecuteReader();
+                    while (r.Read())
+                        rows.Add((r.GetString(0), r.GetString(1)));
+                }
+                foreach (var (uuid, url) in rows)
+                    try { await PatchAsync("grupo_mercadoria", $"id=eq.{uuid}", new { url_da_imagem = url }); } catch { }
+
+                // ── Marmitas (marmita MySQL → mercadoria Supabase, same table as products) ─
+                rows.Clear();
+                using (var conn = AbrirMysql())
+                using (var cmd = new MySqlCommand(
+                    "SELECT supabase_uuid, marImagem_Url FROM marmita " +
+                    "WHERE supabase_uuid IS NOT NULL AND supabase_uuid <> '' " +
+                    "AND marImagem_Url LIKE 'http%'", conn))
+                {
+                    using var r = cmd.ExecuteReader();
+                    while (r.Read())
+                        rows.Add((r.GetString(0), r.GetString(1)));
+                }
+                foreach (var (uuid, url) in rows)
+                    try { await PatchAsync("mercadoria", $"id=eq.{uuid}", new { url_da_imagem = url }); } catch { }
+            }
+            catch (Exception ex)
+            {
+                Logger.Log("SupabaseService", "SincronizarTodasImagensAsync", "Erro", ex);
             }
         }
 
@@ -1302,28 +1890,37 @@ namespace Pedeai.DB
 
                 var ext      = System.IO.Path.GetExtension(localPath).ToLower();
                 var fileName = $"categoria_{codigoGrupo}{ext}";
-                var mimeType = ext == ".png" ? "image/png"
-                             : ext == ".gif" ? "image/gif"
-                             : "image/jpeg";
+                string publicUrl;
 
-                // Upload to Supabase Storage bucket "categorias"
-                var storageBase = "https://uwgcmnmzjjinfmxlskks.supabase.co/storage/v1/object";
-                var uploadUrl   = $"{storageBase}/categorias/{fileName}";
+                string imgbbKey = GetImgBBKey();
 
-                using var content = new ByteArrayContent(System.IO.File.ReadAllBytes(localPath));
-                content.Headers.ContentType = new MediaTypeHeaderValue(mimeType);
-                using var req = new HttpRequestMessage(HttpMethod.Post, uploadUrl) { Content = content };
-                req.Headers.Add("apikey", KEY);
-                req.Headers.Authorization = new AuthenticationHeaderValue("Bearer", KEY);
-                req.Headers.Add("x-upsert", "true");   // overwrite if exists
+                if (!string.IsNullOrWhiteSpace(imgbbKey))
+                {
+                    publicUrl = await UploadImgBBAsync(localPath, imgbbKey);
+                }
+                else
+                {
+                    // Upload to Supabase Storage bucket "categorias"
+                    var mimeType    = ext == ".png" ? "image/png"
+                                    : ext == ".gif" ? "image/gif"
+                                    : "image/jpeg";
+                    var storageBase = "https://uwgcmnmzjjinfmxlskks.supabase.co/storage/v1/object";
+                    var uploadUrl   = $"{storageBase}/categorias/{fileName}";
 
-                var resp = await _http.SendAsync(req);
-                var body = await resp.Content.ReadAsStringAsync();
-                if (!resp.IsSuccessStatusCode)
-                    throw new Exception($"Storage upload {resp.StatusCode}: {body}");
+                    using var content = new ByteArrayContent(System.IO.File.ReadAllBytes(localPath));
+                    content.Headers.ContentType = new MediaTypeHeaderValue(mimeType);
+                    using var req = new HttpRequestMessage(HttpMethod.Post, uploadUrl) { Content = content };
+                    req.Headers.Add("apikey", KEY);
+                    req.Headers.Authorization = new AuthenticationHeaderValue("Bearer", KEY);
+                    req.Headers.Add("x-upsert", "true");
 
-                // Public URL pattern for Supabase Storage
-                var publicUrl = $"https://uwgcmnmzjjinfmxlskks.supabase.co/storage/v1/object/public/categorias/{fileName}";
+                    var resp = await _http.SendAsync(req);
+                    var body = await resp.Content.ReadAsStringAsync();
+                    if (!resp.IsSuccessStatusCode)
+                        throw new Exception($"Storage upload {resp.StatusCode}: {body}");
+
+                    publicUrl = $"https://uwgcmnmzjjinfmxlskks.supabase.co/storage/v1/object/public/categorias/{fileName}";
+                }
 
                 // Persist public URL to local DB
                 using var conn = AbrirMysql();
@@ -1332,10 +1929,150 @@ namespace Pedeai.DB
                 cmd.Parameters.AddWithValue("@url", publicUrl);
                 cmd.Parameters.AddWithValue("@c",   codigoGrupo);
                 cmd.ExecuteNonQuery();
+
+                // Push URL to Supabase immediately (bypasses habSite gate)
+                try
+                {
+                    string uuid = GetSupabaseUuid("grupo_mercadoria", "Codigo", codigoGrupo);
+                    if (!string.IsNullOrWhiteSpace(uuid))
+                        await PatchAsync("grupo_mercadoria", $"id=eq.{uuid}",
+                            new { url_da_imagem = publicUrl });
+                }
+                catch { }
             }
             catch (Exception ex)
             {
                 Logger.Log("SupabaseService", "UploadCategoriaImagemAsync", $"Erro categoria {codigoGrupo}", ex);
+            }
+        }
+
+        public static async Task UploadMarmitaImagemAsync(int codigoMarmita, string localPath)
+        {
+            try
+            {
+                if (!System.IO.File.Exists(localPath)) return;
+
+                var ext      = System.IO.Path.GetExtension(localPath).ToLower();
+                var fileName = $"marmita_{codigoMarmita}{ext}";
+                string publicUrl;
+
+                string imgbbKey = GetImgBBKey();
+
+                if (!string.IsNullOrWhiteSpace(imgbbKey))
+                {
+                    publicUrl = await UploadImgBBAsync(localPath, imgbbKey);
+                }
+                else
+                {
+                    var mimeType    = ext == ".png" ? "image/png"
+                                    : ext == ".gif" ? "image/gif"
+                                    : "image/jpeg";
+                    var storageBase = "https://uwgcmnmzjjinfmxlskks.supabase.co/storage/v1/object";
+                    var uploadUrl   = $"{storageBase}/marmitas/{fileName}";
+
+                    using var content = new ByteArrayContent(System.IO.File.ReadAllBytes(localPath));
+                    content.Headers.ContentType = new MediaTypeHeaderValue(mimeType);
+                    using var req = new HttpRequestMessage(HttpMethod.Post, uploadUrl) { Content = content };
+                    req.Headers.Add("apikey", KEY);
+                    req.Headers.Authorization = new AuthenticationHeaderValue("Bearer", KEY);
+                    req.Headers.Add("x-upsert", "true");
+
+                    var resp = await _http.SendAsync(req);
+                    var body = await resp.Content.ReadAsStringAsync();
+                    if (!resp.IsSuccessStatusCode)
+                        throw new Exception($"Storage upload marmita {resp.StatusCode}: {body}");
+
+                    publicUrl = $"https://uwgcmnmzjjinfmxlskks.supabase.co/storage/v1/object/public/marmitas/{fileName}";
+                }
+
+                // Persist public URL to local DB
+                using var conn = AbrirMysql();
+                using var cmd  = new MySqlCommand(
+                    "UPDATE marmita SET marImagem_Url=@url WHERE Codigo=@c", conn);
+                cmd.Parameters.AddWithValue("@url", publicUrl);
+                cmd.Parameters.AddWithValue("@c",   codigoMarmita);
+                cmd.ExecuteNonQuery();
+
+                // Push URL to Supabase immediately (bypasses habSite gate)
+                try
+                {
+                    string uuid = GetSupabaseUuid("marmita", "Codigo", codigoMarmita);
+                    if (!string.IsNullOrWhiteSpace(uuid))
+                        await PatchAsync("mercadoria", $"id=eq.{uuid}",
+                            new { url_da_imagem = publicUrl });
+                }
+                catch { }
+            }
+            catch (Exception ex)
+            {
+                Logger.Log("SupabaseService", "UploadMarmitaImagemAsync", $"Erro marmita {codigoMarmita}", ex);
+            }
+        }
+
+        /// <summary>
+        /// Uploads a product image to Supabase Storage (bucket: produtos)
+        /// and saves the public URL back to mercadoria.mercImagem_Url.
+        /// </summary>
+        public static async Task UploadProdutoImagemAsync(int codigoProduto, string localPath)
+        {
+            try
+            {
+                if (!System.IO.File.Exists(localPath)) return;
+
+                var ext      = System.IO.Path.GetExtension(localPath).ToLower();
+                var fileName = $"produto_{codigoProduto}{ext}";
+                string publicUrl;
+
+                string imgbbKey = GetImgBBKey();
+
+                if (!string.IsNullOrWhiteSpace(imgbbKey))
+                {
+                    publicUrl = await UploadImgBBAsync(localPath, imgbbKey);
+                }
+                else
+                {
+                    var mimeType    = ext == ".png" ? "image/png"
+                                    : ext == ".gif" ? "image/gif"
+                                    : "image/jpeg";
+                    var storageBase = "https://uwgcmnmzjjinfmxlskks.supabase.co/storage/v1/object";
+                    var uploadUrl   = $"{storageBase}/produtos/{fileName}";
+
+                    using var content = new ByteArrayContent(System.IO.File.ReadAllBytes(localPath));
+                    content.Headers.ContentType = new MediaTypeHeaderValue(mimeType);
+                    using var req = new HttpRequestMessage(HttpMethod.Post, uploadUrl) { Content = content };
+                    req.Headers.Add("apikey", KEY);
+                    req.Headers.Authorization = new AuthenticationHeaderValue("Bearer", KEY);
+                    req.Headers.Add("x-upsert", "true");
+
+                    var resp = await _http.SendAsync(req);
+                    var body = await resp.Content.ReadAsStringAsync();
+                    if (!resp.IsSuccessStatusCode)
+                        throw new Exception($"Storage upload produto {resp.StatusCode}: {body}");
+
+                    publicUrl = $"https://uwgcmnmzjjinfmxlskks.supabase.co/storage/v1/object/public/produtos/{fileName}";
+                }
+
+                // Persist public URL to local DB
+                using var conn = AbrirMysql();
+                using var cmd  = new MySqlCommand(
+                    "UPDATE mercadoria SET mercImagem_Url=@url WHERE Codigo=@c", conn);
+                cmd.Parameters.AddWithValue("@url", publicUrl);
+                cmd.Parameters.AddWithValue("@c",   codigoProduto);
+                cmd.ExecuteNonQuery();
+
+                // Push URL to Supabase immediately (bypasses habSite gate)
+                try
+                {
+                    string uuid = GetSupabaseUuid("mercadoria", "Codigo", codigoProduto);
+                    if (!string.IsNullOrWhiteSpace(uuid))
+                        await PatchAsync("mercadoria", $"id=eq.{uuid}",
+                            new { url_da_imagem = publicUrl });
+                }
+                catch { }
+            }
+            catch (Exception ex)
+            {
+                Logger.Log("SupabaseService", "UploadProdutoImagemAsync", $"Erro produto {codigoProduto}", ex);
             }
         }
     }
@@ -1370,14 +2107,17 @@ namespace Pedeai.DB
 
     public class ClienteSupabase
     {
-        public string Id        { get; set; }
-        public string Nome      { get; set; }
-        public string Telefone  { get; set; }
-        public string CpfCnpj   { get; set; }
-        public string Endereco  { get; set; } = "";
-        public string Numero    { get; set; } = "";
-        public string Bairro    { get; set; } = "";
-        public string Cidade    { get; set; } = "";
-        public string Cep       { get; set; } = "";
+        public string Id          { get; set; }
+        public string Nome        { get; set; }
+        public string Telefone    { get; set; }
+        public string CpfCnpj     { get; set; }
+        public string Endereco    { get; set; } = "";
+        public string Numero      { get; set; } = "";
+        public string Complemento { get; set; } = "";
+        public string Bairro      { get; set; } = "";
+        public string Cidade      { get; set; } = "";
+        public string Uf          { get; set; } = "";
+        public string Cep         { get; set; } = "";
+        public string Email       { get; set; } = "";
     }
 }

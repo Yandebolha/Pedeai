@@ -51,6 +51,7 @@ namespace Pedeai.Forms
             txtEmpEmail.Text    = _empresa.empEmail;
             txtEmpEnd.Text      = _empresa.empEndereco;
             txtEmpCodigo.Text   = _empresa.empCodigo_Empresa;
+            txtEmpImgBB.Text    = _empresa.empImgBBKey;
         }
 
         private void BtnSalvarEmpresa_Click(object sender, EventArgs e)
@@ -61,6 +62,7 @@ namespace Pedeai.Forms
             _empresa.empTelefone      = txtEmpTel.Text.Trim();
             _empresa.empEmail         = txtEmpEmail.Text.Trim();
             _empresa.empEndereco      = txtEmpEnd.Text.Trim();
+            _empresa.empImgBBKey      = txtEmpImgBB.Text.Trim();
             var erro = _empBLL.Salvar(_empresa);
             if (!string.IsNullOrEmpty(erro)) { MessageBox.Show("Erro: " + erro); return; }
             MessageBox.Show("Dados da empresa salvos com sucesso!", "OK", MessageBoxButtons.OK, MessageBoxIcon.Information);

@@ -35,6 +35,14 @@ namespace Pedeai.Forms
             this.numPromo           = new System.Windows.Forms.NumericUpDown();
             this.numEstoque         = new System.Windows.Forms.NumericUpDown();
             this.chkControlaEstoque = new System.Windows.Forms.CheckBox();
+            this.chkAdicionais      = new System.Windows.Forms.CheckBox();
+            this.chkComplementos    = new System.Windows.Forms.CheckBox();
+            this.pnlVinculos        = new System.Windows.Forms.Panel();
+            this.lblGrupoVinc       = new System.Windows.Forms.Label();
+            this.cmbGrupoVinc       = new System.Windows.Forms.ComboBox();
+            this.btnAddGrupoVinc    = new System.Windows.Forms.Button();
+            this.lstGruposVinc      = new System.Windows.Forms.ListBox();
+            this.btnRemGrupoVinc    = new System.Windows.Forms.Button();
             this.chkSite            = new System.Windows.Forms.CheckBox();
             this.chkDestaque        = new System.Windows.Forms.CheckBox();
             this.lblCat             = new System.Windows.Forms.Label();
@@ -90,7 +98,7 @@ namespace Pedeai.Forms
             this.btnPesq.FlatStyle=System.Windows.Forms.FlatStyle.Flat; this.btnPesq.Cursor=System.Windows.Forms.Cursors.Hand;
             this.btnPesq.FlatAppearance.BorderSize=0; this.btnPesq.Click+=new System.EventHandler(this.BtnPesqProd_Click);
             // pnlForm
-            this.pnlForm.Dock=System.Windows.Forms.DockStyle.Bottom; this.pnlForm.Height=225;
+            this.pnlForm.Dock=System.Windows.Forms.DockStyle.Bottom; this.pnlForm.Height=340;
             this.pnlForm.BackColor=System.Drawing.Color.FromArgb(245,237,216);
             this.pnlForm.BorderStyle=System.Windows.Forms.BorderStyle.FixedSingle; this.pnlForm.Visible=false;
             this.pnlForm.Controls.Add(this.lblCat);  this.pnlForm.Controls.Add(this.cmbCategoria);
@@ -103,6 +111,8 @@ namespace Pedeai.Forms
             this.pnlForm.Controls.Add(this.lblEst);  this.pnlForm.Controls.Add(this.numEstoque);
             this.pnlForm.Controls.Add(this.chkControlaEstoque);
             this.pnlForm.Controls.Add(this.lblPub);  this.pnlForm.Controls.Add(this.chkSite); this.pnlForm.Controls.Add(this.chkDestaque);
+            this.pnlForm.Controls.Add(this.chkAdicionais); this.pnlForm.Controls.Add(this.chkComplementos);
+            this.pnlForm.Controls.Add(this.pnlVinculos);
             this.pnlForm.Controls.Add(this.pnlBtns);
             // row 1
             this.lblCat.Text="Categoria:"; this.lblCat.AutoSize=true; this.lblCat.Left=10; this.lblCat.Top=11;
@@ -141,6 +151,34 @@ namespace Pedeai.Forms
             this.lblPub.Text="Publica\u00e7\u00f5es:"; this.lblPub.AutoSize=true; this.lblPub.Left=10; this.lblPub.Top=119; this.lblPub.ForeColor=System.Drawing.Color.FromArgb(70,70,70);
             this.chkSite.Text="No site"; this.chkSite.Left=90; this.chkSite.Top=116; this.chkSite.AutoSize=true;
             this.chkDestaque.Text="Destaque"; this.chkDestaque.Left=180; this.chkDestaque.Top=116; this.chkDestaque.AutoSize=true;
+            // row 5 — Adicionais / Complementos checkboxes
+            this.chkAdicionais.Text="Adicionais"; this.chkAdicionais.Left=10; this.chkAdicionais.Top=149; this.chkAdicionais.AutoSize=true;
+            this.chkAdicionais.CheckedChanged+=new System.EventHandler(this.ChkVinculos_CheckedChanged);
+            this.chkComplementos.Text="Complementos"; this.chkComplementos.Left=110; this.chkComplementos.Top=149; this.chkComplementos.AutoSize=true;
+            this.chkComplementos.CheckedChanged+=new System.EventHandler(this.ChkVinculos_CheckedChanged);
+            // row 6 — group link panel
+            this.pnlVinculos.Left=10; this.pnlVinculos.Top=176; this.pnlVinculos.Width=790; this.pnlVinculos.Height=100;
+            this.pnlVinculos.BackColor=System.Drawing.Color.FromArgb(235,227,206);
+            this.pnlVinculos.BorderStyle=System.Windows.Forms.BorderStyle.FixedSingle;
+            this.pnlVinculos.Visible=false;
+            this.pnlVinculos.Controls.Add(this.lblGrupoVinc);
+            this.pnlVinculos.Controls.Add(this.cmbGrupoVinc);
+            this.pnlVinculos.Controls.Add(this.btnAddGrupoVinc);
+            this.pnlVinculos.Controls.Add(this.lstGruposVinc);
+            this.pnlVinculos.Controls.Add(this.btnRemGrupoVinc);
+            this.lblGrupoVinc.Text="Categoria:"; this.lblGrupoVinc.AutoSize=true; this.lblGrupoVinc.Left=6; this.lblGrupoVinc.Top=10;
+            this.cmbGrupoVinc.Left=75; this.cmbGrupoVinc.Top=7; this.cmbGrupoVinc.Width=200;
+            this.cmbGrupoVinc.DropDownStyle=System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.btnAddGrupoVinc.Text="+ Adicionar"; this.btnAddGrupoVinc.Left=282; this.btnAddGrupoVinc.Top=7; this.btnAddGrupoVinc.Width=90; this.btnAddGrupoVinc.Height=24;
+            this.btnAddGrupoVinc.BackColor=System.Drawing.Color.FromArgb(42,120,80); this.btnAddGrupoVinc.ForeColor=System.Drawing.Color.White;
+            this.btnAddGrupoVinc.FlatStyle=System.Windows.Forms.FlatStyle.Flat; this.btnAddGrupoVinc.FlatAppearance.BorderSize=0;
+            this.btnAddGrupoVinc.Click+=new System.EventHandler(this.BtnAddGrupoVinc_Click);
+            this.lstGruposVinc.Left=6; this.lstGruposVinc.Top=36; this.lstGruposVinc.Width=350; this.lstGruposVinc.Height=56;
+            this.lstGruposVinc.HorizontalScrollbar=true;
+            this.btnRemGrupoVinc.Text="Remover"; this.btnRemGrupoVinc.Left=363; this.btnRemGrupoVinc.Top=36; this.btnRemGrupoVinc.Width=80; this.btnRemGrupoVinc.Height=24;
+            this.btnRemGrupoVinc.BackColor=System.Drawing.Color.FromArgb(192,57,43); this.btnRemGrupoVinc.ForeColor=System.Drawing.Color.White;
+            this.btnRemGrupoVinc.FlatStyle=System.Windows.Forms.FlatStyle.Flat; this.btnRemGrupoVinc.FlatAppearance.BorderSize=0;
+            this.btnRemGrupoVinc.Click+=new System.EventHandler(this.BtnRemGrupoVinc_Click);
             // pnlBtns
             this.pnlBtns.Dock=System.Windows.Forms.DockStyle.Bottom; this.pnlBtns.Height=48;
             this.pnlBtns.BackColor=System.Drawing.Color.FromArgb(245,237,216);
@@ -188,6 +226,14 @@ namespace Pedeai.Forms
         internal System.Windows.Forms.CheckBox      chkControlaEstoque;
         internal System.Windows.Forms.CheckBox      chkDestaque;
         internal System.Windows.Forms.CheckBox      chkSite;
+        internal System.Windows.Forms.CheckBox      chkAdicionais;
+        internal System.Windows.Forms.CheckBox      chkComplementos;
+        internal System.Windows.Forms.Panel         pnlVinculos;
+        private  System.Windows.Forms.Label         lblGrupoVinc;
+        internal System.Windows.Forms.ComboBox      cmbGrupoVinc;
+        private  System.Windows.Forms.Button        btnAddGrupoVinc;
+        internal System.Windows.Forms.ListBox       lstGruposVinc;
+        private  System.Windows.Forms.Button        btnRemGrupoVinc;
         internal System.Windows.Forms.Button        btnNovo;
         internal System.Windows.Forms.Button        btnCat;
         internal System.Windows.Forms.Button        btnPesq;

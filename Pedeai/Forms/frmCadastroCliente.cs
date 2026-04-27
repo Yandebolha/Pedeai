@@ -156,6 +156,27 @@ namespace Pedeai.Forms
             pnlForm.Visible = true; txtNome.Focus();
         }
 
+        private async void BtnBuscarWeb_Click(object sender, EventArgs e)
+        {
+            btnBuscarWeb.Enabled = false;
+            btnBuscarWeb.Text = "Aguarde...";
+            try
+            {
+                string resultado = await DB.SupabaseService.ImportarClientesSupabaseAsync();
+                CarregarGrid();
+                MessageBox.Show(resultado, "Buscar Clientes Web", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Erro: " + ex.Message, "Buscar Clientes Web", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            finally
+            {
+                btnBuscarWeb.Enabled = true;
+                btnBuscarWeb.Text = "\u2193 Buscar Web";
+            }
+        }
+
         private void BtnSalvar_Click(object sender, EventArgs e)
         {
             // Validações obrigatórias

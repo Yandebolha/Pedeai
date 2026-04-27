@@ -16,26 +16,36 @@ namespace Pedeai.Forms
         private System.Data.DataTable _allCategorias;
         private System.Windows.Forms.TextBox _txtBuscaCategoria;
         private string _imagemPath = "";   // local file path selected by user
+        private Image  _previewImg = null; // stored separately to control paint fully
 
         public frmCadastroCategoria()
         {
             InitializeComponent();
             if (System.ComponentModel.LicenseManager.UsageMode == System.ComponentModel.LicenseUsageMode.Designtime) return;
             _bll = new GrupoMercadoriaBLL();
-            picImagem.Paint += PicImagem_Paint;
+            // Disable default image painting; we draw manually in Paint
+            picImagem.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Normal;
+            picImagem.Image    = null;
+            picImagem.Paint   += PicImagem_Paint;
             Load += (_, __) => { AdicionarPainelBusca(); Carregar(); };
         }
 
         // ── circular clip on picImagem ────────────────────────────────
         private void PicImagem_Paint(object sender, PaintEventArgs e)
         {
-            if (picImagem.Image == null) return;
             var g = e.Graphics;
             g.SmoothingMode = SmoothingMode.AntiAlias;
+
+            // Fill background first
+            g.Clear(picImagem.BackColor);
+
+            if (_previewImg == null) return;
+
+            // Clip to ellipse and draw image
             using var path = new GraphicsPath();
             path.AddEllipse(0, 0, picImagem.Width - 1, picImagem.Height - 1);
             g.SetClip(path);
-            g.DrawImage(picImagem.Image, 0, 0, picImagem.Width, picImagem.Height);
+            g.DrawImage(_previewImg, 0, 0, picImagem.Width, picImagem.Height);
         }
 
         private void BtnImagem_Click(object sender, EventArgs e)
@@ -49,8 +59,12 @@ namespace Pedeai.Forms
             _imagemPath = dlg.FileName;
             try
             {
-                picImagem.Image = Image.FromFile(_imagemPath);
-                picImagem.Invalidate();
+                // Dispose previous preview to avoid file locks
+                _previewImg?.Dispose();
+                // Load a copy so we don't lock the file
+                using var tmp = Image.FromFile(_imagemPath);
+                _previewImg = new Bitmap(tmp);
+                picImagem.Refresh();
                 lblImagem.Text = Path.GetFileName(_imagemPath);
             }
             catch (Exception ex)
@@ -117,9 +131,10 @@ namespace Pedeai.Forms
             txtNome.Clear();
             cmbSituacao.SelectedIndex = 0;
             chkHabSite.Checked = false;
-            picImagem.Image = null;
+            _previewImg?.Dispose(); _previewImg = null;
             _imagemPath = "";
             lblImagem.Text = "Nenhuma imagem selecionada";
+            picImagem.Refresh();
             pnlForm.Visible = true;
             txtNome.Focus();
         }
@@ -135,18 +150,13 @@ namespace Pedeai.Forms
             cmbSituacao.SelectedItem = obj.Situacao;
             chkHabSite.Checked = obj.grmeHabilitar_Site;
             _imagemPath        = "";
+            _previewImg?.Dispose(); _previewImg = null;
 
-            // Show existing image URL as label; we don't download it to preview
-            if (!string.IsNullOrWhiteSpace(obj.grmeImagem_Url))
-            {
-                picImagem.Image = null;
-                lblImagem.Text  = obj.grmeImagem_Url;
-            }
-            else
-            {
-                picImagem.Image = null;
-                lblImagem.Text  = "Nenhuma imagem selecionada";
-            }
+            // Show existing URL as label
+            lblImagem.Text = !string.IsNullOrWhiteSpace(obj.grmeImagem_Url)
+                ? obj.grmeImagem_Url
+                : "Nenhuma imagem selecionada";
+            picImagem.Refresh();
 
             pnlForm.Visible = true;
             txtNome.Focus();
@@ -161,7 +171,9 @@ namespace Pedeai.Forms
                 grmeOrdem          = 0,
                 Situacao           = _codigoEditando == 0 ? "A" : (cmbSituacao.SelectedItem?.ToString() ?? "A"),
                 grmeHabilitar_Site = chkHabSite.Checked,
-                grmeImagem_Url     = string.IsNullOrWhiteSpace(_imagemPath) ? lblImagem.Text.Trim() : _imagemPath,
+                grmeImagem_Url     = !string.IsNullOrWhiteSpace(_imagemPath)
+                                     ? (_imagemPath.StartsWith("http", StringComparison.OrdinalIgnoreCase) ? _imagemPath : "")
+                                     : (lblImagem.Text.Trim() == "Nenhuma imagem selecionada" ? "" : lblImagem.Text.Trim()),
             };
 
             // Clear placeholder text so we don't store it

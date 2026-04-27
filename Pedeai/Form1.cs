@@ -46,16 +46,10 @@ namespace Pedeai
 
         private void OnNovoPedidoWebRecebido(int count)
         {
+            // Silent background refresh — no popup, preserve selection
             BeginInvoke(new Action(() =>
             {
-                try { CarregarPedidos(); } catch { }
-                try
-                {
-                    if (count > 0)
-                        MessageBox.Show($"{count} novo(s) pedido(s) via Web recebido(s)!",
-                            "Pedido Web", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                }
-                catch { }
+                try { CarregarPedidosSemPerderSelecao(); } catch { }
             }));
         }
 
@@ -812,8 +806,38 @@ namespace Pedeai
                 }
             };
 
+            var btnBuscarWeb = new Button
+            {
+                Text      = "\u2193 Buscar Web",
+                Left      = 738,
+                Top       = 8,
+                Width     = 110,
+                Height    = 28,
+                BackColor = Color.FromArgb(39, 130, 57),
+                ForeColor = Color.White,
+                FlatStyle = FlatStyle.Flat,
+                Cursor    = Cursors.Hand,
+                Font      = new Font("Segoe UI", 8.5F, FontStyle.Bold)
+            };
+            btnBuscarWeb.FlatAppearance.BorderSize = 0;
+            btnBuscarWeb.Click += async (_, __) =>
+            {
+                btnBuscarWeb.Enabled = false;
+                btnBuscarWeb.Text    = "Buscando...";
+                try
+                {
+                    var diag = await System.Threading.Tasks.Task.Run(
+                        () => DB.SupabaseService.ImportarPedidosManuaisAsync());
+                    CarregarPedidos();
+                    MessageBox.Show(diag, "Buscar Pedidos Web",
+                        MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+                catch (Exception ex) { MessageBox.Show("Erro: " + ex.Message); }
+                finally { btnBuscarWeb.Enabled = true; btnBuscarWeb.Text = "\u2193 Buscar Web"; }
+            };
+
             pnlFiltros.Controls.AddRange(new System.Windows.Forms.Control[]
-                { lblSit, cmbFiltroPedido, lblDt, dtpFiltroPedido, btnFiltrar, btnTodos, btnManual });
+                { lblSit, cmbFiltroPedido, lblDt, dtpFiltroPedido, btnFiltrar, btnTodos, btnManual, btnBuscarWeb });
 
             // Detalhe header
             lblDetalhe = new Label
@@ -983,6 +1007,11 @@ namespace Pedeai
 
         private void CarregarPedidos()
         {
+            // Preserve currently selected order
+            int selectedCod = 0;
+            if (gridPedidos?.SelectedRows.Count > 0)
+                try { selectedCod = Convert.ToInt32(gridPedidos.SelectedRows[0].Cells["Codigo"].Value); } catch { }
+
             try
             {
                 string filtro = null;
@@ -1000,6 +1029,35 @@ namespace Pedeai
                 gridItens.DataSource   = null;
             }
             catch (Exception ex) { MessageBox.Show("Erro ao carregar pedidos: " + ex.Message); }
+
+            if (selectedCod > 0) RestaurarSelecaoPedido(selectedCod);
+        }
+
+        private void CarregarPedidosSemPerderSelecao()
+        {
+            int selectedCod = 0;
+            if (gridPedidos?.SelectedRows.Count > 0)
+                try { selectedCod = Convert.ToInt32(gridPedidos.SelectedRows[0].Cells["Codigo"].Value); } catch { }
+
+            try
+            {
+                string filtro = null;
+                if (cmbFiltroPedido?.SelectedIndex > 0)
+                {
+                    var sel = cmbFiltroPedido.SelectedItem?.ToString() ?? "";
+                    if      (sel == "Pendentes")   filtro = "pendentes";
+                    else if (sel == "Em Preparo")  filtro = "emPreparo";
+                    else if (sel == "Finalizados") filtro = "finalizados";
+                    else if (sel == "Cancelados")  filtro = "cancelados";
+                }
+                DateTime? dt = dtpFiltroPedido?.Value.Date;
+                gridPedidos.DataSource = _pedidoBLL.Listar(filtro, dt);
+                AjustarColunasPedidos();
+                // Do NOT reset gridItens — keep items visible for selected order
+            }
+            catch { }
+
+            if (selectedCod > 0) RestaurarSelecaoPedido(selectedCod);
         }
 
         private void AjustarColunasPedidos()

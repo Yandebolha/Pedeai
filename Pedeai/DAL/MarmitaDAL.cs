@@ -37,6 +37,7 @@ namespace Pedeai.DAL
                 marCusto         = r["marCusto"] == DBNull.Value ? 0m : Convert.ToDecimal(r["marCusto"]),
                 marHabilitar_Site = r["marHabilitar_Site"] != DBNull.Value && Convert.ToBoolean(r["marHabilitar_Site"]),
                 marDestaque      = r["marDestaque"] != DBNull.Value && Convert.ToBoolean(r["marDestaque"]),
+                marImagem_Url    = TryGetString(r, "marImagem_Url"),
                 supabase_uuid    = TryGetString(r, "supabase_uuid"),
                 Situacao         = (r["Situacao"]?.ToString() ?? "A")[0]
             };
@@ -56,8 +57,8 @@ namespace Pedeai.DAL
                 obj.auxCodigo = ProximoAuxCodigo("marmita", conn);
                 using var cmd = new MySqlCommand(@"
                     INSERT INTO marmita (Codigo, auxCodigo, marDescricao, marValor, marCusto,
-                                        marHabilitar_Site, marDestaque, Situacao)
-                    VALUES (@cod, @aux, @desc, @val, @cst, @site, @dest, @sit)", conn);
+                                        marHabilitar_Site, marDestaque, marImagem_Url, Situacao)
+                    VALUES (@cod, @aux, @desc, @val, @cst, @site, @dest, @img, @sit)", conn);
                 cmd.Parameters.AddWithValue("@cod",  obj.Codigo);
                 cmd.Parameters.AddWithValue("@aux",  obj.auxCodigo);
                 cmd.Parameters.AddWithValue("@desc", obj.marDescricao);
@@ -65,6 +66,7 @@ namespace Pedeai.DAL
                 cmd.Parameters.AddWithValue("@cst",  obj.marCusto);
                 cmd.Parameters.AddWithValue("@site", obj.marHabilitar_Site ? 1 : 0);
                 cmd.Parameters.AddWithValue("@dest", obj.marDestaque ? 1 : 0);
+                cmd.Parameters.AddWithValue("@img",  obj.marImagem_Url ?? "");
                 cmd.Parameters.AddWithValue("@sit",  obj.Situacao.ToString());
                 cmd.ExecuteNonQuery();
                 return "";
@@ -79,13 +81,15 @@ namespace Pedeai.DAL
                 using var conn = AbrirConexao();
                 using var cmd = new MySqlCommand(@"
                     UPDATE marmita SET marDescricao=@desc, marValor=@val, marCusto=@cst,
-                                      marHabilitar_Site=@site, marDestaque=@dest, Situacao=@sit
+                                      marHabilitar_Site=@site, marDestaque=@dest,
+                                      marImagem_Url=@img, Situacao=@sit
                     WHERE Codigo=@cod", conn);
                 cmd.Parameters.AddWithValue("@desc", obj.marDescricao);
                 cmd.Parameters.AddWithValue("@val",  obj.marValor);
                 cmd.Parameters.AddWithValue("@cst",  obj.marCusto);
                 cmd.Parameters.AddWithValue("@site", obj.marHabilitar_Site ? 1 : 0);
                 cmd.Parameters.AddWithValue("@dest", obj.marDestaque ? 1 : 0);
+                cmd.Parameters.AddWithValue("@img",  obj.marImagem_Url ?? "");
                 cmd.Parameters.AddWithValue("@sit",  obj.Situacao.ToString());
                 cmd.Parameters.AddWithValue("@cod",  obj.Codigo);
                 cmd.ExecuteNonQuery();

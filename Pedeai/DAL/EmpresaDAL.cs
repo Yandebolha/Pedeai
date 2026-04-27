@@ -30,6 +30,7 @@ namespace Pedeai.DAL
                 empNivel_Atualizacao = TryGetInt(r, "empNivel_Atualizacao", 2),
                 empVersao_Atual      = TryGet(r, "empVersao_Atual"),
                 empMax_Maquinas      = TryGetInt(r, "empMax_Maquinas", 0),
+                empImgBBKey          = TryGet(r, "empImgBBKey"),
             };
         }
 
@@ -75,8 +76,8 @@ namespace Pedeai.DAL
                 {
                     if (obj.Codigo <= 0) obj.Codigo = 1;
                     const string ins = @"
-                        INSERT INTO empresa (Codigo,empNome,empNome_Fantasia,empCNPJ,empTelefone,empEmail,empEndereco,Info)
-                        VALUES(@cod,@nome,@fant,@cnpj,@tel,@email,@end,@info)";
+                        INSERT INTO empresa (Codigo,empNome,empNome_Fantasia,empCNPJ,empTelefone,empEmail,empEndereco,Info,empImgBBKey)
+                        VALUES(@cod,@nome,@fant,@cnpj,@tel,@email,@end,@info,@imgbb)";
                     using var ins2 = new MySqlCommand(ins, conn);
                     ins2.Parameters.AddWithValue("@cod",   obj.Codigo);
                     ins2.Parameters.AddWithValue("@nome",  obj.empNome);
@@ -86,13 +87,15 @@ namespace Pedeai.DAL
                     ins2.Parameters.AddWithValue("@email", obj.empEmail ?? "");
                     ins2.Parameters.AddWithValue("@end",   obj.empEndereco ?? "");
                     ins2.Parameters.AddWithValue("@info",  obj.Info ?? "");
+                    ins2.Parameters.AddWithValue("@imgbb", obj.empImgBBKey ?? "");
                     ins2.ExecuteNonQuery();
                 }
                 else
                 {
                     const string upd = @"
                         UPDATE empresa SET empNome=@nome,empNome_Fantasia=@fant,empCNPJ=@cnpj,
-                            empTelefone=@tel,empEmail=@email,empEndereco=@end,Info=@info
+                            empTelefone=@tel,empEmail=@email,empEndereco=@end,Info=@info,
+                            empImgBBKey=@imgbb
                         WHERE Codigo=@cod";
                     using var upd2 = new MySqlCommand(upd, conn);
                     upd2.Parameters.AddWithValue("@nome",  obj.empNome);
@@ -102,6 +105,7 @@ namespace Pedeai.DAL
                     upd2.Parameters.AddWithValue("@email", obj.empEmail ?? "");
                     upd2.Parameters.AddWithValue("@end",   obj.empEndereco ?? "");
                     upd2.Parameters.AddWithValue("@info",  obj.Info ?? "");
+                    upd2.Parameters.AddWithValue("@imgbb", obj.empImgBBKey ?? "");
                     upd2.Parameters.AddWithValue("@cod",   obj.Codigo);
                     upd2.ExecuteNonQuery();
                 }

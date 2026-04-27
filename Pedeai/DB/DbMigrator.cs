@@ -680,6 +680,18 @@ namespace Pedeai.DB
                     "TINYINT(1) NOT NULL DEFAULT 0");
                 AddColumnIfNotExists(conn, db, "marmita", "marDestaque",
                     "TINYINT(1) NOT NULL DEFAULT 0");
+                AddColumnIfNotExists(conn, db, "marmita", "marImagem_Url",
+                    "VARCHAR(500) NOT NULL DEFAULT ''");
+
+                // Complement groups linked to a marmita (shown as selectable options on website)
+                Exec(conn, @"
+                    CREATE TABLE IF NOT EXISTS marmita_complemento_grupo (
+                        Codigo          INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+                        Codigo_Marmita  INT NOT NULL,
+                        Codigo_Grupo    INT NOT NULL,
+                        grmeDescricao   VARCHAR(200) NOT NULL DEFAULT '',
+                        UNIQUE KEY uq_mar_grp (Codigo_Marmita, Codigo_Grupo)
+                    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
                 AddColumnIfNotExists(conn, db, "cupom", "supabase_uuid",
                     "VARCHAR(50) NOT NULL DEFAULT ''");
                 AddColumnIfNotExists(conn, db, "bairro", "supabase_uuid",
@@ -698,6 +710,21 @@ namespace Pedeai.DB
                     "VARCHAR(500) NOT NULL DEFAULT ''");
                 AddColumnIfNotExists(conn, db, "grupo_mercadoria", "supabase_uuid",
                     "VARCHAR(50) NOT NULL DEFAULT ''"  );
+
+                // ── mercadoria_vinculo_grupo: Adicionais/Complementos ─────────
+                Exec(conn, @"
+                    CREATE TABLE IF NOT EXISTS mercadoria_vinculo_grupo (
+                        Codigo        INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+                        Codigo_Mercadoria INT NOT NULL,
+                        Codigo_Grupo  INT NOT NULL,
+                        tipo          CHAR(1) NOT NULL DEFAULT 'A' COMMENT 'A=Adicional C=Complemento',
+                        Situacao      CHAR(1) NOT NULL DEFAULT 'A',
+                        UNIQUE KEY uq_merc_grp_tipo (Codigo_Mercadoria, Codigo_Grupo, tipo)
+                    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+
+                // ── empresa: ImgBB API key for image hosting ──────────────
+                AddColumnIfNotExists(conn, db, "empresa", "empImgBBKey",
+                    "VARCHAR(200) NOT NULL DEFAULT ''");
 
                 return true;
             }

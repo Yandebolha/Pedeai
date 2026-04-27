@@ -80,9 +80,9 @@ namespace Pedeai.Forms
             this.btnEditar.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
             this.btnEditar.FlatAppearance.BorderSize = 0;
             this.btnEditar.Click += new System.EventHandler(this.BtnEditar_Click);
-            // pnlForm â€” taller to fit image row
+            // pnlForm — taller to fit image row
             this.pnlForm.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.pnlForm.Height = 160;
+            this.pnlForm.Height = 220;
             this.pnlForm.BackColor = System.Drawing.Color.FromArgb(245, 237, 216);
             this.pnlForm.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.pnlForm.Visible = false;
@@ -144,7 +144,7 @@ namespace Pedeai.Forms
             // picImagem â€” round preview 80x80
             this.picImagem.Left = 20; this.picImagem.Top = 75;
             this.picImagem.Width = 80; this.picImagem.Height = 80;
-            this.picImagem.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+            this.picImagem.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Normal;
             this.picImagem.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.picImagem.BackColor = System.Drawing.Color.FromArgb(220, 210, 190);
             // btnImagem
@@ -209,3 +209,4 @@ namespace Pedeai.Forms
         }
     }
 }
+

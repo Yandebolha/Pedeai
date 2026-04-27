@@ -9,6 +9,7 @@ namespace Pedeai.Modelo
         public decimal marCusto            { get; set; }
         public bool    marHabilitar_Site   { get; set; }
         public bool    marDestaque         { get; set; }
+        public string  marImagem_Url       { get; set; } = "";
         public string  supabase_uuid       { get; set; } = "";
         public char    Situacao            { get; set; } = 'A';
     }

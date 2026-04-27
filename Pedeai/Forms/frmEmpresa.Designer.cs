@@ -20,6 +20,7 @@ namespace Pedeai.Forms
             this.txtEmpEmail = new System.Windows.Forms.TextBox();
             this.txtEmpEnd = new System.Windows.Forms.TextBox();
             this.txtEmpCodigo = new System.Windows.Forms.TextBox();
+            this.txtEmpImgBB = new System.Windows.Forms.TextBox();
             this.txtUsrNome = new System.Windows.Forms.TextBox();
             this.txtUsrLogin = new System.Windows.Forms.TextBox();
             this.txtUsrSenha = new System.Windows.Forms.TextBox();
@@ -161,6 +162,17 @@ namespace Pedeai.Forms
             this.txtEmpCodigo.Size = new System.Drawing.Size(140, 25);
             this.txtEmpCodigo.TabIndex = 6;
             this.txtEmpCodigo.Font = new System.Drawing.Font("Consolas", 10F, System.Drawing.FontStyle.Bold);
+            // 
+            // txtEmpImgBB
+            // 
+            this.txtEmpImgBB.BackColor = System.Drawing.Color.White;
+            this.txtEmpImgBB.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.txtEmpImgBB.ForeColor = System.Drawing.Color.FromArgb(50, 50, 50);
+            this.txtEmpImgBB.Location = new System.Drawing.Point(168, 314);
+            this.txtEmpImgBB.Name = "txtEmpImgBB";
+            this.txtEmpImgBB.Size = new System.Drawing.Size(360, 25);
+            this.txtEmpImgBB.TabIndex = 7;
+            this.txtEmpImgBB.PlaceholderText = "Chave API do ImgBB (imgbb.com)";
             // 
             // txtUsrNome
             // 
@@ -715,6 +727,7 @@ namespace Pedeai.Forms
             this.tabEmp.Controls.Add(this.txtEmpEmail);
             this.tabEmp.Controls.Add(this.txtEmpEnd);
             this.tabEmp.Controls.Add(this.txtEmpCodigo);
+            this.tabEmp.Controls.Add(this.txtEmpImgBB);
             this.tabEmp.Controls.Add(this.btnSalvEmp);
             this.tabEmp.Controls.Add(this.lblEmpNome);
             this.tabEmp.Controls.Add(this.lblEmpFantasia);
@@ -723,6 +736,7 @@ namespace Pedeai.Forms
             this.tabEmp.Controls.Add(this.lblEmpEmail);
             this.tabEmp.Controls.Add(this.lblEmpEnd);
             this.tabEmp.Controls.Add(this.lblEmpCodigo);
+            this.tabEmp.Controls.Add(this.lblEmpImgBB);
             this.tabEmp.Controls.Add(this.lblEmpTitle);
             this.tabEmp.ForeColor = System.Drawing.Color.FromArgb(50, 50, 50);
             this.tabEmp.Location = new System.Drawing.Point(4, 30);
@@ -739,7 +753,7 @@ namespace Pedeai.Forms
             this.btnSalvEmp.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnSalvEmp.Font = new System.Drawing.Font("Segoe UI", 9.5F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.btnSalvEmp.ForeColor = System.Drawing.Color.White;
-            this.btnSalvEmp.Location = new System.Drawing.Point(168, 314);
+            this.btnSalvEmp.Location = new System.Drawing.Point(168, 348);
             this.btnSalvEmp.Name = "btnSalvEmp";
             this.btnSalvEmp.Size = new System.Drawing.Size(160, 32);
             this.btnSalvEmp.TabIndex = 6;
@@ -1031,7 +1045,9 @@ namespace Pedeai.Forms
         private System.Windows.Forms.Label lblEmpEmail    = new System.Windows.Forms.Label { Text = "E-mail:",        AutoSize = true, Left = 22, Top = 216, ForeColor = System.Drawing.Color.FromArgb(70,70,70) };
         private System.Windows.Forms.Label lblEmpEnd      = new System.Windows.Forms.Label { Text = "Endereço:", AutoSize = true, Left = 22, Top = 247, ForeColor = System.Drawing.Color.FromArgb(70,70,70) };
         private System.Windows.Forms.Label lblEmpCodigo    = new System.Windows.Forms.Label { Text = "Código da Empresa:", AutoSize = true, Left = 22, Top = 278, ForeColor = System.Drawing.Color.FromArgb(120,60,10), Font = new System.Drawing.Font("Segoe UI", 8.5F, System.Drawing.FontStyle.Bold) };
+        private System.Windows.Forms.Label lblEmpImgBB     = new System.Windows.Forms.Label { Text = "ImgBB API Key:", AutoSize = true, Left = 22, Top = 318, ForeColor = System.Drawing.Color.FromArgb(70,70,70) };
         internal System.Windows.Forms.TextBox txtEmpCodigo;
+        internal System.Windows.Forms.TextBox txtEmpImgBB;
         // labels usuario
         private System.Windows.Forms.Label lblUsrNome      = new System.Windows.Forms.Label { Text = "Nome:",              AutoSize = true, Left = 22, Top = 25,  ForeColor = System.Drawing.Color.FromArgb(70,70,70) };
         private System.Windows.Forms.Label lblUsrLogin     = new System.Windows.Forms.Label { Text = "Login:",             AutoSize = true, Left = 22, Top = 65,  ForeColor = System.Drawing.Color.FromArgb(70,70,70) };

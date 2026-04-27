@@ -333,6 +333,30 @@ namespace Pedeai.BLL
             catch { return new System.Collections.Generic.List<(string, string)>(); }
         }
 
+        // ── Notificações Web ──────────────────────────────────────────────────
+
+        /// <summary>Envia confirmação de recebimento de pedido feito pelo site.</summary>
+        public static void NotificarPedidoWebRecebido(string telefone, string nomeCliente,
+            string numeroPedido, decimal total)
+        {
+            if (!Ativo || string.IsNullOrWhiteSpace(telefone)) return;
+            string msg = $"Olá *{nomeCliente}*! 🎉\n" +
+                         $"Seu pedido *#{numeroPedido}* foi recebido com sucesso!\n" +
+                         $"Total: *R$ {total:N2}*\n" +
+                         $"Em breve entraremos em contato. Obrigado pela preferência! 🍽️";
+            EnviarBackground(telefone, msg);
+        }
+
+        /// <summary>Envia boas-vindas quando um cliente se cadastra pelo site.</summary>
+        public static void NotificarNovoCadastroWeb(string telefone, string nomeCliente)
+        {
+            if (!Ativo || string.IsNullOrWhiteSpace(telefone)) return;
+            string msg = $"Olá *{nomeCliente}*! 😊\n" +
+                         $"Seu cadastro foi realizado com sucesso em nosso sistema!\n" +
+                         $"Agora você pode acompanhar seus pedidos e aproveitar nossas promoções. Bem-vindo(a)! 🎊";
+            EnviarBackground(telefone, msg);
+        }
+
         // ── Utilitário ────────────────────────────────────────────────────────
 
         private static async Task CriarSeNecessarioAsync()

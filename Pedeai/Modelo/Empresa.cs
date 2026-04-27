@@ -22,5 +22,7 @@ namespace Pedeai.Modelo
         public string empVersao_Atual { get; set; } = "";
         /// <summary>Número máximo de máquinas simultâneas permitidas. 0 = sem limite. Sincronizado do Supabase.</summary>
         public int empMax_Maquinas { get; set; } = 0;
+        /// <summary>Chave de API do ImgBB para hospedagem de imagens de produtos, marmitas e categorias.</summary>
+        public string empImgBBKey { get; set; } = "";
     }
 }

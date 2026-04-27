@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Drawing;
 using System.Windows.Forms;
+using MySqlConnector;
 using Pedeai.BLL;
 using Pedeai.Modelo;
 
@@ -28,6 +30,10 @@ namespace Pedeai.Forms
         // Marmita em edição
         private int _codigoEditando = 0;
 
+        // Marmita image
+        private string _marmitaImagemPath = "";
+        private System.Drawing.Image _marmitaPreviewImg = null;
+
         // Produtos disponíveis (para adicionar aos itens)
         private readonly List<(int Codigo, string Nome, decimal Preco)> _produtos
             = new List<(int, string, decimal)>();
@@ -43,13 +49,22 @@ namespace Pedeai.Forms
         private Button btnAddItem, btnRemItem;
         private NumericUpDown numCusto;
         private CheckBox chkHabilitarSite, chkDestaque;
+        private PictureBox picMarmita;
+
+        // Complement groups (shown as selection options on the website, e.g. "Escolha seu Arroz")
+        private readonly List<(int CodGrupo, string NomeGrupo)> _complementosGrupo
+            = new List<(int, string)>();
+        private ComboBox cmbGrupoComp;
+        private ListBox  lstGruposComp;
+        private Panel    pnlComplementos;
+        private Label lblMarmitaImagem;
 
         public frmCadastroMarmita()
         {
             InitUI();
             if (System.ComponentModel.LicenseManager.UsageMode
                     == System.ComponentModel.LicenseUsageMode.Designtime) return;
-            Load += (_, __) => { CarregarProdutos(); CarregarGrid(); };
+            Load += (_, __) => { CarregarProdutos(); CarregarGrid(); CarregarGruposCombo(); };
         }
 
         // ── Construção da UI ─────────────────────────────────────────────────
@@ -81,11 +96,14 @@ namespace Pedeai.Forms
             btnNovaMAR.Click += BtnNova_Click;
             btnExcluir = MkBtn("Excluir", ClrRed, 100);
             btnExcluir.Click += BtnExcluir_Click;
+            var btnSincSite = MkBtn("\u2601 Sincronizar Site", Color.FromArgb(30, 120, 200), 140);
+            btnSincSite.Click += BtnSincSite_Click;
             btnFechar = MkBtn("Fechar", ClrBrown, 90);
             btnFechar.Click += (_, __) => Close();
-            btnExcluir.Left = 176; btnFechar.Left = 284;
+            btnExcluir.Left = 176; btnSincSite.Left = 284; btnFechar.Left = 432;
             pnlTool.Controls.Add(btnNovaMAR);
             pnlTool.Controls.Add(btnExcluir);
+            pnlTool.Controls.Add(btnSincSite);
             pnlTool.Controls.Add(btnFechar);
 
             // ── Grid marmitas ─────────────────────────────────────────────
@@ -187,6 +205,82 @@ namespace Pedeai.Forms
             pnlOpcoes.Controls.Add(chkHabilitarSite);
             pnlOpcoes.Controls.Add(chkDestaque);
 
+            // Row 4: Image picker
+            var pnlImgRow = new Panel { Dock = DockStyle.Top, Height = 90, BackColor = ClrFoot };
+            picMarmita = new PictureBox
+            {
+                Left = 0, Top = 5, Width = 72, Height = 72,
+                SizeMode = PictureBoxSizeMode.Normal,
+                BorderStyle = BorderStyle.None,
+                BackColor = Color.FromArgb(220, 210, 190)
+            };
+            picMarmita.Paint += PicMarmita_Paint;
+            var btnMarmitaImagem = new Button
+            {
+                Text = "\U0001F5BC Imagem da Marmita",
+                Left = 82, Top = 10, Width = 175, Height = 28,
+                BackColor = ClrOrange, ForeColor = Color.White,
+                FlatStyle = FlatStyle.Flat, Cursor = Cursors.Hand,
+                Font = new Font("Segoe UI", 8.5F, FontStyle.Bold)
+            };
+            btnMarmitaImagem.FlatAppearance.BorderSize = 0;
+            btnMarmitaImagem.Click += BtnMarmitaImagem_Click;
+            lblMarmitaImagem = new Label
+            {
+                Left = 82, Top = 44, Width = 250, AutoSize = false, Height = 18,
+                Text = "Nenhuma imagem selecionada",
+                ForeColor = Color.FromArgb(120, 100, 60),
+                Font = new Font("Segoe UI", 8F)
+            };
+            pnlImgRow.Controls.Add(picMarmita);
+            pnlImgRow.Controls.Add(btnMarmitaImagem);
+            pnlImgRow.Controls.Add(lblMarmitaImagem);
+
+            // ── Row 5: Complement groups ─────────────────────────────────
+            pnlComplementos = new Panel { Dock = DockStyle.Top, Height = 130, BackColor = ClrFoot, Padding = new Padding(4) };
+            var lblCompTit = new Label
+            {
+                Text = "Grupos de Complementos (site):",
+                ForeColor = Color.FromArgb(80, 60, 30),
+                Font = new Font("Segoe UI", 8.5F, FontStyle.Bold),
+                Left = 4, Top = 4, AutoSize = true
+            };
+            cmbGrupoComp = new ComboBox
+            {
+                Left = 4, Top = 22, Width = 190, DropDownStyle = ComboBoxStyle.DropDownList,
+                BackColor = Color.White, ForeColor = ClrText,
+                Font = new Font("Segoe UI", 9F)
+            };
+            var btnAddComp = new Button
+            {
+                Text = "+ Adicionar", Left = 200, Top = 22, Width = 88, Height = 24,
+                BackColor = ClrOrange, ForeColor = Color.White,
+                FlatStyle = FlatStyle.Flat, Cursor = Cursors.Hand,
+                Font = new Font("Segoe UI", 8F, FontStyle.Bold)
+            };
+            btnAddComp.FlatAppearance.BorderSize = 0;
+            btnAddComp.Click += BtnAddComp_Click;
+            lstGruposComp = new ListBox
+            {
+                Left = 4, Top = 52, Width = 284, Height = 72,
+                BackColor = Color.White, ForeColor = ClrText,
+                Font = new Font("Segoe UI", 9F), BorderStyle = BorderStyle.FixedSingle
+            };
+            var btnRemComp = new Button
+            {
+                Text = "Remover", Left = 294, Top = 52, Width = 75, Height = 24,
+                BackColor = ClrRed, ForeColor = Color.White,
+                FlatStyle = FlatStyle.Flat, Cursor = Cursors.Hand,
+                Font = new Font("Segoe UI", 8F, FontStyle.Bold)
+            };
+            btnRemComp.FlatAppearance.BorderSize = 0;
+            btnRemComp.Click += BtnRemComp_Click;
+            pnlComplementos.Controls.Add(lblCompTit);
+            pnlComplementos.Controls.Add(cmbGrupoComp);
+            pnlComplementos.Controls.Add(btnAddComp);
+            pnlComplementos.Controls.Add(lstGruposComp);
+            pnlComplementos.Controls.Add(btnRemComp);
+
             var pnlBtns = new Panel { Dock = DockStyle.Bottom, Height = 34 };
             btnSalvar = MkBtn("Salvar", ClrGreen, 100);
             btnSalvar.Click += BtnSalvar_Click;
@@ -196,8 +290,10 @@ namespace Pedeai.Forms
             pnlBtns.Controls.Add(btnSalvar);
             pnlBtns.Controls.Add(btnCancelar);
 
-            pnlForm.Height = 200;
+            pnlForm.Height = 430;
             pnlForm.Controls.Add(pnlBtns);
+            pnlForm.Controls.Add(pnlComplementos);
+            pnlForm.Controls.Add(pnlImgRow);
             pnlForm.Controls.Add(pnlOpcoes);
             pnlForm.Controls.Add(pnlFields);
             pnlForm.Controls.Add(pnlRowDesc);
@@ -369,8 +465,15 @@ namespace Pedeai.Forms
             numCusto.Value           = obj.marCusto > numCusto.Maximum ? numCusto.Maximum : obj.marCusto;
             chkHabilitarSite.Checked = obj.marHabilitar_Site;
             chkDestaque.Checked      = obj.marDestaque;
+            // Keep existing URL in _marmitaImagemPath so it is preserved on save
+            _marmitaImagemPath = obj.marImagem_Url ?? "";
+            _marmitaPreviewImg?.Dispose(); _marmitaPreviewImg = null;
+            lblMarmitaImagem.Text = !string.IsNullOrWhiteSpace(_marmitaImagemPath)
+                ? System.IO.Path.GetFileName(_marmitaImagemPath) : "Nenhuma imagem selecionada";
+            picMarmita.Refresh();
             lblFormTitulo.Text       = "Editar Marmita";
             pnlForm.Visible          = true;
+            CarregarComplementosDoDb(cod);
             txtDescricao.Focus();
         }
 
@@ -382,13 +485,59 @@ namespace Pedeai.Forms
             numCusto.Value           = 0;
             chkHabilitarSite.Checked = false;
             chkDestaque.Checked      = false;
+            _marmitaImagemPath       = "";
+            _marmitaPreviewImg?.Dispose(); _marmitaPreviewImg = null;
+            lblMarmitaImagem.Text    = "Nenhuma imagem selecionada";
+            picMarmita.Refresh();
+            _complementosGrupo.Clear();
+            lstGruposComp?.Items.Clear();
             lblFormTitulo.Text       = "Nova Marmita";
             pnlForm.Visible          = true;
             txtDescricao.Focus();
         }
 
+        private void PicMarmita_Paint(object sender, PaintEventArgs e)
+        {
+            var g = e.Graphics;
+            g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+            g.Clear(picMarmita.BackColor);
+            if (_marmitaPreviewImg == null) return;
+            using var path = new System.Drawing.Drawing2D.GraphicsPath();
+            path.AddEllipse(0, 0, picMarmita.Width - 1, picMarmita.Height - 1);
+            g.SetClip(path);
+            g.DrawImage(_marmitaPreviewImg, 0, 0, picMarmita.Width, picMarmita.Height);
+        }
+
+        private void BtnMarmitaImagem_Click(object sender, EventArgs e)
+        {
+            using var dlgImg = new OpenFileDialog
+            {
+                Title  = "Selecionar imagem da marmita",
+                Filter = "Imagens|*.jpg;*.jpeg;*.png;*.bmp;*.gif;*.webp"
+            };
+            if (dlgImg.ShowDialog() != DialogResult.OK) return;
+            _marmitaImagemPath = dlgImg.FileName;
+            try
+            {
+                _marmitaPreviewImg?.Dispose();
+                using var tmp = System.Drawing.Image.FromFile(_marmitaImagemPath);
+                _marmitaPreviewImg = new Bitmap(tmp);
+                picMarmita.Refresh();
+                lblMarmitaImagem.Text = System.IO.Path.GetFileName(_marmitaImagemPath);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Erro ao carregar imagem: " + ex.Message);
+                _marmitaImagemPath = "";
+            }
+        }
+
         private void BtnSalvar_Click(object sender, EventArgs e)
         {
+            // Only persist HTTP URLs to MySQL; local paths are handled by the Upload method
+            string urlParaSalvar = _marmitaImagemPath?.StartsWith("http", StringComparison.OrdinalIgnoreCase) == true
+                ? _marmitaImagemPath : "";
+
             var obj = new Marmita
             {
                 Codigo            = _codigoEditando,
@@ -397,17 +546,31 @@ namespace Pedeai.Forms
                 marCusto          = numCusto.Value,
                 marHabilitar_Site = chkHabilitarSite.Checked,
                 marDestaque       = chkDestaque.Checked,
+                marImagem_Url     = urlParaSalvar,
                 Situacao          = 'A'
             };
             var erro = _bll.Salvar(obj);
             if (!string.IsNullOrEmpty(erro)) { MessageBox.Show(erro, "Erro", MessageBoxButtons.OK, MessageBoxIcon.Error); return; }
             pnlForm.Visible = false;
             int savedCod = _codigoEditando > 0 ? _codigoEditando : obj.Codigo;
+            string imagemPath = _marmitaImagemPath;
+            var complementosSalvos = new List<(int CodGrupo, string NomeGrupo)>(_complementosGrupo);
             _codigoEditando = 0;
+            _marmitaImagemPath = "";
+            _complementosGrupo.Clear();
+            lstGruposComp?.Items.Clear();
             CarregarGrid();
             if (savedCod > 0)
+            {
+                SalvarComplementosNoDb(savedCod, complementosSalvos);
                 System.Threading.Tasks.Task.Run(async () =>
-                    await DB.SupabaseService.SincronizarMarmitaAsync(savedCod));
+                {
+                    if (!string.IsNullOrWhiteSpace(imagemPath))
+                        await DB.SupabaseService.UploadMarmitaImagemAsync(savedCod, imagemPath);
+                    await DB.SupabaseService.SincronizarMarmitaAsync(savedCod);
+                    await DB.SupabaseService.SincronizarComplementosMarmitaAsync(savedCod);
+                });
+            }
         }
 
         private void BtnExcluir_Click(object sender, EventArgs e)
@@ -420,6 +583,32 @@ namespace Pedeai.Forms
             if (!string.IsNullOrEmpty(erro)) { MessageBox.Show(erro); return; }
             CarregarGrid();
             gridItens.DataSource = null;
+        }
+
+        private async void BtnSincSite_Click(object sender, EventArgs e)
+        {
+            int cod = GetSelectedMarmitaCod();
+            if (cod <= 0) { MessageBox.Show("Selecione uma marmita para sincronizar."); return; }
+            var btn = (Button)sender;
+            btn.Enabled = false;
+            btn.Text    = "Sincronizando...";
+            try
+            {
+                await DB.SupabaseService.SincronizarMarmitaAsync(cod);
+                await DB.SupabaseService.SincronizarComplementosMarmitaAsync(cod);
+                MessageBox.Show("Marmita sincronizada com o site com sucesso!", "Sincronização",
+                    MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Erro na sincronização: " + ex.Message, "Erro",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            finally
+            {
+                btn.Enabled = true;
+                btn.Text    = "\u2601 Sincronizar Site";
+            }
         }
 
         private void BtnAddItem_Click(object sender, EventArgs e)
@@ -493,6 +682,10 @@ namespace Pedeai.Forms
             var erro = _bll.AdicionarItem(item);
             if (!string.IsNullOrEmpty(erro)) { MessageBox.Show(erro); return; }
             CarregarItens(codMar);
+            // Sync updated items to Supabase (so the website shows the new option)
+            int codMarSync = codMar;
+            System.Threading.Tasks.Task.Run(async () =>
+                await DB.SupabaseService.SincronizarComplementosMarmitaAsync(codMarSync));
         }
 
         private void BtnRemItem_Click(object sender, EventArgs e)
@@ -503,13 +696,118 @@ namespace Pedeai.Forms
             int cod = Convert.ToInt32(val);
             var erro = _bll.RemoverItem(cod);
             if (!string.IsNullOrEmpty(erro)) { MessageBox.Show(erro); return; }
-            CarregarItens(GetSelectedMarmitaCod());
+            int codMarSync = GetSelectedMarmitaCod();
+            CarregarItens(codMarSync);
+            // Sync updated items to Supabase
+            System.Threading.Tasks.Task.Run(async () =>
+                await DB.SupabaseService.SincronizarComplementosMarmitaAsync(codMarSync));
         }
 
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
         {
             if (keyData == Keys.Escape) { if (pnlForm.Visible) pnlForm.Visible = false; else Close(); return true; }
             return base.ProcessCmdKey(ref msg, keyData);
+        }
+
+        // ── Complementos (grupos de ingredientes para o site) ─────────────────
+
+        private void CarregarGruposCombo()
+        {
+            try
+            {
+                cmbGrupoComp.Items.Clear();
+                var bll = new GrupoMercadoriaBLL();
+                var dt = bll.Listar(true);
+                foreach (System.Data.DataRow r in dt.Rows)
+                    cmbGrupoComp.Items.Add(new GrupoItem(Convert.ToInt32(r["Codigo"]), r["Nome"]?.ToString() ?? ""));
+                if (cmbGrupoComp.Items.Count > 0) cmbGrupoComp.SelectedIndex = 0;
+            }
+            catch { }
+        }
+
+        private void CarregarComplementosDoDb(int codigoMarmita)
+        {
+            _complementosGrupo.Clear();
+            lstGruposComp?.Items.Clear();
+            if (codigoMarmita <= 0) return;
+            try
+            {
+                using var conn = new MySqlConnection(ConfigurationManager.AppSettings["ConnectionString"]);
+                conn.Open();
+                using var cmd = new MySqlCommand(
+                    "SELECT mcg.Codigo_Grupo, COALESCE(gm.grmeNome,'') AS Nome " +
+                    "FROM marmita_complemento_grupo mcg " +
+                    "LEFT JOIN grupo_mercadoria gm ON gm.Codigo=mcg.Codigo_Grupo " +
+                    "WHERE mcg.Codigo_Marmita=@cod ORDER BY mcg.Codigo", conn);
+                cmd.Parameters.AddWithValue("@cod", codigoMarmita);
+                using var dr = cmd.ExecuteReader();
+                while (dr.Read())
+                {
+                    var item = (dr.GetInt32(0), dr.GetString(1));
+                    _complementosGrupo.Add(item);
+                }
+                AtualizarListaComplementos();
+            }
+            catch (Exception ex) { Logger.Log("frmCadastroMarmita", "CarregarComplementosDoDb", "Erro", ex); }
+        }
+
+        private void AtualizarListaComplementos()
+        {
+            lstGruposComp.Items.Clear();
+            foreach (var (cod, nome) in _complementosGrupo)
+                lstGruposComp.Items.Add($"{nome}|{cod}");
+        }
+
+        private void BtnAddComp_Click(object sender, EventArgs e)
+        {
+            if (!(cmbGrupoComp.SelectedItem is GrupoItem g)) return;
+            if (_complementosGrupo.Exists(x => x.CodGrupo == g.Codigo)) return;
+            _complementosGrupo.Add((g.Codigo, g.Nome));
+            AtualizarListaComplementos();
+        }
+
+        private void BtnRemComp_Click(object sender, EventArgs e)
+        {
+            if (lstGruposComp.SelectedItem == null) return;
+            var parts = lstGruposComp.SelectedItem.ToString()?.Split('|');
+            if (parts?.Length >= 2 && int.TryParse(parts[^1], out int cod))
+                _complementosGrupo.RemoveAll(x => x.CodGrupo == cod);
+            AtualizarListaComplementos();
+        }
+
+        private void SalvarComplementosNoDb(int codigoMarmita,
+            List<(int CodGrupo, string NomeGrupo)> grupos)
+        {
+            try
+            {
+                using var conn = new MySqlConnection(ConfigurationManager.AppSettings["ConnectionString"]);
+                conn.Open();
+                // Remove all existing links then re-insert
+                using (var del = new MySqlCommand(
+                    "DELETE FROM marmita_complemento_grupo WHERE Codigo_Marmita=@cod", conn))
+                {
+                    del.Parameters.AddWithValue("@cod", codigoMarmita);
+                    del.ExecuteNonQuery();
+                }
+                foreach (var (codGrupo, nomeGrupo) in grupos)
+                {
+                    using var ins = new MySqlCommand(
+                        "INSERT INTO marmita_complemento_grupo (Codigo_Marmita, Codigo_Grupo, grmeDescricao) " +
+                        "VALUES(@m, @g, @n)", conn);
+                    ins.Parameters.AddWithValue("@m", codigoMarmita);
+                    ins.Parameters.AddWithValue("@g", codGrupo);
+                    ins.Parameters.AddWithValue("@n", nomeGrupo);
+                    ins.ExecuteNonQuery();
+                }
+            }
+            catch (Exception ex) { Logger.Log("frmCadastroMarmita", "SalvarComplementosNoDb", "Erro", ex); }
+        }
+
+        private class GrupoItem
+        {
+            public int Codigo; public string Nome;
+            public GrupoItem(int c, string n) { Codigo = c; Nome = n; }
+            public override string ToString() => Nome;
         }
     }
 }
