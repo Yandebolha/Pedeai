@@ -51,8 +51,8 @@ namespace Pedeai.DAL
                 obj.Codigo    = ProximoCodigo("bairro", conn);
                 obj.auxCodigo = 1;
                 using var cmd = new MySqlCommand(
-                    "INSERT INTO bairro (Codigo, auxCodigo, baiCidade, baiNome, baiTaxa_Entrega, Situacao) " +
-                    "VALUES(@cod, @aux, @cid, @nom, @taxa, @sit)", conn);
+                    "INSERT INTO bairro (Codigo, auxCodigo, baiCidade, baiNome, baiTaxa_Entrega, baiCEP, Situacao) " +
+                    "VALUES(@cod, @aux, @cid, @nom, @taxa, @cep, @sit)", conn);
                 BindParams(cmd, obj);
                 cmd.ExecuteNonQuery();
                 return "";
@@ -66,7 +66,7 @@ namespace Pedeai.DAL
             {
                 using var conn = AbrirConexao();
                 using var cmd = new MySqlCommand(
-                    "UPDATE bairro SET baiCidade=@cid, baiNome=@nom, baiTaxa_Entrega=@taxa, Situacao=@sit " +
+                    "UPDATE bairro SET baiCidade=@cid, baiNome=@nom, baiTaxa_Entrega=@taxa, baiCEP=@cep, Situacao=@sit " +
                     "WHERE Codigo=@cod", conn);
                 BindParams(cmd, obj);
                 cmd.ExecuteNonQuery();
@@ -82,6 +82,7 @@ namespace Pedeai.DAL
             cmd.Parameters.AddWithValue("@cid",  obj.baiCidade ?? "");
             cmd.Parameters.AddWithValue("@nom",  obj.baiNome ?? "");
             cmd.Parameters.AddWithValue("@taxa", obj.baiTaxa_Entrega);
+            cmd.Parameters.AddWithValue("@cep",  obj.baiCEP ?? "");
             cmd.Parameters.AddWithValue("@sit",  obj.Situacao ?? "A");
         }
 
@@ -92,7 +93,13 @@ namespace Pedeai.DAL
             baiCidade       = r["baiCidade"]?.ToString() ?? "",
             baiNome         = r["baiNome"]?.ToString() ?? "",
             baiTaxa_Entrega = r["baiTaxa_Entrega"] == DBNull.Value ? 0 : Convert.ToDecimal(r["baiTaxa_Entrega"]),
+            baiCEP          = TryGet(r, "baiCEP"),
             Situacao        = r["Situacao"]?.ToString() ?? "A",
         };
+
+        private static string TryGet(MySqlDataReader r, string col)
+        {
+            try { return r[col]?.ToString() ?? ""; } catch { return ""; }
+        }
     }
 }

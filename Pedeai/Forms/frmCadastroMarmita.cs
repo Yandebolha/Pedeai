@@ -42,6 +42,7 @@ namespace Pedeai.Forms
         private Button btnNovaMAR, btnSalvar, btnExcluir, btnFechar;
         private Button btnAddItem, btnRemItem;
         private NumericUpDown numCusto;
+        private CheckBox chkHabilitarSite, chkDestaque;
 
         public frmCadastroMarmita()
         {
@@ -171,6 +172,21 @@ namespace Pedeai.Forms
             pnlFields.Controls.Add(lblVal);
             pnlFields.Controls.Add(numValor);
 
+            // Row 3: Site checkboxes
+            var pnlOpcoes = new Panel { Dock = DockStyle.Top, Height = 32, BackColor = ClrFoot };
+            chkHabilitarSite = new CheckBox
+            {
+                Text = "Habilitar no Site", Left = 0, Top = 6, AutoSize = true,
+                ForeColor = ClrText, Font = new Font("Segoe UI", 9F)
+            };
+            chkDestaque = new CheckBox
+            {
+                Text = "Destaque", Left = 150, Top = 6, AutoSize = true,
+                ForeColor = ClrText, Font = new Font("Segoe UI", 9F)
+            };
+            pnlOpcoes.Controls.Add(chkHabilitarSite);
+            pnlOpcoes.Controls.Add(chkDestaque);
+
             var pnlBtns = new Panel { Dock = DockStyle.Bottom, Height = 34 };
             btnSalvar = MkBtn("Salvar", ClrGreen, 100);
             btnSalvar.Click += BtnSalvar_Click;
@@ -180,7 +196,9 @@ namespace Pedeai.Forms
             pnlBtns.Controls.Add(btnSalvar);
             pnlBtns.Controls.Add(btnCancelar);
 
+            pnlForm.Height = 200;
             pnlForm.Controls.Add(pnlBtns);
+            pnlForm.Controls.Add(pnlOpcoes);
             pnlForm.Controls.Add(pnlFields);
             pnlForm.Controls.Add(pnlRowDesc);
             pnlForm.Controls.Add(lblFormTitulo);
@@ -345,23 +363,27 @@ namespace Pedeai.Forms
             if (cod <= 0) return;
             var obj = _bll.PesquisaCodigo(cod);
             if (obj == null) return;
-            _codigoEditando      = cod;
-            txtDescricao.Text    = obj.marDescricao;
-            numValor.Value       = obj.marValor > numValor.Maximum ? numValor.Maximum : obj.marValor;
-            numCusto.Value       = obj.marCusto > numCusto.Maximum ? numCusto.Maximum : obj.marCusto;
-            lblFormTitulo.Text   = "Editar Marmita";
-            pnlForm.Visible      = true;
+            _codigoEditando          = cod;
+            txtDescricao.Text        = obj.marDescricao;
+            numValor.Value           = obj.marValor > numValor.Maximum ? numValor.Maximum : obj.marValor;
+            numCusto.Value           = obj.marCusto > numCusto.Maximum ? numCusto.Maximum : obj.marCusto;
+            chkHabilitarSite.Checked = obj.marHabilitar_Site;
+            chkDestaque.Checked      = obj.marDestaque;
+            lblFormTitulo.Text       = "Editar Marmita";
+            pnlForm.Visible          = true;
             txtDescricao.Focus();
         }
 
         private void BtnNova_Click(object sender, EventArgs e)
         {
             _codigoEditando = 0;
-            txtDescricao.Text  = "";
-            numValor.Value     = 0;
-            numCusto.Value     = 0;
-            lblFormTitulo.Text = "Nova Marmita";
-            pnlForm.Visible    = true;
+            txtDescricao.Text        = "";
+            numValor.Value           = 0;
+            numCusto.Value           = 0;
+            chkHabilitarSite.Checked = false;
+            chkDestaque.Checked      = false;
+            lblFormTitulo.Text       = "Nova Marmita";
+            pnlForm.Visible          = true;
             txtDescricao.Focus();
         }
 
@@ -369,17 +391,23 @@ namespace Pedeai.Forms
         {
             var obj = new Marmita
             {
-                Codigo       = _codigoEditando,
-                marDescricao = txtDescricao.Text.Trim(),
-                marValor     = numValor.Value,
-                marCusto     = numCusto.Value,
-                Situacao     = 'A'
+                Codigo            = _codigoEditando,
+                marDescricao      = txtDescricao.Text.Trim(),
+                marValor          = numValor.Value,
+                marCusto          = numCusto.Value,
+                marHabilitar_Site = chkHabilitarSite.Checked,
+                marDestaque       = chkDestaque.Checked,
+                Situacao          = 'A'
             };
             var erro = _bll.Salvar(obj);
             if (!string.IsNullOrEmpty(erro)) { MessageBox.Show(erro, "Erro", MessageBoxButtons.OK, MessageBoxIcon.Error); return; }
             pnlForm.Visible = false;
+            int savedCod = _codigoEditando > 0 ? _codigoEditando : obj.Codigo;
             _codigoEditando = 0;
             CarregarGrid();
+            if (savedCod > 0)
+                System.Threading.Tasks.Task.Run(async () =>
+                    await DB.SupabaseService.SincronizarMarmitaAsync(savedCod));
         }
 
         private void BtnExcluir_Click(object sender, EventArgs e)

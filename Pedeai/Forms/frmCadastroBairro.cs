@@ -65,15 +65,50 @@ namespace Pedeai.Forms
             return base.ProcessCmdKey(ref msg, keyData);
         }
 
+        private async void TxtCEP_Leave(object sender, EventArgs e) => await BuscarCepViaCep();
+
+        private void TxtCEP_TextChanged(object sender, EventArgs e)
+        {
+            var digits = new string(System.Array.FindAll(txtCEP.Text.ToCharArray(), char.IsDigit));
+            // Format as 00000-000 while typing
+            if (digits.Length > 5)
+            {
+                string fmt = digits.Substring(0, 5) + "-" + digits.Substring(5, Math.Min(3, digits.Length - 5));
+                if (txtCEP.Text != fmt) { txtCEP.Text = fmt; txtCEP.SelectionStart = fmt.Length; }
+            }
+            if (digits.Length == 8)
+                _ = BuscarCepViaCep();
+        }
+
+        private async System.Threading.Tasks.Task BuscarCepViaCep()
+        {
+            var cep = new string(System.Array.FindAll(txtCEP.Text.ToCharArray(), char.IsDigit));
+            if (cep.Length != 8) return;
+            try
+            {
+                using var http = new System.Net.Http.HttpClient { Timeout = TimeSpan.FromSeconds(6) };
+                var json = await http.GetStringAsync("https://viacep.com.br/ws/" + cep + "/json/");
+                var obj  = Newtonsoft.Json.Linq.JObject.Parse(json);
+                if (obj["erro"] == null)
+                {
+                    txtCidade.Text = obj["localidade"]?.ToString() ?? txtCidade.Text;
+                    txtBairro.Text = obj["bairro"]?.ToString()     ?? txtBairro.Text;
+                    numTaxa.Focus();
+                }
+            }
+            catch { }
+        }
+
         private void ModoNovo()
         {
             _codigoEditando = 0;
+            txtCEP.Clear();
             txtCidade.Clear();
             txtBairro.Clear();
             numTaxa.Value = 0;
             cmbSituacao.SelectedItem = "A";
             pnlForm.Visible = true;
-            txtCidade.Focus();
+            txtCEP.Focus();
         }
 
         private void CarregarParaEditar()
@@ -86,6 +121,7 @@ namespace Pedeai.Forms
             txtCidade.Text       = obj.baiCidade ?? "";
             txtBairro.Text       = obj.baiNome ?? "";
             numTaxa.Value        = obj.baiTaxa_Entrega;
+            txtCEP.Text          = obj.baiCEP ?? "";
             cmbSituacao.SelectedItem = obj.Situacao ?? "A";
             pnlForm.Visible      = true;
             txtBairro.Focus();
@@ -107,6 +143,7 @@ namespace Pedeai.Forms
                 baiCidade       = txtCidade.Text.Trim(),
                 baiNome         = txtBairro.Text.Trim(),
                 baiTaxa_Entrega = numTaxa.Value,
+                baiCEP          = txtCEP.Text.Replace("-", "").Trim(),
                 Situacao        = _codigoEditando == 0 ? "A" : (cmbSituacao.SelectedItem?.ToString() ?? "A"),
             };
             var erro = _bll.Salvar(obj);
@@ -114,6 +151,27 @@ namespace Pedeai.Forms
             pnlForm.Visible = false;
             _codigoEditando = 0;
             Carregar();
+            // Sync to Supabase in background
+            if (!string.IsNullOrWhiteSpace(obj.baiCEP))
+            {
+                int codSalvo = obj.Codigo > 0 ? obj.Codigo : BuscarCodigoRecem(obj.baiCidade, obj.baiNome);
+                if (codSalvo > 0)
+                    System.Threading.Tasks.Task.Run(async () =>
+                        await DB.SupabaseService.SincronizarBairroAsync(codSalvo));
+            }
+        }
+
+        private int BuscarCodigoRecem(string cidade, string nome)
+        {
+            try
+            {
+                var bairro = _bll.Listar();
+                foreach (System.Data.DataRow r in bairro.Rows)
+                    if (r["Cidade"]?.ToString() == cidade && r["Bairro"]?.ToString() == nome)
+                        return Convert.ToInt32(r["Codigo"]);
+            }
+            catch { }
+            return 0;
         }
 
         private void BtnCancelar_Click(object sender, EventArgs e)

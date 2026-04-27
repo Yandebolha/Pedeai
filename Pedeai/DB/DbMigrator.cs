@@ -669,6 +669,36 @@ namespace Pedeai.DB
                     }
                 }
 
+                // ── Integração Supabase: colunas supabase_uuid ───────────────
+                AddColumnIfNotExists(conn, db, "grupo_mercadoria", "supabase_uuid",
+                    "VARCHAR(50) NOT NULL DEFAULT ''");
+                AddColumnIfNotExists(conn, db, "mercadoria", "supabase_uuid",
+                    "VARCHAR(50) NOT NULL DEFAULT ''");
+                AddColumnIfNotExists(conn, db, "marmita", "supabase_uuid",
+                    "VARCHAR(50) NOT NULL DEFAULT ''");
+                AddColumnIfNotExists(conn, db, "marmita", "marHabilitar_Site",
+                    "TINYINT(1) NOT NULL DEFAULT 0");
+                AddColumnIfNotExists(conn, db, "marmita", "marDestaque",
+                    "TINYINT(1) NOT NULL DEFAULT 0");
+                AddColumnIfNotExists(conn, db, "cupom", "supabase_uuid",
+                    "VARCHAR(50) NOT NULL DEFAULT ''");
+                AddColumnIfNotExists(conn, db, "bairro", "supabase_uuid",
+                    "VARCHAR(50) NOT NULL DEFAULT ''");
+                AddColumnIfNotExists(conn, db, "bairro", "baiCEP",
+                    "VARCHAR(10) NOT NULL DEFAULT ''");
+                AddColumnIfNotExists(conn, db, "pedido_web", "pediSupabase_Id",
+                    "VARCHAR(50) NOT NULL DEFAULT ''");
+                AddColumnIfNotExists(conn, db, "cliente", "supabase_uuid",
+                    "VARCHAR(50) NOT NULL DEFAULT ''");
+
+                // ── Supabase integration: grupo_mercadoria ────────────────────
+                AddColumnIfNotExists(conn, db, "grupo_mercadoria", "grmeHabilitar_Site",
+                    "TINYINT(1) NOT NULL DEFAULT 0");
+                AddColumnIfNotExists(conn, db, "grupo_mercadoria", "grmeImagem_Url",
+                    "VARCHAR(500) NOT NULL DEFAULT ''");
+                AddColumnIfNotExists(conn, db, "grupo_mercadoria", "supabase_uuid",
+                    "VARCHAR(50) NOT NULL DEFAULT ''"  );
+
                 return true;
             }
             catch (Exception ex)

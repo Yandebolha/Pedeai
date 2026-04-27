@@ -30,13 +30,21 @@ namespace Pedeai.DAL
             if (!r.Read()) return null;
             return new Marmita
             {
-                Codigo       = Convert.ToInt32(r["Codigo"]),
-                auxCodigo    = Convert.ToInt32(r["auxCodigo"]),
-                marDescricao = r["marDescricao"]?.ToString() ?? "",
-                marValor     = Convert.ToDecimal(r["marValor"]),
-                marCusto     = r["marCusto"] == DBNull.Value ? 0m : Convert.ToDecimal(r["marCusto"]),
-                Situacao     = (r["Situacao"]?.ToString() ?? "A")[0]
+                Codigo           = Convert.ToInt32(r["Codigo"]),
+                auxCodigo        = Convert.ToInt32(r["auxCodigo"]),
+                marDescricao     = r["marDescricao"]?.ToString() ?? "",
+                marValor         = Convert.ToDecimal(r["marValor"]),
+                marCusto         = r["marCusto"] == DBNull.Value ? 0m : Convert.ToDecimal(r["marCusto"]),
+                marHabilitar_Site = r["marHabilitar_Site"] != DBNull.Value && Convert.ToBoolean(r["marHabilitar_Site"]),
+                marDestaque      = r["marDestaque"] != DBNull.Value && Convert.ToBoolean(r["marDestaque"]),
+                supabase_uuid    = TryGetString(r, "supabase_uuid"),
+                Situacao         = (r["Situacao"]?.ToString() ?? "A")[0]
             };
+        }
+
+        private static string TryGetString(MySqlDataReader r, string col)
+        {
+            try { return r[col]?.ToString() ?? ""; } catch { return ""; }
         }
 
         public string Incluir(Marmita obj)
@@ -47,13 +55,16 @@ namespace Pedeai.DAL
                 obj.Codigo    = ProximoCodigo("marmita", conn);
                 obj.auxCodigo = ProximoAuxCodigo("marmita", conn);
                 using var cmd = new MySqlCommand(@"
-                    INSERT INTO marmita (Codigo, auxCodigo, marDescricao, marValor, marCusto, Situacao)
-                    VALUES (@cod, @aux, @desc, @val, @cst, @sit)", conn);
+                    INSERT INTO marmita (Codigo, auxCodigo, marDescricao, marValor, marCusto,
+                                        marHabilitar_Site, marDestaque, Situacao)
+                    VALUES (@cod, @aux, @desc, @val, @cst, @site, @dest, @sit)", conn);
                 cmd.Parameters.AddWithValue("@cod",  obj.Codigo);
                 cmd.Parameters.AddWithValue("@aux",  obj.auxCodigo);
                 cmd.Parameters.AddWithValue("@desc", obj.marDescricao);
                 cmd.Parameters.AddWithValue("@val",  obj.marValor);
                 cmd.Parameters.AddWithValue("@cst",  obj.marCusto);
+                cmd.Parameters.AddWithValue("@site", obj.marHabilitar_Site ? 1 : 0);
+                cmd.Parameters.AddWithValue("@dest", obj.marDestaque ? 1 : 0);
                 cmd.Parameters.AddWithValue("@sit",  obj.Situacao.ToString());
                 cmd.ExecuteNonQuery();
                 return "";
@@ -67,11 +78,14 @@ namespace Pedeai.DAL
             {
                 using var conn = AbrirConexao();
                 using var cmd = new MySqlCommand(@"
-                    UPDATE marmita SET marDescricao=@desc, marValor=@val, marCusto=@cst, Situacao=@sit
+                    UPDATE marmita SET marDescricao=@desc, marValor=@val, marCusto=@cst,
+                                      marHabilitar_Site=@site, marDestaque=@dest, Situacao=@sit
                     WHERE Codigo=@cod", conn);
                 cmd.Parameters.AddWithValue("@desc", obj.marDescricao);
                 cmd.Parameters.AddWithValue("@val",  obj.marValor);
                 cmd.Parameters.AddWithValue("@cst",  obj.marCusto);
+                cmd.Parameters.AddWithValue("@site", obj.marHabilitar_Site ? 1 : 0);
+                cmd.Parameters.AddWithValue("@dest", obj.marDestaque ? 1 : 0);
                 cmd.Parameters.AddWithValue("@sit",  obj.Situacao.ToString());
                 cmd.Parameters.AddWithValue("@cod",  obj.Codigo);
                 cmd.ExecuteNonQuery();

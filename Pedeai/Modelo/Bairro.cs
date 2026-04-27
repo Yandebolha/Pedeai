@@ -7,6 +7,7 @@ namespace Pedeai.Modelo
         public string  baiCidade       { get; set; } = "";
         public string  baiNome         { get; set; } = "";
         public decimal baiTaxa_Entrega { get; set; }
+        public string  baiCEP          { get; set; } = "";
         public string  Situacao        { get; set; } = "A";
     }
 }

@@ -114,6 +114,24 @@ namespace Pedeai.Forms
             var erro = _bll.Salvar(obj);
             if (!string.IsNullOrEmpty(erro)) { MessageBox.Show("Erro: " + erro); return; }
             pnlForm.Visible = false; _codigoEditando = 0; CarregarGrid();
+            // Sync to Supabase in background
+            int codSalvo = obj.Codigo > 0 ? obj.Codigo : BuscarCodigoCupom(obj.cupomCodigo);
+            if (codSalvo > 0)
+                System.Threading.Tasks.Task.Run(async () =>
+                    await DB.SupabaseService.SincronizarCupomAsync(codSalvo));
+        }
+
+        private int BuscarCodigoCupom(string codigoCupom)
+        {
+            try
+            {
+                if (_allCupons == null) return 0;
+                foreach (System.Data.DataRow r in _allCupons.Rows)
+                    if (r["Cupom"]?.ToString() == codigoCupom)
+                        return Convert.ToInt32(r["Codigo"]);
+            }
+            catch { }
+            return 0;
         }
 
         private void BtnDesativar_Click(object sender, EventArgs e)

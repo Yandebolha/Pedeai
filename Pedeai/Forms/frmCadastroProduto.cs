@@ -204,6 +204,24 @@ namespace Pedeai.Forms
             var erro = _bll.Salvar(obj);
             if (!string.IsNullOrEmpty(erro)) { MessageBox.Show("Erro: " + erro); return; }
             pnlForm.Visible = false; _codigoEditando = 0; CarregarGrid();
+            // Sync to Supabase in background
+            int codSalvo = obj.Codigo > 0 ? obj.Codigo : BuscarCodigo(obj.mercMercadoria);
+            if (codSalvo > 0)
+                System.Threading.Tasks.Task.Run(async () =>
+                    await DB.SupabaseService.SincronizarProdutoAsync(codSalvo));
+        }
+
+        private int BuscarCodigo(string nome)
+        {
+            try
+            {
+                if (_dtProdutos == null) return 0;
+                foreach (System.Data.DataRow r in _dtProdutos.Rows)
+                    if (r["Nome"]?.ToString() == nome)
+                        return Convert.ToInt32(r["Codigo"]);
+            }
+            catch { }
+            return 0;
         }
 
         private void BtnDesativar_Click(object sender, EventArgs e)

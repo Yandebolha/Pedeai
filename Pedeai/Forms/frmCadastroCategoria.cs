@@ -1,5 +1,8 @@
 using System;
 using System.Drawing;
+using System.Drawing.Drawing2D;
+using System.IO;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using Pedeai.BLL;
 using Pedeai.Modelo;
@@ -12,15 +15,52 @@ namespace Pedeai.Forms
         private int _codigoEditando = 0;
         private System.Data.DataTable _allCategorias;
         private System.Windows.Forms.TextBox _txtBuscaCategoria;
+        private string _imagemPath = "";   // local file path selected by user
 
         public frmCadastroCategoria()
         {
             InitializeComponent();
             if (System.ComponentModel.LicenseManager.UsageMode == System.ComponentModel.LicenseUsageMode.Designtime) return;
             _bll = new GrupoMercadoriaBLL();
+            picImagem.Paint += PicImagem_Paint;
             Load += (_, __) => { AdicionarPainelBusca(); Carregar(); };
         }
 
+        // ── circular clip on picImagem ────────────────────────────────
+        private void PicImagem_Paint(object sender, PaintEventArgs e)
+        {
+            if (picImagem.Image == null) return;
+            var g = e.Graphics;
+            g.SmoothingMode = SmoothingMode.AntiAlias;
+            using var path = new GraphicsPath();
+            path.AddEllipse(0, 0, picImagem.Width - 1, picImagem.Height - 1);
+            g.SetClip(path);
+            g.DrawImage(picImagem.Image, 0, 0, picImagem.Width, picImagem.Height);
+        }
+
+        private void BtnImagem_Click(object sender, EventArgs e)
+        {
+            using var dlg = new OpenFileDialog
+            {
+                Title  = "Selecionar imagem da categoria",
+                Filter = "Imagens|*.jpg;*.jpeg;*.png;*.bmp;*.gif;*.webp"
+            };
+            if (dlg.ShowDialog() != DialogResult.OK) return;
+            _imagemPath = dlg.FileName;
+            try
+            {
+                picImagem.Image = Image.FromFile(_imagemPath);
+                picImagem.Invalidate();
+                lblImagem.Text = Path.GetFileName(_imagemPath);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Erro ao carregar imagem: " + ex.Message);
+                _imagemPath = "";
+            }
+        }
+
+        // ── search panel ──────────────────────────────────────────────
         private void AdicionarPainelBusca()
         {
             var pnlSearch = new System.Windows.Forms.Panel
@@ -73,8 +113,15 @@ namespace Pedeai.Forms
 
         private void ModoNovo()
         {
-            _codigoEditando = 0; txtNome.Clear();
-            pnlForm.Visible = true; txtNome.Focus();
+            _codigoEditando = 0;
+            txtNome.Clear();
+            cmbSituacao.SelectedIndex = 0;
+            chkHabSite.Checked = false;
+            picImagem.Image = null;
+            _imagemPath = "";
+            lblImagem.Text = "Nenhuma imagem selecionada";
+            pnlForm.Visible = true;
+            txtNome.Focus();
         }
 
         private void CarregarParaEditar()
@@ -83,24 +130,57 @@ namespace Pedeai.Forms
             var cod = Convert.ToInt32(grid.SelectedRows[0].Cells["Codigo"].Value);
             var obj = _bll.PesquisaCodigo(cod);
             if (obj == null) return;
-            _codigoEditando = cod;
-            txtNome.Text = obj.grmeDescricao_ ?? "";
+            _codigoEditando    = cod;
+            txtNome.Text       = obj.grmeDescricao_ ?? "";
             cmbSituacao.SelectedItem = obj.Situacao;
-            pnlForm.Visible = true; txtNome.Focus();
+            chkHabSite.Checked = obj.grmeHabilitar_Site;
+            _imagemPath        = "";
+
+            // Show existing image URL as label; we don't download it to preview
+            if (!string.IsNullOrWhiteSpace(obj.grmeImagem_Url))
+            {
+                picImagem.Image = null;
+                lblImagem.Text  = obj.grmeImagem_Url;
+            }
+            else
+            {
+                picImagem.Image = null;
+                lblImagem.Text  = "Nenhuma imagem selecionada";
+            }
+
+            pnlForm.Visible = true;
+            txtNome.Focus();
         }
 
         private void BtnSalvar_Click(object sender, EventArgs e)
         {
             var obj = new GrupoMercadoria
             {
-                Codigo         = _codigoEditando,
-                grmeDescricao_ = txtNome.Text.Trim(),
-                grmeOrdem      = 0,
-                Situacao       = _codigoEditando == 0 ? "A" : (cmbSituacao.SelectedItem?.ToString() ?? "A"),
+                Codigo             = _codigoEditando,
+                grmeDescricao_     = txtNome.Text.Trim(),
+                grmeOrdem          = 0,
+                Situacao           = _codigoEditando == 0 ? "A" : (cmbSituacao.SelectedItem?.ToString() ?? "A"),
+                grmeHabilitar_Site = chkHabSite.Checked,
+                grmeImagem_Url     = string.IsNullOrWhiteSpace(_imagemPath) ? lblImagem.Text.Trim() : _imagemPath,
             };
+
+            // Clear placeholder text so we don't store it
+            if (obj.grmeImagem_Url == "Nenhuma imagem selecionada") obj.grmeImagem_Url = "";
+
             var erro = _bll.Salvar(obj);
             if (!string.IsNullOrEmpty(erro)) { MessageBox.Show("Erro: " + erro); return; }
-            pnlForm.Visible = false; _codigoEditando = 0; Carregar();
+
+            int savedCod = obj.Codigo;   // Incluir/Alterar sets Codigo on obj
+            string savedPath = _imagemPath;
+            pnlForm.Visible = false; _codigoEditando = 0; _imagemPath = ""; Carregar();
+
+            // Sync to Supabase in background — will upload image if local path set
+            Task.Run(async () =>
+            {
+                if (!string.IsNullOrWhiteSpace(savedPath))
+                    await DB.SupabaseService.UploadCategoriaImagemAsync(savedCod, savedPath);
+                await DB.SupabaseService.SincronizarGrupoAsync(savedCod);
+            });
         }
 
         private void BtnDesativar_Click(object sender, EventArgs e)

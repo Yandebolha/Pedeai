@@ -207,6 +207,11 @@ namespace Pedeai.Forms
             };
             var erro = _bll.Salvar(obj);
             if (!string.IsNullOrEmpty(erro)) { MessageBox.Show("Erro: " + erro); return; }
+
+            int savedCod = obj.Codigo;
+            System.Threading.Tasks.Task.Run(async () =>
+                await DB.SupabaseService.SincronizarClienteAsync(savedCod));
+
             pnlForm.Visible = false; _codigoEditando = 0; CarregarGrid();
         }
 

@@ -2,12 +2,15 @@ namespace Pedeai.Modelo
 {
     public class Marmita
     {
-        public int     Codigo       { get; set; }
-        public int     auxCodigo    { get; set; }
-        public string  marDescricao { get; set; } = "";
-        public decimal marValor     { get; set; }
-        public decimal marCusto     { get; set; }
-        public char    Situacao     { get; set; } = 'A';
+        public int     Codigo              { get; set; }
+        public int     auxCodigo           { get; set; }
+        public string  marDescricao        { get; set; } = "";
+        public decimal marValor            { get; set; }
+        public decimal marCusto            { get; set; }
+        public bool    marHabilitar_Site   { get; set; }
+        public bool    marDestaque         { get; set; }
+        public string  supabase_uuid       { get; set; } = "";
+        public char    Situacao            { get; set; } = 'A';
     }
 
     public class MarmitaItem

@@ -37,6 +37,8 @@ namespace Pedeai.Forms
             this.numTaxa     = new System.Windows.Forms.NumericUpDown();
             this.lblSit      = new System.Windows.Forms.Label();
             this.cmbSituacao = new System.Windows.Forms.ComboBox();
+            this.lblCEP      = new System.Windows.Forms.Label();
+            this.txtCEP      = new System.Windows.Forms.TextBox();
             this.SuspendLayout();
 
             // grid
@@ -167,6 +169,8 @@ namespace Pedeai.Forms
             this.pnlForm.Controls.Add(this.numTaxa);
             this.pnlForm.Controls.Add(this.lblSit);
             this.pnlForm.Controls.Add(this.cmbSituacao);
+            this.pnlForm.Controls.Add(this.lblCEP);
+            this.pnlForm.Controls.Add(this.txtCEP);
             this.pnlForm.Controls.Add(this.pnlBtns);
 
             // pnlBtns
@@ -216,16 +220,36 @@ namespace Pedeai.Forms
             this.btnD.FlatAppearance.BorderSize = 0;
             this.btnD.Click += new System.EventHandler(this.BtnDesativar_Click);
 
+            // lblCEP
+            this.lblCEP.Text = "CEP";
+            this.lblCEP.Left = 8;
+            this.lblCEP.Top = 10;
+            this.lblCEP.AutoSize = true;
+            this.lblCEP.Font = new System.Drawing.Font("Segoe UI", 9F);
+            this.lblCEP.ForeColor = System.Drawing.Color.FromArgb(60, 60, 60);
+
+            // txtCEP
+            this.txtCEP.Left = 8;
+            this.txtCEP.Top = 28;
+            this.txtCEP.Width = 110;
+            this.txtCEP.MaxLength = 9;
+            this.txtCEP.Font = new System.Drawing.Font("Segoe UI", 9.5F);
+            this.txtCEP.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.txtCEP.BackColor = System.Drawing.Color.White;
+            this.txtCEP.PlaceholderText = "00000-000";
+            this.txtCEP.Leave       += new System.EventHandler(this.TxtCEP_Leave);
+            this.txtCEP.TextChanged += new System.EventHandler(this.TxtCEP_TextChanged);
+
             // lblCidade
             this.lblCidade.Text = "Cidade";
-            this.lblCidade.Left = 8;
+            this.lblCidade.Left = 130;
             this.lblCidade.Top = 10;
             this.lblCidade.AutoSize = true;
             this.lblCidade.Font = new System.Drawing.Font("Segoe UI", 9F);
             this.lblCidade.ForeColor = System.Drawing.Color.FromArgb(60, 60, 60);
 
             // txtCidade
-            this.txtCidade.Left = 8;
+            this.txtCidade.Left = 130;
             this.txtCidade.Top = 28;
             this.txtCidade.Width = 180;
             this.txtCidade.Height = 24;
@@ -235,14 +259,14 @@ namespace Pedeai.Forms
 
             // lblBairro
             this.lblBairro.Text = "Bairro";
-            this.lblBairro.Left = 200;
+            this.lblBairro.Left = 322;
             this.lblBairro.Top = 10;
             this.lblBairro.AutoSize = true;
             this.lblBairro.Font = new System.Drawing.Font("Segoe UI", 9F);
             this.lblBairro.ForeColor = System.Drawing.Color.FromArgb(60, 60, 60);
 
             // txtBairro
-            this.txtBairro.Left = 200;
+            this.txtBairro.Left = 322;
             this.txtBairro.Top = 28;
             this.txtBairro.Width = 200;
             this.txtBairro.Height = 24;
@@ -252,14 +276,14 @@ namespace Pedeai.Forms
 
             // lblTaxa
             this.lblTaxa.Text = "Taxa de Entrega (R$)";
-            this.lblTaxa.Left = 412;
+            this.lblTaxa.Left = 534;
             this.lblTaxa.Top = 10;
             this.lblTaxa.AutoSize = true;
             this.lblTaxa.Font = new System.Drawing.Font("Segoe UI", 9F);
             this.lblTaxa.ForeColor = System.Drawing.Color.FromArgb(60, 60, 60);
 
             // numTaxa
-            this.numTaxa.Left = 412;
+            this.numTaxa.Left = 534;
             this.numTaxa.Top = 28;
             this.numTaxa.Width = 120;
             this.numTaxa.Height = 24;
@@ -270,14 +294,14 @@ namespace Pedeai.Forms
 
             // lblSit
             this.lblSit.Text = "Situação";
-            this.lblSit.Left = 545;
+            this.lblSit.Left = 666;
             this.lblSit.Top = 10;
             this.lblSit.AutoSize = true;
             this.lblSit.Font = new System.Drawing.Font("Segoe UI", 9F);
             this.lblSit.ForeColor = System.Drawing.Color.FromArgb(60, 60, 60);
 
             // cmbSituacao
-            this.cmbSituacao.Left = 545;
+            this.cmbSituacao.Left = 666;
             this.cmbSituacao.Top = 28;
             this.cmbSituacao.Width = 90;
             this.cmbSituacao.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
@@ -322,5 +346,7 @@ namespace Pedeai.Forms
         private System.Windows.Forms.NumericUpDown numTaxa;
         private System.Windows.Forms.Label         lblSit;
         private System.Windows.Forms.ComboBox      cmbSituacao;
+        private System.Windows.Forms.Label         lblCEP;
+        private System.Windows.Forms.TextBox       txtCEP;
     }
 }

@@ -39,8 +39,31 @@ namespace Pedeai
             BuildDashboard();
             BuildPedidos();
             BuildFinanceiro();
+            AppEvents.NovoPedidoWebRecebido += OnNovoPedidoWebRecebido;
             if (System.ComponentModel.LicenseManager.UsageMode != System.ComponentModel.LicenseUsageMode.Designtime)
                 Load += Form1_Load;
+        }
+
+        private void OnNovoPedidoWebRecebido(int count)
+        {
+            BeginInvoke(new Action(() =>
+            {
+                try { CarregarPedidos(); } catch { }
+                try
+                {
+                    if (count > 0)
+                        MessageBox.Show($"{count} novo(s) pedido(s) via Web recebido(s)!",
+                            "Pedido Web", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+                catch { }
+            }));
+        }
+
+        protected override void OnFormClosed(FormClosedEventArgs e)
+        {
+            AppEvents.NovoPedidoWebRecebido -= OnNovoPedidoWebRecebido;
+            try { DB.QuartzSchedulerService.StopAsync().GetAwaiter().GetResult(); } catch { }
+            base.OnFormClosed(e);
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -51,6 +74,12 @@ namespace Pedeai
             _timer.Start();
             Logger.Log("Form1", "Form1_Load", $"Login | Usu\u00e1rio: {UsuarioSessao.NomeAtual}");
             BeginInvoke(new Action(VerificarAvisosIniciais));
+            // Start web order polling + initial sync
+            System.Threading.Tasks.Task.Run(async () =>
+            {
+                await DB.QuartzSchedulerService.StartAsync();
+                await DB.SupabaseService.SincronizarTudoAsync();
+            });
         }
 
         private void VerificarAvisosIniciais()
