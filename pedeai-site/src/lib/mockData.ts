@@ -1,0 +1,73 @@
+import { Categoria, Produto, Loja } from '../types/database';
+
+export const mockLoja: Loja = {
+  id: '1',
+  nome: 'RanGoFood',
+  logo_url: 'https://picsum.photos/seed/logo/200/200',
+  banner_url: 'https://picsum.photos/seed/banner/1200/400',
+  cor_primaria: '#EA1D2C',
+  taxa_entrega: 5.0,
+  tempo_estimado: '30-45 min',
+  endereco: 'Rua das Flores, 123',
+  telefone: '(11) 99999-9999',
+  created_at: new Date().toISOString(),
+};
+
+export const mockCategorias: Categoria[] = [
+  { id: 'c1e1e1e1-e1e1-1e1e-a1e1-e1e1e1e1e1e1', nome: 'Pizzas', imagem_url: 'https://picsum.photos/seed/pizza/100/100', ordem: 1, ativo: true, created_at: '' },
+  { id: 'c2e2e2e2-e2e2-2e2e-a2e2-e2e2e2e2e2e2', nome: 'Hambúrgueres', imagem_url: 'https://picsum.photos/seed/burger/100/100', ordem: 2, ativo: true, created_at: '' },
+  { id: 'c3e3e3e3-e3e3-3e3e-a3e3-e3e3e3e3e3e3', nome: 'Bebidas', imagem_url: 'https://picsum.photos/seed/drinks/100/100', ordem: 3, ativo: true, created_at: '' },
+  { id: 'c4e4e4e4-e4e4-4e4e-a4e4-e4e4e4e4e4e4', nome: 'Sobremesas', imagem_url: 'https://picsum.photos/seed/dessert/100/100', ordem: 4, ativo: true, created_at: '' },
+  { id: 'c5e5e5e5-e5e5-5e5e-a5e5-e5e5e5e5e5e5', nome: 'Japonesa', imagem_url: 'https://picsum.photos/seed/sushi/100/100', ordem: 5, ativo: true, created_at: '' },
+];
+
+export const mockProdutos: Produto[] = [
+  {
+    id: 'f1e1e1e1-e1e1-1e1e-a1e1-e1e1e1e1e1e1',
+    grupo_id: 'c1e1e1e1-e1e1-1e1e-a1e1-e1e1e1e1e1e1',
+    nome: 'Pizza Margherita',
+    descricao: 'Molho de tomate, mussarela, manjericão fresco e azeite.',
+    preco_venda: 45.9,
+    preco_promocional: 39.9,
+    imagem_url: 'https://picsum.photos/seed/pizzamargherita/400/300',
+    ativo: true,
+    destaque: true,
+    created_at: '',
+  },
+  {
+    id: 'f1e1e1e1-e1e1-1e1e-a1e1-e1e1e1e1e1e2',
+    grupo_id: 'c1e1e1e1-e1e1-1e1e-a1e1-e1e1e1e1e1e1',
+    nome: 'Pizza Calabresa',
+    descricao: 'Molho de tomate, mussarela, calabresa fatiada e cebola.',
+    preco_venda: 42.9,
+    preco_promocional: null,
+    imagem_url: 'https://picsum.photos/seed/pizzacalabresa/400/300',
+    ativo: true,
+    destaque: false,
+    created_at: '',
+  },
+  {
+    id: 'f2e2e2e2-e2e2-2e2e-a2e2-e2e2e2e2e2e1',
+    grupo_id: 'c2e2e2e2-e2e2-2e2e-a2e2-e2e2e2e2e2e2',
+    nome: 'Burger Clássico',
+    descricao: 'Pão brioche, blend 180g, queijo cheddar, alface e tomate.',
+    preco_venda: 32.0,
+    preco_promocional: 28.0,
+    imagem_url: 'https://picsum.photos/seed/burgerclassico/400/300',
+    ativo: true,
+    destaque: true,
+    created_at: '',
+  },
+  {
+    id: 'f3e3e3e3-e3e3-3e3e-a3e3-e3e3e3e3e3e1',
+    grupo_id: 'c3e3e3e3-e3e3-3e3e-a3e3-e3e3e3e3e3e3',
+    nome: 'Coca-Cola 350ml',
+    descricao: 'Lata gelada.',
+    preco_venda: 6.0,
+    preco_promocional: null,
+    imagem_url: 'https://picsum.photos/seed/coke/400/300',
+    ativo: true,
+    destaque: false,
+    created_at: '',
+  },
+];

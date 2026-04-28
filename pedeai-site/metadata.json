@@ -1,0 +1,5 @@
+{
+  "name": "RanGoFood Delivery",
+  "description": "Web app de delivery de comida mobile-first inspirado no iFood, com integração Supabase e interface moderna.",
+  "requestFramePermissions": []
+}
