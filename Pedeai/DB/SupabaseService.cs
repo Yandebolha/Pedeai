@@ -745,7 +745,7 @@ namespace Pedeai.DB
                     codigo,
                     valor,
                     tipo     = supaTipo,
-                    validade = validade.HasValue ? validade.Value.ToString("yyyy-MM-dd") : (string)null,
+                    validade = validade.HasValue ? validade.Value.Date.Add(new TimeSpan(23, 59, 59)).ToString("yyyy-MM-ddTHH:mm:ss") : (string)null,
                     ativo,
                 };
 
@@ -1347,6 +1347,14 @@ namespace Pedeai.DB
                 }
 
                 trans.Commit();
+
+                // Incrementa totais do cliente (gasto mensal, pedidos mensais, gasto total)
+                // Igual ao que acontece com pedidos locais ao serem pagos
+                if (codigoClienteLocal > 0)
+                {
+                    try { new DAL.ClienteDAL().IncrementarTotais(codigoClienteLocal, supaPedido.Total); }
+                    catch { }
+                }
 
                 // Register coupon usage if order had a coupon
                 if (!string.IsNullOrWhiteSpace(supaPedido.CupomId))

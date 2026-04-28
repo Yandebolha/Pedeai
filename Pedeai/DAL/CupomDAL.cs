@@ -110,7 +110,7 @@ namespace Pedeai.DAL
             cmd.Parameters.AddWithValue("@valor",  obj.cupomValor);
             cmd.Parameters.AddWithValue("@minimo", obj.cupomPedido_Minimo);
             cmd.Parameters.AddWithValue("@limite", obj.cupomLimite_Usos);
-            cmd.Parameters.AddWithValue("@valido", obj.cupomValido_Ate.Date);
+            cmd.Parameters.AddWithValue("@valido", obj.cupomValido_Ate.Date.Add(new TimeSpan(23, 59, 59)));
             cmd.Parameters.AddWithValue("@sit",    obj.Situacao ?? "A");
             cmd.Parameters.AddWithValue("@trans",  obj.Status_Transmissao ?? "N");
             cmd.Parameters.AddWithValue("@info",   obj.Info ?? "");

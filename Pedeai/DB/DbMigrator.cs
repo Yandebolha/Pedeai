@@ -722,7 +722,7 @@ namespace Pedeai.DB
                         UNIQUE KEY uq_merc_grp_tipo (Codigo_Mercadoria, Codigo_Grupo, tipo)
                     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
                 // Garante colunas/índice para bancos criados antes desta versão
-                AddColumnIfNotExists(conn, db, "mercadoria_vinculo_grupo", "tipo",
+                 AddColumnIfNotExists(conn, db, "mercadoria_vinculo_grupo", "tipo",
                     "CHAR(1) NOT NULL DEFAULT 'A' COMMENT 'A=Adicional C=Complemento'");
                 AddColumnIfNotExists(conn, db, "mercadoria_vinculo_grupo", "Situacao",
                     "CHAR(1) NOT NULL DEFAULT 'A'");

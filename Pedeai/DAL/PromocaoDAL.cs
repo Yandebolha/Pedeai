@@ -36,7 +36,7 @@ namespace Pedeai.DAL
                 VALUES (@nome, @ini, @fim, @tipo, @val, 1)", conn);
             cmd.Parameters.AddWithValue("@nome", nome);
             cmd.Parameters.AddWithValue("@ini",  inicio.Date);
-            cmd.Parameters.AddWithValue("@fim",  fim.Date);
+            cmd.Parameters.AddWithValue("@fim",  fim.Date.Add(new TimeSpan(23, 59, 59)));
             cmd.Parameters.AddWithValue("@tipo", tipoDesc);
             cmd.Parameters.AddWithValue("@val",  valorDesc);
             cmd.ExecuteNonQuery();
@@ -53,7 +53,7 @@ namespace Pedeai.DAL
                 WHERE Codigo=@id", conn);
             cmd.Parameters.AddWithValue("@nome", nome);
             cmd.Parameters.AddWithValue("@ini",  inicio.Date);
-            cmd.Parameters.AddWithValue("@fim",  fim.Date);
+            cmd.Parameters.AddWithValue("@fim",  fim.Date.Add(new TimeSpan(23, 59, 59)));
             cmd.Parameters.AddWithValue("@tipo", tipoDesc);
             cmd.Parameters.AddWithValue("@val",  valorDesc);
             cmd.Parameters.AddWithValue("@id",   codigo);
