@@ -74,6 +74,9 @@ namespace Pedeai.Forms
             this.tabControl = new System.Windows.Forms.TabControl();
             this.tabEmp = new System.Windows.Forms.TabPage();
             this.btnSalvEmp = new System.Windows.Forms.Button();
+            this.btnSincronizarSite = new System.Windows.Forms.Button();
+            this.btnDiagnostico = new System.Windows.Forms.Button();
+            this.lblSincStatus = new System.Windows.Forms.Label();
             this.tabUsr = new System.Windows.Forms.TabPage();
             this.tabImp = new System.Windows.Forms.TabPage();
             this.btnSalvImp = new System.Windows.Forms.Button();
@@ -729,6 +732,9 @@ namespace Pedeai.Forms
             this.tabEmp.Controls.Add(this.txtEmpCodigo);
             this.tabEmp.Controls.Add(this.txtEmpImgBB);
             this.tabEmp.Controls.Add(this.btnSalvEmp);
+            this.tabEmp.Controls.Add(this.btnSincronizarSite);
+            this.tabEmp.Controls.Add(this.btnDiagnostico);
+            this.tabEmp.Controls.Add(this.lblSincStatus);
             this.tabEmp.Controls.Add(this.lblEmpNome);
             this.tabEmp.Controls.Add(this.lblEmpFantasia);
             this.tabEmp.Controls.Add(this.lblEmpCNPJ);
@@ -760,6 +766,51 @@ namespace Pedeai.Forms
             this.btnSalvEmp.Text = "✓  Salvar Empresa";
             this.btnSalvEmp.UseVisualStyleBackColor = false;
             this.btnSalvEmp.Click += new System.EventHandler(this.BtnSalvarEmpresa_Click);
+            // 
+            // btnSincronizarSite
+            // 
+            this.btnSincronizarSite.BackColor = System.Drawing.Color.FromArgb(30, 100, 180);
+            this.btnSincronizarSite.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.btnSincronizarSite.FlatAppearance.BorderSize = 0;
+            this.btnSincronizarSite.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnSincronizarSite.Font = new System.Drawing.Font("Segoe UI", 9.5F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.btnSincronizarSite.ForeColor = System.Drawing.Color.White;
+            this.btnSincronizarSite.Location = new System.Drawing.Point(340, 348);
+            this.btnSincronizarSite.Name = "btnSincronizarSite";
+            this.btnSincronizarSite.Size = new System.Drawing.Size(220, 32);
+            this.btnSincronizarSite.TabIndex = 7;
+            this.btnSincronizarSite.Text = "☁  Enviar Tudo ao Site";
+            this.btnSincronizarSite.UseVisualStyleBackColor = false;
+            this.btnSincronizarSite.Click += new System.EventHandler(this.BtnSincronizarSite_Click);
+            // 
+            // btnDiagnostico
+            // 
+            this.btnDiagnostico.BackColor = System.Drawing.Color.FromArgb(60, 60, 60);
+            this.btnDiagnostico.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.btnDiagnostico.FlatAppearance.BorderSize = 0;
+            this.btnDiagnostico.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnDiagnostico.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular);
+            this.btnDiagnostico.ForeColor = System.Drawing.Color.White;
+            this.btnDiagnostico.Location = new System.Drawing.Point(572, 348);
+            this.btnDiagnostico.Name = "btnDiagnostico";
+            this.btnDiagnostico.Size = new System.Drawing.Size(160, 32);
+            this.btnDiagnostico.TabIndex = 8;
+            this.btnDiagnostico.Text = "🔍  Testar Conexão";
+            this.btnDiagnostico.UseVisualStyleBackColor = false;
+            this.btnDiagnostico.Click += new System.EventHandler(this.BtnDiagnostico_Click);
+            // 
+            // lblSincStatus
+            // 
+            this.lblSincStatus.AutoSize = false;
+            this.lblSincStatus.BackColor = System.Drawing.Color.Transparent;
+            this.lblSincStatus.ForeColor = System.Drawing.Color.FromArgb(30, 100, 180);
+            this.lblSincStatus.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Italic);
+            this.lblSincStatus.Location = new System.Drawing.Point(168, 388);
+            this.lblSincStatus.Name = "lblSincStatus";
+            this.lblSincStatus.Size = new System.Drawing.Size(392, 22);
+            this.lblSincStatus.TabIndex = 99;
+            this.lblSincStatus.Text = "";
+            this.lblSincStatus.Visible = false;
             // 
             // tabUsr
             // 
@@ -1034,6 +1085,9 @@ namespace Pedeai.Forms
         private System.Windows.Forms.Label          lblResetAviso;
         internal System.Windows.Forms.Button        btnResetarBanco;
         private System.Windows.Forms.Button         btnSalvEmp;
+        private System.Windows.Forms.Button         btnSincronizarSite;
+        private System.Windows.Forms.Button         btnDiagnostico;
+        private System.Windows.Forms.Label          lblSincStatus;
         private System.Windows.Forms.Button         btnSalvImp;
         private System.Windows.Forms.Button         btnTesteImp;
         // labels empresa

@@ -70,6 +70,131 @@ namespace Pedeai.Forms
             _ = AtualizarNomeSupabaseAsync(_empresa);
         }
 
+        private async void BtnSincronizarSite_Click(object sender, EventArgs e)
+        {
+            btnSincronizarSite.Enabled = false;
+            btnSincronizarSite.Text    = "⏳  Sincronizando...";
+            lblSincStatus.Text         = "Iniciando...";
+            lblSincStatus.ForeColor    = System.Drawing.Color.FromArgb(30, 100, 180);
+            lblSincStatus.Visible      = true;
+
+            // Progress<string> marshals callbacks to the UI thread automatically
+            var progress = new System.Progress<string>(msg =>
+            {
+                lblSincStatus.Text = msg;
+                lblSincStatus.Refresh();
+            });
+
+            try
+            {
+                string erros = await DB.SupabaseService.SincronizarTudoComProgressoAsync(progress);
+
+                if (string.IsNullOrWhiteSpace(erros))
+                {
+                    lblSincStatus.Text      = "✓ Sincronização concluída com sucesso!";
+                    lblSincStatus.ForeColor = System.Drawing.Color.FromArgb(60, 130, 40);
+                    MessageBox.Show(
+                        "Todos os dados foram enviados ao site:\n"
+                        + "• Loja (nome, endereço, telefone)\n"
+                        + "• Categorias\n"
+                        + "• Produtos e imagens\n"
+                        + "• Marmitas e itens\n"
+                        + "• Cupons de desconto\n"
+                        + "• Bairros e taxas de entrega\n"
+                        + "• Clientes",
+                        "Sincronização Concluída",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Information);
+                }
+                else
+                {
+                    lblSincStatus.Text      = "⚠ Concluído com erros — veja detalhes";
+                    lblSincStatus.ForeColor = System.Drawing.Color.FromArgb(180, 100, 0);
+                    // Show errors in a scrollable dialog
+                    var dlg = new Form
+                    {
+                        Text            = "Erros na Sincronização",
+                        Size            = new System.Drawing.Size(700, 480),
+                        StartPosition   = FormStartPosition.CenterParent,
+                        BackColor       = System.Drawing.Color.FromArgb(20, 20, 20),
+                        FormBorderStyle = FormBorderStyle.FixedDialog,
+                        MaximizeBox     = false,
+                    };
+                    var tb = new TextBox
+                    {
+                        Multiline   = true,
+                        ReadOnly    = true,
+                        ScrollBars  = ScrollBars.Vertical,
+                        Dock        = DockStyle.Fill,
+                        BackColor   = System.Drawing.Color.FromArgb(20, 20, 20),
+                        ForeColor   = System.Drawing.Color.FromArgb(255, 180, 0),
+                        Font        = new System.Drawing.Font("Consolas", 9f),
+                        Text        = erros,
+                    };
+                    dlg.Controls.Add(tb);
+                    dlg.ShowDialog(this);
+                }
+            }
+            catch (Exception ex)
+            {
+                lblSincStatus.Text      = "✗ Erro: " + ex.Message;
+                lblSincStatus.ForeColor = System.Drawing.Color.FromArgb(180, 30, 30);
+                MessageBox.Show("Erro durante a sincronização:\n" + ex.Message,
+                    "Erro", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            finally
+            {
+                btnSincronizarSite.Enabled = true;
+                btnSincronizarSite.Text    = "☁  Enviar Tudo ao Site";
+            }
+        }
+
+        private async void BtnDiagnostico_Click(object sender, EventArgs e)
+        {
+            btnDiagnostico.Enabled = false;
+            btnDiagnostico.Text    = "Testando...";
+            try
+            {
+                var resultado = await DB.SupabaseService.DiagnosticaAsync();
+
+                // Show result in a dark terminal-style dialog
+                var dlg = new Form
+                {
+                    Text            = "Diagnóstico Supabase",
+                    Size            = new System.Drawing.Size(780, 560),
+                    StartPosition   = FormStartPosition.CenterParent,
+                    BackColor       = System.Drawing.Color.FromArgb(20, 20, 20),
+                    FormBorderStyle = FormBorderStyle.FixedDialog,
+                    MaximizeBox     = false,
+                };
+                var tb = new TextBox
+                {
+                    Multiline   = true,
+                    ReadOnly    = true,
+                    Dock        = DockStyle.Fill,
+                    ScrollBars  = ScrollBars.Vertical,
+                    Font        = new System.Drawing.Font("Consolas", 9.5F),
+                    BackColor   = System.Drawing.Color.FromArgb(20, 20, 20),
+                    ForeColor   = System.Drawing.Color.FromArgb(180, 255, 180),
+                    BorderStyle = BorderStyle.None,
+                    Text        = resultado,
+                };
+                dlg.Controls.Add(tb);
+                dlg.ShowDialog(this);
+                dlg.Dispose();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Erro no diagnóstico:\n" + ex.Message, "Erro",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            finally
+            {
+                btnDiagnostico.Enabled = true;
+                btnDiagnostico.Text    = "🔍  Testar Conexão";
+            }
+        }
+
         private static async Task AtualizarNomeSupabaseAsync(Empresa empresa)
         {
             try

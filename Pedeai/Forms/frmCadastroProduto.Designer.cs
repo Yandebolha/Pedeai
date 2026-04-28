@@ -13,6 +13,7 @@ namespace Pedeai.Forms
         }
         private void InitializeComponent()
         {
+            this.btnSincSite        = new System.Windows.Forms.Button();
             this.grid               = new System.Windows.Forms.DataGridView();
             this.topBar             = new System.Windows.Forms.Panel();
             this.btnNovo            = new System.Windows.Forms.Button();
@@ -78,7 +79,7 @@ namespace Pedeai.Forms
             // topBar
             this.topBar.Dock = System.Windows.Forms.DockStyle.Top; this.topBar.Height = 44;
             this.topBar.BackColor = System.Drawing.Color.FromArgb(176, 110, 42);
-            this.topBar.Controls.Add(this.btnNovo); this.topBar.Controls.Add(this.btnCat);
+            this.topBar.Controls.Add(this.btnNovo); this.topBar.Controls.Add(this.btnCat); this.topBar.Controls.Add(this.btnSincSite);
             this.btnNovo.Text="+ Novo Produto"; this.btnNovo.Left=8; this.btnNovo.Top=8; this.btnNovo.Width=115; this.btnNovo.Height=28;
             this.btnNovo.BackColor=System.Drawing.Color.FromArgb(87,120,38); this.btnNovo.ForeColor=System.Drawing.Color.White;
             this.btnNovo.FlatStyle=System.Windows.Forms.FlatStyle.Flat; this.btnNovo.Font=new System.Drawing.Font("Segoe UI",9F,System.Drawing.FontStyle.Bold);
@@ -87,6 +88,10 @@ namespace Pedeai.Forms
             this.btnCat.BackColor=System.Drawing.Color.FromArgb(224,113,42); this.btnCat.ForeColor=System.Drawing.Color.White;
             this.btnCat.FlatStyle=System.Windows.Forms.FlatStyle.Flat; this.btnCat.Font=new System.Drawing.Font("Segoe UI",9F,System.Drawing.FontStyle.Bold);
             this.btnCat.FlatAppearance.BorderSize=0; this.btnCat.Click+=new System.EventHandler(this.BtnCatProd_Click);
+            this.btnSincSite.Text="☁ Sincronizar Site"; this.btnSincSite.Left=243; this.btnSincSite.Top=8; this.btnSincSite.Width=140; this.btnSincSite.Height=28;
+            this.btnSincSite.BackColor=System.Drawing.Color.FromArgb(30,120,200); this.btnSincSite.ForeColor=System.Drawing.Color.White;
+            this.btnSincSite.FlatStyle=System.Windows.Forms.FlatStyle.Flat; this.btnSincSite.Font=new System.Drawing.Font("Segoe UI",9F,System.Drawing.FontStyle.Bold);
+            this.btnSincSite.FlatAppearance.BorderSize=0; this.btnSincSite.Click+=new System.EventHandler(this.BtnSincSite_Click);
             // pnlSearch
             this.pnlSearch.Dock=System.Windows.Forms.DockStyle.Top; this.pnlSearch.Height=38;
             this.pnlSearch.BackColor=System.Drawing.Color.FromArgb(235,226,208);
@@ -236,6 +241,7 @@ namespace Pedeai.Forms
         private  System.Windows.Forms.Button        btnRemGrupoVinc;
         internal System.Windows.Forms.Button        btnNovo;
         internal System.Windows.Forms.Button        btnCat;
+        internal System.Windows.Forms.Button        btnSincSite;
         internal System.Windows.Forms.Button        btnPesq;
         internal System.Windows.Forms.Button        btnImg;
         internal System.Windows.Forms.Button        btnS;

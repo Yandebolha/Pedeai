@@ -1,5 +1,6 @@
 using System;
 using System.Data;
+using System.Threading.Tasks;
 using Pedeai.DAL;
 using Pedeai.Modelo;
 
@@ -22,9 +23,16 @@ namespace Pedeai.BLL
             if (obj.Codigo_Grupo <= 0)
                 return "Selecione uma categoria.";
 
-            return obj.Codigo == 0 ? _dal.Incluir(obj) : _dal.Alterar(obj);
+            var erro = obj.Codigo == 0 ? _dal.Incluir(obj) : _dal.Alterar(obj);
+            if (string.IsNullOrEmpty(erro))
+                Task.Run(async () => await Pedeai.DB.SupabaseService.SincronizarProdutoAsync(obj.Codigo));
+            return erro;
         }
 
-        public void AlternarSituacao(int codigo) => _dal.AlternarSituacao(codigo);
+        public void AlternarSituacao(int codigo)
+        {
+            _dal.AlternarSituacao(codigo);
+            Task.Run(async () => await Pedeai.DB.SupabaseService.SincronizarProdutoAsync(codigo));
+        }
     }
 }

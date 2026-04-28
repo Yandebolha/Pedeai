@@ -270,8 +270,11 @@ namespace Pedeai.Forms
         {
             if (grid.SelectedRows.Count == 0) return;
             if (MessageBox.Show("Desativar produto?", "Confirmar", MessageBoxButtons.YesNo) != DialogResult.Yes) return;
-            _bll.AlternarSituacao(Convert.ToInt32(grid.SelectedRows[0].Cells["Codigo"].Value));
+            int cod = Convert.ToInt32(grid.SelectedRows[0].Cells["Codigo"].Value);
+            _bll.AlternarSituacao(cod);
             pnlForm.Visible = false; CarregarGrid();
+            System.Threading.Tasks.Task.Run(async () =>
+                await DB.SupabaseService.SincronizarProdutoAsync(cod));
         }
 
         // ── Vinculos helpers ──────────────────────────────────────────────────
@@ -403,6 +406,29 @@ namespace Pedeai.Forms
         {
             if (keyData == Keys.Escape) { Close(); return true; }
             return base.ProcessCmdKey(ref msg, keyData);
+        }
+
+        private async void BtnSincSite_Click(object sender, EventArgs e)
+        {
+            btnSincSite.Enabled = false;
+            btnSincSite.Text    = "Sincronizando...";
+            try
+            {
+                await DB.SupabaseService.SincronizarTodosProdutosAsync();
+                await DB.SupabaseService.SincronizarTodasImagensAsync();
+                MessageBox.Show("Produtos sincronizados com o site com sucesso!", "Sincronização",
+                    MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Erro na sincronização: " + ex.Message, "Erro",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            finally
+            {
+                btnSincSite.Enabled = true;
+                btnSincSite.Text    = "\u2601 Sincronizar Site";
+            }
         }
 
         private class CatItem

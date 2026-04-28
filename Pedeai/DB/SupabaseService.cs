@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Configuration;
+using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
@@ -20,8 +21,26 @@ namespace Pedeai.DB
         private const string BASE = "https://uwgcmnmzjjinfmxlskks.supabase.co/rest/v1";
         private const string KEY  = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3Z2Ntbm16amppbmZteGxza2tzIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NjEyOTQwNCwiZXhwIjoyMDkxNzA1NDA0fQ.ZKkr27mHvknWpOh1C9PQePJEAHQYQvnnUjvMEFvj5Gg";
 
+        // Supabase table names (must match exactly what's in the Supabase project)
+        private const string TBL_MERCADORIAS    = "mercadoria";
+        private const string TBL_GRUPO_MERC     = "grupo_mercadoria";
+        private const string TBL_BAIRRO         = "bairro";
+        private const string TBL_CUPOM          = "cupom";
+        private const string TBL_TAXA_ENTREGA   = "taxa_entrega";
+        private const string TBL_CLIENTE        = "cliente";
+        private const string TBL_COMP_GRUPO     = "complemento_grupo";
+        private const string TBL_COMPLEMENTO    = "complemento";          // items within a group
+        private const string TBL_MERC_COMP_GRP  = "mercadoria_complemento_grupo"; // link table
+        private const string TBL_LOJA           = "loja";
+
         private static readonly HttpClient _http;
         private static string _marmitaGrupoUuid; // cached UUID of "Marmitas" group
+
+        // Session cache: groups already verified/synced this run — avoids re-syncing same group N times
+        private static readonly HashSet<int> _gruposSincronizados = new HashSet<int>();
+
+        /// <summary>Clears the per-run group cache. Call at the start of a full sync.</summary>
+        public static void ResetSyncCache() => _gruposSincronizados.Clear();
 
         static SupabaseService()
         {
@@ -117,6 +136,7 @@ namespace Pedeai.DB
 
         private static async Task DeleteAsync(string endpoint, string filter)
         {
+            if (string.IsNullOrWhiteSpace(filter)) return; // safety: never delete all rows
             using var req = new HttpRequestMessage(HttpMethod.Delete, $"{BASE}/{endpoint}?{filter}");
             req.Headers.Add("Prefer", "return=minimal");
             await _http.SendAsync(req);
@@ -208,10 +228,27 @@ namespace Pedeai.DB
                     !imagemUrl.StartsWith("http", StringComparison.OrdinalIgnoreCase))
                     imagemUrl = "";
 
-                // Only sync to Supabase if explicitly enabled for site
-                if (!habSite) return "";
-
                 string uuid = GetSupabaseUuid("grupo_mercadoria", "Codigo", codigoGrupo);
+
+                // Skip completely deleted records
+                if (!ativo)
+                {
+                    if (!string.IsNullOrWhiteSpace(uuid))
+                        await PatchAsync("grupo_mercadoria", $"id=eq.{uuid}", new { ativo = false });
+                    return "";
+                }
+
+                // Verify cached UUID still exists in Supabase (may have been deleted)
+                // Only clear if we get a confirmed 200-OK with 0 results (not on network error)
+                if (!string.IsNullOrWhiteSpace(uuid) && !_gruposSincronizados.Contains(codigoGrupo))
+                {
+                    try
+                    {
+                        var check = await GetAsync($"grupo_mercadoria?id=eq.{uuid}&limit=1");
+                        if (check.Count == 0) { SaveSupabaseUuid("grupo_mercadoria", "Codigo", codigoGrupo, ""); uuid = ""; }
+                    }
+                    catch { /* network error — keep existing UUID, don't clear */ }
+                }
 
                 // Check Supabase by nome to avoid duplicates if UUID not stored
                 if (string.IsNullOrWhiteSpace(uuid))
@@ -225,7 +262,9 @@ namespace Pedeai.DB
                     }
                 }
 
-                var payload = new { nome, ordem, ativo, url_da_imagem = imagemUrl };
+                // habSite controls visibility on the site (ativo flag), but we always sync the record
+                bool ativoSite = habSite && ativo;
+                var payload = new { nome, ordem, ativo = ativoSite, imagem_url = imagemUrl };
 
                 if (!string.IsNullOrWhiteSpace(uuid))
                     await PatchAsync("grupo_mercadoria", $"id=eq.{uuid}", payload);
@@ -236,6 +275,7 @@ namespace Pedeai.DB
                     if (!string.IsNullOrWhiteSpace(uuid))
                         SaveSupabaseUuid("grupo_mercadoria", "Codigo", codigoGrupo, uuid);
                 }
+                _gruposSincronizados.Add(codigoGrupo); // mark as synced this session
                 return "";
             }
             catch (Exception ex)
@@ -283,34 +323,79 @@ namespace Pedeai.DB
 
                 string uuid = GetSupabaseUuid("mercadoria", "Codigo", codigoMercadoria);
 
-                if (!habSite || situacao != "A")
+                // Skip completely deleted records
+                if (situacao != "A")
                 {
-                    // Deactivate in Supabase if already synced
                     if (!string.IsNullOrWhiteSpace(uuid))
-                        await PatchAsync("mercadoria", $"id=eq.{uuid}", new { ativo = false });
+                        await PatchAsync(TBL_MERCADORIAS, $"id=eq.{uuid}", new { ativo = false });
                     return "";
                 }
 
-                // Ensure group is synced first
+                // Verify cached UUID still exists in Supabase
+                // Only clear on confirmed 200-OK with 0 results (not on network error)
+                if (!string.IsNullOrWhiteSpace(uuid))
+                {
+                    try
+                    {
+                        var check = await GetAsync($"{TBL_MERCADORIAS}?id=eq.{uuid}&limit=1");
+                        if (check.Count == 0) { SaveSupabaseUuid("mercadoria", "Codigo", codigoMercadoria, ""); uuid = ""; }
+                    }
+                    catch { /* network error — keep existing UUID */ }
+                }
+
+                // habSite controls Supabase visibility — always sync but set ativo accordingly
+                bool ativoSite = habSite;
+
+                // Ensure group UUID is available — only do full sync if not already done this session
                 string grupoUuid = "";
                 if (codigoGrupo > 0)
                 {
-                    await SincronizarGrupoAsync(codigoGrupo);
                     grupoUuid = GetSupabaseUuid("grupo_mercadoria", "Codigo", codigoGrupo);
+                    if (string.IsNullOrWhiteSpace(grupoUuid))
+                    {
+                        // Group not yet synced — sync it now and get UUID
+                        await SincronizarGrupoAsync(codigoGrupo);
+                        grupoUuid = GetSupabaseUuid("grupo_mercadoria", "Codigo", codigoGrupo);
+                    }
                 }
 
-                var payload = string.IsNullOrWhiteSpace(grupoUuid)
-                    ? (object)new { nome, descricao, preco_venda = precoVenda, preco_promocional = precoPromo,
-                                    url_da_imagem = imagemUrl, ativo = true, destaque }
+                // Resolve UUID by name lookup in Supabase if not stored in MySQL (avoids duplicate POST)
+                if (string.IsNullOrWhiteSpace(uuid))
+                {
+                    try
+                    {
+                        var existing = await GetAsync(
+                            $"{TBL_MERCADORIAS}?nome=eq.{Uri.EscapeDataString(nome)}&limit=1");
+                        if (existing.Count > 0)
+                        {
+                            uuid = existing[0]["id"]?.ToString() ?? "";
+                            if (!string.IsNullOrWhiteSpace(uuid))
+                                SaveSupabaseUuid("mercadoria", "Codigo", codigoMercadoria, uuid);
+                        }
+                    }
+                    catch { }
+                }
+
+                var postPayload = string.IsNullOrWhiteSpace(grupoUuid)
+                    ? (object)new { nome, descricao, preco_venda = precoVenda,
+                                    imagem_url = imagemUrl, ativo = ativoSite, destaque }
                     : (object)new { grupo_id = grupoUuid, nome, descricao,
-                                    preco_venda = precoVenda, preco_promocional = precoPromo,
-                                    url_da_imagem = imagemUrl, ativo = true, destaque };
+                                    preco_venda = precoVenda,
+                                    imagem_url = imagemUrl, ativo = ativoSite, destaque };
 
                 if (!string.IsNullOrWhiteSpace(uuid))
-                    await PatchAsync("mercadoria", $"id=eq.{uuid}", payload);
+                {
+                    // PATCH: only update imagem_url if we actually have one (don't clear existing)
+                    object patchPayload = string.IsNullOrWhiteSpace(imagemUrl)
+                        ? (string.IsNullOrWhiteSpace(grupoUuid)
+                            ? (object)new { nome, descricao, preco_venda = precoVenda, ativo = ativoSite, destaque }
+                            : (object)new { grupo_id = grupoUuid, nome, descricao, preco_venda = precoVenda, ativo = ativoSite, destaque })
+                        : postPayload;
+                    await PatchAsync(TBL_MERCADORIAS, $"id=eq.{uuid}", patchPayload);
+                }
                 else
                 {
-                    var result = await PostAsync("mercadoria", payload);
+                    var result = await PostAsync(TBL_MERCADORIAS, postPayload);
                     uuid = result?["id"]?.ToString() ?? "";
                     if (!string.IsNullOrWhiteSpace(uuid))
                         SaveSupabaseUuid("mercadoria", "Codigo", codigoMercadoria, uuid);
@@ -324,31 +409,48 @@ namespace Pedeai.DB
             }
         }
 
-        public static async Task SincronizarTodosProdutosAsync()
+        public static async Task<List<string>> SincronizarTodosProdutosAsync()
         {
+            var erros = new List<string>();
             try
             {
                 var codigos = new List<int>();
                 using (var conn = AbrirMysql())
                 using (var cmd  = new MySqlCommand(
-                    "SELECT Codigo FROM mercadoria WHERE mercHabilitar_Site=1 AND Situacao='A'", conn))
+                    "SELECT Codigo FROM mercadoria", conn))
                 {
                     using var r = cmd.ExecuteReader();
                     while (r.Read()) codigos.Add(Convert.ToInt32(r["Codigo"]));
                 }
                 foreach (var cod in codigos)
-                    await SincronizarProdutoAsync(cod);
+                {
+                    var err = await SincronizarProdutoAsync(cod);
+                    if (!string.IsNullOrWhiteSpace(err)) erros.Add($"Produto {cod}: {err}");
+                }
             }
             catch (Exception ex)
             {
                 Logger.Log("SupabaseService", "SincronizarTodosProdutosAsync", "Erro", ex);
+                erros.Add($"Produtos: {ex.Message}");
             }
+            return erros;
         }
 
         // ── Marmita ──────────────────────────────────────────────────────────
 
         private static async Task<string> ObterOuCriarGrupoMarmitaAsync()
         {
+            // Verify cached UUID still exists in Supabase
+            if (!string.IsNullOrEmpty(_marmitaGrupoUuid))
+            {
+                try
+                {
+                    var check = await GetAsync($"grupo_mercadoria?id=eq.{_marmitaGrupoUuid}&limit=1");
+                    if (check.Count == 0) _marmitaGrupoUuid = null; // stale — re-fetch below
+                }
+                catch { _marmitaGrupoUuid = null; }
+            }
+
             if (!string.IsNullOrEmpty(_marmitaGrupoUuid)) return _marmitaGrupoUuid;
 
             var arr = await GetAsync("grupo_mercadoria?nome=eq.Marmitas&limit=1");
@@ -397,31 +499,71 @@ namespace Pedeai.DB
 
                 string uuid = GetSupabaseUuid("marmita", "Codigo", codigoMarmita);
 
-                if (!habSite || situacao != "A")
+                // Skip completely deleted records
+                if (situacao != "A")
                 {
                     if (!string.IsNullOrWhiteSpace(uuid))
-                        await PatchAsync("mercadoria", $"id=eq.{uuid}", new { ativo = false });
+                        await PatchAsync(TBL_MERCADORIAS, $"id=eq.{uuid}", new { ativo = false });
                     return "";
                 }
 
-                string grupoUuid = await ObterOuCriarGrupoMarmitaAsync();
-                var payload = new
+                // Verify cached UUID still exists in Supabase
+                // Only clear on confirmed 200-OK with 0 results
+                if (!string.IsNullOrWhiteSpace(uuid))
                 {
-                    grupo_id          = grupoUuid,
-                    nome              = descricao,
-                    descricao         = "Marmita",
-                    preco_venda       = valor,
-                    preco_promocional = 0m,
-                    url_da_imagem     = imagemUrl,
-                    ativo             = true,
+                    try
+                    {
+                        var check = await GetAsync($"{TBL_MERCADORIAS}?id=eq.{uuid}&limit=1");
+                        if (check.Count == 0) { SaveSupabaseUuid("marmita", "Codigo", codigoMarmita, ""); uuid = ""; }
+                    }
+                    catch { /* keep UUID on network error */ }
+                }
+
+                // habSite controls Supabase visibility — always sync
+                bool ativoSite = habSite;
+
+                string grupoUuid = await ObterOuCriarGrupoMarmitaAsync();
+
+                // Resolve UUID by name lookup in Supabase if not stored in MySQL (avoids duplicate POST)
+                if (string.IsNullOrWhiteSpace(uuid))
+                {
+                    try
+                    {
+                        var existing = await GetAsync(
+                            $"{TBL_MERCADORIAS}?nome=eq.{Uri.EscapeDataString(descricao)}&limit=1");
+                        if (existing.Count > 0)
+                        {
+                            uuid = existing[0]["id"]?.ToString() ?? "";
+                            if (!string.IsNullOrWhiteSpace(uuid))
+                                SaveSupabaseUuid("marmita", "Codigo", codigoMarmita, uuid);
+                        }
+                    }
+                    catch { }
+                }
+
+                var postPayload = new
+                {
+                    grupo_id    = grupoUuid,
+                    nome        = descricao,
+                    descricao   = "Marmita",
+                    preco_venda = valor,
+                    imagem_url  = imagemUrl,
+                    ativo       = ativoSite,
                     destaque
                 };
 
                 if (!string.IsNullOrWhiteSpace(uuid))
-                    await PatchAsync("mercadoria", $"id=eq.{uuid}", payload);
+                {
+                    // PATCH: only update imagem_url if we actually have one (don't clear existing)
+                    object patchPayload = string.IsNullOrWhiteSpace(imagemUrl)
+                        ? (object)new { grupo_id = grupoUuid, nome = descricao, descricao = "Marmita",
+                                        preco_venda = valor, ativo = ativoSite, destaque }
+                        : postPayload;
+                    await PatchAsync(TBL_MERCADORIAS, $"id=eq.{uuid}", patchPayload);
+                }
                 else
                 {
-                    var result = await PostAsync("mercadoria", payload);
+                    var result = await PostAsync(TBL_MERCADORIAS, postPayload);
                     uuid = result?["id"]?.ToString() ?? "";
                     if (!string.IsNullOrWhiteSpace(uuid))
                         SaveSupabaseUuid("marmita", "Codigo", codigoMarmita, uuid);
@@ -444,7 +586,7 @@ namespace Pedeai.DB
                 var codigos = new List<int>();
                 using (var conn = AbrirMysql())
                 using (var cmd  = new MySqlCommand(
-                    "SELECT Codigo FROM marmita WHERE COALESCE(marHabilitar_Site,0)=1 AND Situacao='A'", conn))
+                    "SELECT Codigo FROM marmita", conn))
                 {
                     using var r = cmd.ExecuteReader();
                     while (r.Read()) codigos.Add(Convert.ToInt32(r["Codigo"]));
@@ -452,12 +594,51 @@ namespace Pedeai.DB
                 foreach (var cod in codigos)
                 {
                     await SincronizarMarmitaAsync(cod);
-                    await SincronizarComplementosMarmitaAsync(cod);
+                    await SincronizarItensMarmitaAsync(cod);
                 }
             }
             catch (Exception ex)
             {
                 Logger.Log("SupabaseService", "SincronizarTodasMarmitasAsync", "Erro", ex);
+            }
+        }
+
+        // ── Cupom ─────────────────────────────────────────────────────────────
+
+        // ── Formas de Pagamento ───────────────────────────────────────────────
+
+        /// <summary>
+        /// Seeds the Supabase forma_pagamento table with the default payment methods
+        /// (Dinheiro, Cartão, Pix). Only inserts rows that are not already present.
+        /// </summary>
+        public static async Task SincronizarFormasPagamentoAsync()
+        {
+            try
+            {
+                var existentes = await GetAsync("forma_pagamento?select=nome");
+                var nomesExistentes = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                foreach (JObject fp in existentes)
+                {
+                    var n = fp["nome"]?.ToString();
+                    if (!string.IsNullOrWhiteSpace(n)) nomesExistentes.Add(n);
+                }
+
+                var defaults = new[]
+                {
+                    new { nome = "Dinheiro", tipo = "dinheiro", ativo = true },
+                    new { nome = "Cartão",   tipo = "cartao",   ativo = true },
+                    new { nome = "Pix",      tipo = "pix",      ativo = true },
+                };
+
+                foreach (var fp in defaults)
+                {
+                    if (!nomesExistentes.Contains(fp.nome))
+                        try { await PostAsync("forma_pagamento", fp); } catch { }
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.Log("SupabaseService", "SincronizarFormasPagamentoAsync", "Erro", ex);
             }
         }
 
@@ -510,11 +691,9 @@ namespace Pedeai.DB
                 {
                     codigo,
                     valor,
-                    tipo           = supaTipo,
-                    validade       = validade.HasValue ? validade.Value.ToString("yyyy-MM-dd") : (string)null,
+                    tipo     = supaTipo,
+                    validade = validade.HasValue ? validade.Value.ToString("yyyy-MM-dd") : (string)null,
                     ativo,
-                    limite_usos    = limiteUsos,
-                    usos_realizados = usosRealizados,
                 };
 
                 if (!string.IsNullOrWhiteSpace(uuid))
@@ -562,43 +741,72 @@ namespace Pedeai.DB
         {
             try
             {
-                string cep, situacao;
+                string cep, situacao, nome, cidade;
                 decimal taxa;
+                int auxCodigo;
 
                 using (var conn = AbrirMysql())
                 using (var cmd  = new MySqlCommand(
-                    "SELECT COALESCE(baiCEP,'') AS baiCEP, baiTaxa_Entrega, Situacao " +
+                    "SELECT COALESCE(baiCEP,'') AS baiCEP, baiTaxa_Entrega, Situacao, " +
+                    "COALESCE(baiNome,'') AS baiNome, COALESCE(baiCidade,'') AS baiCidade, " +
+                    "COALESCE(auxCodigo,1) AS auxCodigo " +
                     "FROM bairro WHERE Codigo=@c LIMIT 1", conn))
                 {
                     cmd.Parameters.AddWithValue("@c", codigoBairro);
                     using var r = cmd.ExecuteReader();
                     if (!r.Read()) return "";
-                    cep      = r["baiCEP"]?.ToString()?.Replace("-", "").Trim() ?? "";
-                    taxa     = r["baiTaxa_Entrega"] == DBNull.Value ? 0m : Convert.ToDecimal(r["baiTaxa_Entrega"]);
-                    situacao = r["Situacao"]?.ToString() ?? "A";
+                    cep       = r["baiCEP"]?.ToString()?.Replace("-","").Trim() ?? "";
+                    taxa      = r["baiTaxa_Entrega"] == DBNull.Value ? 0m : Convert.ToDecimal(r["baiTaxa_Entrega"]);
+                    situacao  = r["Situacao"]?.ToString() ?? "A";
+                    nome      = r["baiNome"]?.ToString() ?? "";
+                    cidade    = r["baiCidade"]?.ToString() ?? "";
+                    auxCodigo = r["auxCodigo"] == DBNull.Value ? 1 : Convert.ToInt32(r["auxCodigo"]);
                 }
 
-                if (string.IsNullOrWhiteSpace(cep)) return ""; // no CEP, skip
-
-                string uuid = GetSupabaseUuid("bairro", "Codigo", codigoBairro);
-
-                if (situacao != "A")
+                // ── Sync to Supabase `bairro` table (mirrors MySQL structure) ──
+                try
                 {
-                    if (!string.IsNullOrWhiteSpace(uuid))
-                        await DeleteAsync("taxa_entrega", $"id=eq.{uuid}");
-                    return "";
+                    var bairroPayload = new
+                    {
+                        codigo          = codigoBairro,
+                        auxcodigo       = auxCodigo,
+                        baicidade       = cidade,
+                        bainome         = nome,
+                        baitaxa_entrega = taxa,
+                        situacao        = situacao == "A" ? "A" : "I",
+                    };
+                    // Check if row exists by codigo (integer PK)
+                    var existentes = await GetAsync($"bairro?codigo=eq.{codigoBairro}&limit=1");
+                    if (existentes.Count > 0)
+                        await PatchAsync("bairro", $"codigo=eq.{codigoBairro}", bairroPayload);
+                    else
+                        await PostAsync("bairro", bairroPayload);
                 }
+                catch { } // non-critical — taxa_entrega sync below is the primary delivery fee store
 
-                var payload = new { cep, valor = taxa };
-
-                if (!string.IsNullOrWhiteSpace(uuid))
-                    await PatchAsync("taxa_entrega", $"id=eq.{uuid}", payload);
-                else
+                // ── Sync CEP-based delivery fee to `taxa_entrega` ──────────────
+                if (!string.IsNullOrWhiteSpace(cep))
                 {
-                    var result = await PostAsync("taxa_entrega", payload);
-                    uuid = result?["id"]?.ToString() ?? "";
+                    string uuid = GetSupabaseUuid("bairro", "Codigo", codigoBairro);
+
+                    if (situacao != "A")
+                    {
+                        if (!string.IsNullOrWhiteSpace(uuid))
+                            await DeleteAsync("taxa_entrega", $"id=eq.{uuid}");
+                        return "";
+                    }
+
+                    var payload = new { cep, valor = taxa };
+
                     if (!string.IsNullOrWhiteSpace(uuid))
-                        SaveSupabaseUuid("bairro", "Codigo", codigoBairro, uuid);
+                        await PatchAsync("taxa_entrega", $"id=eq.{uuid}", payload);
+                    else
+                    {
+                        var result = await PostAsync("taxa_entrega", payload);
+                        uuid = result?["id"]?.ToString() ?? "";
+                        if (!string.IsNullOrWhiteSpace(uuid))
+                            SaveSupabaseUuid("bairro", "Codigo", codigoBairro, uuid);
+                    }
                 }
                 return "";
             }
@@ -1453,37 +1661,51 @@ namespace Pedeai.DB
 
                 string uuid = GetSupabaseUuid("cliente", "Codigo", codigoCliente);
 
+                // Verify cached UUID still exists in Supabase
+                if (!string.IsNullOrWhiteSpace(uuid))
+                {
+                    try
+                    {
+                        var check = await GetAsync($"cliente?id=eq.{uuid}&limit=1");
+                        if (check.Count == 0) { SaveSupabaseUuid("cliente", "Codigo", codigoCliente, ""); uuid = ""; }
+                    }
+                    catch { /* keep UUID on network error */ }
+                }
+
                 // Search Supabase for existing record to avoid duplicates
                 if (string.IsNullOrWhiteSpace(uuid))
                 {
-                    // 1. By CPF as string (preserves leading zeros)
-                    if (!string.IsNullOrWhiteSpace(cpf) && cpf.Length >= 11)
+                    // 1. By phone (most reliable — phone is stored as numeric)
+                    if (!string.IsNullOrWhiteSpace(celular) && long.TryParse(celular, out long telLookup) && telLookup > 0)
                     {
-                        var byCpf = await GetAsync($"cliente?cpf_cnpj=eq.{cpf}&limit=1");
-                        if (byCpf.Count > 0)
+                        var byTel = await GetAsync($"cliente?telefone=eq.{telLookup}&limit=1");
+                        if (byTel.Count > 0)
                         {
-                            uuid = byCpf[0]["id"]?.ToString() ?? "";
+                            uuid = byTel[0]["id"]?.ToString() ?? "";
                             if (!string.IsNullOrWhiteSpace(uuid))
                                 SaveSupabaseUuid("cliente", "Codigo", codigoCliente, uuid);
                         }
                     }
-                    // 2. By phone
-                    if (string.IsNullOrWhiteSpace(uuid) && !string.IsNullOrWhiteSpace(celular))
+                    // 2. By nome (last resort)
+                    if (string.IsNullOrWhiteSpace(uuid) && !string.IsNullOrWhiteSpace(nome))
                     {
-                        if (long.TryParse(celular, out long telNum2))
+                        var byNome = await GetAsync($"cliente?nome=eq.{Uri.EscapeDataString(nome)}&limit=1");
+                        if (byNome.Count > 0)
                         {
-                            var byTel = await GetAsync($"cliente?telefone=eq.{telNum2}&limit=1");
-                            if (byTel.Count > 0)
-                            {
-                                uuid = byTel[0]["id"]?.ToString() ?? "";
-                                if (!string.IsNullOrWhiteSpace(uuid))
-                                    SaveSupabaseUuid("cliente", "Codigo", codigoCliente, uuid);
-                            }
+                            uuid = byNome[0]["id"]?.ToString() ?? "";
+                            if (!string.IsNullOrWhiteSpace(uuid))
+                                SaveSupabaseUuid("cliente", "Codigo", codigoCliente, uuid);
                         }
                     }
                 }
 
-                long telLong = long.TryParse(celular, out var tl) ? tl : 0;
+                // telefone: send null when empty to avoid storing 0
+                long? telLong = (!string.IsNullOrWhiteSpace(celular) && long.TryParse(celular, out var tl) && tl > 0)
+                    ? (long?)tl : null;
+
+                // cpf_cnpj: numeric — only send when parseable and > 0
+                long? cpfLong = (!string.IsNullOrWhiteSpace(cpf) && long.TryParse(cpf, out var cl) && cl > 0)
+                    ? (long?)cl : null;
 
                 // Build formatted address string for endereco_padrao
                 string enderecoFormatado = endereco;
@@ -1492,48 +1714,39 @@ namespace Pedeai.DB
                 if (!string.IsNullOrWhiteSpace(bairro))      enderecoFormatado += $", {bairro}";
                 if (!string.IsNullOrWhiteSpace(cidade))      enderecoFormatado += $" - {cidade}";
 
-                long cpfLong = long.TryParse(cpf, out var cl) ? cl : 0;
-
                 var payload = new
                 {
                     nome,
-                    telefone         = telLong,
-                    cpf_cnpj         = cpfLong > 0 ? (object)cpfLong : null,
-                    endereco_padrao  = enderecoFormatado,
+                    telefone        = (object)telLong ?? DBNull.Value,
+                    cpf_cnpj        = (object)cpfLong ?? DBNull.Value,
+                    endereco_padrao = string.IsNullOrWhiteSpace(enderecoFormatado) ? null : enderecoFormatado,
                 };
 
                 if (!string.IsNullOrWhiteSpace(uuid))
                     await PatchAsync("cliente", $"id=eq.{uuid}", payload);
                 else
                 {
-                    var fullPayload = new
-                    {
-                        nome,
-                        telefone         = telLong,
-                        cpf_cnpj         = cpfLong > 0 ? (object)cpfLong : null,
-                        endereco_padrao  = enderecoFormatado,
-                    };
-                    var result = await PostAsync("cliente", fullPayload);
+                    var result = await PostAsync("cliente", payload);
                     uuid = result?["id"]?.ToString() ?? "";
                     if (!string.IsNullOrWhiteSpace(uuid))
                         SaveSupabaseUuid("cliente", "Codigo", codigoCliente, uuid);
                 }
 
-                // Sync address to enderecos_salvo (upsert by whatsapp + endereco + bairro)
+                // Sync address to enderecos_salvo — lookup by whatsapp+endereco only (bairro can be null)
                 if (!string.IsNullOrWhiteSpace(celular) && !string.IsNullOrWhiteSpace(endereco))
                 {
                     try
                     {
                         var byAddr = await GetAsync(
-                            $"enderecos_salvo?whatsapp=eq.{celular}&endereco=eq.{Uri.EscapeDataString(endereco)}&bairro=eq.{Uri.EscapeDataString(bairro)}&limit=1");
+                            $"enderecos_salvo?whatsapp=eq.{Uri.EscapeDataString(celular)}&endereco=eq.{Uri.EscapeDataString(endereco)}&limit=1");
                         var addrPayload = new
                         {
                             whatsapp    = celular,
                             endereco,
-                            bairro,
-                            numero,
-                            complemento,
-                            cidade,
+                            bairro      = string.IsNullOrWhiteSpace(bairro)    ? null : bairro,
+                            numero      = string.IsNullOrWhiteSpace(numero)     ? null : numero,
+                            complemento = string.IsNullOrWhiteSpace(complemento) ? null : complemento,
+                            cidade      = string.IsNullOrWhiteSpace(cidade)    ? null : cidade,
                         };
                         if (byAddr.Count > 0)
                         {
@@ -1581,53 +1794,32 @@ namespace Pedeai.DB
 
         // ── Marmita Items Sync ────────────────────────────────────────────────
 
+        /// <summary>
+        /// Syncs marmita items to Supabase grouped by their product category.
+        /// Each category becomes a complemento_grupo (group header shown on the website),
+        /// <summary>
+        /// Syncs the mercadoria items referenced by this marmita to the Supabase
+        /// mercadoria table (each item is a regular product with its own grupo_mercadoria).
+        /// </summary>
         public static async Task SincronizarItensMarmitaAsync(int codigoMarmita)
         {
             try
             {
-                string marmitaUuid = GetSupabaseUuid("marmita", "Codigo", codigoMarmita);
-                if (string.IsNullOrWhiteSpace(marmitaUuid)) return; // marmita not synced yet
-
-                // Load marmita items with their product's supabase_uuid and price
-                var itens = new List<(string nome, string mercUuid, decimal preco, int ordem)>();
+                // Get distinct mercadoria codes used as items in this marmita
+                var codigosItem = new List<int>();
                 using (var conn = AbrirMysql())
-                using (var cmd  = new MySqlCommand(@"
-                    SELECT mi.maritmNome,
-                           COALESCE(m.supabase_uuid,'') AS mercUuid,
-                           COALESCE(m.mercValorVenda, 0) AS preco
-                    FROM marmita_item mi
-                    LEFT JOIN mercadoria m ON m.Codigo = mi.maritmCodigo_Merc
-                    WHERE mi.Codigo_Marmita = @c
-                    ORDER BY mi.maritmNome", conn))
+                using (var cmd  = new MySqlCommand(
+                    "SELECT DISTINCT maritmCodigo_Merc FROM marmita_item " +
+                    "WHERE Codigo_Marmita=@c AND maritmCodigo_Merc IS NOT NULL AND maritmCodigo_Merc > 0", conn))
                 {
                     cmd.Parameters.AddWithValue("@c", codigoMarmita);
                     using var r = cmd.ExecuteReader();
-                    int ordem = 0;
-                    while (r.Read())
-                        itens.Add((
-                            r["maritmNome"]?.ToString() ?? "",
-                            r["mercUuid"]?.ToString() ?? "",
-                            r["preco"] == DBNull.Value ? 0m : Convert.ToDecimal(r["preco"]),
-                            ordem++));
+                    while (r.Read()) codigosItem.Add(Convert.ToInt32(r["maritmCodigo_Merc"]));
                 }
 
-                // Delete existing adicionais for this marmita in Supabase
-                try { await DeleteAsync("adicionais", $"mercadoria_id=eq.{marmitaUuid}"); } catch { }
-
-                // Insert new items into adicionais table
-                foreach (var (nome, mercUuid, preco, ordem) in itens)
-                {
-                    var payload = new
-                    {
-                        mercadoria_id = marmitaUuid,  // parent marmita UUID
-                        nome,
-                        preco,
-                        opcional = false,
-                        ativo    = true,
-                        ordem
-                    };
-                    try { await PostAsync("adicionais", payload); } catch { }
-                }
+                // Sync each referenced mercadoria as a regular product
+                foreach (var codMerc in codigosItem)
+                    await SincronizarProdutoAsync(codMerc);
             }
             catch (Exception ex)
             {
@@ -1635,73 +1827,18 @@ namespace Pedeai.DB
             }
         }
 
-        /// <summary>
-        /// Syncs the marmita's complement groups to the Supabase 'adicionais' table.
-        /// Each group link from marmita_complemento_grupo is posted as optional=false.
-        /// This replaces SincronizarItensMarmitaAsync when complement groups are configured.
-        /// </summary>
+        // Kept for backwards compatibility — now just delegates to SincronizarItensMarmitaAsync
         public static async Task SincronizarComplementosMarmitaAsync(int codigoMarmita)
-        {
-            try
-            {
-                string marmitaUuid = GetSupabaseUuid("marmita", "Codigo", codigoMarmita);
-                if (string.IsNullOrWhiteSpace(marmitaUuid)) return;
-
-                // Read complement groups from MySQL
-                var grupos = new List<string>();
-                using (var conn = AbrirMysql())
-                {
-                    using var cmd = new MySqlCommand(
-                        "SELECT COALESCE(gm.grmeDescricao_, mcg.grmeDescricao, '') AS nome " +
-                        "FROM marmita_complemento_grupo mcg " +
-                        "LEFT JOIN grupo_mercadoria gm ON gm.Codigo = mcg.Codigo_Grupo " +
-                        "WHERE mcg.Codigo_Marmita = @c ORDER BY mcg.Codigo", conn);
-                    cmd.Parameters.AddWithValue("@c", codigoMarmita);
-                    using var dr = cmd.ExecuteReader();
-                    while (dr.Read())
-                    {
-                        var nome = dr.GetString(0);
-                        if (!string.IsNullOrWhiteSpace(nome))
-                            grupos.Add(nome);
-                    }
-                }
-
-                // If no complement groups configured, fall back to sync individual items
-                if (grupos.Count == 0)
-                {
-                    await SincronizarItensMarmitaAsync(codigoMarmita);
-                    return;
-                }
-
-                // Delete all existing adicionais for this marmita, then re-insert as groups
-                try { await DeleteAsync("adicionais", $"mercadoria_id=eq.{marmitaUuid}"); } catch { }
-
-                int ordem = 0;
-                foreach (var nome in grupos)
-                {
-                    var payload = new
-                    {
-                        mercadoria_id = marmitaUuid,
-                        nome,
-                        preco    = 0m,
-                        opcional = false,
-                        ativo    = true,
-                        ordem    = ordem++
-                    };
-                    try { await PostAsync("adicionais", payload); } catch { }
-                }
-            }
-            catch (Exception ex)
-            {
-                Logger.Log("SupabaseService", "SincronizarComplementosMarmitaAsync",
-                    $"Erro marmita {codigoMarmita}", ex);
-            }
-        }
+            => await SincronizarItensMarmitaAsync(codigoMarmita);
 
         /// <summary>
         /// Syncs Adicionais and Complementos group links to Supabase.
         /// adicionais (opcional=true) and complementos (opcional=false) are posted to the 'adicionais' table
         /// keyed by the product's mercadoria_id, using the grupo_mercadoria name.
+        /// </summary>
+        /// <summary>
+        /// Kept for API compatibility. Syncs the product as a regular mercadoria in Supabase.
+        /// Adicionais/complementos are treated as separate mercadoria records in their own groups.
         /// </summary>
         public static async Task SincronizarVinculosGrupoAsync(
             int codigoMercadoria,
@@ -1710,24 +1847,12 @@ namespace Pedeai.DB
         {
             try
             {
-                string mercUuid = GetSupabaseUuid("mercadoria", "Codigo", codigoMercadoria);
-                if (string.IsNullOrWhiteSpace(mercUuid)) return;
+                // Just sync the product itself as a regular mercadoria
+                await SincronizarProdutoAsync(codigoMercadoria);
 
-                // Delete all existing adicionais/complementos-type records for this product
-                // Use filter: mercadoria_id=eq.{uuid}&tipo fields not present; rely on deleting all and re-inserting
-                try { await DeleteAsync("adicionais", $"mercadoria_id=eq.{mercUuid}"); } catch { }
-
-                int ordem = 0;
-                foreach (var (codGrupo, nome) in adicionais)
-                {
-                    var payload = new { mercadoria_id = mercUuid, nome, preco = 0m, opcional = true,  ativo = true, ordem = ordem++ };
-                    try { await PostAsync("adicionais", payload); } catch { }
-                }
-                foreach (var (codGrupo, nome) in complementos)
-                {
-                    var payload = new { mercadoria_id = mercUuid, nome, preco = 0m, opcional = false, ativo = true, ordem = ordem++ };
-                    try { await PostAsync("adicionais", payload); } catch { }
-                }
+                // Also sync each adicional/complemento as its own mercadoria product
+                foreach (var (codGrupo, _) in adicionais.Concat(complementos))
+                    if (codGrupo > 0) await SincronizarProdutoAsync(codGrupo);
             }
             catch (Exception ex)
             {
@@ -1778,25 +1903,341 @@ namespace Pedeai.DB
 
         // ── (end of new methods) ──────────────────────────────────────────────
 
-        public static async Task SincronizarTodosGruposAsync()
+        public static async Task<List<string>> SincronizarTodosGruposAsync()
         {
+            var erros = new List<string>();
             try
             {
                 var codigos = new List<int>();
                 using (var conn = AbrirMysql())
                 using (var cmd  = new MySqlCommand(
-                    "SELECT Codigo FROM grupo_mercadoria WHERE Situacao='A' AND COALESCE(grmeHabilitar_Site,0)=1", conn))
+                    "SELECT Codigo FROM grupo_mercadoria", conn))
                 {
                     using var r = cmd.ExecuteReader();
                     while (r.Read()) codigos.Add(Convert.ToInt32(r["Codigo"]));
                 }
                 foreach (var cod in codigos)
-                    await SincronizarGrupoAsync(cod);
+                {
+                    var err = await SincronizarGrupoAsync(cod);
+                    if (!string.IsNullOrWhiteSpace(err)) erros.Add($"Categoria {cod}: {err}");
+                }
             }
             catch (Exception ex)
             {
                 Logger.Log("SupabaseService", "SincronizarTodosGruposAsync", "Erro", ex);
+                erros.Add($"Categorias: {ex.Message}");
             }
+            return erros;
+        }
+
+        /// <summary>
+        /// Syncs only catalog-related tables (categories, products, marmitas, images).
+        /// Called every few minutes as a background catch-all — faster than SincronizarTudoAsync.
+        /// </summary>
+        public static async Task SincronizarCatalogoAsync()
+        {
+            try
+            {
+                await SincronizarTodosGruposAsync();
+                await SincronizarTodosProdutosAsync();
+                await SincronizarTodasMarmitasAsync();
+                await SincronizarTodasImagensAsync();
+            }
+            catch (Exception ex)
+            {
+                Logger.Log("SupabaseService", "SincronizarCatalogoAsync", "Erro", ex);
+            }
+        }
+
+        /// <summary>
+        /// Runs a live connectivity and permissions diagnostic against Supabase.
+        /// Tests GET, INSERT and DELETE for each relevant table and returns the raw
+        /// HTTP status codes and response bodies so any misconfiguration is visible.
+        /// </summary>
+        public static async Task<string> DiagnosticaAsync()
+        {
+            var sb = new System.Text.StringBuilder();
+            sb.AppendLine($"Diagnóstico Supabase — {DateTime.Now:dd/MM/yyyy HH:mm:ss}");
+            sb.AppendLine($"URL: {BASE}");
+            sb.AppendLine(new string('═', 70));
+
+            // ── MySQL ─────────────────────────────────────────────────────────
+            sb.AppendLine("\n[MySQL]");
+            try
+            {
+                using var conn = AbrirMysql();
+                using var cmd  = new MySqlCommand("SELECT COUNT(*) FROM mercadoria", conn);
+                sb.AppendLine($"  ✓ Conectado — {cmd.ExecuteScalar()} produto(s) no banco local");
+            }
+            catch (Exception ex) { sb.AppendLine($"  ✗ ERRO: {ex.Message}"); }
+
+            // ── GET /loja  (basic auth test) ──────────────────────────────────
+            sb.AppendLine("\n[GET /loja]");
+            try
+            {
+                var r    = await _http.GetAsync($"{BASE}/loja?limit=1");
+                var body = await r.Content.ReadAsStringAsync();
+                sb.AppendLine($"  Status: {(int)r.StatusCode} {r.ReasonPhrase}");
+                if (body.Length > 0) sb.AppendLine("  " + body[..Math.Min(180, body.Length)]);
+            }
+            catch (Exception ex) { sb.AppendLine($"  ✗ ERRO: {ex.Message}"); }
+
+            // ── GET /mercadoria ──────────────────────────────────────────────
+            sb.AppendLine("\n[GET /mercadoria]");
+            try
+            {
+                var r    = await _http.GetAsync($"{BASE}/mercadoria?limit=2");
+                var body = await r.Content.ReadAsStringAsync();
+                sb.AppendLine($"  Status: {(int)r.StatusCode} {r.ReasonPhrase}");
+                if (body.Length > 0) sb.AppendLine("  " + body[..Math.Min(300, body.Length)]);
+            }
+            catch (Exception ex) { sb.AppendLine($"  ✗ ERRO: {ex.Message}"); }
+
+            // ── POST /mercadoria (campos mínimos) ─────────────────────────────
+            sb.AppendLine("\n[POST /mercadoria — campos mínimos]");
+            string testId1 = null;
+            try
+            {
+                var json = JsonConvert.SerializeObject(new
+                    { nome = "_DIAG_MIN_", preco_venda = 0.01m, ativo = false });
+                using var req = new HttpRequestMessage(HttpMethod.Post, $"{BASE}/mercadoria")
+                    { Content = new StringContent(json, Encoding.UTF8, "application/json") };
+                req.Headers.Add("Prefer", "return=representation");
+                var r    = await _http.SendAsync(req);
+                var body = await r.Content.ReadAsStringAsync();
+                sb.AppendLine($"  Status: {(int)r.StatusCode} {r.ReasonPhrase}");
+                sb.AppendLine("  " + body[..Math.Min(400, body.Length)]);
+                if (r.IsSuccessStatusCode)
+                    try { testId1 = (JToken.Parse(body) is JArray a ? a[0] : JToken.Parse(body))?["id"]?.ToString(); } catch { }
+            }
+            catch (Exception ex) { sb.AppendLine($"  ✗ ERRO: {ex.Message}"); }
+            if (!string.IsNullOrEmpty(testId1))
+            {
+                try
+                {
+                    using var d = new HttpRequestMessage(HttpMethod.Delete, $"{BASE}/mercadoria?id=eq.{testId1}");
+                    d.Headers.Add("Prefer", "return=minimal");
+                    await _http.SendAsync(d);
+                    sb.AppendLine("  (registro de teste removido ✓)");
+                }
+                catch { }
+            }
+
+            // ── POST /mercadoria (payload completo) ───────────────────────────
+            sb.AppendLine("\n[POST /mercadoria — payload completo]");
+            string testId2 = null;
+            try
+            {
+                var json = JsonConvert.SerializeObject(new
+                {
+                    nome        = "_DIAG_FULL_",
+                    descricao   = "",
+                    preco_venda = 0.01m,
+                    imagem_url  = "",
+                    ativo       = false,
+                    destaque    = false
+                });
+                using var req = new HttpRequestMessage(HttpMethod.Post, $"{BASE}/mercadoria")
+                    { Content = new StringContent(json, Encoding.UTF8, "application/json") };
+                req.Headers.Add("Prefer", "return=representation");
+                var r    = await _http.SendAsync(req);
+                var body = await r.Content.ReadAsStringAsync();
+                sb.AppendLine($"  Status: {(int)r.StatusCode} {r.ReasonPhrase}");
+                sb.AppendLine("  " + body[..Math.Min(400, body.Length)]);
+                if (r.IsSuccessStatusCode)
+                    try { testId2 = (JToken.Parse(body) is JArray a ? a[0] : JToken.Parse(body))?["id"]?.ToString(); } catch { }
+            }
+            catch (Exception ex) { sb.AppendLine($"  ✗ ERRO: {ex.Message}"); }
+            if (!string.IsNullOrEmpty(testId2))
+            {
+                try
+                {
+                    using var d = new HttpRequestMessage(HttpMethod.Delete, $"{BASE}/mercadoria?id=eq.{testId2}");
+                    d.Headers.Add("Prefer", "return=minimal");
+                    await _http.SendAsync(d);
+                    sb.AppendLine("  (registro de teste removido ✓)");
+                }
+                catch { }
+            }
+
+            // ── GET /grupo_mercadoria ─────────────────────────────────────────
+            sb.AppendLine("\n[GET /grupo_mercadoria]");
+            try
+            {
+                var r    = await _http.GetAsync($"{BASE}/grupo_mercadoria?limit=2");
+                var body = await r.Content.ReadAsStringAsync();
+                sb.AppendLine($"  Status: {(int)r.StatusCode} {r.ReasonPhrase}");
+                if (body.Length > 0) sb.AppendLine("  " + body[..Math.Min(200, body.Length)]);
+            }
+            catch (Exception ex) { sb.AppendLine($"  ✗ ERRO: {ex.Message}"); }
+
+            // ── GET /bairro ───────────────────────────────────────────────────
+            sb.AppendLine("\n[GET /bairro]");
+            try
+            {
+                var r    = await _http.GetAsync($"{BASE}/bairro?limit=1");
+                var body = await r.Content.ReadAsStringAsync();
+                sb.AppendLine($"  Status: {(int)r.StatusCode} {r.ReasonPhrase}");
+                if (body.Length > 0) sb.AppendLine("  " + body[..Math.Min(200, body.Length)]);
+            }
+            catch (Exception ex) { sb.AppendLine($"  ✗ ERRO: {ex.Message}"); }
+
+            // ── GET /cupom ────────────────────────────────────────────────────
+            sb.AppendLine("\n[GET /cupom]");
+            try
+            {
+                var r    = await _http.GetAsync($"{BASE}/cupom?limit=1");
+                var body = await r.Content.ReadAsStringAsync();
+                sb.AppendLine($"  Status: {(int)r.StatusCode} {r.ReasonPhrase}");
+                if (body.Length > 0) sb.AppendLine("  " + body[..Math.Min(200, body.Length)]);
+            }
+            catch (Exception ex) { sb.AppendLine($"  ✗ ERRO: {ex.Message}"); }
+
+            // ── SYNC REAL: 1ª categoria do MySQL → grupo_mercadoria ──────────
+            sb.AppendLine("\n[SYNC REAL — 1ª categoria MySQL → grupo_mercadoria]");
+            try
+            {
+                int codGrupo = 0;
+                string nomeGrupo = "", imagemGrupo = ""; int ordemGrupo = 0;
+                using (var conn = AbrirMysql())
+                using (var cmd = new MySqlCommand(
+                    "SELECT Codigo, grmeDescricao_, COALESCE(grmeOrdem,0) AS grmeOrdem, " +
+                    "COALESCE(grmeImagem_Url,'') AS grmeImagem_Url FROM grupo_mercadoria LIMIT 1", conn))
+                {
+                    using var r = cmd.ExecuteReader();
+                    if (r.Read())
+                    {
+                        codGrupo   = Convert.ToInt32(r["Codigo"]);
+                        nomeGrupo  = r["grmeDescricao_"]?.ToString() ?? "";
+                        ordemGrupo = Convert.ToInt32(r["grmeOrdem"]);
+                        imagemGrupo = r["grmeImagem_Url"]?.ToString() ?? "";
+                        if (!string.IsNullOrWhiteSpace(imagemGrupo) &&
+                            !imagemGrupo.StartsWith("http", StringComparison.OrdinalIgnoreCase))
+                            imagemGrupo = "";
+                    }
+                }
+                if (codGrupo > 0)
+                {
+                    sb.AppendLine($"  MySQL Codigo={codGrupo} nome=\"{nomeGrupo}\"");
+                    var payload = new { nome = nomeGrupo, ordem = ordemGrupo, ativo = true, imagem_url = imagemGrupo };
+                    var payloadJson = JsonConvert.SerializeObject(payload);
+                    sb.AppendLine($"  Payload: {payloadJson}");
+
+                    // Check if already exists
+                    var existentes = await GetAsync($"grupo_mercadoria?nome=eq.{Uri.EscapeDataString(nomeGrupo)}&limit=1");
+                    if (existentes.Count > 0)
+                    {
+                        var existId = existentes[0]["id"]?.ToString();
+                        sb.AppendLine($"  Já existe no Supabase id={existId} — fazendo PATCH");
+                        using var req = new HttpRequestMessage(new HttpMethod("PATCH"),
+                            $"{BASE}/grupo_mercadoria?id=eq.{existId}")
+                        { Content = new StringContent(payloadJson, Encoding.UTF8, "application/json") };
+                        req.Headers.Add("Prefer", "return=representation");
+                        var r = await _http.SendAsync(req);
+                        var body = await r.Content.ReadAsStringAsync();
+                        sb.AppendLine($"  PATCH Status: {(int)r.StatusCode} {r.ReasonPhrase}");
+                        sb.AppendLine("  " + body[..Math.Min(300, body.Length)]);
+                    }
+                    else
+                    {
+                        sb.AppendLine("  Não existe — fazendo POST");
+                        using var req = new HttpRequestMessage(HttpMethod.Post, $"{BASE}/grupo_mercadoria")
+                        { Content = new StringContent(payloadJson, Encoding.UTF8, "application/json") };
+                        req.Headers.Add("Prefer", "return=representation");
+                        var r = await _http.SendAsync(req);
+                        var body = await r.Content.ReadAsStringAsync();
+                        sb.AppendLine($"  POST Status: {(int)r.StatusCode} {r.ReasonPhrase}");
+                        sb.AppendLine("  " + body[..Math.Min(300, body.Length)]);
+                    }
+                }
+                else sb.AppendLine("  Nenhuma categoria encontrada no MySQL.");
+            }
+            catch (Exception ex) { sb.AppendLine($"  ✗ ERRO: {ex.Message}"); }
+
+            // ── SYNC REAL: 1º produto do MySQL → mercadoria ──────────────────
+            sb.AppendLine("\n[SYNC REAL — 1º produto MySQL → mercadoria]");
+            try
+            {
+                int codMerc = 0;
+                string nomeMerc = "", descMerc = "", imgMerc = "";
+                decimal precoMerc = 0m;
+                using (var conn = AbrirMysql())
+                using (var cmd = new MySqlCommand(
+                    "SELECT Codigo, mercMercadoria, COALESCE(mercApresentacao,'') AS mercApresentacao, " +
+                    "COALESCE(mercPreco_Venda,0) AS mercPreco_Venda, " +
+                    "COALESCE(mercImagem_Url,'') AS mercImagem_Url FROM mercadoria WHERE Situacao='A' LIMIT 1", conn))
+                {
+                    using var r = cmd.ExecuteReader();
+                    if (r.Read())
+                    {
+                        codMerc   = Convert.ToInt32(r["Codigo"]);
+                        nomeMerc  = r["mercMercadoria"]?.ToString() ?? "";
+                        descMerc  = r["mercApresentacao"]?.ToString() ?? "";
+                        precoMerc = Convert.ToDecimal(r["mercPreco_Venda"]);
+                        imgMerc   = r["mercImagem_Url"]?.ToString() ?? "";
+                        if (!string.IsNullOrWhiteSpace(imgMerc) &&
+                            !imgMerc.StartsWith("http", StringComparison.OrdinalIgnoreCase))
+                            imgMerc = "";
+                    }
+                }
+                if (codMerc > 0)
+                {
+                    sb.AppendLine($"  MySQL Codigo={codMerc} nome=\"{nomeMerc}\" preco={precoMerc}");
+                    var payload = new { nome = nomeMerc, descricao = descMerc, preco_venda = precoMerc,
+                                        imagem_url = imgMerc, ativo = true, destaque = false };
+                    var payloadJson = JsonConvert.SerializeObject(payload);
+                    sb.AppendLine($"  Payload: {payloadJson}");
+
+                    // Check if already exists
+                    var existentes = await GetAsync($"mercadoria?nome=eq.{Uri.EscapeDataString(nomeMerc)}&limit=1");
+                    if (existentes.Count > 0)
+                    {
+                        var existId = existentes[0]["id"]?.ToString();
+                        sb.AppendLine($"  Já existe no Supabase id={existId} — fazendo PATCH");
+                        using var req = new HttpRequestMessage(new HttpMethod("PATCH"),
+                            $"{BASE}/mercadoria?id=eq.{existId}")
+                        { Content = new StringContent(payloadJson, Encoding.UTF8, "application/json") };
+                        req.Headers.Add("Prefer", "return=representation");
+                        var r = await _http.SendAsync(req);
+                        var body = await r.Content.ReadAsStringAsync();
+                        sb.AppendLine($"  PATCH Status: {(int)r.StatusCode} {r.ReasonPhrase}");
+                        sb.AppendLine("  " + body[..Math.Min(300, body.Length)]);
+                    }
+                    else
+                    {
+                        sb.AppendLine("  Não existe — fazendo POST");
+                        using var req = new HttpRequestMessage(HttpMethod.Post, $"{BASE}/mercadoria")
+                        { Content = new StringContent(payloadJson, Encoding.UTF8, "application/json") };
+                        req.Headers.Add("Prefer", "return=representation");
+                        var r = await _http.SendAsync(req);
+                        var body = await r.Content.ReadAsStringAsync();
+                        sb.AppendLine($"  POST Status: {(int)r.StatusCode} {r.ReasonPhrase}");
+                        sb.AppendLine("  " + body[..Math.Min(300, body.Length)]);
+                        // Clean up test if it worked
+                        if (r.IsSuccessStatusCode)
+                        {
+                            try
+                            {
+                                var inserted = JToken.Parse(body);
+                                var insId = (inserted is JArray aa ? aa[0] : inserted)?["id"]?.ToString();
+                                if (!string.IsNullOrWhiteSpace(insId))
+                                {
+                                    using var d = new HttpRequestMessage(HttpMethod.Delete, $"{BASE}/mercadoria?id=eq.{insId}");
+                                    d.Headers.Add("Prefer", "return=minimal");
+                                    await _http.SendAsync(d);
+                                    sb.AppendLine("  (registro de teste removido ✓ — rode o Enviar Tudo ao Site para enviar de verdade)");
+                                }
+                            }
+                            catch { }
+                        }
+                    }
+                }
+                else sb.AppendLine("  Nenhum produto ativo encontrado no MySQL.");
+            }
+            catch (Exception ex) { sb.AppendLine($"  ✗ ERRO: {ex.Message}"); }
+
+            sb.AppendLine("\n" + new string('═', 70));
+            return sb.ToString();
         }
 
         public static async Task SincronizarTudoAsync()
@@ -1804,10 +2245,11 @@ namespace Pedeai.DB
             try
             {
                 await SincronizarLojaAsync();
+                await SincronizarFormasPagamentoAsync();
                 await SincronizarTodosGruposAsync();
                 await SincronizarTodosProdutosAsync();
                 await SincronizarTodasMarmitasAsync();
-                await SincronizarTodasImagensAsync();   // push any HTTP URLs still missing in Supabase
+                await SincronizarTodasImagensAsync();
                 await SincronizarTodosCuponsAsync();
                 await SincronizarTodosBairrosAsync();
                 await SincronizarTodosClientesAsync();
@@ -1819,62 +2261,138 @@ namespace Pedeai.DB
         }
 
         /// <summary>
+        /// Full sync with step-by-step progress reporting. Returns accumulated errors.
+        /// Uses IProgress&lt;string&gt; so callbacks are marshalled back to the UI thread automatically.
+        /// </summary>
+        public static async Task<string> SincronizarTudoComProgressoAsync(IProgress<string> progress)
+        {
+            var todosErros = new List<string>();
+            ResetSyncCache(); // clear per-run group cache to avoid stale hits
+
+            progress?.Report("Sincronizando dados da loja...");
+            await SincronizarLojaAsync();
+
+            progress?.Report("Sincronizando formas de pagamento...");
+            await SincronizarFormasPagamentoAsync();
+
+            progress?.Report("Sincronizando categorias...");
+            todosErros.AddRange(await SincronizarTodosGruposAsync());
+
+            progress?.Report("Sincronizando produtos...");
+            todosErros.AddRange(await SincronizarTodosProdutosAsync());
+
+            progress?.Report("Sincronizando marmitas e itens...");
+            await SincronizarTodasMarmitasAsync();
+
+            progress?.Report("Sincronizando imagens...");
+            await SincronizarTodasImagensAsync();
+
+            progress?.Report("Sincronizando cupons...");
+            await SincronizarTodosCuponsAsync();
+
+            progress?.Report("Sincronizando bairros e taxas de entrega...");
+            await SincronizarTodosBairrosAsync();
+
+            progress?.Report("Sincronizando clientes...");
+            await SincronizarTodosClientesAsync();
+
+            progress?.Report(todosErros.Count == 0 ? "Concluido!" : $"Concluido com {todosErros.Count} erro(s).");
+            return todosErros.Count == 0 ? "" : string.Join("\n", todosErros);
+        }
+
+        /// <summary>
         /// Force-patches url_da_imagem in Supabase for every local record that already has
-        /// a valid HTTP URL in MySQL but whose Supabase row still has an empty / stale URL.
-        /// Safe to call repeatedly — uses PATCH so it only updates the image column.
+        /// a valid HTTP URL in MySQL. Uses UUID when available; falls back to name lookup in Supabase
+        /// for records that were synced before UUID tracking was added.
+        /// Safe to call repeatedly — only updates the image column.
         /// </summary>
         public static async Task SincronizarTodasImagensAsync()
         {
             try
             {
                 // ── Produtos (mercadoria MySQL → mercadoria Supabase) ──────────────
-                var rows = new List<(string uuid, string url)>();
+                var prodRows = new List<(int codigo, string nome, string uuid, string url)>();
                 using (var conn = AbrirMysql())
                 using (var cmd = new MySqlCommand(
-                    "SELECT supabase_uuid, mercImagem_Url FROM mercadoria " +
-                    "WHERE supabase_uuid IS NOT NULL AND supabase_uuid <> '' " +
-                    "AND mercImagem_Url LIKE 'http%'", conn))
+                    "SELECT Codigo, mercMercadoria, COALESCE(supabase_uuid,''), mercImagem_Url " +
+                    "FROM mercadoria WHERE mercImagem_Url LIKE 'http%'", conn))
                 {
                     using var r = cmd.ExecuteReader();
                     while (r.Read())
-                        rows.Add((r.GetString(0), r.GetString(1)));
+                        prodRows.Add((r.GetInt32(0), r.GetString(1), r.GetString(2), r.GetString(3)));
                 }
-                foreach (var (uuid, url) in rows)
-                    try { await PatchAsync("mercadoria", $"id=eq.{uuid}", new { url_da_imagem = url }); } catch { }
+                foreach (var (codigo, nome, uuid, url) in prodRows)
+                    try { await ForcarUrlImagemAsync(TBL_MERCADORIAS, "mercadoria", "Codigo", codigo, nome, url); } catch { }
 
                 // ── Categorias (grupo_mercadoria MySQL → grupo_mercadoria Supabase) ─
-                rows.Clear();
+                var grpRows = new List<(int codigo, string nome, string uuid, string url)>();
                 using (var conn = AbrirMysql())
                 using (var cmd = new MySqlCommand(
-                    "SELECT supabase_uuid, grmeImagem_Url FROM grupo_mercadoria " +
-                    "WHERE supabase_uuid IS NOT NULL AND supabase_uuid <> '' " +
-                    "AND grmeImagem_Url LIKE 'http%'", conn))
+                    "SELECT Codigo, grmeDescricao_, COALESCE(supabase_uuid,''), grmeImagem_Url " +
+                    "FROM grupo_mercadoria WHERE grmeImagem_Url LIKE 'http%'", conn))
                 {
                     using var r = cmd.ExecuteReader();
                     while (r.Read())
-                        rows.Add((r.GetString(0), r.GetString(1)));
+                        grpRows.Add((r.GetInt32(0), r.GetString(1), r.GetString(2), r.GetString(3)));
                 }
-                foreach (var (uuid, url) in rows)
-                    try { await PatchAsync("grupo_mercadoria", $"id=eq.{uuid}", new { url_da_imagem = url }); } catch { }
+                foreach (var (codigo, nome, uuid, url) in grpRows)
+                    try { await ForcarUrlImagemAsync("grupo_mercadoria", "grupo_mercadoria", "Codigo", codigo, nome, url, "imagem_url"); } catch { }
 
                 // ── Marmitas (marmita MySQL → mercadoria Supabase, same table as products) ─
-                rows.Clear();
+                var marRows = new List<(int codigo, string nome, string uuid, string url)>();
                 using (var conn = AbrirMysql())
                 using (var cmd = new MySqlCommand(
-                    "SELECT supabase_uuid, marImagem_Url FROM marmita " +
-                    "WHERE supabase_uuid IS NOT NULL AND supabase_uuid <> '' " +
-                    "AND marImagem_Url LIKE 'http%'", conn))
+                    "SELECT Codigo, marDescricao, COALESCE(supabase_uuid,''), marImagem_Url " +
+                    "FROM marmita WHERE marImagem_Url LIKE 'http%'", conn))
                 {
                     using var r = cmd.ExecuteReader();
                     while (r.Read())
-                        rows.Add((r.GetString(0), r.GetString(1)));
+                        marRows.Add((r.GetInt32(0), r.GetString(1), r.GetString(2), r.GetString(3)));
                 }
-                foreach (var (uuid, url) in rows)
-                    try { await PatchAsync("mercadoria", $"id=eq.{uuid}", new { url_da_imagem = url }); } catch { }
+                foreach (var (codigo, nome, uuid, url) in marRows)
+                    try { await ForcarUrlImagemAsync(TBL_MERCADORIAS, "marmita", "Codigo", codigo, nome, url); } catch { }
             }
             catch (Exception ex)
             {
                 Logger.Log("SupabaseService", "SincronizarTodasImagensAsync", "Erro", ex);
+            }
+        }
+
+        /// <summary>
+        /// Finds the Supabase UUID for a row using MySQL first, then a name lookup in Supabase as
+        /// fallback (handles records that exist in Supabase but whose UUID was never stored locally).
+        /// Saves UUID back to MySQL if found via fallback. Then PATCHes url_da_imagem.
+        /// </summary>
+        private static async Task ForcarUrlImagemAsync(
+            string supabaseTable, string mysqlTable, string pkCol, int pkVal,
+            string nome, string publicUrl, string imageColName = "imagem_url")
+        {
+            // 1. Try local UUID cache
+            string uuid = GetSupabaseUuid(mysqlTable, pkCol, pkVal);
+
+            // 2. Fallback: search Supabase by nome (handles missing UUID in MySQL)
+            if (string.IsNullOrWhiteSpace(uuid))
+            {
+                try
+                {
+                    var arr = await GetAsync(
+                        $"{supabaseTable}?nome=eq.{Uri.EscapeDataString(nome)}&limit=1");
+                    if (arr.Count > 0)
+                    {
+                        uuid = arr[0]["id"]?.ToString() ?? "";
+                        if (!string.IsNullOrWhiteSpace(uuid))
+                            SaveSupabaseUuid(mysqlTable, pkCol, pkVal, uuid);
+                    }
+                }
+                catch { }
+            }
+
+            // 3. PATCH if we have the UUID
+            if (!string.IsNullOrWhiteSpace(uuid))
+            {
+                var patch = new Dictionary<string, object> { [imageColName] = publicUrl };
+                await PatchAsync(supabaseTable, $"id=eq.{uuid}",
+                    JsonConvert.DeserializeObject(JsonConvert.SerializeObject(patch)));
             }
         }
 
@@ -1930,15 +2448,18 @@ namespace Pedeai.DB
                 cmd.Parameters.AddWithValue("@c",   codigoGrupo);
                 cmd.ExecuteNonQuery();
 
-                // Push URL to Supabase immediately (bypasses habSite gate)
-                try
+                // Read category name for Supabase lookup fallback
+                string grpNome = "";
+                using (var cmd2 = new MySqlCommand(
+                    "SELECT grmeDescricao_ FROM grupo_mercadoria WHERE Codigo=@c LIMIT 1", conn))
                 {
-                    string uuid = GetSupabaseUuid("grupo_mercadoria", "Codigo", codigoGrupo);
-                    if (!string.IsNullOrWhiteSpace(uuid))
-                        await PatchAsync("grupo_mercadoria", $"id=eq.{uuid}",
-                            new { url_da_imagem = publicUrl });
+                    cmd2.Parameters.AddWithValue("@c", codigoGrupo);
+                    grpNome = cmd2.ExecuteScalar()?.ToString() ?? "";
                 }
-                catch { }
+
+                // Push URL to Supabase — bypasses habSite gate, finds UUID by name if not in MySQL
+                await ForcarUrlImagemAsync("grupo_mercadoria", "grupo_mercadoria",
+                    "Codigo", codigoGrupo, grpNome, publicUrl, "imagem_url");
             }
             catch (Exception ex)
             {
@@ -1993,15 +2514,18 @@ namespace Pedeai.DB
                 cmd.Parameters.AddWithValue("@c",   codigoMarmita);
                 cmd.ExecuteNonQuery();
 
-                // Push URL to Supabase immediately (bypasses habSite gate)
-                try
+                // Read marmita name for Supabase lookup fallback
+                string marNome = "";
+                using (var cmd2 = new MySqlCommand(
+                    "SELECT marDescricao FROM marmita WHERE Codigo=@c LIMIT 1", conn))
                 {
-                    string uuid = GetSupabaseUuid("marmita", "Codigo", codigoMarmita);
-                    if (!string.IsNullOrWhiteSpace(uuid))
-                        await PatchAsync("mercadoria", $"id=eq.{uuid}",
-                            new { url_da_imagem = publicUrl });
+                    cmd2.Parameters.AddWithValue("@c", codigoMarmita);
+                    marNome = cmd2.ExecuteScalar()?.ToString() ?? "";
                 }
-                catch { }
+
+                // Push URL to Supabase — bypasses habSite gate, finds UUID by name if not in MySQL
+                await ForcarUrlImagemAsync(TBL_MERCADORIAS, "marmita",
+                    "Codigo", codigoMarmita, marNome, publicUrl);
             }
             catch (Exception ex)
             {
@@ -2060,15 +2584,18 @@ namespace Pedeai.DB
                 cmd.Parameters.AddWithValue("@c",   codigoProduto);
                 cmd.ExecuteNonQuery();
 
-                // Push URL to Supabase immediately (bypasses habSite gate)
-                try
+                // Read product name for Supabase lookup fallback
+                string prodNome = "";
+                using (var cmd2 = new MySqlCommand(
+                    "SELECT mercMercadoria FROM mercadoria WHERE Codigo=@c LIMIT 1", conn))
                 {
-                    string uuid = GetSupabaseUuid("mercadoria", "Codigo", codigoProduto);
-                    if (!string.IsNullOrWhiteSpace(uuid))
-                        await PatchAsync("mercadoria", $"id=eq.{uuid}",
-                            new { url_da_imagem = publicUrl });
+                    cmd2.Parameters.AddWithValue("@c", codigoProduto);
+                    prodNome = cmd2.ExecuteScalar()?.ToString() ?? "";
                 }
-                catch { }
+
+                // Push URL to Supabase — bypasses habSite gate, finds UUID by name if not in MySQL
+                await ForcarUrlImagemAsync(TBL_MERCADORIAS, "mercadoria",
+                    "Codigo", codigoProduto, prodNome, publicUrl);
             }
             catch (Exception ex)
             {

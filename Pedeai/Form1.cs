@@ -19,6 +19,7 @@ namespace Pedeai
         private BLL.ConfiguracaoImpressaoBLL     _impBLL;
 
         private int  _paginaAtual = 0; // 0=Dashboard 1=Pedidos 2=Financeiro
+        private System.Threading.Timer _syncCatalogoTimer;
 
         // -- Cores ------------------------------------------------------------
         private static readonly Color CorSidebar    = Color.FromArgb(18, 20, 25);
@@ -56,6 +57,7 @@ namespace Pedeai
         protected override void OnFormClosed(FormClosedEventArgs e)
         {
             AppEvents.NovoPedidoWebRecebido -= OnNovoPedidoWebRecebido;
+            try { _syncCatalogoTimer?.Dispose(); } catch { }
             try { DB.QuartzSchedulerService.StopAsync().GetAwaiter().GetResult(); } catch { }
             base.OnFormClosed(e);
         }
@@ -68,6 +70,14 @@ namespace Pedeai
             _timer.Start();
             Logger.Log("Form1", "Form1_Load", $"Login | Usu\u00e1rio: {UsuarioSessao.NomeAtual}");
             BeginInvoke(new Action(VerificarAvisosIniciais));
+
+            // Periodic catalog sync — runs every 5 minutes as catch-all for MySQL→Supabase
+            _syncCatalogoTimer = new System.Threading.Timer(
+                async _ => { try { await DB.SupabaseService.SincronizarCatalogoAsync(); } catch { } },
+                null,
+                System.TimeSpan.FromMinutes(5),
+                System.TimeSpan.FromMinutes(5));
+
             // Start web order polling + initial sync
             System.Threading.Tasks.Task.Run(async () =>
             {

@@ -1,4 +1,5 @@
 using System.Data;
+using System.Threading.Tasks;
 using Pedeai.DAL;
 using Pedeai.Modelo;
 
@@ -17,7 +18,10 @@ namespace Pedeai.BLL
             if (string.IsNullOrWhiteSpace(obj.grmeDescricao_))
                 return "Informe o nome da categoria.";
 
-            return obj.Codigo == 0 ? _dal.Incluir(obj) : _dal.Alterar(obj);
+            var erro = obj.Codigo == 0 ? _dal.Incluir(obj) : _dal.Alterar(obj);
+            if (string.IsNullOrEmpty(erro))
+                Task.Run(async () => await Pedeai.DB.SupabaseService.SincronizarGrupoAsync(obj.Codigo));
+            return erro;
         }
     }
 }

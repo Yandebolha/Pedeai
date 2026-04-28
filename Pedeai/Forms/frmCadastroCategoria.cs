@@ -205,6 +205,8 @@ namespace Pedeai.Forms
             obj.Situacao = "I";
             _bll.Salvar(obj);
             pnlForm.Visible = false; Carregar();
+            int codD = cod;
+            Task.Run(async () => await DB.SupabaseService.SincronizarGrupoAsync(codD));
         }
 
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData)

@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Data;
+using System.Threading.Tasks;
 using Pedeai.DAL;
 using Pedeai.Modelo;
 
@@ -19,7 +20,15 @@ namespace Pedeai.BLL
                 return "Informe a descrição da marmita.";
             if (obj.marValor <= 0)
                 return "O valor da marmita deve ser maior que zero.";
-            return obj.Codigo == 0 ? _dal.Incluir(obj) : _dal.Alterar(obj);
+
+            var erro = obj.Codigo == 0 ? _dal.Incluir(obj) : _dal.Alterar(obj);
+            if (string.IsNullOrEmpty(erro))
+                Task.Run(async () =>
+                {
+                    await Pedeai.DB.SupabaseService.SincronizarMarmitaAsync(obj.Codigo);
+                    await Pedeai.DB.SupabaseService.SincronizarItensMarmitaAsync(obj.Codigo);
+                });
+            return erro;
         }
 
         public string Excluir(int codigo) => _dal.Excluir(codigo);
