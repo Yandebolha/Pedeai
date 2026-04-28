@@ -721,6 +721,21 @@ namespace Pedeai.DB
                         Situacao      CHAR(1) NOT NULL DEFAULT 'A',
                         UNIQUE KEY uq_merc_grp_tipo (Codigo_Mercadoria, Codigo_Grupo, tipo)
                     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+                // Garante colunas/índice para bancos criados antes desta versão
+                AddColumnIfNotExists(conn, db, "mercadoria_vinculo_grupo", "tipo",
+                    "CHAR(1) NOT NULL DEFAULT 'A' COMMENT 'A=Adicional C=Complemento'");
+                AddColumnIfNotExists(conn, db, "mercadoria_vinculo_grupo", "Situacao",
+                    "CHAR(1) NOT NULL DEFAULT 'A'");
+                AddUniqueKeyIfNotExists(conn, db, "mercadoria_vinculo_grupo", "uq_merc_grp_tipo",
+                    "(Codigo_Mercadoria, Codigo_Grupo, tipo)");
+
+                // ── mercadoria: campos de precificação de adicional/complemento e fracionado ──
+                AddColumnIfNotExists(conn, db, "mercadoria", "mercPreco_Adicional",
+                    "DECIMAL(10,2) NOT NULL DEFAULT 0 COMMENT 'Preço do produto quando usado como Adicional'");
+                AddColumnIfNotExists(conn, db, "mercadoria", "mercFracionado",
+                    "TINYINT(1) NOT NULL DEFAULT 0 COMMENT '1=produto com múltiplos sabores (ex: pizza)'");
+                AddColumnIfNotExists(conn, db, "mercadoria", "mercQtd_Sabores",
+                    "INT NOT NULL DEFAULT 1 COMMENT 'Quantidade máxima de sabores para produto fracionado'");
 
                 // ── empresa: ImgBB API key for image hosting ──────────────
                 AddColumnIfNotExists(conn, db, "empresa", "empImgBBKey",
@@ -745,6 +760,21 @@ namespace Pedeai.DB
         {
             using var cmd = new MySqlCommand(sql, conn);
             cmd.ExecuteNonQuery();
+        }
+
+        private static void AddUniqueKeyIfNotExists(
+            MySqlConnection conn, string db, string table, string keyName, string cols)
+        {
+            using var check = new MySqlCommand(@"
+                SELECT COUNT(*) FROM information_schema.TABLE_CONSTRAINTS
+                WHERE TABLE_SCHEMA=@db AND TABLE_NAME=@tbl AND CONSTRAINT_NAME=@key
+                  AND CONSTRAINT_TYPE='UNIQUE'", conn);
+            check.Parameters.AddWithValue("@db",  db);
+            check.Parameters.AddWithValue("@tbl", table);
+            check.Parameters.AddWithValue("@key", keyName);
+            var exists = Convert.ToInt32(check.ExecuteScalar()) > 0;
+            if (!exists)
+                Exec(conn, $"ALTER TABLE `{table}` ADD UNIQUE KEY `{keyName}` {cols}");
         }
 
         private static void AddColumnIfNotExists(

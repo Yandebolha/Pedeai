@@ -61,9 +61,10 @@ namespace Pedeai.DAL
                             (auxCodigo, Codigo, Codigo_Grupo, mercMercadoria, mercApresentacao,
                              mercPreco_Venda, mercPreco_Custo, mercPreco_Promocional, mercEstoque_Atual,
                              mercControla_Estoque, mercImagem_Url, mercDestaque, mercOrdem,
-                             mercHabilitar_Ifood, mercHabilitar_Site, Situacao, Status_Transmissao, Info, mercData_Cadastro)
+                             mercHabilitar_Ifood, mercHabilitar_Site, mercPreco_Adicional, mercFracionado, mercQtd_Sabores,
+                             Situacao, Status_Transmissao, Info, mercData_Cadastro)
                             VALUES(@aux, @cod, @grp, @nome, @desc, @preco, @custo, @promo, @est,
-                                   @ctrl, @img, @dest, @ordem, @ifood, @site, @sit, @trans, @info, @dt)";
+                                   @ctrl, @img, @dest, @ordem, @ifood, @site, @precoad, @frac, @qtdsab, @sit, @trans, @info, @dt)";
                 using var cmd = new MySqlCommand(sql, conn);
                 BindParams(cmd, obj);
                 cmd.ExecuteNonQuery();
@@ -91,7 +92,9 @@ namespace Pedeai.DAL
                             Codigo_Grupo=@grp, mercMercadoria=@nome, mercApresentacao=@desc,
                             mercPreco_Venda=@preco, mercPreco_Custo=@custo, mercPreco_Promocional=@promo, mercEstoque_Atual=@est,
                             mercControla_Estoque=@ctrl, mercImagem_Url=@img, mercDestaque=@dest,
-                            mercOrdem=@ordem, mercHabilitar_Ifood=@ifood, mercHabilitar_Site=@site, Situacao=@sit
+                            mercOrdem=@ordem, mercHabilitar_Ifood=@ifood, mercHabilitar_Site=@site,
+                            mercPreco_Adicional=@precoad, mercFracionado=@frac, mercQtd_Sabores=@qtdsab,
+                            Situacao=@sit
                             WHERE Codigo=@cod";
                 using var cmd = new MySqlCommand(sql, conn);
                 BindParams(cmd, obj);
@@ -167,8 +170,11 @@ namespace Pedeai.DAL
             cmd.Parameters.AddWithValue("@dest",  obj.mercDestaque ? 1 : 0);
             cmd.Parameters.AddWithValue("@ordem", obj.mercOrdem);
             cmd.Parameters.AddWithValue("@ifood", obj.mercHabilitar_Ifood ? 1 : 0);
-            cmd.Parameters.AddWithValue("@site",  obj.mercHabilitar_Site  ? 1 : 0);
-            cmd.Parameters.AddWithValue("@sit",   obj.Situacao ?? "A");
+            cmd.Parameters.AddWithValue("@site",    obj.mercHabilitar_Site  ? 1 : 0);
+            cmd.Parameters.AddWithValue("@precoad",  obj.mercPreco_Adicional);
+            cmd.Parameters.AddWithValue("@frac",     obj.mercFracionado    ? 1 : 0);
+            cmd.Parameters.AddWithValue("@qtdsab",   obj.mercQtd_Sabores);
+            cmd.Parameters.AddWithValue("@sit",      obj.Situacao ?? "A");
             cmd.Parameters.AddWithValue("@trans", obj.Status_Transmissao ?? "N");
             cmd.Parameters.AddWithValue("@info",  obj.Info ?? "");
             cmd.Parameters.AddWithValue("@dt",    obj.mercData_Cadastro);
@@ -202,6 +208,12 @@ namespace Pedeai.DAL
                 mercHabilitar_Ifood  = r["mercHabilitar_Ifood"]?.ToString() == "1" || r["mercHabilitar_Ifood"]?.ToString() == "True",
                 mercHabilitar_Site   = ColExists(r, "mercHabilitar_Site") &&
                                        (r["mercHabilitar_Site"]?.ToString() == "1" || r["mercHabilitar_Site"]?.ToString() == "True"),
+                mercPreco_Adicional  = ColExists(r, "mercPreco_Adicional") && r["mercPreco_Adicional"] != DBNull.Value
+                                       ? Convert.ToDecimal(r["mercPreco_Adicional"]) : 0m,
+                mercFracionado       = ColExists(r, "mercFracionado") &&
+                                       (r["mercFracionado"]?.ToString() == "1" || r["mercFracionado"]?.ToString() == "True"),
+                mercQtd_Sabores      = ColExists(r, "mercQtd_Sabores") && r["mercQtd_Sabores"] != DBNull.Value
+                                       ? Convert.ToInt32(r["mercQtd_Sabores"]) : 1,
                 mercData_Cadastro    = r["mercData_Cadastro"] == DBNull.Value ? DateTime.Now : Convert.ToDateTime(r["mercData_Cadastro"]),
                 Situacao             = r["Situacao"]?.ToString() ?? "A",
                 Status_Transmissao   = r["Status_Transmissao"]?.ToString() ?? "N",

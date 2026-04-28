@@ -22,6 +22,13 @@ namespace Pedeai.Modelo
         public bool mercHabilitar_Site   { get; set; }
         public DateTime mercData_Cadastro { get; set; }
 
+        // Precificação específica quando usado como Adicional (não altera preço de estoque)
+        public decimal mercPreco_Adicional { get; set; }
+
+        // Produto fracionado (múltiplos sabores, ex: pizza)
+        public bool mercFracionado    { get; set; }
+        public int  mercQtd_Sabores   { get; set; } = 1;
+
         public string Situacao { get; set; } = "A";
         public string Status_Transmissao { get; set; } = "N";
         public string Info { get; set; } = "";

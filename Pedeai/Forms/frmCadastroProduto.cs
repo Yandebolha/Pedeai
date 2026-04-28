@@ -20,6 +20,7 @@ namespace Pedeai.Forms
         // Vinculo groups for Adicionais/Complementos
         private readonly List<VinculoItem> _vinculosAdicionais   = new List<VinculoItem>();
         private readonly List<VinculoItem> _vinculosComplementos = new List<VinculoItem>();
+        private bool _loadingForm = false; // suprime ChkVinculos_CheckedChanged durante carga
 
         private struct VinculoItem
         {
@@ -153,9 +154,14 @@ namespace Pedeai.Forms
             txtNome.Clear();
             _caminhoImagem = ""; lblImagem.Text = "nenhuma imagem selecionada"; lblImagem.ForeColor = Color.Gray;
             numPreco.Value = 0; numCusto.Value = 0; numPromo.Value = 0; numEstoque.Value = 0;
+            numPrecoAdicional.Value = 0; numPrecoAdicional.Visible = false; lblPrecoAdicional.Visible = false;
+            numQtdSabores.Value = 1; numQtdSabores.Visible = false; lblQtdSabores.Visible = false;
             chkControlaEstoque.Checked = false; chkDestaque.Checked = false; chkSite.Checked = false;
-            chkAdicionais.Checked = false; chkComplementos.Checked = false;
+            _loadingForm = true;
+            try { chkAdicionais.Checked = false; chkComplementos.Checked = false; chkFracionado.Checked = false; }
+            finally { _loadingForm = false; }
             _vinculosAdicionais.Clear(); _vinculosComplementos.Clear();
+            pnlVinculos.Visible = false;
             AtualizarListaVinculos();
             cmbSituacao.SelectedIndex = 0;
             pnlForm.Visible = true; txtNome.Focus();
@@ -182,14 +188,30 @@ namespace Pedeai.Forms
             chkDestaque.Checked        = obj.mercDestaque;
             chkSite.Checked            = obj.mercHabilitar_Site;
             cmbSituacao.SelectedItem   = obj.Situacao == "I" ? "Inativo" : "Ativo";
+            numPrecoAdicional.Value    = obj.mercPreco_Adicional;
             cmbCategoria.Text = "";
             foreach (CatItem item in cmbCategoria.Items)
                 if (item.Codigo == obj.Codigo_Grupo) { cmbCategoria.SelectedItem = item; break; }
-            // Load vinculos
+            // Load vinculos — usa flag para não disparar ChkVinculos_CheckedChanged
             _vinculosAdicionais.Clear(); _vinculosComplementos.Clear();
             CarregarVinculosDoDb(cod);
-            chkAdicionais.Checked   = _vinculosAdicionais.Count > 0;
-            chkComplementos.Checked = _vinculosComplementos.Count > 0;
+            _loadingForm = true;
+            try
+            {
+                chkAdicionais.Checked   = _vinculosAdicionais.Count > 0;
+                chkComplementos.Checked = _vinculosComplementos.Count > 0;
+                chkFracionado.Checked   = obj.mercFracionado;
+                numQtdSabores.Value     = Math.Max(1, obj.mercQtd_Sabores);
+            }
+            finally { _loadingForm = false; }
+            lblPrecoAdicional.Visible  = chkAdicionais.Checked;
+            numPrecoAdicional.Visible  = chkAdicionais.Checked;
+            lblQtdSabores.Visible      = chkFracionado.Checked;
+            numQtdSabores.Visible      = chkFracionado.Checked;
+            // Ajusta visibilidade do painel sem evento
+            string _catNomeLoad = (cmbCategoria.SelectedItem as CatItem)?.Nome ?? cmbCategoria.Text.Trim();
+            bool _isMarmitasLoad = chkComplementos.Checked && _catNomeLoad.Equals("Marmitas", StringComparison.OrdinalIgnoreCase);
+            pnlVinculos.Visible = chkAdicionais.Checked || (chkComplementos.Checked && !_isMarmitasLoad);
             AtualizarListaVinculos();
             pnlForm.Visible = true; txtNome.Focus();
         }
@@ -219,36 +241,56 @@ namespace Pedeai.Forms
                 mercEstoque_Atual     = numEstoque.Value,
                 mercControla_Estoque  = chkControlaEstoque.Checked,
                 mercImagem_Url        = _caminhoImagem?.StartsWith("http", StringComparison.OrdinalIgnoreCase) == true
-                                         ? _caminhoImagem : "",
+                                         ? _caminhoImagem
+                                         // Mantém a URL existente no banco quando não há nova imagem local
+                                         : (_codigoEditando > 0 ? (_bll.PesquisaCodigo(_codigoEditando)?.mercImagem_Url ?? "") : ""),
                 mercDestaque          = chkDestaque.Checked,
                 mercOrdem             = 0,
                 mercHabilitar_Site    = chkSite.Checked,
+                mercPreco_Adicional   = chkAdicionais.Checked ? numPrecoAdicional.Value : 0m,
+                mercFracionado        = chkFracionado.Checked,
+                mercQtd_Sabores       = chkFracionado.Checked ? (int)numQtdSabores.Value : 1,
                 Situacao              = cmbSituacao.SelectedItem?.ToString() == "Inativo" ? "I" : "A",
             };
             var erro = _bll.Salvar(obj);
             if (!string.IsNullOrEmpty(erro)) { MessageBox.Show("Erro: " + erro); return; }
-            pnlForm.Visible = false; _codigoEditando = 0; CarregarGrid();
-            // Sync to Supabase in background — upload image if it's a local file path
+
+            // Captura estado dos vínculos ANTES de ocultar o painel (controles ainda válidos)
             int codSalvo = obj.Codigo > 0 ? obj.Codigo : BuscarCodigo(obj.mercMercadoria);
-            string imagemLocal = _caminhoImagem;
+            string catNomeSalvar = (cmbCategoria.SelectedItem as CatItem)?.Nome ?? cmbCategoria.Text.Trim();
+            bool salvarComplementos = chkComplementos.Checked;
+            bool salvarAdicionais   = chkAdicionais.Checked;
+
+            // Garante vínculo Marmitas com o código correto
+            if (salvarComplementos
+                && catNomeSalvar.Equals("Marmitas", StringComparison.OrdinalIgnoreCase))
+            {
+                _vinculosComplementos.RemoveAll(v => v.NomeGrupo.Equals("Marmitas", StringComparison.OrdinalIgnoreCase));
+                _vinculosComplementos.Add(new VinculoItem { CodigoGrupo = codigoGrupo, NomeGrupo = "Marmitas" });
+            }
+
+            var snapAdicionais   = new List<VinculoItem>(_vinculosAdicionais);
+            var snapComplementos = new List<VinculoItem>(_vinculosComplementos);
+            string imagemLocal   = _caminhoImagem;
             _caminhoImagem = "";
-            // Save vinculos to DB
-            if (codSalvo > 0) SalvarVinculosNoDb(codSalvo);
-            var vincsAd   = new List<VinculoItem>(_vinculosAdicionais);
-            var vincsComp = new List<VinculoItem>(_vinculosComplementos);
+
+            pnlForm.Visible = false; _codigoEditando = 0; CarregarGrid();
+
+            if (codSalvo > 0)
+                SalvarVinculosNoDb(codSalvo, salvarAdicionais, snapAdicionais, salvarComplementos, snapComplementos);
+
             if (codSalvo > 0)
                 System.Threading.Tasks.Task.Run(async () =>
                 {
-                    // Upload image only if it's a local file (not already a URL)
                     if (!string.IsNullOrWhiteSpace(imagemLocal)
                         && !imagemLocal.StartsWith("http", StringComparison.OrdinalIgnoreCase)
                         && System.IO.File.Exists(imagemLocal))
                     {
                         await DB.SupabaseService.UploadProdutoImagemAsync(codSalvo, imagemLocal);
                     }
-                    await DB.SupabaseService.SincronizarProdutoAsync(codSalvo);
-                    var adTuples   = vincsAd.ConvertAll(v => (v.CodigoGrupo, v.NomeGrupo));
-                    var compTuples = vincsComp.ConvertAll(v => (v.CodigoGrupo, v.NomeGrupo));
+                    var adTuples   = snapAdicionais.ConvertAll(v => (v.CodigoGrupo, v.NomeGrupo));
+                    var compTuples = snapComplementos.ConvertAll(v => (v.CodigoGrupo, v.NomeGrupo));
+                    // SincronizarVinculosGrupoAsync já chama SincronizarProdutoAsync internamente
                     await DB.SupabaseService.SincronizarVinculosGrupoAsync(codSalvo, adTuples, compTuples);
                 });
         }
@@ -294,8 +336,40 @@ namespace Pedeai.Forms
 
         private void ChkVinculos_CheckedChanged(object sender, EventArgs e)
         {
-            pnlVinculos.Visible = chkAdicionais.Checked || chkComplementos.Checked;
+            if (_loadingForm) return;
+            // Para produtos na categoria Marmitas com Complementos marcado:
+            // o vínculo é automático — não precisa selecionar grupo manualmente.
+            string catNome = (cmbCategoria.SelectedItem as CatItem)?.Nome ?? cmbCategoria.Text.Trim();
+            bool isMarmitasComp = chkComplementos.Checked
+                && catNome.Equals("Marmitas", StringComparison.OrdinalIgnoreCase);
+
+            // Mostra painel de seleção só quando Adicionais ou Complementos não-Marmitas
+            pnlVinculos.Visible = chkAdicionais.Checked || (chkComplementos.Checked && !isMarmitasComp);
+            // Preço de Adicional: visível apenas quando Adicionais está marcado
+            lblPrecoAdicional.Visible = chkAdicionais.Checked;
+            numPrecoAdicional.Visible = chkAdicionais.Checked;
+
+            if (isMarmitasComp)
+            {
+                // Informa o usuário que o vínculo é automático
+                _vinculosComplementos.Clear();
+                _vinculosComplementos.Add(new VinculoItem
+                    { CodigoGrupo = (cmbCategoria.SelectedItem as CatItem)?.Codigo ?? 0,
+                      NomeGrupo   = "Marmitas" });
+            }
+            else if (!chkComplementos.Checked)
+            {
+                _vinculosComplementos.Clear();
+            }
             AtualizarListaVinculos();
+        }
+
+        private void ChkFracionado_CheckedChanged(object sender, EventArgs e)
+        {
+            if (_loadingForm) return;
+            lblQtdSabores.Visible = chkFracionado.Checked;
+            numQtdSabores.Visible = chkFracionado.Checked;
+            if (chkFracionado.Checked && numQtdSabores.Value < 1) numQtdSabores.Value = 2;
         }
 
         private void AtualizarListaVinculos()
@@ -353,7 +427,7 @@ namespace Pedeai.Forms
                     System.Configuration.ConfigurationManager.AppSettings["ConnectionString"]);
                 conn.Open();
                 using var cmd = new MySqlConnector.MySqlCommand(
-                    "SELECT mvg.Codigo_Grupo, mvg.tipo, COALESCE(gm.grmeNome,'') AS Nome " +
+                    "SELECT mvg.Codigo_Grupo, mvg.tipo, COALESCE(gm.grmeDescricao_,'') AS Nome " +
                     "FROM mercadoria_vinculo_grupo mvg " +
                     "LEFT JOIN grupo_mercadoria gm ON gm.Codigo=mvg.Codigo_Grupo " +
                     "WHERE mvg.Codigo_Mercadoria=@cod AND mvg.Situacao='A'", conn);
@@ -369,14 +443,16 @@ namespace Pedeai.Forms
             catch { }
         }
 
-        private void SalvarVinculosNoDb(int codigoMercadoria)
+        private void SalvarVinculosNoDb(int codigoMercadoria,
+            bool temAdicionais,   List<VinculoItem> adicionais,
+            bool temComplementos, List<VinculoItem> complementos)
         {
             try
             {
                 using var conn = new MySqlConnector.MySqlConnection(
                     System.Configuration.ConfigurationManager.AppSettings["ConnectionString"]);
                 conn.Open();
-                // Mark all existing as inactive then re-insert active ones
+                // Inativa todos os vínculos existentes
                 using (var del = new MySqlConnector.MySqlCommand(
                     "UPDATE mercadoria_vinculo_grupo SET Situacao='I' WHERE Codigo_Mercadoria=@cod", conn))
                 {
@@ -385,6 +461,7 @@ namespace Pedeai.Forms
                 }
                 void UpsertVinculo(int codGrupo, string tipo)
                 {
+                    if (codGrupo <= 0) return; // nunca insere com grupo inválido
                     using var ins = new MySqlConnector.MySqlCommand(@"
                         INSERT INTO mercadoria_vinculo_grupo (Codigo_Mercadoria, Codigo_Grupo, tipo, Situacao)
                         VALUES(@m,@g,@t,'A')
@@ -394,12 +471,17 @@ namespace Pedeai.Forms
                     ins.Parameters.AddWithValue("@t", tipo);
                     ins.ExecuteNonQuery();
                 }
-                if (chkAdicionais.Checked)
-                    foreach (var v in _vinculosAdicionais)   UpsertVinculo(v.CodigoGrupo, "A");
-                if (chkComplementos.Checked)
-                    foreach (var v in _vinculosComplementos) UpsertVinculo(v.CodigoGrupo, "C");
+                if (temAdicionais)
+                    foreach (var v in adicionais)   UpsertVinculo(v.CodigoGrupo, "A");
+                if (temComplementos)
+                    foreach (var v in complementos) UpsertVinculo(v.CodigoGrupo, "C");
             }
-            catch (Exception ex) { Logger.Log("frmCadastroProduto","SalvarVinculosNoDb","Erro",ex); }
+            catch (Exception ex)
+            {
+                Logger.Log("frmCadastroProduto", "SalvarVinculosNoDb", "Erro", ex);
+                MessageBox.Show("Erro ao salvar vínculos:\n" + ex.Message, "Erro",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData)

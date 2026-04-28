@@ -38,6 +38,11 @@ namespace Pedeai.Forms
             this.chkControlaEstoque = new System.Windows.Forms.CheckBox();
             this.chkAdicionais      = new System.Windows.Forms.CheckBox();
             this.chkComplementos    = new System.Windows.Forms.CheckBox();
+            this.lblPrecoAdicional  = new System.Windows.Forms.Label();
+            this.numPrecoAdicional  = new System.Windows.Forms.NumericUpDown();
+            this.chkFracionado      = new System.Windows.Forms.CheckBox();
+            this.lblQtdSabores      = new System.Windows.Forms.Label();
+            this.numQtdSabores      = new System.Windows.Forms.NumericUpDown();
             this.pnlVinculos        = new System.Windows.Forms.Panel();
             this.lblGrupoVinc       = new System.Windows.Forms.Label();
             this.cmbGrupoVinc       = new System.Windows.Forms.ComboBox();
@@ -117,6 +122,9 @@ namespace Pedeai.Forms
             this.pnlForm.Controls.Add(this.chkControlaEstoque);
             this.pnlForm.Controls.Add(this.lblPub);  this.pnlForm.Controls.Add(this.chkSite); this.pnlForm.Controls.Add(this.chkDestaque);
             this.pnlForm.Controls.Add(this.chkAdicionais); this.pnlForm.Controls.Add(this.chkComplementos);
+            this.pnlForm.Controls.Add(this.lblPrecoAdicional); this.pnlForm.Controls.Add(this.numPrecoAdicional);
+            this.pnlForm.Controls.Add(this.chkFracionado);
+            this.pnlForm.Controls.Add(this.lblQtdSabores); this.pnlForm.Controls.Add(this.numQtdSabores);
             this.pnlForm.Controls.Add(this.pnlVinculos);
             this.pnlForm.Controls.Add(this.pnlBtns);
             // row 1
@@ -161,8 +169,18 @@ namespace Pedeai.Forms
             this.chkAdicionais.CheckedChanged+=new System.EventHandler(this.ChkVinculos_CheckedChanged);
             this.chkComplementos.Text="Complementos"; this.chkComplementos.Left=110; this.chkComplementos.Top=149; this.chkComplementos.AutoSize=true;
             this.chkComplementos.CheckedChanged+=new System.EventHandler(this.ChkVinculos_CheckedChanged);
+            // row 5b — Preço do Adicional (visível apenas quando chkAdicionais marcado)
+            this.lblPrecoAdicional.Text="Preço Adicional R$:"; this.lblPrecoAdicional.AutoSize=true; this.lblPrecoAdicional.Left=240; this.lblPrecoAdicional.Top=151; this.lblPrecoAdicional.Visible=false;
+            this.numPrecoAdicional.Left=365; this.numPrecoAdicional.Top=148; this.numPrecoAdicional.Width=90; this.numPrecoAdicional.Visible=false;
+            this.numPrecoAdicional.DecimalPlaces=2; this.numPrecoAdicional.Maximum=999999;
+            // row 5c — Fracionado (pizza com múltiplos sabores)
+            this.chkFracionado.Text="Fracionado (múltiplos sabores)"; this.chkFracionado.Left=10; this.chkFracionado.Top=178; this.chkFracionado.AutoSize=true;
+            this.chkFracionado.CheckedChanged+=new System.EventHandler(this.ChkFracionado_CheckedChanged);
+            this.lblQtdSabores.Text="Qtd. sabores:"; this.lblQtdSabores.AutoSize=true; this.lblQtdSabores.Left=255; this.lblQtdSabores.Top=180; this.lblQtdSabores.Visible=false;
+            this.numQtdSabores.Left=355; this.numQtdSabores.Top=177; this.numQtdSabores.Width=55; this.numQtdSabores.Visible=false;
+            this.numQtdSabores.Minimum=1; this.numQtdSabores.Maximum=10; this.numQtdSabores.Value=1;
             // row 6 — group link panel
-            this.pnlVinculos.Left=10; this.pnlVinculos.Top=176; this.pnlVinculos.Width=790; this.pnlVinculos.Height=100;
+            this.pnlVinculos.Left=10; this.pnlVinculos.Top=205; this.pnlVinculos.Width=790; this.pnlVinculos.Height=100;
             this.pnlVinculos.BackColor=System.Drawing.Color.FromArgb(235,227,206);
             this.pnlVinculos.BorderStyle=System.Windows.Forms.BorderStyle.FixedSingle;
             this.pnlVinculos.Visible=false;
@@ -233,6 +251,11 @@ namespace Pedeai.Forms
         internal System.Windows.Forms.CheckBox      chkSite;
         internal System.Windows.Forms.CheckBox      chkAdicionais;
         internal System.Windows.Forms.CheckBox      chkComplementos;
+        internal System.Windows.Forms.Label         lblPrecoAdicional;
+        internal System.Windows.Forms.NumericUpDown numPrecoAdicional;
+        internal System.Windows.Forms.CheckBox      chkFracionado;
+        private  System.Windows.Forms.Label         lblQtdSabores;
+        internal System.Windows.Forms.NumericUpDown numQtdSabores;
         internal System.Windows.Forms.Panel         pnlVinculos;
         private  System.Windows.Forms.Label         lblGrupoVinc;
         internal System.Windows.Forms.ComboBox      cmbGrupoVinc;
