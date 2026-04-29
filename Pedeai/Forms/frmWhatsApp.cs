@@ -947,23 +947,26 @@ namespace Pedeai.Forms
                 var clientes = WhatsAppService.ListarClientesComFone();
                 btnEnviarProm.Enabled = false;
                 int enviado = 0;
-                await System.Threading.Tasks.Task.Run(() =>
+                var falharam = new System.Collections.Generic.List<string>();
+                await System.Threading.Tasks.Task.Run(async () =>
                 {
                     foreach (var (fone, nome) in clientes)
                     {
-                        WhatsAppService.NotificarPromocao(fone, nome, promNome, dataFimStr, tipoD, valDesc, itensComPreco, cupomCodigo);
-                        enviado++;
-                        System.Threading.Thread.Sleep(800);
+                        bool ok = await WhatsAppService.NotificarPromocao(fone, nome, promNome, dataFimStr, tipoD, valDesc, itensComPreco, cupomCodigo).ConfigureAwait(false);
+                        if (ok) enviado++; else falharam.Add($"{nome} ({fone})");
+                        System.Threading.Thread.Sleep(2000);
                         if (IsDisposed) return;
-                        Invoke(new Action(() => btnEnviarProm.Text = $"Enviando {enviado}/{clientes.Count}..."));
+                        Invoke(new Action(() => btnEnviarProm.Text = $"Enviando {enviado+falharam.Count}/{clientes.Count}..."));
                     }
                 }).ConfigureAwait(false);
                 if (!IsDisposed) Invoke(new Action(() =>
                 {
                     btnEnviarProm.Enabled = true;
                     btnEnviarProm.Text = "📲 Enviar Clientes";
-                    MessageBox.Show($"Promoção enviada para {enviado} cliente(s).", "Concluído",
-                        MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    string msg = $"Promoção enviada para {enviado} cliente(s) com sucesso.";
+                    if (falharam.Count > 0)
+                        msg += $"\n\nNão entregues ({falharam.Count}):\n" + string.Join("\n", falharam);
+                    MessageBox.Show(msg, "Concluído", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }));
             };
         }
@@ -1154,26 +1157,29 @@ namespace Pedeai.Forms
                 var clientes = WhatsAppService.ListarClientesComFone();
                 btnEnviarCard.Enabled = false;
                 int enviado = 0;
+                var falharam = new System.Collections.Generic.List<string>();
                 string titulo = txtTitulo.Text.Trim();
                 string obs    = txtObs.Text.Trim();
                 string dataStr= DateTime.Today.ToString("dd/MM/yyyy");
-                await System.Threading.Tasks.Task.Run(() =>
+                await System.Threading.Tasks.Task.Run(async () =>
                 {
                     foreach (var (fone, nome) in clientes)
                     {
-                        WhatsAppService.NotificarCardapio(fone, nome, titulo, dataStr, itens, obs);
-                        enviado++;
-                        System.Threading.Thread.Sleep(800);
+                        bool ok = await WhatsAppService.NotificarCardapio(fone, nome, titulo, dataStr, itens, obs).ConfigureAwait(false);
+                        if (ok) enviado++; else falharam.Add($"{nome} ({fone})");
+                        System.Threading.Thread.Sleep(2000);
                         if (IsDisposed) return;
-                        Invoke(new Action(() => btnEnviarCard.Text = $"Enviando {enviado}/{clientes.Count}..."));
+                        Invoke(new Action(() => btnEnviarCard.Text = $"Enviando {enviado+falharam.Count}/{clientes.Count}..."));
                     }
                 }).ConfigureAwait(false);
                 if (!IsDisposed) Invoke(new Action(() =>
                 {
                     btnEnviarCard.Enabled = true;
                     btnEnviarCard.Text = "📲 Enviar Clientes";
-                    MessageBox.Show($"Cardápio enviado para {enviado} cliente(s).", "Concluído",
-                        MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    string msg = $"Cardápio enviado para {enviado} cliente(s) com sucesso.";
+                    if (falharam.Count > 0)
+                        msg += $"\n\nNão entregues ({falharam.Count}):\n" + string.Join("\n", falharam);
+                    MessageBox.Show(msg, "Concluído", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }));
             };
         }

@@ -114,12 +114,28 @@ namespace Pedeai.DAL
         public PedidoWeb PesquisaCodigo(int codigo)
         {
             using var conn = AbrirConexao();
-            using var cmd = new MySqlCommand(
-                "SELECT * FROM pedido_web WHERE Codigo = @cod LIMIT 1", conn);
+            // COALESCE garante que se pediTelefone_Cliente estiver vazio,
+            // usa clieCelular ou clieTelefone do cadastro do cliente
+            using var cmd = new MySqlCommand(@"
+                SELECT p.*,
+                       COALESCE(
+                           NULLIF(TRIM(p.pediTelefone_Cliente),''),
+                           NULLIF(TRIM(c.clieCelular),''),
+                           NULLIF(TRIM(c.clieTelefone),''),
+                           ''
+                       ) AS TelefoneEfetivo
+                FROM pedido_web p
+                LEFT JOIN cliente c ON c.Codigo = p.Codigo_Cliente
+                WHERE p.Codigo = @cod LIMIT 1", conn);
             cmd.Parameters.AddWithValue("@cod", codigo);
             using var r = cmd.ExecuteReader();
             if (!r.Read()) return null;
-            return MapearPedido(r);
+            var pedido = MapearPedido(r);
+            // Se o campo do pedido estava vazio, usa o telefone efetivo do cliente
+            var telEfetivo = r["TelefoneEfetivo"]?.ToString() ?? "";
+            if (string.IsNullOrWhiteSpace(pedido.pediTelefone_Cliente) && !string.IsNullOrWhiteSpace(telEfetivo))
+                pedido.pediTelefone_Cliente = telEfetivo;
+            return pedido;
         }
 
         /// <summary>Lista os itens de um pedido como objetos (para impressao).</summary>

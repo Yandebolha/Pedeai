@@ -167,18 +167,34 @@ namespace Pedeai.BLL
                 if (fone.Length < 10) return false;
                 if (!fone.StartsWith("55")) fone = "55" + fone;
 
-                var body = new JObject
+                // Tenta primeiro sem @s.whatsapp.net (Evolution API v2)
+                // depois com sufixo (v1 fallback)
+                foreach (string numero in new[] { fone, fone + "@s.whatsapp.net" })
                 {
-                    ["number"] = fone + "@s.whatsapp.net",
-                    ["text"]   = mensagem,
-                    ["options"] = new JObject { ["delay"] = 500 }
-                };
-                var req = Req(HttpMethod.Post, $"/message/sendText/{Instance}");
-                req.Content = new StringContent(body.ToString(), Encoding.UTF8, "application/json");
-                var resp = await _http.SendAsync(req).ConfigureAwait(false);
-                return resp.IsSuccessStatusCode;
+                    var body = new JObject
+                    {
+                        ["number"] = numero,
+                        ["text"]   = mensagem,
+                        ["options"] = new JObject { ["delay"] = 500 }
+                    };
+                    var req = Req(HttpMethod.Post, $"/message/sendText/{Instance}");
+                    req.Content = new StringContent(body.ToString(), Encoding.UTF8, "application/json");
+                    var resp = await _http.SendAsync(req).ConfigureAwait(false);
+                    if (resp.IsSuccessStatusCode) return true;
+
+                    // Loga o erro para diagnóstico
+                    string errBody = "";
+                    try { errBody = await resp.Content.ReadAsStringAsync().ConfigureAwait(false); } catch { }
+                    Logger.Log("WhatsAppService", "EnviarAsync",
+                        $"Falha [{(int)resp.StatusCode}] para {fone} (fmt={numero}) | {errBody?.Substring(0, Math.Min(200, errBody?.Length ?? 0))}");
+                }
+                return false;
             }
-            catch { return false; }
+            catch (Exception ex)
+            {
+                Logger.Log("WhatsAppService", "EnviarAsync", $"Exceção para {telefone}", ex);
+                return false;
+            }
         }
 
         /// <summary>Envia em segundo plano sem bloquear a UI.</summary>
@@ -265,12 +281,12 @@ namespace Pedeai.BLL
         }
 
         /// <summary>Envia mensagem de promoção com cupom de desconto para um cliente.</summary>
-        public static void NotificarPromocao(string telefone, string nomeCliente,
+        public static async Task<bool> NotificarPromocao(string telefone, string nomeCliente,
             string promNome, string dataFim, string tipoDesc, decimal valorDesc,
             System.Collections.Generic.List<(string nome, decimal preco)> produtos,
             string cupomCodigo)
         {
-            if (!Ativo) return;
+            if (!Ativo) return false;
             string descontoStr = tipoDesc == "PERCENTUAL"
                 ? $"{valorDesc:0.#}% OFF"
                 : $"R$ {valorDesc:N2} de desconto";
@@ -294,16 +310,16 @@ namespace Pedeai.BLL
                 sb.AppendLine("Informe ao atendente ao fazer seu pedido.");
             }
             sb.AppendLine("\nNão perca essa oportunidade! 🛍️");
-            EnviarBackground(telefone, sb.ToString().Trim());
+            return await EnviarAsync(telefone, sb.ToString().Trim()).ConfigureAwait(false);
         }
 
         /// <summary>Envia cardápio do dia para um cliente.</summary>
-        public static void NotificarCardapio(string telefone, string nomeCliente,
+        public static async Task<bool> NotificarCardapio(string telefone, string nomeCliente,
             string titulo, string data,
             System.Collections.Generic.List<(string nome, string desc)> itens,
             string observacao)
         {
-            if (!Ativo) return;
+            if (!Ativo) return false;
             var sb = new System.Text.StringBuilder();
             sb.AppendLine($"Olá, {nomeCliente}! 🍽️");
             sb.AppendLine($"*Cardápio do Dia — {data}*");
@@ -320,7 +336,7 @@ namespace Pedeai.BLL
                 sb.AppendLine(observacao);
             }
             sb.AppendLine("\nFaça seu pedido agora! 📱");
-            EnviarBackground(telefone, sb.ToString().Trim());
+            return await EnviarAsync(telefone, sb.ToString().Trim()).ConfigureAwait(false);
         }
 
         /// <summary>Lista todos os clientes ativos com telefone/celular disponível.</summary>
