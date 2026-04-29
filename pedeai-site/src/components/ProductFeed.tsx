@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { Produto, ComplementoGrupoComItens, Adicional } from '@/types/database';
+import { useState, useEffect, useMemo } from 'react';
+import { Produto, ComplementoGrupoComItens, Adicional, ComplementoItem } from '@/types/database';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Plus, Minus, X, ShoppingBag, Check } from 'lucide-react';
@@ -18,6 +18,7 @@ export function ProductFeed({ products, categoryName }: ProductFeedProps) {
   const [selectedProduct, setSelectedProduct] = useState<Produto | null>(null);
   const [selectedComplementos, setSelectedComplementos] = useState<Record<string, string[]>>({});
   const [selectedAdicionais, setSelectedAdicionais] = useState<SelectedAdicional[]>([]);
+  const [selectedSabores, setSelectedSabores] = useState<string[]>([]);
   const [modalQuantity, setModalQuantity] = useState(1);
 
   const { data: complementGrupos } = useQuery<ComplementoGrupoComItens[]>({
@@ -50,10 +51,30 @@ export function ProductFeed({ products, categoryName }: ProductFeedProps) {
     enabled: !!selectedProduct,
   });
 
+  // Busca os sabores disponíveis para produtos fracionados (outros produtos da mesma categoria)
+  // Produtos sabor são sincronizados com ativo=true pelo backend quando o grupo tem fracionado
+  const { data: saboresDisponiveis } = useQuery<Produto[]>({
+    queryKey: ['sabores', selectedProduct?.grupo_id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('mercadoria')
+        .select('*')
+        .eq('grupo_id', selectedProduct!.grupo_id!)
+        .eq('ativo', true)
+        .neq('fracionado', true)
+        .neq('id', selectedProduct!.id)
+        .order('nome');
+      if (error) throw error;
+      return data as Produto[];
+    },
+    enabled: !!(selectedProduct?.fracionado && selectedProduct?.grupo_id),
+  });
+
   useEffect(() => {
     if (selectedProduct) {
       setSelectedComplementos({});
       setSelectedAdicionais([]);
+      setSelectedSabores([]);
       setModalQuantity(1);
     }
   }, [selectedProduct?.id]);
@@ -79,14 +100,38 @@ export function ProductFeed({ products, categoryName }: ProductFeedProps) {
       })
     : [];
 
-  const canAdd =
-    !complementGrupos ||
-    complementGrupos
-      .filter((g) => g.obrigatorio && g.nome.toLowerCase() !== 'geral')
-      .every((g) => (selectedComplementos[g.id]?.length || 0) >= g.minimo);
+  // ── Fracionado (múltiplos sabores) ───────────────────────────────────────
+  const isFracionado = selectedProduct?.fracionado === true;
+  const qtdSabores = selectedProduct?.qtd_sabores || 2;
+
+  const toggleSabor = (id: string) => {
+    setSelectedSabores((prev) => {
+      if (prev.includes(id)) return prev.filter((x) => x !== id);
+      if (prev.length >= qtdSabores) return prev; // limite atingido
+      return [...prev, id];
+    });
+  };
+
+  // Preço calculado = média dos sabores selecionados
+  const precoCalculado = useMemo(() => {
+    if (!isFracionado || !saboresDisponiveis || selectedSabores.length !== qtdSabores) return null;
+    const soma = selectedSabores.reduce((acc, id) => {
+      const prod = saboresDisponiveis.find((p) => p.id === id);
+      return acc + (prod ? (prod.preco_promocional ?? prod.preco_venda) : 0);
+    }, 0);
+    return soma / qtdSabores;
+  }, [isFracionado, selectedSabores, qtdSabores, saboresDisponiveis]);
+
+  const canAdd = isFracionado
+    ? selectedSabores.length === qtdSabores
+    : (!complementGrupos ||
+        complementGrupos
+          .filter((g) => g.obrigatorio && g.nome.toLowerCase() !== 'geral')
+          .every((g) => (selectedComplementos[g.id]?.length || 0) >= g.minimo));
 
   const adicionaisTotal = selectedAdicionais.reduce((acc, a) => acc + a.preco * a.quantity, 0);
   const itemBasePrice = selectedProduct ? (selectedProduct.preco_promocional || selectedProduct.preco_venda) : 0;
+  const finalPrice = isFracionado ? (precoCalculado ?? itemBasePrice) : (itemBasePrice + adicionaisTotal);
 
   return (
     <div className="px-4 py-6">
@@ -148,7 +193,11 @@ export function ProductFeed({ products, categoryName }: ProductFeedProps) {
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
-                    addItem(product, 1);
+                    if (product.fracionado) {
+                      setSelectedProduct(product); // abre o modal para escolher sabores
+                    } else {
+                      addItem(product, 1);
+                    }
                   }}
                   className="absolute bottom-1 right-1 bg-white rounded-full p-1 shadow-lg border border-gray-100 text-red-600 hover:bg-red-50 transition-colors"
                 >
@@ -207,6 +256,91 @@ export function ProductFeed({ products, categoryName }: ProductFeedProps) {
                       {selectedProduct.descricao}
                     </p>
                   </div>
+
+                  {/* ── Seletor de Sabores (produto fracionado) ── */}
+                  {isFracionado && (
+                    <div className="border-t border-gray-100 -mx-6">
+                      {/* Cabeçalho */}
+                      <div className="flex items-center justify-between bg-gray-50 px-6 py-3">
+                        <div>
+                          <h3 className="font-bold text-gray-900 text-[15px] leading-tight">Sabores</h3>
+                          <p className="text-xs text-gray-500 mt-0.5">
+                            Escolha {qtdSabores} {qtdSabores === 1 ? 'sabor' : 'sabores'}
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          {selectedSabores.length > 0 && (
+                            <span className="text-xs font-bold text-red-600 bg-red-50 px-2 py-0.5 rounded-full border border-red-100">
+                              {selectedSabores.length}/{qtdSabores}
+                            </span>
+                          )}
+                          <span className="text-[10px] bg-red-600 text-white px-2.5 py-1 rounded-full font-bold uppercase tracking-wide">
+                            Obrigatório
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Lista de sabores */}
+                      <div className="divide-y divide-gray-100 bg-white">
+                        {(saboresDisponiveis || []).map((sabor) => {
+                          const isSelected = selectedSabores.includes(sabor.id);
+                          const isDisabled = !isSelected && selectedSabores.length >= qtdSabores;
+                          const precoPorSabor = sabor.preco_promocional ?? sabor.preco_venda;
+                          return (
+                            <button
+                              key={sabor.id}
+                              onClick={() => !isDisabled && toggleSabor(sabor.id)}
+                              className={`w-full flex items-center gap-4 px-6 py-4 text-left transition-colors ${
+                                isSelected ? 'bg-red-50' : isDisabled ? 'opacity-40 cursor-not-allowed' : 'hover:bg-gray-50 active:bg-gray-100'
+                              }`}
+                            >
+                              {/* Checkbox */}
+                              <div
+                                className={`w-5 h-5 flex-shrink-0 rounded-md border-2 flex items-center justify-center transition-all ${
+                                  isSelected ? 'bg-red-600 border-red-600' : 'border-gray-300 bg-white'
+                                }`}
+                              >
+                                {isSelected && <Check className="w-3 h-3 text-white" strokeWidth={3} />}
+                              </div>
+
+                              {/* Imagem miniatura */}
+                              {sabor.imagem_url && (
+                                <div className="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0">
+                                  <img
+                                    src={sabor.imagem_url}
+                                    alt={sabor.nome}
+                                    className="w-full h-full object-cover"
+                                    referrerPolicy="no-referrer"
+                                  />
+                                </div>
+                              )}
+
+                              {/* Nome e preço */}
+                              <div className="flex-1 min-w-0">
+                                <p className="text-sm font-semibold text-gray-800 uppercase leading-tight tracking-wide">
+                                  {sabor.nome}
+                                </p>
+                                {sabor.descricao && (
+                                  <p className="text-xs text-gray-400 mt-0.5 line-clamp-1">{sabor.descricao}</p>
+                                )}
+                              </div>
+
+                              {/* Preço individual */}
+                              <span className="text-xs font-bold text-green-700 flex-shrink-0">
+                                R$ {precoPorSabor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                              </span>
+                            </button>
+                          );
+                        })}
+
+                        {(!saboresDisponiveis || saboresDisponiveis.length === 0) && (
+                          <div className="px-6 py-8 text-center text-gray-400 text-sm">
+                            Nenhum sabor disponível nesta categoria.
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
 
                   {/* Grupos de Complementos */}
                   {sortedGrupos && sortedGrupos.length > 0 && (
@@ -359,17 +493,37 @@ export function ProductFeed({ products, categoryName }: ProductFeedProps) {
                   )}
 
                   <div className="pt-4 border-t border-gray-100">
-                    <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">Preço base</span>
-                    <div className="flex items-baseline gap-2 mt-1">
-                      <span className="text-2xl font-black text-green-700">
-                        R$ {itemBasePrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                      </span>
-                      {selectedProduct.preco_promocional && (
-                        <span className="text-sm text-gray-400 line-through">
-                          R$ {selectedProduct.preco_venda.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                    {isFracionado ? (
+                      <>
+                        <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">
+                          {selectedSabores.length === qtdSabores ? 'Preço calculado' : `A partir de · selecione ${qtdSabores} sabores`}
                         </span>
-                      )}
-                    </div>
+                        <div className="flex items-baseline gap-2 mt-1">
+                          <span className="text-2xl font-black text-green-700">
+                            R$ {(precoCalculado ?? itemBasePrice).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                          </span>
+                          {precoCalculado !== null && precoCalculado !== itemBasePrice && (
+                            <span className="text-xs text-gray-400">
+                              ({selectedSabores.length}/{qtdSabores} sabores · média)
+                            </span>
+                          )}
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">Preço base</span>
+                        <div className="flex items-baseline gap-2 mt-1">
+                          <span className="text-2xl font-black text-green-700">
+                            R$ {itemBasePrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                          </span>
+                          {selectedProduct.preco_promocional && (
+                            <span className="text-sm text-gray-400 line-through">
+                              R$ {selectedProduct.preco_venda.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                            </span>
+                          )}
+                        </div>
+                      </>
+                    )}
                   </div>
 
                   {/* Seletor de Quantidade */}
@@ -397,14 +551,36 @@ export function ProductFeed({ products, categoryName }: ProductFeedProps) {
                     <button
                       disabled={!canAdd}
                       onClick={() => {
-                        const complementosList: SelectedComplemento[] = Object.entries(selectedComplementos).flatMap(
+                        if (isFracionado && precoCalculado !== null && saboresDisponiveis) {
+                          // Produto fracionado: adiciona com sabores como complementos e preço calculado
+                          const saboresComp: SelectedComplemento[] = [{
+                            grupoId: 'sabores',
+                            grupoNome: '🍕 Sabores',
+                            itemId: selectedSabores.join(','),
+                            itemNome: selectedSabores
+                              .map((id) => saboresDisponiveis.find((p) => p.id === id)?.nome || '')
+                              .join(', '),
+                          }];
+                          // Override do preço para o valor calculado (média dos sabores)
+                          const produtoOverride: Produto = {
+                            ...selectedProduct!,
+                            preco_venda: precoCalculado,
+                            preco_promocional: null,
+                          };
+                          addItem(produtoOverride, modalQuantity, saboresComp, []);
+                          setSelectedProduct(null);
+                          return;
+                        }
+
+                        const complementosList: SelectedComplemento[] = (Object.entries(selectedComplementos) as [string, string[]][]).flatMap(
                           ([grupoId, itemIds]) => {
                             const grupo = complementGrupos?.find((g) => g.id === grupoId);
+                            const itens = grupo?.complemento as ComplementoItem[] | undefined;
                             return itemIds.map((itemId) => ({
                               grupoId,
                               grupoNome: grupo?.nome || '',
                               itemId,
-                              itemNome: grupo?.complemento?.find((c) => c.id === itemId)?.nome || '',
+                              itemNome: itens?.find((c) => c.id === itemId)?.nome || '',
                             }));
                           }
                         );
@@ -421,7 +597,9 @@ export function ProductFeed({ products, categoryName }: ProductFeedProps) {
                       <ShoppingBag className="w-5 h-5" />
                       <span>
                         {canAdd
-                          ? `Adicionar · R$ ${((itemBasePrice + adicionaisTotal) * modalQuantity).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`
+                          ? `Adicionar · R$ ${(finalPrice * modalQuantity).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`
+                          : isFracionado
+                          ? `Escolha ${qtdSabores - selectedSabores.length} sabor${qtdSabores - selectedSabores.length !== 1 ? 'es' : ''} ainda`
                           : 'Escolha as opções obrigatórias'}
                       </span>
                     </button>

@@ -32,7 +32,7 @@ export default function Home() {
   });
 
   // Busca as categorias reais do banco de dados
-  const { data: categories, isLoading: isLoadingCats } = useQuery({
+  const { data: categoriesRaw, isLoading: isLoadingCats } = useQuery({
     queryKey: ['categories'],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -44,6 +44,18 @@ export default function Home() {
       return data as Categoria[];
     },
   });
+
+  // Deduplica categorias pelo nome (evita duplicatas de sync)
+  const categories = useMemo(() => {
+    if (!categoriesRaw) return [];
+    const seen = new Set<string>();
+    return categoriesRaw.filter((c) => {
+      const key = c.nome.trim().toLowerCase();
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+  }, [categoriesRaw]);
 
   // Busca os produtos reais do banco de dados
   const { data: products, isLoading: isLoadingProds } = useQuery({

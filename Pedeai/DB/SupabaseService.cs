@@ -360,8 +360,26 @@ namespace Pedeai.DB
                 }
 
                 // forcarAtivoFalse: produto é complemento puro (não deve aparecer como produto standalone)
-                // Sabores de produto fracionado continuam ativos — aparecem no site como pizza individual também
-                bool ativoSite = forcarAtivoFalse ? false : habSite;
+                // Produto fracionado SEMPRE fica ativo no site (é o container de tamanho — ex: Pizza Grande)
+                // Produto não-fracionado em grupo que tem fracionado fica ativo como sabor disponível,
+                // mesmo que não esteja habilitado como produto standalone (habSite=false).
+                bool isGrupoComFracionado = false;
+                if (!fracionado && !forcarAtivoFalse && codigoGrupo > 0)
+                {
+                    try
+                    {
+                        using var connF = AbrirMysql();
+                        using var cmdF = new MySqlCommand(
+                            "SELECT COUNT(*) FROM mercadoria " +
+                            "WHERE Codigo_Grupo=@g AND COALESCE(mercFracionado,0)=1 AND Situacao='A' AND Codigo<>@c LIMIT 1",
+                            connF);
+                        cmdF.Parameters.AddWithValue("@g", codigoGrupo);
+                        cmdF.Parameters.AddWithValue("@c", codigoMercadoria);
+                        isGrupoComFracionado = Convert.ToInt32(cmdF.ExecuteScalar()) > 0;
+                    }
+                    catch { /* ignora — fallback para habSite */ }
+                }
+                bool ativoSite = forcarAtivoFalse ? false : (habSite || fracionado || isGrupoComFracionado);
 
                 // Ensure group UUID is available — only do full sync if not already done this session
                 string grupoUuid = "";

@@ -285,3 +285,8 @@ ALTER TABLE taxa_entrega ADD COLUMN IF NOT EXISTS cidade TEXT;
 
 -- MIGRACAO: Enderecos Salvos - UF
 ALTER TABLE enderecos_salvo ADD COLUMN IF NOT EXISTS uf VARCHAR(2);
+
+
+-- MIGRACAO: Produto fracionado (multiplos sabores)
+ALTER TABLE mercadoria ADD COLUMN IF NOT EXISTS fracionado BOOLEAN DEFAULT FALSE;
+ALTER TABLE mercadoria ADD COLUMN IF NOT EXISTS qtd_sabores INTEGER DEFAULT 2;

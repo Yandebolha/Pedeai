@@ -44,6 +44,8 @@ export interface Database {
           imagem_url: string | null
           ativo: boolean
           destaque: boolean
+          fracionado: boolean | null
+          qtd_sabores: number | null
           created_at: string
         }
       }
