@@ -1,10 +1,12 @@
-import { useState } from 'react';
-import { Produto } from '@/types/database';
+import { useState, useEffect } from 'react';
+import { Produto, ComplementoGrupoComItens, Adicional } from '@/types/database';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Plus, X, ShoppingBag } from 'lucide-react';
-import { useCartStore } from '@/store/useCartStore';
+import { Plus, Minus, X, ShoppingBag, Check } from 'lucide-react';
+import { useCartStore, SelectedComplemento, SelectedAdicional } from '@/store/useCartStore';
 import { motion, AnimatePresence } from 'motion/react';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/lib/supabase';
 
 interface ProductFeedProps {
   products: Produto[];
@@ -14,6 +16,64 @@ interface ProductFeedProps {
 export function ProductFeed({ products, categoryName }: ProductFeedProps) {
   const addItem = useCartStore((state) => state.addItem);
   const [selectedProduct, setSelectedProduct] = useState<Produto | null>(null);
+  const [selectedComplementos, setSelectedComplementos] = useState<Record<string, string[]>>({});
+  const [selectedAdicionais, setSelectedAdicionais] = useState<SelectedAdicional[]>([]);
+  const [modalQuantity, setModalQuantity] = useState(1);
+
+  const { data: complementGrupos } = useQuery<ComplementoGrupoComItens[]>({
+    queryKey: ['complemento_grupo', selectedProduct?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('complemento_grupo')
+        .select('*, complemento(*)')
+        .eq('mercadoria_id', selectedProduct!.id)
+        .eq('ativo', true)
+        .order('ordem');
+      if (error) throw error;
+      return data as ComplementoGrupoComItens[];
+    },
+    enabled: !!selectedProduct,
+  });
+
+  const { data: adicionaisList } = useQuery<Adicional[]>({
+    queryKey: ['adicional', selectedProduct?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('adicional')
+        .select('*')
+        .eq('mercadoria_id', selectedProduct!.id)
+        .eq('ativo', true)
+        .order('ordem');
+      if (error) throw error;
+      return data as Adicional[];
+    },
+    enabled: !!selectedProduct,
+  });
+
+  useEffect(() => {
+    if (selectedProduct) {
+      setSelectedComplementos({});
+      setSelectedAdicionais([]);
+      setModalQuantity(1);
+    }
+  }, [selectedProduct?.id]);
+
+  const toggleComplemento = (grupo: ComplementoGrupoComItens, itemId: string) => {
+    setSelectedComplementos((prev) => {
+      const current = prev[grupo.id] || [];
+      if (current.includes(itemId)) return { ...prev, [grupo.id]: current.filter((id) => id !== itemId) };
+      if (grupo.maximo === 1) return { ...prev, [grupo.id]: [itemId] };
+      if (current.length >= grupo.maximo) return prev;
+      return { ...prev, [grupo.id]: [...current, itemId] };
+    });
+  };
+
+  const canAdd =
+    !complementGrupos ||
+    complementGrupos.filter((g) => g.obrigatorio).every((g) => (selectedComplementos[g.id]?.length || 0) >= g.minimo);
+
+  const adicionaisTotal = selectedAdicionais.reduce((acc, a) => acc + a.preco * a.quantity, 0);
+  const itemBasePrice = selectedProduct ? (selectedProduct.preco_promocional || selectedProduct.preco_venda) : 0;
 
   return (
     <div className="px-4 py-6">
@@ -135,11 +195,154 @@ export function ProductFeed({ products, categoryName }: ProductFeedProps) {
                     </p>
                   </div>
 
+                  {/* Grupos de Complementos */}
+                  {complementGrupos && complementGrupos.length > 0 && (
+                    <div className="space-y-3 pt-4 border-t border-gray-100">
+                      {complementGrupos.map((grupo) => {
+                        const selectedCount = selectedComplementos[grupo.id]?.length || 0;
+                        const isMulti = grupo.maximo > 1;
+                        return (
+                          <div key={grupo.id} className="overflow-hidden rounded-2xl border border-gray-200">
+                            {/* Cabeçalho */}
+                            <div className="flex items-start justify-between bg-gray-50 px-4 py-3 border-b border-gray-100">
+                              <div>
+                                <h3 className="font-bold text-gray-900 text-sm">{grupo.nome}</h3>
+                                <p className="text-xs text-gray-500 mt-0.5">
+                                  {grupo.minimo === grupo.maximo
+                                    ? `Escolha ${grupo.maximo} ${grupo.maximo === 1 ? 'opção' : 'opções'}`
+                                    : `Escolha entre ${grupo.minimo} e ${grupo.maximo} opções`}
+                                </p>
+                              </div>
+                              <div className="flex items-center gap-2 mt-0.5">
+                                {selectedCount > 0 && (
+                                  <span className="text-xs font-bold text-red-600 bg-red-50 px-2 py-0.5 rounded-full border border-red-100">
+                                    {selectedCount}/{grupo.maximo}
+                                  </span>
+                                )}
+                                {grupo.obrigatorio && (
+                                  <span className="text-[10px] bg-red-600 text-white px-2.5 py-1 rounded-full font-bold uppercase tracking-wide">
+                                    Obrigatório
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+
+                            {/* Itens */}
+                            <div className="divide-y divide-gray-100">
+                              {(grupo.complemento || [])
+                                .filter((c) => c.ativo)
+                                .sort((a, b) => a.ordem - b.ordem)
+                                .map((item) => {
+                                  const isSelected = (selectedComplementos[grupo.id] || []).includes(item.id);
+                                  const isDisabled = !isSelected && selectedCount >= grupo.maximo;
+                                  return (
+                                    <button
+                                      key={item.id}
+                                      onClick={() => !isDisabled && toggleComplemento(grupo, item.id)}
+                                      className={`w-full flex items-center gap-4 px-4 py-3.5 text-left transition-colors ${
+                                        isSelected
+                                          ? 'bg-red-50'
+                                          : isDisabled
+                                          ? 'opacity-40 cursor-not-allowed'
+                                          : 'hover:bg-gray-50 active:bg-gray-100'
+                                      }`}
+                                    >
+                                      <div className="flex-1 min-w-0">
+                                        <p className="text-sm font-semibold text-gray-800 leading-tight">{item.nome}</p>
+                                        {item.preco > 0 && (
+                                          <p className="text-xs text-green-700 font-bold mt-0.5">
+                                            + R$ {item.preco.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                                          </p>
+                                        )}
+                                      </div>
+                                      {isMulti ? (
+                                        <div
+                                          className={`w-5 h-5 flex-shrink-0 rounded-md border-2 flex items-center justify-center transition-all ${
+                                            isSelected ? 'bg-red-600 border-red-600' : 'border-gray-300 bg-white'
+                                          }`}
+                                        >
+                                          {isSelected && <Check className="w-3 h-3 text-white" strokeWidth={3} />}
+                                        </div>
+                                      ) : (
+                                        <div
+                                          className={`w-5 h-5 flex-shrink-0 rounded-full border-2 flex items-center justify-center transition-all ${
+                                            isSelected ? 'border-red-600' : 'border-gray-300'
+                                          }`}
+                                        >
+                                          {isSelected && <div className="w-2.5 h-2.5 bg-red-600 rounded-full" />}
+                                        </div>
+                                      )}
+                                    </button>
+                                  );
+                                })}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+
+                  {/* Adicionais */}
+                  {adicionaisList && adicionaisList.length > 0 && (
+                    <div className="space-y-3 pt-4 border-t border-gray-100">
+                      <h3 className="font-bold text-gray-800 text-sm">Adicionais</h3>
+                      {adicionaisList.map((adicional) => {
+                        const selectedQty = selectedAdicionais.find((a) => a.id === adicional.id)?.quantity || 0;
+                        return (
+                          <div
+                            key={adicional.id}
+                            className="flex items-center justify-between p-3 rounded-xl border border-gray-100"
+                          >
+                            <div>
+                              <p className="text-sm font-medium text-gray-700">{adicional.nome}</p>
+                              <p className="text-xs text-green-700 font-bold">
+                                + R$ {adicional.preco.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                              </p>
+                            </div>
+                            <div className="flex items-center gap-2 bg-gray-50 rounded-lg p-1 border border-gray-100">
+                              <button
+                                onClick={() => {
+                                  setSelectedAdicionais((prev) => {
+                                    const existing = prev.find((a) => a.id === adicional.id);
+                                    if (!existing || existing.quantity === 0) return prev;
+                                    if (existing.quantity === 1) return prev.filter((a) => a.id !== adicional.id);
+                                    return prev.map((a) => (a.id === adicional.id ? { ...a, quantity: a.quantity - 1 } : a));
+                                  });
+                                }}
+                                disabled={selectedQty === 0}
+                                className="p-1 text-red-600 hover:bg-red-50 rounded-md transition-colors disabled:opacity-30"
+                              >
+                                <Minus className="w-4 h-4" />
+                              </button>
+                              <span className="text-sm font-bold w-4 text-center">{selectedQty}</span>
+                              <button
+                                onClick={() => {
+                                  setSelectedAdicionais((prev) => {
+                                    const existing = prev.find((a) => a.id === adicional.id);
+                                    if (!existing)
+                                      return [
+                                        ...prev,
+                                        { id: adicional.id, nome: adicional.nome, preco: adicional.preco, quantity: 1 },
+                                      ];
+                                    return prev.map((a) => (a.id === adicional.id ? { ...a, quantity: a.quantity + 1 } : a));
+                                  });
+                                }}
+                                className="p-1 text-red-600 hover:bg-red-50 rounded-md transition-colors"
+                              >
+                                <Plus className="w-4 h-4" />
+                              </button>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+
                   <div className="pt-4 border-t border-gray-100">
-                    <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">Preço</span>
+                    <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">Preço base</span>
                     <div className="flex items-baseline gap-2 mt-1">
                       <span className="text-2xl font-black text-green-700">
-                        R$ {(selectedProduct.preco_promocional || selectedProduct.preco_venda).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                        R$ {itemBasePrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                       </span>
                       {selectedProduct.preco_promocional && (
                         <span className="text-sm text-gray-400 line-through">
@@ -149,16 +352,58 @@ export function ProductFeed({ products, categoryName }: ProductFeedProps) {
                     </div>
                   </div>
 
-                  <div className="pt-6">
+                  {/* Seletor de Quantidade */}
+                  <div className="flex items-center justify-between p-3 bg-gray-50 rounded-xl border border-gray-100">
+                    <span className="font-bold text-gray-700 text-sm">Quantidade</span>
+                    <div className="flex items-center gap-3 bg-white rounded-lg p-1 border border-gray-200">
+                      <button
+                        onClick={() => setModalQuantity((q) => Math.max(1, q - 1))}
+                        disabled={modalQuantity <= 1}
+                        className="p-1.5 text-red-600 hover:bg-red-50 rounded-md transition-colors disabled:opacity-30"
+                      >
+                        <Minus className="w-4 h-4" />
+                      </button>
+                      <span className="text-sm font-bold w-6 text-center">{modalQuantity}</span>
+                      <button
+                        onClick={() => setModalQuantity((q) => q + 1)}
+                        className="p-1.5 text-red-600 hover:bg-red-50 rounded-md transition-colors"
+                      >
+                        <Plus className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="pt-2">
                     <button
+                      disabled={!canAdd}
                       onClick={() => {
-                        addItem(selectedProduct, 1);
+                        const complementosList: SelectedComplemento[] = Object.entries(selectedComplementos).flatMap(
+                          ([grupoId, itemIds]) => {
+                            const grupo = complementGrupos?.find((g) => g.id === grupoId);
+                            return itemIds.map((itemId) => ({
+                              grupoId,
+                              grupoNome: grupo?.nome || '',
+                              itemId,
+                              itemNome: grupo?.complemento?.find((c) => c.id === itemId)?.nome || '',
+                            }));
+                          }
+                        );
+                        addItem(
+                          selectedProduct,
+                          modalQuantity,
+                          complementosList,
+                          selectedAdicionais.filter((a) => a.quantity > 0)
+                        );
                         setSelectedProduct(null);
                       }}
-                      className="w-full bg-red-600 text-white py-4 rounded-2xl font-bold flex items-center justify-center gap-3 hover:bg-red-700 transition-all shadow-lg shadow-red-200"
+                      className="w-full bg-red-600 text-white py-4 rounded-2xl font-bold flex items-center justify-center gap-3 hover:bg-red-700 transition-all shadow-lg shadow-red-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none"
                     >
                       <ShoppingBag className="w-5 h-5" />
-                      Adicionar à Sacola
+                      <span>
+                        {canAdd
+                          ? `Adicionar · R$ ${((itemBasePrice + adicionaisTotal) * modalQuantity).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`
+                          : 'Escolha as opções obrigatórias'}
+                      </span>
                     </button>
                   </div>
                 </div>

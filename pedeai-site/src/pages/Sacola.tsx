@@ -113,11 +113,32 @@ export default function Sacola() {
                   <div>
                     <h3 className="text-sm font-bold text-gray-900 truncate">{item.product.nome}</h3>
                     <p className="text-xs text-gray-500 line-clamp-1">{item.product.descricao}</p>
+                    {item.complementos?.length > 0 && (
+                      <div className="mt-1 space-y-0.5">
+                        {item.complementos.map((c) => (
+                          <p key={c.grupoId} className="text-[11px] text-gray-400 leading-tight">
+                            {c.grupoNome}: <span className="text-gray-600 font-medium">{c.itemNome}</span>
+                          </p>
+                        ))}
+                      </div>
+                    )}
+                    {item.adicionais?.filter((a) => a.quantity > 0).length > 0 && (
+                      <div className="mt-1 space-y-0.5">
+                        {item.adicionais.filter((a) => a.quantity > 0).map((a) => (
+                          <p key={a.id} className="text-[11px] text-green-600 leading-tight">
+                            +{a.quantity}x {a.nome} (+ R$ {(a.preco * a.quantity).toLocaleString('pt-BR', { minimumFractionDigits: 2 })})
+                          </p>
+                        ))}
+                      </div>
+                    )}
                   </div>
                   
                   <div className="flex items-center justify-between mt-2">
                     <span className="text-sm font-bold text-red-600">
-                      R$ {(item.product.preco_promocional || item.product.preco_venda).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                      R$ {(
+                        (item.product.preco_promocional || item.product.preco_venda) +
+                        (item.adicionais?.reduce((acc, a) => acc + a.preco * a.quantity, 0) || 0)
+                      ).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                     </span>
                     
                     <div className="flex items-center gap-3 bg-gray-50 rounded-lg p-1 border border-gray-100">

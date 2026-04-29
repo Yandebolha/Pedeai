@@ -93,6 +93,55 @@ export interface Database {
           created_at: string
         }
       }
+      complemento_grupo: {
+        Row: {
+          id: string
+          mercadoria_id: string | null
+          nome: string
+          minimo: number
+          maximo: number
+          obrigatorio: boolean
+          ordem: number
+          ativo: boolean
+          created_at: string
+        }
+      }
+      complemento: {
+        Row: {
+          id: string
+          grupo_id: string | null
+          nome: string
+          preco: number
+          ordem: number
+          ativo: boolean
+          created_at: string
+        }
+      }
+      adicional: {
+        Row: {
+          id: string
+          mercadoria_id: string | null
+          nome: string
+          preco: number
+          ordem: number
+          ativo: boolean
+          created_at: string
+        }
+      }
+      itens_pedido_web: {
+        Row: {
+          id: string
+          pedido_id: string | null
+          mercadoria_id: string | null
+          quantidade: number
+          preco_unitario: number
+          preco_adicionais: number
+          complementos_json: unknown | null
+          adicionais_json: unknown | null
+          observacao: string | null
+          created_at: string
+        }
+      }
     }
   }
 }
@@ -104,3 +153,10 @@ export type Cliente = Database['public']['Tables']['cliente']['Row'];
 export type Pedido = Database['public']['Tables']['pedido_web']['Row'];
 export type FormaPagamento = Database['public']['Tables']['forma_pagamento']['Row'];
 export type EnderecoSalvo = Database['public']['Tables']['enderecos_salvo']['Row'];
+export type ComplementoGrupo = Database['public']['Tables']['complemento_grupo']['Row'];
+export type ComplementoItem = Database['public']['Tables']['complemento']['Row'];
+export type Adicional = Database['public']['Tables']['adicional']['Row'];
+
+export interface ComplementoGrupoComItens extends ComplementoGrupo {
+  complemento: ComplementoItem[];
+}

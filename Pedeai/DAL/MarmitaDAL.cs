@@ -39,13 +39,19 @@ namespace Pedeai.DAL
                 marDestaque      = r["marDestaque"] != DBNull.Value && Convert.ToBoolean(r["marDestaque"]),
                 marImagem_Url    = TryGetString(r, "marImagem_Url"),
                 supabase_uuid    = TryGetString(r, "supabase_uuid"),
-                Situacao         = (r["Situacao"]?.ToString() ?? "A")[0]
+                Situacao         = (r["Situacao"]?.ToString() ?? "A")[0],
+                marMaxComplementos = TryGetInt(r, "marMaxComplementos", 1)
             };
         }
 
         private static string TryGetString(MySqlDataReader r, string col)
         {
             try { return r[col]?.ToString() ?? ""; } catch { return ""; }
+        }
+
+        private static int TryGetInt(MySqlDataReader r, string col, int def = 0)
+        {
+            try { return r[col] == DBNull.Value ? def : Convert.ToInt32(r[col]); } catch { return def; }
         }
 
         public string Incluir(Marmita obj)
@@ -57,17 +63,18 @@ namespace Pedeai.DAL
                 obj.auxCodigo = ProximoAuxCodigo("marmita", conn);
                 using var cmd = new MySqlCommand(@"
                     INSERT INTO marmita (Codigo, auxCodigo, marDescricao, marValor, marCusto,
-                                        marHabilitar_Site, marDestaque, marImagem_Url, Situacao)
-                    VALUES (@cod, @aux, @desc, @val, @cst, @site, @dest, @img, @sit)", conn);
-                cmd.Parameters.AddWithValue("@cod",  obj.Codigo);
-                cmd.Parameters.AddWithValue("@aux",  obj.auxCodigo);
-                cmd.Parameters.AddWithValue("@desc", obj.marDescricao);
-                cmd.Parameters.AddWithValue("@val",  obj.marValor);
-                cmd.Parameters.AddWithValue("@cst",  obj.marCusto);
-                cmd.Parameters.AddWithValue("@site", obj.marHabilitar_Site ? 1 : 0);
-                cmd.Parameters.AddWithValue("@dest", obj.marDestaque ? 1 : 0);
-                cmd.Parameters.AddWithValue("@img",  obj.marImagem_Url ?? "");
-                cmd.Parameters.AddWithValue("@sit",  obj.Situacao.ToString());
+                                        marHabilitar_Site, marDestaque, marImagem_Url, Situacao, marMaxComplementos)
+                    VALUES (@cod, @aux, @desc, @val, @cst, @site, @dest, @img, @sit, @maxcomp)", conn);
+                cmd.Parameters.AddWithValue("@cod",     obj.Codigo);
+                cmd.Parameters.AddWithValue("@aux",     obj.auxCodigo);
+                cmd.Parameters.AddWithValue("@desc",    obj.marDescricao);
+                cmd.Parameters.AddWithValue("@val",     obj.marValor);
+                cmd.Parameters.AddWithValue("@cst",     obj.marCusto);
+                cmd.Parameters.AddWithValue("@site",    obj.marHabilitar_Site ? 1 : 0);
+                cmd.Parameters.AddWithValue("@dest",    obj.marDestaque ? 1 : 0);
+                cmd.Parameters.AddWithValue("@img",     obj.marImagem_Url ?? "");
+                cmd.Parameters.AddWithValue("@sit",     obj.Situacao.ToString());
+                cmd.Parameters.AddWithValue("@maxcomp", obj.marMaxComplementos < 1 ? 1 : obj.marMaxComplementos);
                 cmd.ExecuteNonQuery();
                 return "";
             }
@@ -82,16 +89,17 @@ namespace Pedeai.DAL
                 using var cmd = new MySqlCommand(@"
                     UPDATE marmita SET marDescricao=@desc, marValor=@val, marCusto=@cst,
                                       marHabilitar_Site=@site, marDestaque=@dest,
-                                      marImagem_Url=@img, Situacao=@sit
+                                      marImagem_Url=@img, Situacao=@sit, marMaxComplementos=@maxcomp
                     WHERE Codigo=@cod", conn);
-                cmd.Parameters.AddWithValue("@desc", obj.marDescricao);
-                cmd.Parameters.AddWithValue("@val",  obj.marValor);
-                cmd.Parameters.AddWithValue("@cst",  obj.marCusto);
-                cmd.Parameters.AddWithValue("@site", obj.marHabilitar_Site ? 1 : 0);
-                cmd.Parameters.AddWithValue("@dest", obj.marDestaque ? 1 : 0);
-                cmd.Parameters.AddWithValue("@img",  obj.marImagem_Url ?? "");
-                cmd.Parameters.AddWithValue("@sit",  obj.Situacao.ToString());
-                cmd.Parameters.AddWithValue("@cod",  obj.Codigo);
+                cmd.Parameters.AddWithValue("@desc",    obj.marDescricao);
+                cmd.Parameters.AddWithValue("@val",     obj.marValor);
+                cmd.Parameters.AddWithValue("@cst",     obj.marCusto);
+                cmd.Parameters.AddWithValue("@site",    obj.marHabilitar_Site ? 1 : 0);
+                cmd.Parameters.AddWithValue("@dest",    obj.marDestaque ? 1 : 0);
+                cmd.Parameters.AddWithValue("@img",     obj.marImagem_Url ?? "");
+                cmd.Parameters.AddWithValue("@sit",     obj.Situacao.ToString());
+                cmd.Parameters.AddWithValue("@maxcomp", obj.marMaxComplementos < 1 ? 1 : obj.marMaxComplementos);
+                cmd.Parameters.AddWithValue("@cod",     obj.Codigo);
                 cmd.ExecuteNonQuery();
                 return "";
             }

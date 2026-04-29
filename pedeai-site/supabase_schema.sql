@@ -197,3 +197,42 @@ INSERT INTO forma_pagamento (nome, tipo) VALUES
 ('Pix', 'pix'),
 ('Dinheiro', 'dinheiro'),
 ('Vale Refeição', 'vale');
+
+-- ==========================================
+-- MIGRAÇÃO: Complementos e Adicionais
+-- ==========================================
+
+-- Adicionar mercadoria_id direto ao complemento_grupo (ligação simplificada, sem junction table)
+ALTER TABLE complemento_grupo
+  ADD COLUMN IF NOT EXISTS mercadoria_id UUID REFERENCES mercadoria(id) ON DELETE CASCADE,
+  ADD COLUMN IF NOT EXISTS ordem INTEGER DEFAULT 0,
+  ADD COLUMN IF NOT EXISTS ativo BOOLEAN DEFAULT TRUE;
+
+-- Adicionar ordem ao complemento
+ALTER TABLE complemento
+  ADD COLUMN IF NOT EXISTS ordem INTEGER DEFAULT 0;
+
+-- Criar tabela de adicionais (itens pagos que somam ao preço do produto)
+CREATE TABLE IF NOT EXISTS adicional (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  mercadoria_id UUID NOT NULL REFERENCES mercadoria(id) ON DELETE CASCADE,
+  nome TEXT NOT NULL,
+  preco DECIMAL(10,2) NOT NULL DEFAULT 0,
+  ordem INTEGER DEFAULT 0,
+  ativo BOOLEAN DEFAULT TRUE,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Adicionar colunas de detalhe nos itens do pedido
+ALTER TABLE itens_pedido_web
+  ADD COLUMN IF NOT EXISTS complementos_json JSONB,
+  ADD COLUMN IF NOT EXISTS adicionais_json JSONB,
+  ADD COLUMN IF NOT EXISTS preco_adicionais DECIMAL(10,2) DEFAULT 0;
+
+-- Índices para performance
+CREATE INDEX IF NOT EXISTS idx_complemento_grupo_mercadoria ON complemento_grupo(mercadoria_id);
+CREATE INDEX IF NOT EXISTS idx_adicional_mercadoria ON adicional(mercadoria_id);
+
+-- RLS para adicional
+ALTER TABLE adicional ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Leitura pública para adicionais" ON adicional FOR SELECT USING (true);

@@ -12,6 +12,8 @@ namespace Pedeai.Modelo
         public string  marImagem_Url       { get; set; } = "";
         public string  supabase_uuid       { get; set; } = "";
         public char    Situacao            { get; set; } = 'A';
+        /// <summary>Máximo de complementos (itens) que o cliente pode escolher. Mínimo = 1.</summary>
+        public int     marMaxComplementos  { get; set; } = 1;
     }
 
     public class MarmitaItem

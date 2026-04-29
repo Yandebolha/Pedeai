@@ -1868,14 +1868,21 @@ namespace Pedeai.DB
                 string marmitaUuid = GetSupabaseUuid("marmita", "Codigo", codigoMarmita);
                 if (string.IsNullOrWhiteSpace(marmitaUuid)) return;
 
-                // 2. Nome da marmita para nomear o grupo
+                // 2. Nome e máximo de complementos da marmita
                 string marmitaNome = "";
+                int maxComplementos = 1;
                 using (var conn = AbrirMysql())
                 using (var cmd = new MySqlCommand(
-                    "SELECT marDescricao FROM marmita WHERE Codigo=@c LIMIT 1", conn))
+                    "SELECT marDescricao, COALESCE(marMaxComplementos, 1) AS marMaxComplementos FROM marmita WHERE Codigo=@c LIMIT 1", conn))
                 {
                     cmd.Parameters.AddWithValue("@c", codigoMarmita);
-                    marmitaNome = cmd.ExecuteScalar()?.ToString() ?? "Marmita";
+                    using var r = cmd.ExecuteReader();
+                    if (r.Read())
+                    {
+                        marmitaNome = r["marDescricao"]?.ToString() ?? "Marmita";
+                        maxComplementos = r["marMaxComplementos"] == DBNull.Value ? 1 : Convert.ToInt32(r["marMaxComplementos"]);
+                        if (maxComplementos < 1) maxComplementos = 1;
+                    }
                 }
 
                 // 3. Busca itens da marmita com preço da mercadoria vinculada
@@ -1897,30 +1904,61 @@ namespace Pedeai.DB
 
                 if (!itens.Any()) return;
 
-                // 4. Cria ou encontra o complemento_grupo desta marmita
-                // Busca via tabela de link mercadoria_complemento_grupo → complemento_grupo
+                // 4. Cria ou encontra o complemento_grupo desta marmita via mercadoria_id
+                // (primary lookup: mercadoria_id direto na tabela — usado pelo site)
                 string grupoCompId = "";
                 try
                 {
-                    var lnkArr = await GetAsync(
-                        $"{TBL_MERC_COMP_GRP}?mercadoria_id=eq.{marmitaUuid}&select=grupo_id&limit=1");
-                    if (lnkArr.Count > 0)
-                        grupoCompId = lnkArr[0]["grupo_id"]?.ToString() ?? "";
+                    var grpArr = await GetAsync(
+                        $"{TBL_COMP_GRUPO}?mercadoria_id=eq.{marmitaUuid}&limit=1");
+                    if (grpArr.Count > 0)
+                        grupoCompId = grpArr[0]["id"]?.ToString() ?? "";
                 }
                 catch { }
 
+                // Fallback: busca via junction table (registros antigos)
                 if (string.IsNullOrWhiteSpace(grupoCompId))
                 {
                     try
                     {
+                        var lnkArr = await GetAsync(
+                            $"{TBL_MERC_COMP_GRP}?mercadoria_id=eq.{marmitaUuid}&select=grupo_id&limit=1");
+                        if (lnkArr.Count > 0)
+                            grupoCompId = lnkArr[0]["grupo_id"]?.ToString() ?? "";
+                    }
+                    catch { }
+                }
+
+                if (string.IsNullOrWhiteSpace(grupoCompId))
+                {
+                    // Cria novo grupo com mercadoria_id direto
+                    try
+                    {
                         var grpResult = await PostAsync(TBL_COMP_GRUPO, new
                         {
-                            nome        = marmitaNome,
-                            obrigatorio = true,
-                            minimo      = 1,
-                            maximo      = 1,
+                            mercadoria_id = marmitaUuid,
+                            nome          = marmitaNome,
+                            obrigatorio   = true,
+                            minimo        = 1,
+                            maximo        = maxComplementos,
+                            ativo         = true,
                         });
                         grupoCompId = grpResult?["id"]?.ToString() ?? "";
+                    }
+                    catch { }
+                }
+                else
+                {
+                    // Atualiza mercadoria_id e maximo no grupo existente
+                    try
+                    {
+                        await PatchAsync(TBL_COMP_GRUPO, $"id=eq.{grupoCompId}", new
+                        {
+                            mercadoria_id = marmitaUuid,
+                            maximo        = maxComplementos,
+                            nome          = marmitaNome,
+                            ativo         = true,
+                        });
                     }
                     catch { }
                 }
@@ -1958,6 +1996,8 @@ namespace Pedeai.DB
                 catch { }
 
                 // 7. Upsert cada item como complemento
+                var nomesAtuais = new HashSet<string>(itens.Select(i => i.nome), StringComparer.OrdinalIgnoreCase);
+
                 foreach (var (nome, preco) in itens)
                 {
                     try
@@ -1979,6 +2019,16 @@ namespace Pedeai.DB
                         }
                     }
                     catch { }
+                }
+
+                // 8. Remove do Supabase complementos que não existem mais nesta marmita
+                foreach (var kvp in existentes)
+                {
+                    if (!nomesAtuais.Contains(kvp.Key))
+                    {
+                        try { await DeleteAsync(TBL_COMPLEMENTO, $"id=eq.{kvp.Value}"); }
+                        catch { }
+                    }
                 }
             }
             catch (Exception ex)

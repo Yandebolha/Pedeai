@@ -263,12 +263,21 @@ export default function Checkout() {
       if (orderError) throw orderError;
 
       // 3. Salva os Itens do Pedido na tabela itens_pedido_web
-      const orderItems = cartItems.map(item => ({
-        pedido_id: orderData.id,
-        mercadoria_id: item.product.id,
-        quantidade: item.quantity,
-        preco_unitario: item.product.preco_promocional || item.product.preco_venda
-      }));
+      const orderItems = cartItems.map(item => {
+        const adicionaisPrice = item.adicionais?.reduce((acc, a) => acc + a.preco * a.quantity, 0) || 0;
+        const unitPrice = (item.product.preco_promocional || item.product.preco_venda) + adicionaisPrice;
+        return {
+          pedido_id: orderData.id,
+          mercadoria_id: item.product.id,
+          quantidade: item.quantity,
+          preco_unitario: unitPrice,
+          preco_adicionais: adicionaisPrice,
+          complementos_json: item.complementos?.length > 0 ? item.complementos : null,
+          adicionais_json: item.adicionais?.filter(a => a.quantity > 0).length > 0
+            ? item.adicionais.filter(a => a.quantity > 0)
+            : null,
+        };
+      });
 
       const { error: itemsError } = await supabase
         .from('itens_pedido_web')
@@ -608,18 +617,42 @@ export default function Checkout() {
 
                 <div className="space-y-6">
                   {/* Itens */}
-                  <div className="space-y-2">
+                  <div className="space-y-3">
                     <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">Itens na Sacola</p>
-                    {cartItems.map((item) => (
-                      <div key={item.id} className="flex justify-between text-sm">
-                        <span className="text-gray-700 font-medium">
-                          <span className="font-bold text-red-600">{item.quantity}x</span> {item.product.nome}
-                        </span>
-                        <span className="font-bold text-gray-900">
-                          R$ {((item.product.preco_promocional || item.product.preco_venda) * item.quantity).toFixed(2)}
-                        </span>
-                      </div>
-                    ))}
+                    {cartItems.map((item) => {
+                      const adicionaisPrice = item.adicionais?.reduce((acc, a) => acc + a.preco * a.quantity, 0) || 0;
+                      const unitPrice = (item.product.preco_promocional || item.product.preco_venda) + adicionaisPrice;
+                      return (
+                        <div key={item.id} className="text-sm space-y-0.5">
+                          <div className="flex justify-between">
+                            <span className="text-gray-700 font-medium">
+                              <span className="font-bold text-red-600">{item.quantity}x</span> {item.product.nome}
+                            </span>
+                            <span className="font-bold text-gray-900">
+                              R$ {(unitPrice * item.quantity).toFixed(2)}
+                            </span>
+                          </div>
+                          {item.complementos?.length > 0 && (
+                            <div className="ml-4 space-y-0.5">
+                              {item.complementos.map((c) => (
+                                <p key={c.grupoId} className="text-[11px] text-gray-400">
+                                  {c.grupoNome}: {c.itemNome}
+                                </p>
+                              ))}
+                            </div>
+                          )}
+                          {item.adicionais?.filter((a) => a.quantity > 0).length > 0 && (
+                            <div className="ml-4 space-y-0.5">
+                              {item.adicionais.filter((a) => a.quantity > 0).map((a) => (
+                                <p key={a.id} className="text-[11px] text-green-600">
+                                  +{a.quantity}x {a.nome}
+                                </p>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
                   </div>
 
                   {/* Endereço */}

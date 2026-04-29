@@ -46,6 +46,7 @@ namespace Pedeai.Forms
         private Button btnNovaMAR, btnSalvar, btnExcluir, btnFechar;
         private Button btnAddItem, btnRemItem;
         private NumericUpDown numCusto;
+        private NumericUpDown numMaxComp;
         private CheckBox chkHabilitarSite, chkDestaque;
         private PictureBox picMarmita;
         private Label lblMarmitaImagem;
@@ -146,7 +147,7 @@ namespace Pedeai.Forms
             };
             pnlRowDesc.Controls.Add(txtDescricao);
             pnlRowDesc.Controls.Add(lblDesc);
-            // Row 2: cost / value
+            // Row 2: cost / value / max complementos
             var pnlFields = new Panel { Dock = DockStyle.Top, Height = 36, BackColor = ClrFoot };
             // Valor R$ — fixed width on the right
             var lblVal = new Label
@@ -175,11 +176,26 @@ namespace Pedeai.Forms
                 BackColor = Color.White, ForeColor = ClrText, ThousandsSeparator = true,
                 Margin = new Padding(0, 4, 4, 4)
             };
-            // Right-to-left: numCusto, lblCusto, numValor, lblVal
+            var lblMaxComp = new Label
+            {
+                Text = "Máx. Compl.:", Width = 75, Dock = DockStyle.Left,
+                TextAlign = ContentAlignment.MiddleLeft, ForeColor = Color.FromArgb(100, 80, 50)
+            };
+            numMaxComp = new NumericUpDown
+            {
+                Width = 60, Dock = DockStyle.Left,
+                DecimalPlaces = 0, Minimum = 1, Maximum = 50, Value = 1,
+                Font = new Font("Segoe UI", 10F, FontStyle.Bold),
+                BackColor = Color.White, ForeColor = ClrText,
+                Margin = new Padding(0, 4, 8, 4)
+            };
+            // Right-to-left: numCusto, lblCusto, numValor, lblVal | left: lblMaxComp, numMaxComp
             pnlFields.Controls.Add(lblCusto);
             pnlFields.Controls.Add(numCusto);
             pnlFields.Controls.Add(lblVal);
             pnlFields.Controls.Add(numValor);
+            pnlFields.Controls.Add(lblMaxComp);
+            pnlFields.Controls.Add(numMaxComp);
 
             // Row 3: Site checkboxes
             var pnlOpcoes = new Panel { Dock = DockStyle.Top, Height = 32, BackColor = ClrFoot };
@@ -408,6 +424,7 @@ namespace Pedeai.Forms
             txtDescricao.Text        = obj.marDescricao;
             numValor.Value           = obj.marValor > numValor.Maximum ? numValor.Maximum : obj.marValor;
             numCusto.Value           = obj.marCusto > numCusto.Maximum ? numCusto.Maximum : obj.marCusto;
+            numMaxComp.Value         = obj.marMaxComplementos < 1 ? 1 : (obj.marMaxComplementos > 50 ? 50 : obj.marMaxComplementos);
             chkHabilitarSite.Checked = obj.marHabilitar_Site;
             chkDestaque.Checked      = obj.marDestaque;
             // Keep existing URL in _marmitaImagemPath so it is preserved on save
@@ -427,6 +444,7 @@ namespace Pedeai.Forms
             txtDescricao.Text        = "";
             numValor.Value           = 0;
             numCusto.Value           = 0;
+            numMaxComp.Value         = 1;
             chkHabilitarSite.Checked = false;
             chkDestaque.Checked      = false;
             _marmitaImagemPath       = "";
@@ -486,6 +504,7 @@ namespace Pedeai.Forms
                 marDescricao      = txtDescricao.Text.Trim(),
                 marValor          = numValor.Value,
                 marCusto          = numCusto.Value,
+                marMaxComplementos = (int)numMaxComp.Value,
                 marHabilitar_Site = chkHabilitarSite.Checked,
                 marDestaque       = chkDestaque.Checked,
                 marImagem_Url     = urlParaSalvar,
