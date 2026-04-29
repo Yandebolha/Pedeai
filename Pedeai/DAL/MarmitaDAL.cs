@@ -54,6 +54,16 @@ namespace Pedeai.DAL
             try { return r[col] == DBNull.Value ? def : Convert.ToInt32(r[col]); } catch { return def; }
         }
 
+        private static string TryGetString2(MySqlDataReader r, string col, string def = "")
+        {
+            try { var v = r[col]; return v == DBNull.Value ? def : (v?.ToString() ?? def); } catch { return def; }
+        }
+
+        private static int TryGetInt2(MySqlDataReader r, string col, int def = 0)
+        {
+            try { return r[col] == DBNull.Value ? def : Convert.ToInt32(r[col]); } catch { return def; }
+        }
+
         public string Incluir(Marmita obj)
         {
             try
@@ -122,6 +132,35 @@ namespace Pedeai.DAL
             catch (Exception ex) { return ex.Message; }
         }
 
+        // ── Migrations ───────────────────────────────────────────────────────
+
+        public void EnsureMigrations()
+        {
+            using var conn = AbrirConexao();
+            // maritmGrupo
+            using (var check = new MySqlCommand(
+                "SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='marmita_item' AND COLUMN_NAME='maritmGrupo'", conn))
+            {
+                if (Convert.ToInt32(check.ExecuteScalar()) == 0)
+                {
+                    using var alter = new MySqlCommand(
+                        "ALTER TABLE marmita_item ADD COLUMN maritmGrupo VARCHAR(100) NOT NULL DEFAULT 'Geral'", conn);
+                    alter.ExecuteNonQuery();
+                }
+            }
+            // maritmGrupoMax
+            using (var check = new MySqlCommand(
+                "SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='marmita_item' AND COLUMN_NAME='maritmGrupoMax'", conn))
+            {
+                if (Convert.ToInt32(check.ExecuteScalar()) == 0)
+                {
+                    using var alter = new MySqlCommand(
+                        "ALTER TABLE marmita_item ADD COLUMN maritmGrupoMax INT NOT NULL DEFAULT 1", conn);
+                    alter.ExecuteNonQuery();
+                }
+            }
+        }
+
         // ── MarmitaItem ───────────────────────────────────────────────────────
 
         public List<MarmitaItem> ListarItens(int codigoMarmita)
@@ -140,7 +179,9 @@ namespace Pedeai.DAL
                     Codigo_Marmita    = Convert.ToInt32(r["Codigo_Marmita"]),
                     maritmCodigo_Merc = Convert.ToInt32(r["maritmCodigo_Merc"]),
                     maritmNome        = r["maritmNome"]?.ToString() ?? "",
-                    maritmQtde        = Convert.ToDecimal(r["maritmQtde"])
+                    maritmQtde        = Convert.ToDecimal(r["maritmQtde"]),
+                    maritmGrupo       = TryGetString2(r, "maritmGrupo", "Geral"),
+                    maritmGrupoMax    = TryGetInt2(r, "maritmGrupoMax", 1)
                 });
             return list;
         }
@@ -153,14 +194,16 @@ namespace Pedeai.DAL
                 item.Codigo    = ProximoCodigo("marmita_item", conn);
                 item.auxCodigo = ProximoAuxCodigo("marmita_item", conn);
                 using var cmd = new MySqlCommand(@"
-                    INSERT INTO marmita_item (Codigo, auxCodigo, Codigo_Marmita, maritmCodigo_Merc, maritmNome, maritmQtde)
-                    VALUES (@cod, @aux, @mar, @merc, @nome, @qtde)", conn);
-                cmd.Parameters.AddWithValue("@cod",  item.Codigo);
-                cmd.Parameters.AddWithValue("@aux",  item.auxCodigo);
-                cmd.Parameters.AddWithValue("@mar",  item.Codigo_Marmita);
-                cmd.Parameters.AddWithValue("@merc", item.maritmCodigo_Merc);
-                cmd.Parameters.AddWithValue("@nome", item.maritmNome);
-                cmd.Parameters.AddWithValue("@qtde", item.maritmQtde);
+                    INSERT INTO marmita_item (Codigo, auxCodigo, Codigo_Marmita, maritmCodigo_Merc, maritmNome, maritmQtde, maritmGrupo, maritmGrupoMax)
+                    VALUES (@cod, @aux, @mar, @merc, @nome, @qtde, @grupo, @maxg)", conn);
+                cmd.Parameters.AddWithValue("@cod",   item.Codigo);
+                cmd.Parameters.AddWithValue("@aux",   item.auxCodigo);
+                cmd.Parameters.AddWithValue("@mar",   item.Codigo_Marmita);
+                cmd.Parameters.AddWithValue("@merc",  item.maritmCodigo_Merc);
+                cmd.Parameters.AddWithValue("@nome",  item.maritmNome);
+                cmd.Parameters.AddWithValue("@qtde",  item.maritmQtde);
+                cmd.Parameters.AddWithValue("@grupo", string.IsNullOrWhiteSpace(item.maritmGrupo) ? "Geral" : item.maritmGrupo);
+                cmd.Parameters.AddWithValue("@maxg",  item.maritmGrupoMax < 1 ? 1 : item.maritmGrupoMax);
                 cmd.ExecuteNonQuery();
                 return "";
             }

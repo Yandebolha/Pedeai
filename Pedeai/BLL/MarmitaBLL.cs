@@ -12,6 +12,8 @@ namespace Pedeai.BLL
 
         public DataTable Listar(bool apenasAtivas = false) => _dal.Listar(apenasAtivas);
 
+        public void EnsureMigrations() => _dal.EnsureMigrations();
+
         public Marmita PesquisaCodigo(int codigo) => _dal.PesquisaCodigo(codigo);
 
         public string Salvar(Marmita obj)

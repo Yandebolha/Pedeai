@@ -68,9 +68,22 @@ export function ProductFeed({ products, categoryName }: ProductFeedProps) {
     });
   };
 
+  const GROUP_ORDER = ['arroz', 'feijão', 'feijao', 'guarnição', 'guarnicao', 'guarnições', 'guarnicoes', 'salada', 'carne'];
+  const sortedGrupos = complementGrupos
+    ? [...complementGrupos].sort((a, b) => {
+        const ai = GROUP_ORDER.findIndex((k) => a.nome.toLowerCase().startsWith(k));
+        const bi = GROUP_ORDER.findIndex((k) => b.nome.toLowerCase().startsWith(k));
+        const av = ai === -1 ? 99 : ai;
+        const bv = bi === -1 ? 99 : bi;
+        return av - bv;
+      })
+    : [];
+
   const canAdd =
     !complementGrupos ||
-    complementGrupos.filter((g) => g.obrigatorio).every((g) => (selectedComplementos[g.id]?.length || 0) >= g.minimo);
+    complementGrupos
+      .filter((g) => g.obrigatorio && g.nome.toLowerCase() !== 'geral')
+      .every((g) => (selectedComplementos[g.id]?.length || 0) >= g.minimo);
 
   const adicionaisTotal = selectedAdicionais.reduce((acc, a) => acc + a.preco * a.quantity, 0);
   const itemBasePrice = selectedProduct ? (selectedProduct.preco_promocional || selectedProduct.preco_venda) : 0;
@@ -174,12 +187,11 @@ export function ProductFeed({ products, categoryName }: ProductFeedProps) {
                   <X className="w-5 h-5" />
                 </button>
                 
-                <div className="w-full bg-gray-100 flex items-center justify-center" style={{ maxHeight: '300px', minHeight: '180px' }}>
+                <div className="w-full h-56 overflow-hidden">
                   <img
                     src={selectedProduct.imagem_url || 'https://via.placeholder.com/400'}
                     alt={selectedProduct.nome}
-                    className="w-full object-contain"
-                    style={{ maxHeight: '300px', imageRendering: 'auto' }}
+                    className="w-full h-full object-cover"
                   />
                 </div>
 
@@ -197,9 +209,9 @@ export function ProductFeed({ products, categoryName }: ProductFeedProps) {
                   </div>
 
                   {/* Grupos de Complementos */}
-                  {complementGrupos && complementGrupos.length > 0 && (
+                  {sortedGrupos && sortedGrupos.length > 0 && (
                     <div className="space-y-0 pt-2 border-t border-gray-100 -mx-6">
-                      {complementGrupos.map((grupo) => {
+                      {sortedGrupos.map((grupo) => {
                         const selectedCount = selectedComplementos[grupo.id]?.length || 0;
                         const isMulti = grupo.maximo > 1;
                         const subtitle = grupo.minimo === grupo.maximo

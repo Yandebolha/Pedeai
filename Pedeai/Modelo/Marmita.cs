@@ -24,5 +24,9 @@ namespace Pedeai.Modelo
         public int     maritmCodigo_Merc   { get; set; }
         public string  maritmNome          { get; set; } = "";
         public decimal maritmQtde          { get; set; } = 1;
+        /// <summary>Grupo/categoria deste item dentro da marmita (ex: Arroz, Feijão, Carne, Guarnição, Salada).</summary>
+        public string  maritmGrupo         { get; set; } = "Geral";
+        /// <summary>Quantidade máxima de itens que o cliente pode escolher NESTE grupo.</summary>
+        public int     maritmGrupoMax      { get; set; } = 1;
     }
 }

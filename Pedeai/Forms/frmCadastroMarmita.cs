@@ -56,7 +56,7 @@ namespace Pedeai.Forms
             InitUI();
             if (System.ComponentModel.LicenseManager.UsageMode
                     == System.ComponentModel.LicenseUsageMode.Designtime) return;
-            Load += (_, __) => { CarregarProdutos(); CarregarGrid(); };
+            Load += (_, __) => { _bll.EnsureMigrations(); CarregarProdutos(); CarregarGrid(); };
         }
 
         // ── Construção da UI ─────────────────────────────────────────────────
@@ -390,15 +390,17 @@ namespace Pedeai.Forms
             if (codigoMarmita <= 0) return;
             var itens = _bll.ListarItens(codigoMarmita);
             var dt = new System.Data.DataTable();
-            dt.Columns.Add("Codigo",   typeof(int));
-            dt.Columns.Add("Produto",  typeof(string));
-            dt.Columns.Add("Qtde",     typeof(decimal));
+            dt.Columns.Add("Codigo",    typeof(int));
+            dt.Columns.Add("Grupo",     typeof(string));
+            dt.Columns.Add("Produto",   typeof(string));
+            dt.Columns.Add("Máx.Grupo", typeof(int));
             foreach (var i in itens)
-                dt.Rows.Add(i.Codigo, i.maritmNome, i.maritmQtde);
+                dt.Rows.Add(i.Codigo, i.maritmGrupo, i.maritmNome, i.maritmGrupoMax);
             gridItens.DataSource = dt;
-            if (gridItens.Columns.Contains("Codigo")) gridItens.Columns["Codigo"].Visible = false;
-            if (gridItens.Columns.Contains("Produto")) { gridItens.Columns["Produto"].HeaderText = "Produto"; gridItens.Columns["Produto"].FillWeight = 70; }
-            if (gridItens.Columns.Contains("Qtde")) { gridItens.Columns["Qtde"].HeaderText = "Qtde"; gridItens.Columns["Qtde"].FillWeight = 20; gridItens.Columns["Qtde"].DefaultCellStyle.Format = "N2"; }
+            if (gridItens.Columns.Contains("Codigo"))    gridItens.Columns["Codigo"].Visible = false;
+            if (gridItens.Columns.Contains("Grupo"))     { gridItens.Columns["Grupo"].HeaderText = "Grupo"; gridItens.Columns["Grupo"].FillWeight = 28; }
+            if (gridItens.Columns.Contains("Produto"))   { gridItens.Columns["Produto"].HeaderText = "Produto"; gridItens.Columns["Produto"].FillWeight = 52; }
+            if (gridItens.Columns.Contains("Máx.Grupo")) { gridItens.Columns["Máx.Grupo"].HeaderText = "Máx"; gridItens.Columns["Máx.Grupo"].FillWeight = 12; }
         }
 
         private int GetSelectedMarmitaCod()
@@ -599,15 +601,29 @@ namespace Pedeai.Forms
             Preencher("");
             txtF.TextChanged += (_, __) => Preencher(txtF.Text);
 
-            var pnlBottom = new Panel { Dock = DockStyle.Bottom, Height = 80, BackColor = ClrFoot, Padding = new Padding(8, 4, 8, 4) };
+            var pnlBottom = new Panel { Dock = DockStyle.Bottom, Height = 110, BackColor = ClrFoot, Padding = new Padding(8, 4, 8, 4) };
             var lblQ = new Label { Text = "Qtde:", Left = 8, Top = 10, AutoSize = true, ForeColor = Color.FromArgb(100, 80, 50) };
             var numQ = new NumericUpDown { Left = 60, Top = 6, Width = 80, Height = 26, Value = 1, Minimum = 0.001m, Maximum = 9999, DecimalPlaces = 3, BackColor = Color.White, ForeColor = ClrText };
+
+            var lblGrupo = new Label { Text = "Grupo:", Left = 8, Top = 42, AutoSize = true, ForeColor = Color.FromArgb(100, 80, 50) };
+            var cmbGrupo = new ComboBox
+            {
+                Left = 60, Top = 38, Width = 200, Height = 26,
+                BackColor = Color.White, ForeColor = ClrText,
+                Font = new Font("Segoe UI", 9F), DropDownStyle = ComboBoxStyle.DropDown
+            };
+            cmbGrupo.Items.AddRange(new object[] { "Arroz", "Feijão", "Carne", "Guarnição", "Salada", "Talher", "Geral" });
+            cmbGrupo.Text = "Geral";
+
+            var lblMaxG = new Label { Text = "Máx. grupo:", Left = 270, Top = 42, AutoSize = true, ForeColor = Color.FromArgb(100, 80, 50) };
+            var numMaxG = new NumericUpDown { Left = 355, Top = 38, Width = 60, Height = 26, Value = 1, Minimum = 1, Maximum = 50, DecimalPlaces = 0, BackColor = Color.White, ForeColor = ClrText };
+
             var btnOk = MkBtn("Adicionar", ClrGreen, 110);
-            btnOk.Top = 42; btnOk.Left = 8;
+            btnOk.Top = 74; btnOk.Left = 8;
             var btnCnc = MkBtn("Cancelar", ClrBrown, 100);
-            btnCnc.Top = 42; btnCnc.Left = 125;
+            btnCnc.Top = 74; btnCnc.Left = 125;
             btnCnc.Click += (_, __) => dlg.DialogResult = DialogResult.Cancel;
-            pnlBottom.Controls.AddRange(new Control[] { lblQ, numQ, btnOk, btnCnc });
+            pnlBottom.Controls.AddRange(new Control[] { lblQ, numQ, lblGrupo, cmbGrupo, lblMaxG, numMaxG, btnOk, btnCnc });
 
             (int Codigo, string Nome, decimal Preco) escolhido = default;
             btnOk.Click += (_, __) =>
@@ -632,7 +648,9 @@ namespace Pedeai.Forms
                 Codigo_Marmita    = codMar,
                 maritmCodigo_Merc = escolhido.Codigo,
                 maritmNome        = escolhido.Nome,
-                maritmQtde        = numQ.Value
+                maritmQtde        = numQ.Value,
+                maritmGrupo       = string.IsNullOrWhiteSpace(cmbGrupo.Text) ? "Geral" : cmbGrupo.Text.Trim(),
+                maritmGrupoMax    = (int)numMaxG.Value
             };
             var erro = _bll.AdicionarItem(item);
             if (!string.IsNullOrEmpty(erro)) { MessageBox.Show(erro); return; }

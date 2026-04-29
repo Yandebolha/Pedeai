@@ -1864,171 +1864,154 @@ namespace Pedeai.DB
         {
             try
             {
-                // 1. UUID da marmita no Supabase (deve existir antes dos itens)
+                // 1. UUID da marmita no Supabase
                 string marmitaUuid = GetSupabaseUuid("marmita", "Codigo", codigoMarmita);
                 if (string.IsNullOrWhiteSpace(marmitaUuid)) return;
 
-                // 2. Nome e máximo de complementos da marmita
-                string marmitaNome = "";
-                int maxComplementos = 1;
-                using (var conn = AbrirMysql())
-                using (var cmd = new MySqlCommand(
-                    "SELECT marDescricao, COALESCE(marMaxComplementos, 1) AS marMaxComplementos FROM marmita WHERE Codigo=@c LIMIT 1", conn))
-                {
-                    cmd.Parameters.AddWithValue("@c", codigoMarmita);
-                    using var r = cmd.ExecuteReader();
-                    if (r.Read())
-                    {
-                        marmitaNome = r["marDescricao"]?.ToString() ?? "Marmita";
-                        maxComplementos = r["marMaxComplementos"] == DBNull.Value ? 1 : Convert.ToInt32(r["marMaxComplementos"]);
-                        if (maxComplementos < 1) maxComplementos = 1;
-                    }
-                }
-
-                // 3. Busca itens da marmita com preço da mercadoria vinculada
-                var itens = new List<(string nome, decimal preco)>();
+                // 2. Busca itens agrupados: nome, preco, grupo, maxGrupo
+                var itensRaw = new List<(string nome, decimal preco, string grupo, int maxGrupo)>();
                 using (var conn = AbrirMysql())
                 using (var cmd = new MySqlCommand(@"
                     SELECT mi.maritmNome,
-                           COALESCE(m.mercPreco_Venda, 0) AS preco
+                           COALESCE(m.mercPreco_Venda, 0) AS preco,
+                           COALESCE(mi.maritmGrupo, 'Geral')    AS grupo,
+                           COALESCE(mi.maritmGrupoMax, 1)        AS maxGrupo
                     FROM marmita_item mi
                     LEFT JOIN mercadoria m ON m.Codigo = mi.maritmCodigo_Merc
                     WHERE mi.Codigo_Marmita = @c
-                    ORDER BY mi.maritmNome", conn))
+                    ORDER BY mi.maritmGrupo, mi.maritmNome", conn))
                 {
                     cmd.Parameters.AddWithValue("@c", codigoMarmita);
                     using var r = cmd.ExecuteReader();
                     while (r.Read())
-                        itens.Add((r["maritmNome"]?.ToString() ?? "", Convert.ToDecimal(r["preco"])));
+                        itensRaw.Add((
+                            r["maritmNome"]?.ToString() ?? "",
+                            Convert.ToDecimal(r["preco"]),
+                            r["grupo"]?.ToString()?.Trim() is string g && g.Length > 0 ? g : "Geral",
+                            r["maxGrupo"] == DBNull.Value ? 1 : Convert.ToInt32(r["maxGrupo"])
+                        ));
                 }
 
-                if (!itens.Any()) return;
+                if (!itensRaw.Any()) return;
 
-                // 4. Cria ou encontra o complemento_grupo desta marmita via mercadoria_id
-                // (primary lookup: mercadoria_id direto na tabela — usado pelo site)
-                string grupoCompId = "";
+                // 3. Agrupa por grupo
+                var porGrupo = itensRaw
+                    .GroupBy(i => i.grupo, StringComparer.OrdinalIgnoreCase)
+                    .ToDictionary(
+                        g => g.Key,
+                        g => (itens: g.ToList(), maxGrupo: g.First().maxGrupo),
+                        StringComparer.OrdinalIgnoreCase);
+
+                // 4. Busca todos os grupos de complemento existentes desta marmita no Supabase
+                var gruposExistentes = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase); // nome → id
                 try
                 {
-                    var grpArr = await GetAsync(
-                        $"{TBL_COMP_GRUPO}?mercadoria_id=eq.{marmitaUuid}&limit=1");
-                    if (grpArr.Count > 0)
-                        grupoCompId = grpArr[0]["id"]?.ToString() ?? "";
-                }
-                catch { }
-
-                // Fallback: busca via junction table (registros antigos)
-                if (string.IsNullOrWhiteSpace(grupoCompId))
-                {
-                    try
+                    var grpArr = await GetAsync($"{TBL_COMP_GRUPO}?mercadoria_id=eq.{marmitaUuid}&select=id,nome");
+                    foreach (JObject g in grpArr)
                     {
-                        var lnkArr = await GetAsync(
-                            $"{TBL_MERC_COMP_GRP}?mercadoria_id=eq.{marmitaUuid}&select=grupo_id&limit=1");
-                        if (lnkArr.Count > 0)
-                            grupoCompId = lnkArr[0]["grupo_id"]?.ToString() ?? "";
-                    }
-                    catch { }
-                }
-
-                if (string.IsNullOrWhiteSpace(grupoCompId))
-                {
-                    // Cria novo grupo com mercadoria_id direto
-                    try
-                    {
-                        var grpResult = await PostAsync(TBL_COMP_GRUPO, new
-                        {
-                            mercadoria_id = marmitaUuid,
-                            nome          = marmitaNome,
-                            obrigatorio   = true,
-                            minimo        = 1,
-                            maximo        = maxComplementos,
-                            ativo         = true,
-                        });
-                        grupoCompId = grpResult?["id"]?.ToString() ?? "";
-                    }
-                    catch { }
-                }
-                else
-                {
-                    // Atualiza mercadoria_id e maximo no grupo existente
-                    try
-                    {
-                        await PatchAsync(TBL_COMP_GRUPO, $"id=eq.{grupoCompId}", new
-                        {
-                            mercadoria_id = marmitaUuid,
-                            maximo        = maxComplementos,
-                            nome          = marmitaNome,
-                            ativo         = true,
-                        });
-                    }
-                    catch { }
-                }
-
-                if (string.IsNullOrWhiteSpace(grupoCompId)) return;
-
-                // 5. Vincula grupo à mercadoria via tabela de link (ignora conflito de duplicata)
-                try
-                {
-                    var linkArr = await GetAsync(
-                        $"{TBL_MERC_COMP_GRP}?mercadoria_id=eq.{marmitaUuid}&grupo_id=eq.{grupoCompId}&limit=1");
-                    if (linkArr.Count == 0)
-                        await PostAsync(TBL_MERC_COMP_GRP, new
-                        {
-                            mercadoria_id = marmitaUuid,
-                            grupo_id      = grupoCompId,
-                        });
-                }
-                catch { }
-
-                // 6. Busca complementos já existentes neste grupo
-                var existentes = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-                try
-                {
-                    var compArr = await GetAsync(
-                        $"{TBL_COMPLEMENTO}?grupo_id=eq.{grupoCompId}&select=id,nome");
-                    foreach (JObject e in compArr)
-                    {
-                        var n  = e["nome"]?.ToString();
-                        var id = e["id"]?.ToString();
+                        var n  = g["nome"]?.ToString();
+                        var id = g["id"]?.ToString();
                         if (!string.IsNullOrEmpty(n) && !string.IsNullOrEmpty(id))
-                            existentes[n] = id;
+                            gruposExistentes[n] = id;
                     }
                 }
                 catch { }
 
-                // 7. Upsert cada item como complemento
-                var nomesAtuais = new HashSet<string>(itens.Select(i => i.nome), StringComparer.OrdinalIgnoreCase);
-
-                foreach (var (nome, preco) in itens)
+                // 5. Para cada grupo local, upsert no Supabase
+                var gruposUsados = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                foreach (var kvGrupo in porGrupo)
                 {
-                    try
+                    string grupoNome = kvGrupo.Key;
+                    var    grupoItens = kvGrupo.Value.itens;
+                    int    grupoMax   = kvGrupo.Value.maxGrupo < 1 ? 1 : kvGrupo.Value.maxGrupo;
+                    gruposUsados.Add(grupoNome);
+
+                    string grupoCompId;
+                    if (gruposExistentes.TryGetValue(grupoNome, out string existId))
                     {
-                        if (existentes.TryGetValue(nome, out string itemId))
+                        grupoCompId = existId;
+                        try
                         {
-                            await PatchAsync(TBL_COMPLEMENTO, $"id=eq.{itemId}",
-                                new { nome, preco, ativo = true });
-                        }
-                        else
-                        {
-                            await PostAsync(TBL_COMPLEMENTO, new
+                            await PatchAsync(TBL_COMP_GRUPO, $"id=eq.{grupoCompId}", new
                             {
-                                grupo_id = grupoCompId,
-                                nome,
-                                preco,
-                                ativo = true,
+                                mercadoria_id = marmitaUuid,
+                                maximo        = grupoMax,
+                                minimo        = 1,
+                                obrigatorio   = !string.Equals(grupoNome, "Geral", StringComparison.OrdinalIgnoreCase),
+                                ativo         = true,
                             });
                         }
-                    }
-                    catch { }
-                }
-
-                // 8. Remove do Supabase complementos que não existem mais nesta marmita
-                foreach (var kvp in existentes)
-                {
-                    if (!nomesAtuais.Contains(kvp.Key))
-                    {
-                        try { await DeleteAsync(TBL_COMPLEMENTO, $"id=eq.{kvp.Value}"); }
                         catch { }
                     }
+                    else
+                    {
+                        try
+                        {
+                            var grpResult = await PostAsync(TBL_COMP_GRUPO, new
+                            {
+                                mercadoria_id = marmitaUuid,
+                                nome          = grupoNome,
+                                obrigatorio   = !string.Equals(grupoNome, "Geral", StringComparison.OrdinalIgnoreCase),
+                                minimo        = 1,
+                                maximo        = grupoMax,
+                                ativo         = true,
+                            });
+                            grupoCompId = grpResult?["id"]?.ToString() ?? "";
+                            if (!string.IsNullOrEmpty(grupoCompId))
+                                gruposExistentes[grupoNome] = grupoCompId;
+                        }
+                        catch { continue; }
+                    }
+
+                    if (string.IsNullOrWhiteSpace(grupoCompId)) continue;
+
+                    // 5b. Busca complementos já existentes neste grupo
+                    var compExistentes = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+                    try
+                    {
+                        var compArr = await GetAsync($"{TBL_COMPLEMENTO}?grupo_id=eq.{grupoCompId}&select=id,nome");
+                        foreach (JObject c in compArr)
+                        {
+                            var n  = c["nome"]?.ToString();
+                            var id = c["id"]?.ToString();
+                            if (!string.IsNullOrEmpty(n) && !string.IsNullOrEmpty(id))
+                                compExistentes[n] = id;
+                        }
+                    }
+                    catch { }
+
+                    var nomesNoGrupo = new HashSet<string>(grupoItens.Select(i => i.nome), StringComparer.OrdinalIgnoreCase);
+
+                    // Upsert itens do grupo
+                    foreach (var (nome, preco, _, __) in grupoItens)
+                    {
+                        try
+                        {
+                            if (compExistentes.TryGetValue(nome, out string cId))
+                                await PatchAsync(TBL_COMPLEMENTO, $"id=eq.{cId}", new { nome, preco, ativo = true });
+                            else
+                                await PostAsync(TBL_COMPLEMENTO, new { grupo_id = grupoCompId, nome, preco, ativo = true });
+                        }
+                        catch { }
+                    }
+
+                    // Remove itens que não existem mais no grupo
+                    foreach (var kvComp in compExistentes)
+                        if (!nomesNoGrupo.Contains(kvComp.Key))
+                            try { await DeleteAsync(TBL_COMPLEMENTO, $"id=eq.{kvComp.Value}"); } catch { }
+                }
+
+                // 6. Remove grupos que não existem mais localmente (deleta complementos + grupo)
+                foreach (var kvGrupoOld in gruposExistentes)
+                {
+                    if (gruposUsados.Contains(kvGrupoOld.Key)) continue;
+                    try
+                    {
+                        // Deleta complementos do grupo antes de deletar o grupo
+                        await DeleteAsync(TBL_COMPLEMENTO, $"grupo_id=eq.{kvGrupoOld.Value}");
+                        await DeleteAsync(TBL_COMP_GRUPO, $"id=eq.{kvGrupoOld.Value}");
+                    }
+                    catch { }
                 }
             }
             catch (Exception ex)
