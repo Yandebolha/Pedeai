@@ -1,0 +1,67 @@
+# Como gerar o instalador do RanGoFood
+
+## Pré-requisitos para GERAR o instalador (na sua máquina)
+
+1. **Inno Setup 6** — https://jrsoftware.org/isdl.php
+2. **.NET SDK 5** — https://dotnet.microsoft.com/download/dotnet/5.0
+
+## Passos
+
+### Método fácil (recomendado)
+Clique duas vezes em `gerar_instalador.bat`
+Ele faz tudo automaticamente:
+- Publica o app (`dotnet publish`)
+- Baixa os pré-requisitos (`.NET 5 Runtime` e `MySQL 5.7`)
+- Compila o instalador
+
+O arquivo final fica em: `installer\output\RanGoFood_Instalador_v1.0.exe`
+
+---
+
+### Passo a passo manual
+
+```
+1. Publicar o app:
+   dotnet publish ..\Pedeai.csproj -c Release -r win-x64 --self-contained false
+
+2. Baixar pré-requisitos:
+   powershell -File baixar_prereqs.ps1
+
+3. Compilar o instalador:
+   "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" setup.iss
+```
+
+---
+
+## O que o instalador faz na máquina do cliente
+
+1. Instala o **.NET 5 Desktop Runtime** (se não tiver)
+2. Instala o **MySQL 5.7** (se não tiver) com a senha definida pelo cliente
+3. Copia os arquivos do **RanGoFood**
+4. Atualiza o `App.config` com a senha do MySQL informada
+5. Cria o banco `pedeai` (as tabelas são criadas automaticamente no primeiro run)
+6. Cria atalho na Área de Trabalho e no Menu Iniciar
+
+## Estrutura de arquivos
+
+```
+installer/
+  setup.iss              ← Script principal do instalador (Inno Setup)
+  baixar_prereqs.ps1     ← Baixa .NET 5 e MySQL para a pasta instaladores/
+  gerar_instalador.bat   ← Automatiza tudo (clique duplo para usar)
+  instaladores/          ← Criada pelo baixar_prereqs.ps1
+    dotnet5-runtime-win-x64.exe
+    mysql-installer-community.msi
+  output/                ← Criada pelo Inno Setup
+    RanGoFood_Instalador_v1.0.exe   ← Arquivo final para distribuir
+```
+
+## Observação sobre o MySQL
+
+O site do MySQL exige aceite de licença antes do download automático.
+Se o `baixar_prereqs.ps1` não conseguir baixar o MySQL, faça o download manualmente:
+
+- Acesse: https://dev.mysql.com/downloads/mysql/5.7.html
+- Clique em **"No thanks, just start my download"**
+- Escolha: **Windows (x86, 64-bit), MSI Installer**
+- Salve como: `installer\instaladores\mysql-installer-community.msi`
