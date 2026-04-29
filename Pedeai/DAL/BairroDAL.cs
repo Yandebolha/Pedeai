@@ -7,6 +7,24 @@ namespace Pedeai.DAL
 {
     public class BairroDAL : BaseDAL
     {
+        public void EnsureMigrations()
+        {
+            try
+            {
+                using var conn = AbrirConexao();
+                // Add supabase_uuid column if missing
+                using var chk = new MySqlCommand(
+                    "SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS " +
+                    "WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='bairro' AND COLUMN_NAME='supabase_uuid'", conn);
+                if (Convert.ToInt32(chk.ExecuteScalar()) == 0)
+                {
+                    using var alt = new MySqlCommand(
+                        "ALTER TABLE bairro ADD COLUMN supabase_uuid VARCHAR(64) NULL DEFAULT NULL", conn);
+                    alt.ExecuteNonQuery();
+                }
+            }
+            catch { }
+        }
         public DataTable Listar(bool apenasAtivos = false)
         {
             var dt = new DataTable();

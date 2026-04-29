@@ -19,6 +19,8 @@ namespace Pedeai.BLL
             return obj == null ? (decimal?)null : obj.baiTaxa_Entrega;
         }
 
+        public void EnsureMigrations() => _dal.EnsureMigrations();
+
         public string Salvar(Bairro obj)
         {
             if (string.IsNullOrWhiteSpace(obj.baiNome))

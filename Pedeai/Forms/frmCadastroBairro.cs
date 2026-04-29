@@ -18,7 +18,11 @@ namespace Pedeai.Forms
             InitializeComponent();
             if (System.ComponentModel.LicenseManager.UsageMode == System.ComponentModel.LicenseUsageMode.Designtime) return;
             _bll = new BairroBLL();
-            Load += (_, __) => Carregar();
+            Load += (_, __) =>
+            {
+                _bll.EnsureMigrations();
+                Carregar();
+            };
         }
 
         private void Carregar()
@@ -151,14 +155,15 @@ namespace Pedeai.Forms
             pnlForm.Visible = false;
             _codigoEditando = 0;
             Carregar();
-            // Sync to Supabase in background
-            if (!string.IsNullOrWhiteSpace(obj.baiCEP))
-            {
-                int codSalvo = obj.Codigo > 0 ? obj.Codigo : BuscarCodigoRecem(obj.baiCidade, obj.baiNome);
-                if (codSalvo > 0)
-                    System.Threading.Tasks.Task.Run(async () =>
-                        await DB.SupabaseService.SincronizarBairroAsync(codSalvo));
-            }
+            // Sync to Supabase (always, regardless of CEP)
+            int codSalvo = obj.Codigo > 0 ? obj.Codigo : BuscarCodigoRecem(obj.baiCidade, obj.baiNome);
+            if (codSalvo > 0)
+                System.Threading.Tasks.Task.Run(async () =>
+                {
+                    var erroSync = await DB.SupabaseService.SincronizarBairroAsync(codSalvo);
+                    if (!string.IsNullOrWhiteSpace(erroSync))
+                        Logger.Log("frmCadastroBairro", "Salvar", $"Erro sync bairro {codSalvo}: {erroSync}");
+                });
         }
 
         private int BuscarCodigoRecem(string cidade, string nome)
@@ -178,6 +183,27 @@ namespace Pedeai.Forms
         {
             pnlForm.Visible = false;
             _codigoEditando = 0;
+        }
+
+        private async void BtnSincronizar_Click(object sender, EventArgs e)
+        {
+            btnSincronizar.Enabled = false;
+            btnSincronizar.Text    = "Sincronizando...";
+            try
+            {
+                await System.Threading.Tasks.Task.Run(async () =>
+                    await DB.SupabaseService.SincronizarTodosBairrosAsync());
+                MessageBox.Show("Sincronização concluída!", "Sucesso", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Erro ao sincronizar: " + ex.Message, "Erro", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            finally
+            {
+                btnSincronizar.Enabled = true;
+                btnSincronizar.Text    = "\u2601 Sincronizar Site";
+            }
         }
 
         private void BtnDesativar_Click(object sender, EventArgs e)

@@ -839,15 +839,6 @@ namespace Pedeai.DB
 
                 // ── Sync to `taxa_entrega` (CEP + bairro + cidade + valor) ──────
                 {
-                    string uuid = GetSupabaseUuid("bairro", "Codigo", codigoBairro);
-
-                    if (situacao != "A")
-                    {
-                        if (!string.IsNullOrWhiteSpace(uuid))
-                            await DeleteAsync("taxa_entrega", $"id=eq.{uuid}");
-                        return "";
-                    }
-
                     var payload = new
                     {
                         cep    = string.IsNullOrWhiteSpace(cep) ? (object)null : cep,
@@ -856,14 +847,39 @@ namespace Pedeai.DB
                         valor  = taxa
                     };
 
-                    if (!string.IsNullOrWhiteSpace(uuid))
-                        await PatchAsync("taxa_entrega", $"id=eq.{uuid}", payload);
+                    // Always search by bairro+cidade to avoid stale-UUID issue
+                    // (MySQL may have a UUID that no longer exists in Supabase after table reset)
+                    var nomeEnc   = Uri.EscapeDataString(nome);
+                    var cidadeEnc = Uri.EscapeDataString(cidade);
+                    var existing  = await GetAsync($"taxa_entrega?bairro=eq.{nomeEnc}&cidade=eq.{cidadeEnc}&limit=1");
+
+                    if (situacao != "A")
+                    {
+                        if (existing.Count > 0)
+                        {
+                            var delUuid = existing[0]["id"]?.ToString() ?? "";
+                            if (!string.IsNullOrWhiteSpace(delUuid))
+                                await DeleteAsync("taxa_entrega", $"id=eq.{delUuid}");
+                        }
+                        SaveSupabaseUuid("bairro", "Codigo", codigoBairro, "");
+                        return "";
+                    }
+
+                    if (existing.Count > 0)
+                    {
+                        var uuid = existing[0]["id"]?.ToString() ?? "";
+                        if (!string.IsNullOrWhiteSpace(uuid))
+                        {
+                            await PatchAsync("taxa_entrega", $"id=eq.{uuid}", payload);
+                            SaveSupabaseUuid("bairro", "Codigo", codigoBairro, uuid);
+                        }
+                    }
                     else
                     {
                         var result = await PostAsync("taxa_entrega", payload);
-                        uuid = result?["id"]?.ToString() ?? "";
-                        if (!string.IsNullOrWhiteSpace(uuid))
-                            SaveSupabaseUuid("bairro", "Codigo", codigoBairro, uuid);
+                        var newUuid = result?["id"]?.ToString() ?? "";
+                        if (!string.IsNullOrWhiteSpace(newUuid))
+                            SaveSupabaseUuid("bairro", "Codigo", codigoBairro, newUuid);
                     }
                 }
                 return "";
@@ -882,7 +898,7 @@ namespace Pedeai.DB
                 var codigos = new List<int>();
                 using (var conn = AbrirMysql())
                 using (var cmd  = new MySqlCommand(
-                    "SELECT Codigo FROM bairro WHERE Situacao='A' AND baiCEP IS NOT NULL AND baiCEP <> ''", conn))
+                    "SELECT Codigo FROM bairro WHERE Situacao='A'", conn))
                 {
                     using var r = cmd.ExecuteReader();
                     while (r.Read()) codigos.Add(Convert.ToInt32(r["Codigo"]));
@@ -1291,6 +1307,32 @@ namespace Pedeai.DB
                 if (!string.IsNullOrWhiteSpace(supaPedido.ClienteId))
                     supaCliente = await BuscarClienteSupabaseAsync(supaPedido.ClienteId);
 
+                // Enrich client address from enderecos_salvo (structured fields: cep, bairro, cidade, uf, complemento)
+                if (supaCliente != null && string.IsNullOrWhiteSpace(supaCliente.Endereco))
+                {
+                    try
+                    {
+                        string telBusca = SanitizarTelefone(supaCliente.Telefone ?? "");
+                        if (!string.IsNullOrWhiteSpace(telBusca))
+                        {
+                            var endArr = await GetAsync(
+                                $"enderecos_salvo?whatsapp=eq.{Uri.EscapeDataString(telBusca)}&order=created_at.desc&limit=1");
+                            if (endArr.Count > 0)
+                            {
+                                var e = (JObject)endArr[0];
+                                supaCliente.Endereco    = e["endereco"]?.ToString() ?? "";
+                                supaCliente.Numero      = e["numero"]?.ToString() ?? "";
+                                supaCliente.Complemento = e["complemento"]?.ToString() ?? "";
+                                supaCliente.Bairro      = e["bairro"]?.ToString() ?? "";
+                                supaCliente.Cidade      = e["cidade"]?.ToString() ?? "";
+                                supaCliente.Uf          = e["uf"]?.ToString() ?? "";
+                                supaCliente.Cep         = SanitizarDigitos(e["cep"]?.ToString() ?? "");
+                            }
+                        }
+                    }
+                    catch { }
+                }
+
                 // Find or create local client by CPF
                 int codigoClienteLocal = 0;
                 if (supaCliente != null)
@@ -1650,16 +1692,52 @@ namespace Pedeai.DB
 
         private static (string rua, string numero, string bairro, string cidade) ParseEndereco(string end)
         {
-            // Expected format: "Rua X, 123 - Bairro - Cidade"
+            // Formats produced by the site:
+            // New:  "Rua X, 123 - Complemento - Bairro - Cidade - UF"
+            // New (no compl): "Rua X, 123 - Bairro - Cidade - UF"
+            // Old:  "Rua X, 123 - Bairro, Cidade"
             string rua = "", numero = "", bairro = "", cidade = "";
             if (string.IsNullOrWhiteSpace(end)) return (rua, numero, bairro, cidade);
-            var parts = end.Split('-');
+
+            var parts = end.Split(new[] { " - " }, StringSplitOptions.None);
+
+            // Part 0: "Rua X, 123"
             var ruaPart = parts[0].Trim();
             var comma = ruaPart.LastIndexOf(',');
             if (comma >= 0) { rua = ruaPart.Substring(0, comma).Trim(); numero = ruaPart.Substring(comma + 1).Trim(); }
             else rua = ruaPart;
-            if (parts.Length > 1) bairro = parts[1].Trim();
-            if (parts.Length > 2) cidade = parts[2].Trim();
+
+            if (parts.Length == 2)
+            {
+                // "Rua X, 123 - Bairro, Cidade" (old format)
+                var seg = parts[1].Trim();
+                var ci = seg.IndexOf(',');
+                if (ci >= 0) { bairro = seg.Substring(0, ci).Trim(); cidade = seg.Substring(ci + 1).Trim(); }
+                else bairro = seg;
+            }
+            else if (parts.Length == 3)
+            {
+                // "Rua X, 123 - Bairro - Cidade" or "Rua X, 123 - Complemento - Bairro"
+                bairro = parts[1].Trim();
+                cidade = parts[2].Trim();
+            }
+            else if (parts.Length >= 4)
+            {
+                // "Rua X, 123 - Complemento - Bairro - Cidade" or "- Cidade - UF"
+                // Last part may be UF (2 chars), second-to-last is Cidade, third-to-last is Bairro
+                int last = parts.Length - 1;
+                string possibleUf = parts[last].Trim();
+                if (possibleUf.Length <= 2)
+                {
+                    cidade = parts[last - 1].Trim();
+                    bairro = parts[last - 2].Trim();
+                }
+                else
+                {
+                    cidade = parts[last].Trim();
+                    bairro = parts[last - 1].Trim();
+                }
+            }
             return (rua, numero, bairro, cidade);
         }
 

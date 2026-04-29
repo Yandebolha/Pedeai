@@ -19,6 +19,7 @@ namespace Pedeai.Forms
             this.topBar      = new System.Windows.Forms.Panel();
             this.btnNovo     = new System.Windows.Forms.Button();
             this.btnEditar   = new System.Windows.Forms.Button();
+            this.btnSincronizar = new System.Windows.Forms.Button();
             this.lblBusca    = new System.Windows.Forms.Label();
             this.txtBusca    = new System.Windows.Forms.TextBox();
             this.lblCidFiltro = new System.Windows.Forms.Label();
@@ -72,6 +73,7 @@ namespace Pedeai.Forms
             this.topBar.BackColor = System.Drawing.Color.FromArgb(176, 110, 42);
             this.topBar.Controls.Add(this.btnNovo);
             this.topBar.Controls.Add(this.btnEditar);
+            this.topBar.Controls.Add(this.btnSincronizar);
             this.topBar.Controls.Add(this.lblBusca);
             this.topBar.Controls.Add(this.txtBusca);
             this.topBar.Controls.Add(this.lblCidFiltro);
@@ -104,16 +106,30 @@ namespace Pedeai.Forms
             this.btnEditar.FlatAppearance.BorderSize = 0;
             this.btnEditar.Click += new System.EventHandler(this.BtnEditar_Click);
 
+            // btnSincronizar
+            this.btnSincronizar.Text = "\u2601 Sincronizar Site";
+            this.btnSincronizar.Left = 208;
+            this.btnSincronizar.Top = 8;
+            this.btnSincronizar.Width = 130;
+            this.btnSincronizar.Height = 28;
+            this.btnSincronizar.BackColor = System.Drawing.Color.FromArgb(42, 120, 180);
+            this.btnSincronizar.ForeColor = System.Drawing.Color.White;
+            this.btnSincronizar.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnSincronizar.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
+            this.btnSincronizar.FlatAppearance.BorderSize = 0;
+            this.btnSincronizar.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.btnSincronizar.Click += new System.EventHandler(this.BtnSincronizar_Click);
+
             // lblBusca
             this.lblBusca.Text      = "🔍 Pesquisar bairro:";
-            this.lblBusca.Left      = 218;
+            this.lblBusca.Left      = 350;
             this.lblBusca.Top       = 14;
             this.lblBusca.AutoSize  = true;
             this.lblBusca.Font      = new System.Drawing.Font("Segoe UI", 8.5F);
             this.lblBusca.ForeColor = System.Drawing.Color.White;
 
             // txtBusca
-            this.txtBusca.Left        = 338;
+            this.txtBusca.Left        = 470;
             this.txtBusca.Top         = 10;
             this.txtBusca.Width       = 160;
             this.txtBusca.Height      = 24;
@@ -125,14 +141,14 @@ namespace Pedeai.Forms
 
             // lblCidFiltro
             this.lblCidFiltro.Text      = "Cidade:";
-            this.lblCidFiltro.Left      = 508;
+            this.lblCidFiltro.Left      = 640;
             this.lblCidFiltro.Top       = 14;
             this.lblCidFiltro.AutoSize  = true;
             this.lblCidFiltro.Font      = new System.Drawing.Font("Segoe UI", 8.5F);
             this.lblCidFiltro.ForeColor = System.Drawing.Color.White;
 
             // txtCidFiltro
-            this.txtCidFiltro.Left        = 556;
+            this.txtCidFiltro.Left        = 686;
             this.txtCidFiltro.Top         = 10;
             this.txtCidFiltro.Width       = 120;
             this.txtCidFiltro.Height      = 24;
@@ -143,7 +159,7 @@ namespace Pedeai.Forms
 
             // btnPesquisar
             this.btnPesquisar.Text = "\U0001F50D Pesquisar";
-            this.btnPesquisar.Left = 684;
+            this.btnPesquisar.Left = 814;
             this.btnPesquisar.Top  = 8;
             this.btnPesquisar.Width  = 104;
             this.btnPesquisar.Height = 28;
@@ -312,7 +328,7 @@ namespace Pedeai.Forms
             // Form
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(800, 520);
+            this.ClientSize = new System.Drawing.Size(950, 520);
             this.KeyPreview = true;
             this.Controls.Add(this.grid);
             this.Controls.Add(this.pnlForm);
@@ -328,6 +344,7 @@ namespace Pedeai.Forms
         private System.Windows.Forms.Panel         topBar;
         private System.Windows.Forms.Button        btnNovo;
         private System.Windows.Forms.Button        btnEditar;
+        private System.Windows.Forms.Button        btnSincronizar;
         private System.Windows.Forms.Label         lblBusca;
         private System.Windows.Forms.TextBox       txtBusca;
         private System.Windows.Forms.Label         lblCidFiltro;

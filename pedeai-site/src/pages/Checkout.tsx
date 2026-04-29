@@ -51,7 +51,8 @@ export default function Checkout() {
     numero: '',
     bairro: '',
     complemento: '',
-    cidade: ''
+    cidade: '',
+    uf: ''
   });
 
   // Máscara CEP
@@ -99,6 +100,7 @@ export default function Checkout() {
           endereco: viaCepData.logradouro || prev.endereco,
           bairro: bairroViaCep || prev.bairro,
           cidade: viaCepData.localidade || prev.cidade,
+          uf: viaCepData.uf || prev.uf,
         }));
         // Busca taxa pelo bairro+cidade retornados pelo ViaCEP
         const bairroParaBusca = bairroViaCep || formData.bairro;
@@ -326,20 +328,21 @@ export default function Checkout() {
           .from('enderecos_salvo')
           .insert([{
             whatsapp: rawWhatsapp,
-            cep: formData.cep.replace(/\D/g, ''),
+            cep: formData.cep.replace(/\D/g, '') || null,
             endereco: formData.endereco,
             numero: formData.numero,
             bairro: formData.bairro,
-            complemento: formData.complemento,
-            cidade: formData.cidade
+            complemento: formData.complemento || null,
+            cidade: formData.cidade,
+            uf: formData.uf || null
           }]);
 
         if (addressError) throw addressError;
       }
 
       const addressStr = selectedAddress 
-        ? `${selectedAddress.endereco}, ${selectedAddress.numero}${selectedAddress.complemento ? ` - ${selectedAddress.complemento}` : ''} - ${selectedAddress.bairro}, ${selectedAddress.cidade}`
-        : `${formData.endereco}, ${formData.numero}${formData.complemento ? ` - ${formData.complemento}` : ''} - ${formData.bairro}, ${formData.cidade}`;
+        ? `${selectedAddress.endereco}, ${selectedAddress.numero}${selectedAddress.complemento ? ` - ${selectedAddress.complemento}` : ''} - ${selectedAddress.bairro} - ${selectedAddress.cidade}`
+        : `${formData.endereco}, ${formData.numero}${formData.complemento ? ` - ${formData.complemento}` : ''} - ${formData.bairro} - ${formData.cidade}${formData.uf ? ` - ${formData.uf}` : ''}`;
 
       // 2. Salva o Pedido na tabela pedido_web
       const { data: orderData, error: orderError } = await supabase

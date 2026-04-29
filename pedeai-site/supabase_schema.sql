@@ -236,3 +236,52 @@ CREATE INDEX IF NOT EXISTS idx_adicional_mercadoria ON adicional(mercadoria_id);
 -- RLS para adicional
 ALTER TABLE adicional ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Leitura pública para adicionais" ON adicional FOR SELECT USING (true);
+
+-- ==========================================
+-- MIGRAÇÃO: Bairros e Taxa de Entrega
+-- ==========================================
+
+-- Tabela de taxa de entrega por bairro (sincronizada do desktop)
+CREATE TABLE IF NOT EXISTS taxa_entrega (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  cep TEXT,
+  bairro TEXT,
+  cidade TEXT,
+  valor DECIMAL(10,2) NOT NULL DEFAULT 0,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- RLS
+ALTER TABLE taxa_entrega ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Leitura publica para taxa_entrega" ON taxa_entrega FOR SELECT USING (true);
+
+-- Se a tabela ja existia sem as colunas bairro/cidade, adicione-as:
+ALTER TABLE taxa_entrega ADD COLUMN IF NOT EXISTS bairro TEXT;
+ALTER TABLE taxa_entrega ADD COLUMN IF NOT EXISTS cidade TEXT;
+
+-- ==========================================
+-- MIGRAÇÃO: Enderecos Salvos - UF
+-- ==========================================
+ALTER TABLE enderecos_salvo ADD COLUMN IF NOT EXISTS uf VARCHAR(2);
+
+
+-- ==========================================
+-- MIGRACAO: Bairros e Taxa de Entrega
+-- ==========================================
+
+CREATE TABLE IF NOT EXISTS taxa_entrega (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  cep TEXT,
+  bairro TEXT,
+  cidade TEXT,
+  valor DECIMAL(10,2) NOT NULL DEFAULT 0,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+ALTER TABLE taxa_entrega ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Leitura publica para taxa_entrega" ON taxa_entrega FOR SELECT USING (true);
+ALTER TABLE taxa_entrega ADD COLUMN IF NOT EXISTS bairro TEXT;
+ALTER TABLE taxa_entrega ADD COLUMN IF NOT EXISTS cidade TEXT;
+
+-- MIGRACAO: Enderecos Salvos - UF
+ALTER TABLE enderecos_salvo ADD COLUMN IF NOT EXISTS uf VARCHAR(2);
