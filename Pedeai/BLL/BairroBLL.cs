@@ -24,6 +24,18 @@ namespace Pedeai.BLL
             if (string.IsNullOrWhiteSpace(obj.baiNome))
                 return "O nome do bairro é obrigatório.";
 
+            // Impede CEP duplicado
+            if (!string.IsNullOrWhiteSpace(obj.baiCEP))
+            {
+                int codDup = _dal.CepJaCadastrado(obj.baiCEP, obj.Codigo);
+                if (codDup > 0)
+                {
+                    var dup = _dal.PesquisaCodigo(codDup);
+                    string info = dup != null ? $" ({dup.baiNome} - {dup.baiCidade})" : "";
+                    return $"Este CEP já está cadastrado em outro bairro{info}.";
+                }
+            }
+
             if (obj.Codigo == 0)
                 return _dal.Incluir(obj);
             else

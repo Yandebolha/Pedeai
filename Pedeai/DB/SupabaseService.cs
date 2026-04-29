@@ -837,8 +837,7 @@ namespace Pedeai.DB
                 }
                 catch { } // non-critical — taxa_entrega sync below is the primary delivery fee store
 
-                // ── Sync CEP-based delivery fee to `taxa_entrega` ──────────────
-                if (!string.IsNullOrWhiteSpace(cep))
+                // ── Sync to `taxa_entrega` (CEP + bairro + cidade + valor) ──────
                 {
                     string uuid = GetSupabaseUuid("bairro", "Codigo", codigoBairro);
 
@@ -849,7 +848,13 @@ namespace Pedeai.DB
                         return "";
                     }
 
-                    var payload = new { cep, valor = taxa };
+                    var payload = new
+                    {
+                        cep    = string.IsNullOrWhiteSpace(cep) ? (object)null : cep,
+                        bairro = nome,
+                        cidade = cidade,
+                        valor  = taxa
+                    };
 
                     if (!string.IsNullOrWhiteSpace(uuid))
                         await PatchAsync("taxa_entrega", $"id=eq.{uuid}", payload);
@@ -982,6 +987,47 @@ namespace Pedeai.DB
 
                 foreach (JObject item in arr)
                 {
+                    // Build readable obs from complementos_json + adicionais_json
+                    var obsBuilder = new System.Text.StringBuilder();
+                    var obsBase = (item["observacao"] ?? item["obs"])?.ToString() ?? "";
+                    try
+                    {
+                        var compJson = item["complementos_json"];
+                        if (compJson != null && compJson.Type != Newtonsoft.Json.Linq.JTokenType.Null)
+                        {
+                            var compArr = compJson as Newtonsoft.Json.Linq.JArray
+                                ?? Newtonsoft.Json.Linq.JArray.Parse(compJson.ToString());
+                            foreach (JObject c in compArr)
+                            {
+                                var grpNome  = c["grupoNome"]?.ToString() ?? c["grupo_nome"]?.ToString() ?? "";
+                                var itemNome = c["itemNome"]?.ToString()  ?? c["item_nome"]?.ToString()  ?? "";
+                                if (!string.IsNullOrWhiteSpace(itemNome))
+                                    obsBuilder.AppendLine($"{grpNome}: {itemNome}");
+                            }
+                        }
+                    }
+                    catch { }
+                    try
+                    {
+                        var adicJson = item["adicionais_json"];
+                        if (adicJson != null && adicJson.Type != Newtonsoft.Json.Linq.JTokenType.Null)
+                        {
+                            var adicArr = adicJson as Newtonsoft.Json.Linq.JArray
+                                ?? Newtonsoft.Json.Linq.JArray.Parse(adicJson.ToString());
+                            foreach (JObject a in adicArr)
+                            {
+                                var nome = a["nome"]?.ToString() ?? "";
+                                var qty  = a["quantity"]?.ToObject<int>() ?? 1;
+                                if (!string.IsNullOrWhiteSpace(nome))
+                                    obsBuilder.AppendLine($"+ {(qty > 1 ? qty + "x " : "")}{nome}");
+                            }
+                        }
+                    }
+                    catch { }
+                    string obsComposta = obsBuilder.ToString().TrimEnd();
+                    if (!string.IsNullOrWhiteSpace(obsBase))
+                        obsComposta = string.IsNullOrWhiteSpace(obsComposta) ? obsBase : obsBase + "\n" + obsComposta;
+
                     result.Add(new ItemPedidoWebSupabase
                     {
                         Id            = item["id"]?.ToString()              ?? "",
@@ -989,7 +1035,7 @@ namespace Pedeai.DB
                         MercadoriaId  = (item["mercadoria_id"] ?? item["produto_id"])?.ToString() ?? "",
                         Quantidade    = (item["quantidade"] ?? item["qtde"])?.ToObject<decimal>()    ?? 1m,
                         PrecoUnitario = (item["preco_unitario"] ?? item["preco"])?.ToObject<decimal>() ?? 0m,
-                        Observacao    = (item["observacao"] ?? item["obs"])?.ToString()      ?? "",
+                        Observacao    = obsComposta,
                     });
                 }
             }
@@ -1361,17 +1407,35 @@ namespace Pedeai.DB
                     RegistrarUsoCupomLocal(supaPedido.CupomId);
 
                 // Send WhatsApp confirmation to client
-                string telWpp = supaCliente?.Telefone ?? supaPedido.EnderecoEntrega ?? "";
-                if (string.IsNullOrWhiteSpace(telWpp))
+                // Priority: 1) client phone from Supabase cliente table
+                //           2) enderecos_salvo.whatsapp filtered by cliente_id
+                //           3) local MySQL client phone
+                string telWpp = SanitizarTelefone(supaCliente?.Telefone ?? "");
+                if (string.IsNullOrWhiteSpace(telWpp) && !string.IsNullOrWhiteSpace(supaPedido.ClienteId))
                 {
-                    // Try to load from local DB
+                    // enderecos_salvo stores whatsapp = customer phone, linked by same clienteId
+                    try
+                    {
+                        // enderecos_salvo has whatsapp col = phone; no direct cliente_id FK,
+                        // but the phone used on the site is the same as whatsapp field
+                        // Try fetching from cliente table directly with telefone field
+                        var cliArr = await GetAsync(
+                            $"cliente?id=eq.{Uri.EscapeDataString(supaPedido.ClienteId)}&select=telefone&limit=1");
+                        if (cliArr.Count > 0)
+                            telWpp = SanitizarTelefone(((JObject)cliArr[0])["telefone"]?.ToString() ?? "");
+                    }
+                    catch { }
+                }
+                if (string.IsNullOrWhiteSpace(telWpp) && codigoClienteLocal > 0)
+                {
+                    // Try to load from local MySQL
                     try
                     {
                         using var cW = AbrirMysql();
                         using var cCmd = new MySqlCommand(
-                            "SELECT COALESCE(clieCelular,'') FROM cliente WHERE Codigo=@c LIMIT 1", cW);
+                            "SELECT COALESCE(clieCelular, clieTelefone, '') FROM cliente WHERE Codigo=@c LIMIT 1", cW);
                         cCmd.Parameters.AddWithValue("@c", codigoClienteLocal);
-                        telWpp = cCmd.ExecuteScalar()?.ToString() ?? "";
+                        telWpp = SanitizarTelefone(cCmd.ExecuteScalar()?.ToString() ?? "");
                     }
                     catch { }
                 }

@@ -220,9 +220,25 @@ namespace Pedeai.BLL
                     linhas.Add(descLinha);
                 }
 
-                // Observação regular (não ingredientes de marmita)
+                // Observação regular (não ingredientes de marmita) — pode ter \n (complementos)
                 if (!string.IsNullOrWhiteSpace(item.itpwObservacoes) && !temIngredientes)
-                    linhas.Add("§S§  Obs: " + item.itpwObservacoes);
+                {
+                    var obsLinhas = item.itpwObservacoes
+                        .Split(new[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
+                    if (obsLinhas.Length == 1)
+                    {
+                        linhas.Add("§S§  Obs: " + obsLinhas[0].Trim());
+                    }
+                    else
+                    {
+                        foreach (var ol in obsLinhas)
+                        {
+                            string t = ol.Trim();
+                            if (!string.IsNullOrEmpty(t))
+                                linhas.Add("§S§  " + t);
+                        }
+                    }
+                }
             }
 
             linhas.Add(linha);

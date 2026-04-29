@@ -90,6 +90,7 @@ export interface Database {
           numero: string | null
           complemento: string | null
           cidade: string | null
+          cep: string | null
           created_at: string
         }
       }

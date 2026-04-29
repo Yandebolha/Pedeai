@@ -43,6 +43,20 @@ namespace Pedeai.DAL
             return Mapear(r);
         }
 
+        /// <summary>Retorna o Codigo do bairro que já usa esse CEP, excluindo o próprio registro.</summary>
+        public int CepJaCadastrado(string cep, int codigoAtual = 0)
+        {
+            if (string.IsNullOrWhiteSpace(cep)) return 0;
+            var cepLimpo = cep.Replace("-", "").Trim();
+            using var conn = AbrirConexao();
+            using var cmd = new MySqlCommand(
+                "SELECT Codigo FROM bairro WHERE REPLACE(baiCEP,'-','')=@cep AND Codigo<>@cod LIMIT 1", conn);
+            cmd.Parameters.AddWithValue("@cep", cepLimpo);
+            cmd.Parameters.AddWithValue("@cod", codigoAtual);
+            var res = cmd.ExecuteScalar();
+            return res == null || res == System.DBNull.Value ? 0 : Convert.ToInt32(res);
+        }
+
         public string Incluir(Bairro obj)
         {
             try

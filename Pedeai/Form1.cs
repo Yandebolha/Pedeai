@@ -146,6 +146,7 @@ namespace Pedeai
         private Button _btnSaiu;
         private Button _btnEntregue;
         private Button _btnCancelar;
+        private Button _btnReimprimir;
 
         // --------------------------------------------------------------------
         // DASHBOARD
@@ -900,6 +901,28 @@ namespace Pedeai
             _btnEntregue  = MkBtn("\u2713 Entregue",       Color.FromArgb(22, 160, 133), 5);
             _btnCancelar  = MkBtn("\u2715 Cancelar",           Color.FromArgb(192, 57, 43),  6);
 
+            // Botao reimprimir (separado do MkBtn pois nao muda situacao)
+            _btnReimprimir = new Button
+            {
+                Text      = "\uD83D\uDDC8 Reimprimir",
+                Width     = 128,
+                Height    = 30,
+                BackColor = Color.FromArgb(100, 100, 100),
+                ForeColor = Color.White,
+                FlatStyle = FlatStyle.Flat,
+                Margin    = new Padding(0, 4, 8, 0),
+                Cursor    = Cursors.Hand,
+                Visible   = false
+            };
+            _btnReimprimir.FlatAppearance.BorderSize = 0;
+            _btnReimprimir.Click += (_, __) =>
+            {
+                if (gridPedidos?.SelectedRows.Count > 0)
+                    try { ImprimirCupomPedido(Convert.ToInt32(gridPedidos.SelectedRows[0].Cells["Codigo"].Value)); }
+                    catch (Exception ex) { MessageBox.Show("Erro: " + ex.Message); }
+            };
+            pnlAcoes.Controls.Add(_btnReimprimir);
+
             // Main grid
             var gridMain = CriarGrid();
             gridMain.Dock = DockStyle.Fill;
@@ -1141,6 +1164,7 @@ namespace Pedeai
                 {
                     _btnConfirmar.Visible = _btnEmPreparo.Visible = _btnPronto.Visible =
                         _btnSaiu.Visible = _btnEntregue.Visible = _btnCancelar.Visible = false;
+                    if (_btnReimprimir != null) _btnReimprimir.Visible = false;
                 }
                 return;
             }
@@ -1160,6 +1184,7 @@ namespace Pedeai
                 _btnSaiu.Visible      = !retirada && !terminal;
                 _btnEntregue.Visible  = !terminal;   // visível para retirada e entrega
                 _btnCancelar.Visible  = !terminal;
+                if (_btnReimprimir != null) _btnReimprimir.Visible = true;
             }
             catch { }
         }

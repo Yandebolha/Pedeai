@@ -32,6 +32,7 @@ export default function Checkout() {
   });
   const [showSummary, setShowSummary] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [bairroTaxa, setBairroTaxa] = useState<number | null>(null); // taxa pelo bairro cadastrado
 
   // Busca dados da loja para taxa de entrega e telefone
   const { data: store } = useQuery({
@@ -45,12 +46,67 @@ export default function Checkout() {
 
   // Estado para novo endereço
   const [formData, setFormData] = useState({
+    cep: '',
     endereco: '',
     numero: '',
     bairro: '',
     complemento: '',
     cidade: ''
   });
+
+  // Máscara CEP
+  const formatCep = (value: string) => {
+    const nums = value.replace(/\D/g, '').slice(0, 8);
+    if (nums.length <= 5) return nums;
+    return `${nums.slice(0, 5)}-${nums.slice(5)}`;
+  };
+
+  // Sempre que o endereço selecionado mudar, busca a taxa correspondente
+  useEffect(() => {
+    if (selectedAddress?.bairro) {
+      buscarTaxaPorBairro(selectedAddress.bairro, selectedAddress.cidade ?? undefined);
+    } else {
+      setBairroTaxa(null);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedAddress?.id]);
+
+  // Busca taxa de entrega pelo bairro e cidade na tabela taxa_entrega
+  const buscarTaxaPorBairro = async (nomeBairro: string, nomeCidade?: string) => {
+    const bairro = nomeBairro.trim();
+    if (!bairro) { setBairroTaxa(null); return; }
+    try {
+      const cidade = nomeCidade?.trim() ?? '';
+      const { data } = cidade
+        ? await supabase.from('taxa_entrega').select('valor').ilike('bairro', bairro).ilike('cidade', cidade).limit(1)
+        : await supabase.from('taxa_entrega').select('valor').ilike('bairro', bairro).limit(1);
+      const raw = data && data.length > 0 ? Number(data[0].valor) : NaN;
+      setBairroTaxa(isNaN(raw) ? null : raw);
+    } catch { setBairroTaxa(null); }
+  };
+
+  // Auto-preenchimento via ViaCEP
+  const handleCepBlur = async () => {
+    const cep = formData.cep.replace(/\D/g, '');
+    if (cep.length !== 8) return;
+    try {
+      const res = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+      const viaCepData = await res.json();
+      if (!viaCepData.erro) {
+        const bairroViaCep = viaCepData.bairro || '';
+        setFormData(prev => ({
+          ...prev,
+          endereco: viaCepData.logradouro || prev.endereco,
+          bairro: bairroViaCep || prev.bairro,
+          cidade: viaCepData.localidade || prev.cidade,
+        }));
+        // Busca taxa pelo bairro+cidade retornados pelo ViaCEP
+        const bairroParaBusca = bairroViaCep || formData.bairro;
+        const cidadeParaBusca = viaCepData.localidade || formData.cidade;
+        if (bairroParaBusca) await buscarTaxaPorBairro(bairroParaBusca, cidadeParaBusca);
+      }
+    } catch {}
+  };
 
   // Função de Máscara de WhatsApp
   const formatWhatsApp = (value: string) => {
@@ -85,7 +141,7 @@ export default function Checkout() {
       // 1. Busca se o cliente já existe
       const { data: clientData } = await supabase
         .from('cliente')
-        .select('*')
+        .select('id, nome, telefone, cpf_cnpj')
         .eq('telefone', rawWhatsapp)
         .maybeSingle();
 
@@ -100,12 +156,12 @@ export default function Checkout() {
       // 2. Busca endereços vinculados a este WhatsApp
       const { data: addressData } = await supabase
         .from('enderecos_salvo')
-        .select('*')
+        .select('id, whatsapp, endereco, numero, bairro, complemento, cidade, cep, created_at')
         .eq('whatsapp', rawWhatsapp);
 
       if (addressData && addressData.length > 0) {
-        setAddressesFound(addressData);
-        setSelectedAddress(addressData[0]);
+        setAddressesFound(addressData as EnderecoSalvo[]);
+        setSelectedAddress(addressData[0] as EnderecoSalvo);
         setShowAddressForm(false);
       } else {
         setAddressesFound([]);
@@ -114,6 +170,11 @@ export default function Checkout() {
       }
     } catch (error) {
       console.error('Erro ao buscar dados:', error);
+      setClientFound(null);
+      setShowClientForm(true);
+      setAddressesFound([]);
+      setSelectedAddress(null);
+      setShowAddressForm(true);
     } finally {
       setLoading(false);
     }
@@ -152,6 +213,43 @@ export default function Checkout() {
     }
   };
 
+  const handleSaveNewAddress = async () => {
+    const rawWhatsapp = whatsapp.replace(/\D/g, '');
+    if (!formData.endereco || !formData.numero || !formData.bairro || !formData.cidade) {
+      alert('Preencha pelo menos rua, número, bairro e cidade.');
+      return;
+    }
+    setLoading(true);
+    try {
+      const { data: savedAddr, error } = await supabase
+        .from('enderecos_salvo')
+        .insert([{
+          whatsapp: rawWhatsapp,
+          cep: formData.cep.replace(/\D/g, '') || null,
+          endereco: formData.endereco,
+          numero: formData.numero,
+          bairro: formData.bairro,
+          complemento: formData.complemento || null,
+          cidade: formData.cidade
+        }])
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      setAddressesFound(prev => [...prev, savedAddr as EnderecoSalvo]);
+      setSelectedAddress(savedAddr as EnderecoSalvo);
+      setShowAddressForm(false);
+      if ((savedAddr as EnderecoSalvo).bairro) {
+        buscarTaxaPorBairro((savedAddr as EnderecoSalvo).bairro!, (savedAddr as EnderecoSalvo).cidade ?? undefined);
+      }
+    } catch (err: any) {
+      alert('Erro ao salvar endereço: ' + err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleApplyCoupon = async () => {
     if (!couponCode.trim()) return;
 
@@ -185,7 +283,7 @@ export default function Checkout() {
 
       setAppliedCoupon({
         id: data.id,
-        valor: data.valor,
+        valor: Number(data.valor),
         tipo: data.tipo as 'fixo' | 'porcentagem',
         codigo: data.codigo
       });
@@ -196,7 +294,7 @@ export default function Checkout() {
     }
   };
 
-  const deliveryFee = store?.taxa_entrega || 0;
+  const deliveryFee = bairroTaxa !== null ? bairroTaxa : Number(store?.taxa_entrega ?? 0);
   const discountValue = appliedCoupon?.tipo === 'porcentagem' ? (cartTotal * appliedCoupon.valor / 100) : (appliedCoupon?.valor || 0);
   const totalOrder = Math.max(0, cartTotal + deliveryFee - discountValue);
 
@@ -223,11 +321,12 @@ export default function Checkout() {
       }
 
       // 1. Salva o endereço se for um novo cadastro
-      if (showAddressForm) {
+        if (showAddressForm) {
         const { error: addressError } = await supabase
           .from('enderecos_salvo')
           .insert([{
             whatsapp: rawWhatsapp,
+            cep: formData.cep.replace(/\D/g, ''),
             endereco: formData.endereco,
             numero: formData.numero,
             bairro: formData.bairro,
@@ -239,8 +338,8 @@ export default function Checkout() {
       }
 
       const addressStr = selectedAddress 
-        ? `${selectedAddress.endereco}, ${selectedAddress.numero} - ${selectedAddress.bairro}`
-        : `${formData.endereco}, ${formData.numero} - ${formData.bairro}`;
+        ? `${selectedAddress.endereco}, ${selectedAddress.numero}${selectedAddress.complemento ? ` - ${selectedAddress.complemento}` : ''} - ${selectedAddress.bairro}, ${selectedAddress.cidade}`
+        : `${formData.endereco}, ${formData.numero}${formData.complemento ? ` - ${formData.complemento}` : ''} - ${formData.bairro}, ${formData.cidade}`;
 
       // 2. Salva o Pedido na tabela pedido_web
       const { data: orderData, error: orderError } = await supabase
@@ -424,7 +523,11 @@ export default function Checkout() {
             {addressesFound.map((addr) => (
               <div 
                 key={addr.id}
-                onClick={() => setSelectedAddress(addr)}
+                onClick={() => {
+                  setSelectedAddress(addr);
+                  if (addr.bairro) buscarTaxaPorBairro(addr.bairro, addr.cidade ?? undefined);
+                  else setBairroTaxa(null);
+                }}
                 className={`p-4 rounded-2xl cursor-pointer transition-all border-2 ${
                   selectedAddress?.id === addr.id 
                     ? 'border-green-500 bg-green-50 shadow-md' 
@@ -432,8 +535,8 @@ export default function Checkout() {
                 }`}
               >
                 <p className="text-gray-700 font-medium">
-                  {addr.endereco}, {addr.numero}<br />
-                  <span className="text-sm text-gray-500">{addr.bairro} - {addr.cidade}</span>
+                  {addr.endereco}, {addr.numero}{addr.complemento ? ` - ${addr.complemento}` : ''}<br />
+                  <span className="text-sm text-gray-500">{addr.bairro} - {addr.cidade}{addr.cep ? ` · CEP ${addr.cep}` : ''}</span>
                 </p>
               </div>
             ))}
@@ -450,37 +553,80 @@ export default function Checkout() {
             </div>
 
             <div className="grid grid-cols-4 gap-3">
-              <input
-                placeholder="Rua / Logradouro"
-                className="col-span-3 bg-gray-50 border-gray-200 rounded-xl py-3 px-4 outline-none focus:ring-2 focus:ring-red-500"
-                value={formData.endereco}
-                onChange={(e) => setFormData({...formData, endereco: e.target.value})}
-              />
-              <input
-                placeholder="Nº"
-                className="col-span-1 bg-gray-50 border-gray-200 rounded-xl py-3 px-4 outline-none focus:ring-2 focus:ring-red-500"
-                value={formData.numero}
-                onChange={(e) => setFormData({...formData, numero: e.target.value})}
-              />
-              <input
-                placeholder="Bairro"
-                className="col-span-2 bg-gray-50 border-gray-200 rounded-xl py-3 px-4 outline-none focus:ring-2 focus:ring-red-500"
-                value={formData.bairro}
-                onChange={(e) => setFormData({...formData, bairro: e.target.value})}
-              />
-              <input
-                placeholder="Cidade"
-                className="col-span-2 bg-gray-50 border-gray-200 rounded-xl py-3 px-4 outline-none focus:ring-2 focus:ring-red-500"
-                value={formData.cidade}
-                onChange={(e) => setFormData({...formData, cidade: e.target.value})}
-              />
-              <input
-                placeholder="Complemento"
-                className="col-span-4 bg-gray-50 border-gray-200 rounded-xl py-3 px-4 outline-none focus:ring-2 focus:ring-red-500"
-                value={formData.complemento}
-                onChange={(e) => setFormData({...formData, complemento: e.target.value})}
-              />
+              <div className="col-span-2 space-y-1">
+                <label className="text-xs font-bold text-gray-400 uppercase ml-1">CEP</label>
+                <input
+                  placeholder="00000-000"
+                  className="w-full bg-gray-50 border-gray-200 rounded-xl py-3 px-4 outline-none focus:ring-2 focus:ring-red-500"
+                  value={formData.cep}
+                  onChange={(e) => setFormData({...formData, cep: formatCep(e.target.value)})}
+                  onBlur={handleCepBlur}
+                  maxLength={9}
+                />
+              </div>
+              <div className="col-span-3 space-y-1">
+                <label className="text-xs font-bold text-gray-400 uppercase ml-1">Rua / Logradouro</label>
+                <input
+                  placeholder="Rua / Logradouro"
+                  className="w-full bg-gray-50 border-gray-200 rounded-xl py-3 px-4 outline-none focus:ring-2 focus:ring-red-500"
+                  value={formData.endereco}
+                  onChange={(e) => setFormData({...formData, endereco: e.target.value})}
+                />
+              </div>
+              <div className="col-span-1 space-y-1">
+                <label className="text-xs font-bold text-gray-400 uppercase ml-1">Nº</label>
+                <input
+                  placeholder="Nº"
+                  className="w-full bg-gray-50 border-gray-200 rounded-xl py-3 px-4 outline-none focus:ring-2 focus:ring-red-500"
+                  value={formData.numero}
+                  onChange={(e) => setFormData({...formData, numero: e.target.value})}
+                />
+              </div>
+              <div className="col-span-2 space-y-1">
+                <label className="text-xs font-bold text-gray-400 uppercase ml-1">Bairro</label>
+                <input
+                  placeholder="Bairro"
+                  className="w-full bg-gray-50 border-gray-200 rounded-xl py-3 px-4 outline-none focus:ring-2 focus:ring-red-500"
+                  value={formData.bairro}
+                  onChange={(e) => setFormData({...formData, bairro: e.target.value})}
+                  onBlur={() => buscarTaxaPorBairro(formData.bairro, formData.cidade)}
+                />
+              </div>
+              <div className="col-span-2 space-y-1">
+                <label className="text-xs font-bold text-gray-400 uppercase ml-1">Cidade</label>
+                <input
+                  placeholder="Cidade"
+                  className="w-full bg-gray-50 border-gray-200 rounded-xl py-3 px-4 outline-none focus:ring-2 focus:ring-red-500"
+                  value={formData.cidade}
+                  onChange={(e) => setFormData({...formData, cidade: e.target.value})}
+                />
+              </div>
+              <div className="col-span-4 space-y-1">
+                <label className="text-xs font-bold text-gray-400 uppercase ml-1">Complemento</label>
+                <input
+                  placeholder="Apto, bloco, referência... (opcional)"
+                  className="w-full bg-gray-50 border-gray-200 rounded-xl py-3 px-4 outline-none focus:ring-2 focus:ring-red-500"
+                  value={formData.complemento}
+                  onChange={(e) => setFormData({...formData, complemento: e.target.value})}
+                />
+              </div>
             </div>
+
+            {bairroTaxa !== null && (
+              <div className="flex items-center justify-between px-4 py-3 bg-green-50 rounded-xl border border-green-200">
+                <span className="text-sm font-medium text-green-800">Taxa para este bairro:</span>
+                <span className="text-sm font-bold text-green-700">R$ {bairroTaxa.toFixed(2)}</span>
+              </div>
+            )}
+
+            <button
+              onClick={handleSaveNewAddress}
+              disabled={loading || !formData.endereco || !formData.numero || !formData.bairro || !formData.cidade}
+              className="w-full bg-red-600 text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2 disabled:opacity-50 transition-all active:scale-[0.98]"
+            >
+              {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />}
+              Salvar Endereço
+            </button>
           </div>
         )}
 
@@ -562,9 +708,19 @@ export default function Checkout() {
         {/* Summary */}
         <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
           <h2 className="font-bold text-gray-800 mb-4">Resumo do Pagamento</h2>
-          <div className="flex items-center justify-between p-3 bg-gray-50 rounded-xl border border-dashed border-gray-200">
-             <span className="text-sm text-gray-600 font-medium">Forma selecionada:</span>
-             <span className="text-sm font-bold text-red-600">{paymentMethod?.nome || 'Não selecionada'}</span>
+          <div className="space-y-2">
+            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-xl border border-dashed border-gray-200">
+              <span className="text-sm text-gray-600 font-medium">Forma selecionada:</span>
+              <span className="text-sm font-bold text-red-600">{paymentMethod?.nome || 'Não selecionada'}</span>
+            </div>
+            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-xl border border-dashed border-gray-200">
+              <span className="text-sm text-gray-600 font-medium">
+                Taxa de entrega{bairroTaxa !== null ? ' (pelo bairro)' : ''}:
+              </span>
+              <span className={`text-sm font-bold ${deliveryFee === 0 ? 'text-green-600' : 'text-gray-800'}`}>
+                {!deliveryFee || isNaN(deliveryFee) ? 'Grátis' : `R$ ${deliveryFee.toFixed(2)}`}
+              </span>
+            </div>
           </div>
         </div>
       </main>
@@ -695,7 +851,7 @@ export default function Checkout() {
                     </div>
                     <div className="flex justify-between text-sm text-gray-600">
                       <span>Taxa de entrega</span>
-                      <span>R$ {deliveryFee.toFixed(2)}</span>
+                      <span>{!deliveryFee || isNaN(deliveryFee) ? 'Grátis' : `R$ ${deliveryFee.toFixed(2)}`}</span>
                     </div>
                     {appliedCoupon && (
                       <div className="flex justify-between text-sm text-green-600 font-medium">
