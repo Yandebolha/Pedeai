@@ -326,9 +326,10 @@ export default function Checkout() {
           item.product.nome.toLowerCase().trim() === nomePremio
         );
         if (itemPremio) {
+          // Desconta apenas 1 unidade do produto prêmio, independente da quantidade no carrinho
           const precoItem = (itemPremio.product.preco_promocional || itemPremio.product.preco_venda)
             + itemPremio.adicionais.reduce((a, ad) => a + ad.preco * ad.quantity, 0);
-          return precoItem * itemPremio.quantity;
+          return precoItem;
         }
       }
       // Fallback: usa o valor armazenado no cupão
@@ -464,7 +465,7 @@ export default function Checkout() {
 
       // 4. Incrementa usos_realizados do cupom (não bloqueia o fluxo se falhar)
       if (appliedCoupon?.id) {
-        try { await supabase.rpc('increment_cupom_uso', { cupom_id: appliedCoupon.id }); } catch { }
+        try { await (supabase as any).rpc('increment_cupom_uso', { cupom_id: appliedCoupon.id }); } catch { }
       }
 
       // 5. Fluxo de Sucesso

@@ -1163,6 +1163,7 @@ namespace Pedeai.DB
                     limite_usos     = limiteUsos,
                     usos_realizados = usosRealizados,
                     produto_nome    = produtoNome,
+                    empresa_codigo  = UsarEmpresaCodigo ? _empresaCodigo : (string)null,
                 };
 
                 // Verifica se já existe no Supabase pelo código
