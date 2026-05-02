@@ -31,12 +31,25 @@ namespace Pedeai.DAL
                 empVersao_Atual      = TryGet(r, "empVersao_Atual"),
                 empMax_Maquinas      = TryGetInt(r, "empMax_Maquinas", 0),
                 empImgBBKey          = TryGet(r, "empImgBBKey"),
+                empLogo_Url          = TryGet(r, "empLogo_Url"),
+                empHabilitar_Site     = TryGetBool(r, "empHabilitar_Site", true),
             };
         }
 
         private static string TryGet(MySqlDataReader r, string col)
         {
             try { return r[col]?.ToString() ?? ""; } catch { return ""; }
+        }
+
+        private static bool TryGetBool(MySqlDataReader r, string col, bool def)
+        {
+            try
+            {
+                var v = r[col];
+                if (v == null || v == DBNull.Value) return def;
+                return Convert.ToBoolean(v);
+            }
+            catch { return def; }
         }
 
         private static int TryGetInt(MySqlDataReader r, string col, int def)
@@ -76,8 +89,8 @@ namespace Pedeai.DAL
                 {
                     if (obj.Codigo <= 0) obj.Codigo = 1;
                     const string ins = @"
-                        INSERT INTO empresa (Codigo,empNome,empNome_Fantasia,empCNPJ,empTelefone,empEmail,empEndereco,Info,empImgBBKey)
-                        VALUES(@cod,@nome,@fant,@cnpj,@tel,@email,@end,@info,@imgbb)";
+                        INSERT INTO empresa (Codigo,empNome,empNome_Fantasia,empCNPJ,empTelefone,empEmail,empEndereco,Info,empImgBBKey,empLogo_Url,empHabilitar_Site)
+                        VALUES(@cod,@nome,@fant,@cnpj,@tel,@email,@end,@info,@imgbb,@logo,@habsite)";
                     using var ins2 = new MySqlCommand(ins, conn);
                     ins2.Parameters.AddWithValue("@cod",   obj.Codigo);
                     ins2.Parameters.AddWithValue("@nome",  obj.empNome);
@@ -88,6 +101,8 @@ namespace Pedeai.DAL
                     ins2.Parameters.AddWithValue("@end",   obj.empEndereco ?? "");
                     ins2.Parameters.AddWithValue("@info",  obj.Info ?? "");
                     ins2.Parameters.AddWithValue("@imgbb", obj.empImgBBKey ?? "");
+                    ins2.Parameters.AddWithValue("@logo",  obj.empLogo_Url ?? "");
+                    ins2.Parameters.AddWithValue("@habsite", obj.empHabilitar_Site ? 1 : 0);
                     ins2.ExecuteNonQuery();
                 }
                 else
@@ -95,7 +110,7 @@ namespace Pedeai.DAL
                     const string upd = @"
                         UPDATE empresa SET empNome=@nome,empNome_Fantasia=@fant,empCNPJ=@cnpj,
                             empTelefone=@tel,empEmail=@email,empEndereco=@end,Info=@info,
-                            empImgBBKey=@imgbb
+                            empImgBBKey=@imgbb, empLogo_Url=@logo, empHabilitar_Site=@habsite
                         WHERE Codigo=@cod";
                     using var upd2 = new MySqlCommand(upd, conn);
                     upd2.Parameters.AddWithValue("@nome",  obj.empNome);
@@ -106,6 +121,8 @@ namespace Pedeai.DAL
                     upd2.Parameters.AddWithValue("@end",   obj.empEndereco ?? "");
                     upd2.Parameters.AddWithValue("@info",  obj.Info ?? "");
                     upd2.Parameters.AddWithValue("@imgbb", obj.empImgBBKey ?? "");
+                    upd2.Parameters.AddWithValue("@logo",  obj.empLogo_Url ?? "");
+                    upd2.Parameters.AddWithValue("@habsite", obj.empHabilitar_Site ? 1 : 0);
                     upd2.Parameters.AddWithValue("@cod",   obj.Codigo);
                     upd2.ExecuteNonQuery();
                 }

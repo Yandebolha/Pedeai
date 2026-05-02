@@ -24,5 +24,12 @@ namespace Pedeai.Modelo
         public int empMax_Maquinas { get; set; } = 0;
         /// <summary>Chave de API do ImgBB para hospedagem de imagens de produtos, marmitas e categorias.</summary>
         public string empImgBBKey { get; set; } = "";
+        /// <summary>URL da logo da empresa exibida no site.</summary>
+        public string empLogo_Url { get; set; } = "";
+        /// <summary>
+        /// Quando false, o sistema não se conecta ao site: desabilita sincronização, polling de pedidos
+        /// e qualquer outra integração com o Supabase. Visível e editável apenas pelo Administrador.
+        /// </summary>
+        public bool empHabilitar_Site { get; set; } = true;
     }
 }

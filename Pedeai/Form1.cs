@@ -20,6 +20,7 @@ namespace Pedeai
 
         private int  _paginaAtual = 0; // 0=Dashboard 1=Pedidos 2=Financeiro
         private System.Threading.Timer _syncCatalogoTimer;
+        private Button _btnBuscarWeb; // referência para controle de visibilidade conforme SiteConectado
 
         // -- Cores ------------------------------------------------------------
         private static readonly Color CorSidebar    = Color.FromArgb(18, 20, 25);
@@ -41,6 +42,7 @@ namespace Pedeai
             BuildPedidos();
             BuildFinanceiro();
             AppEvents.NovoPedidoWebRecebido += OnNovoPedidoWebRecebido;
+            AppEvents.SiteConectadoChanged  += OnSiteConectadoChanged;
             if (System.ComponentModel.LicenseManager.UsageMode != System.ComponentModel.LicenseUsageMode.Designtime)
                 Load += Form1_Load;
         }
@@ -54,9 +56,20 @@ namespace Pedeai
             }));
         }
 
+        private void OnSiteConectadoChanged(bool habilitado)
+        {
+            // Atualiza visibilidade do botão Buscar Web quando o Admin altera a conexão com o site
+            if (_btnBuscarWeb == null) return;
+            if (_btnBuscarWeb.InvokeRequired)
+                _btnBuscarWeb.BeginInvoke(new Action(() => _btnBuscarWeb.Visible = habilitado));
+            else
+                _btnBuscarWeb.Visible = habilitado;
+        }
+
         protected override void OnFormClosed(FormClosedEventArgs e)
         {
             AppEvents.NovoPedidoWebRecebido -= OnNovoPedidoWebRecebido;
+            AppEvents.SiteConectadoChanged  -= OnSiteConectadoChanged;
             try { _syncCatalogoTimer?.Dispose(); } catch { }
             try { DB.QuartzSchedulerService.StopAsync().GetAwaiter().GetResult(); } catch { }
             base.OnFormClosed(e);
@@ -828,8 +841,10 @@ namespace Pedeai
                 ForeColor = Color.White,
                 FlatStyle = FlatStyle.Flat,
                 Cursor    = Cursors.Hand,
-                Font      = new Font("Segoe UI", 8.5F, FontStyle.Bold)
+                Font      = new Font("Segoe UI", 8.5F, FontStyle.Bold),
+                Visible   = DB.SupabaseService.SiteConectado
             };
+            _btnBuscarWeb = btnBuscarWeb; // guarda referência para poder ocultar/mostrar depois
             btnBuscarWeb.FlatAppearance.BorderSize = 0;
             btnBuscarWeb.Click += async (_, __) =>
             {
@@ -1214,6 +1229,20 @@ namespace Pedeai
                 else
                 {
                     Logger.Log("Form1", "AtualizarSituacaoPedido", $"Pedido cancelado | #{cod} | Autorizado por: {canceladoPor}");
+                    // Reverter totais do cliente se o pedido já havia sido contabilizado:
+                    // - Pedido web (origem=0): IncrementarTotais é chamado na importação, sempre revertemos
+                    // - Pedido local/manual: IncrementarTotais só é chamado ao finalizar (sit 3 ou 5)
+                    if (pedido.Codigo_Cliente > 0)
+                    {
+                        bool foiContabilizado = pedido.pediOrigem == 0   // web: sempre incrementado ao importar
+                                             || pedido.pediSituacao == 3 // retirada finalizada
+                                             || pedido.pediSituacao == 5; // entregue finalizado
+                        if (foiContabilizado)
+                        {
+                            try { new BLL.ClienteBLL().DecrementarTotais(pedido.Codigo_Cliente, pedido.pediValor_Total); }
+                            catch { }
+                        }
+                    }
                     CarregarPedidos();
                     RestaurarSelecaoPedido(cod);
                 }

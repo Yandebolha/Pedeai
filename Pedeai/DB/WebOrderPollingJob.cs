@@ -12,6 +12,7 @@ namespace Pedeai.DB
     {
         public async Task Execute(IJobExecutionContext context)
         {
+            if (!SupabaseService.SiteConectado) return;
             try
             {
                 var pedidos = await SupabaseService.BuscarPedidosPendentesAsync();

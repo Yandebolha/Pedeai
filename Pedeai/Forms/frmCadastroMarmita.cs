@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Linq;
 using System.Windows.Forms;
 using Pedeai.BLL;
 using Pedeai.Modelo;
@@ -33,8 +34,8 @@ namespace Pedeai.Forms
         private System.Drawing.Image _marmitaPreviewImg = null;
 
         // Produtos disponíveis (para adicionar aos itens)
-        private readonly List<(int Codigo, string Nome, decimal Preco)> _produtos
-            = new List<(int, string, decimal)>();
+        private readonly List<(int Codigo, string Nome, decimal Preco, string Categoria)> _produtos
+            = new List<(int, string, decimal, string)>();
 
         // Controles
         private DataGridView gridMarmitas;
@@ -44,7 +45,7 @@ namespace Pedeai.Forms
         private NumericUpDown numValor;
         private Label lblFormTitulo;
         private Button btnNovaMAR, btnSalvar, btnExcluir, btnFechar;
-        private Button btnAddItem, btnRemItem;
+        private Button btnAddItem, btnRemItem, btnConfGrupos, btnSincSite;
         private NumericUpDown numCusto;
         private NumericUpDown numMaxComp;
         private CheckBox chkHabilitarSite, chkDestaque;
@@ -56,7 +57,10 @@ namespace Pedeai.Forms
             InitUI();
             if (System.ComponentModel.LicenseManager.UsageMode
                     == System.ComponentModel.LicenseUsageMode.Designtime) return;
-            Load += (_, __) => { _bll.EnsureMigrations(); CarregarProdutos(); CarregarGrid(); };
+            Load += (_, __) => { _bll.EnsureMigrations(); CarregarProdutos(); CarregarGrid();
+                btnSincSite.Visible = DB.SupabaseService.SiteConectado;
+            };
+            AppEvents.SiteConectadoChanged += OnSiteConectadoChanged;
         }
 
         // ── Construção da UI ─────────────────────────────────────────────────
@@ -88,7 +92,7 @@ namespace Pedeai.Forms
             btnNovaMAR.Click += BtnNova_Click;
             btnExcluir = MkBtn("Excluir", ClrRed, 100);
             btnExcluir.Click += BtnExcluir_Click;
-            var btnSincSite = MkBtn("\u2601 Sincronizar Site", Color.FromArgb(30, 120, 200), 140);
+            btnSincSite = MkBtn("\u2601 Sincronizar Site", Color.FromArgb(30, 120, 200), 140);
             btnSincSite.Click += BtnSincSite_Click;
             btnFechar = MkBtn("Fechar", ClrBrown, 90);
             btnFechar.Click += (_, __) => Close();
@@ -276,7 +280,11 @@ namespace Pedeai.Forms
             btnRemItem = MkBtn("Remover", ClrRed, 90);
             btnRemItem.Dock = DockStyle.Right;
             btnRemItem.Click += BtnRemItem_Click;
+            btnConfGrupos = MkBtn("⚙ Grupos", Color.FromArgb(70, 130, 180), 90);
+            btnConfGrupos.Dock = DockStyle.Right;
+            btnConfGrupos.Click += BtnConfGrupos_Click;
             pnlItemsTool.Controls.Add(btnRemItem);
+            pnlItemsTool.Controls.Add(btnConfGrupos);
             pnlItemsTool.Controls.Add(btnAddItem);
             pnlItemsTool.Controls.Add(lblItemsTit);
 
@@ -309,6 +317,21 @@ namespace Pedeai.Forms
             };
             b.FlatAppearance.BorderSize = 0;
             return b;
+        }
+
+        private void OnSiteConectadoChanged(bool habilitado)
+        {
+            if (btnSincSite == null) return;
+            if (btnSincSite.InvokeRequired)
+                btnSincSite.BeginInvoke(new Action(() => btnSincSite.Visible = habilitado));
+            else
+                btnSincSite.Visible = habilitado;
+        }
+
+        protected override void OnFormClosed(FormClosedEventArgs e)
+        {
+            AppEvents.SiteConectadoChanged -= OnSiteConectadoChanged;
+            base.OnFormClosed(e);
         }
 
         private DataGridView MkGrid()
@@ -355,7 +378,8 @@ namespace Pedeai.Forms
                         _produtos.Add((
                             Convert.ToInt32(r["Codigo"]),
                             r["Nome"]?.ToString() ?? "",
-                            r["Preco"] == DBNull.Value ? 0m : Convert.ToDecimal(r["Preco"])));
+                            r["Preco"] == DBNull.Value ? 0m : Convert.ToDecimal(r["Preco"]),
+                            r["Categoria"]?.ToString() ?? "Sem categoria"));
             }
             catch { }
         }
@@ -588,18 +612,32 @@ namespace Pedeai.Forms
 
             var txtF = new TextBox { Dock = DockStyle.Top, Height = 28, BackColor = Color.White, ForeColor = ClrText, Font = new Font("Segoe UI", 10F), PlaceholderText = "Filtrar por nome...", BorderStyle = BorderStyle.FixedSingle };
 
+            // Filtro de categoria
+            var pnlCat = new Panel { Dock = DockStyle.Top, Height = 30, BackColor = ClrBg, Padding = new Padding(4, 2, 4, 2) };
+            var cmbCatFiltro = new ComboBox { Dock = DockStyle.Fill, DropDownStyle = ComboBoxStyle.DropDownList, Font = new Font("Segoe UI", 9F), BackColor = Color.White };
+            cmbCatFiltro.Items.Add("(Todas as categorias)");
+            foreach (var cat in _produtos.Select(p => p.Categoria).Distinct().OrderBy(c => c))
+                cmbCatFiltro.Items.Add(cat);
+            cmbCatFiltro.SelectedIndex = 0;
+            pnlCat.Controls.Add(cmbCatFiltro);
+
             var grid2 = MkGrid();
             grid2.Dock = DockStyle.Fill;
             grid2.Columns.Add(new DataGridViewTextBoxColumn { Name = "Nome", HeaderText = "Produto", FillWeight = 70 });
-            var Preencher = new Action<string>(f =>
+            var Preencher = new Action<string, string>((f, cat) =>
             {
                 grid2.Rows.Clear();
                 foreach (var p in _produtos)
-                    if (string.IsNullOrWhiteSpace(f) || p.Nome.IndexOf(f, StringComparison.OrdinalIgnoreCase) >= 0)
+                {
+                    bool matchNome = string.IsNullOrWhiteSpace(f) || p.Nome.IndexOf(f, StringComparison.OrdinalIgnoreCase) >= 0;
+                    bool matchCat  = cat == "(Todas as categorias)" || string.IsNullOrEmpty(cat) || p.Categoria == cat;
+                    if (matchNome && matchCat)
                         grid2.Rows.Add(p.Nome);
+                }
             });
-            Preencher("");
-            txtF.TextChanged += (_, __) => Preencher(txtF.Text);
+            Preencher("", "");
+            txtF.TextChanged += (_, __) => Preencher(txtF.Text, cmbCatFiltro.SelectedItem?.ToString() ?? "");
+            cmbCatFiltro.SelectedIndexChanged += (_, __) => Preencher(txtF.Text, cmbCatFiltro.SelectedItem?.ToString() ?? "");
 
             var pnlBottom = new Panel { Dock = DockStyle.Bottom, Height = 110, BackColor = ClrFoot, Padding = new Padding(8, 4, 8, 4) };
             var lblQ = new Label { Text = "Qtde:", Left = 8, Top = 10, AutoSize = true, ForeColor = Color.FromArgb(100, 80, 50) };
@@ -612,7 +650,7 @@ namespace Pedeai.Forms
                 BackColor = Color.White, ForeColor = ClrText,
                 Font = new Font("Segoe UI", 9F), DropDownStyle = ComboBoxStyle.DropDown
             };
-            cmbGrupo.Items.AddRange(new object[] { "Arroz", "Feijão", "Carne", "Guarnição", "Salada", "Talher", "Geral" });
+            cmbGrupo.Items.AddRange(new object[] { "Arroz", "Feijão", "Carne", "Guarnição", "Salada", "Talher", "Geral", "Adicional" });
             cmbGrupo.Text = "Geral";
 
             var lblMaxG = new Label { Text = "Máx. grupo:", Left = 270, Top = 42, AutoSize = true, ForeColor = Color.FromArgb(100, 80, 50) };
@@ -625,7 +663,7 @@ namespace Pedeai.Forms
             btnCnc.Click += (_, __) => dlg.DialogResult = DialogResult.Cancel;
             pnlBottom.Controls.AddRange(new Control[] { lblQ, numQ, lblGrupo, cmbGrupo, lblMaxG, numMaxG, btnOk, btnCnc });
 
-            (int Codigo, string Nome, decimal Preco) escolhido = default;
+            (int Codigo, string Nome, decimal Preco, string Categoria) escolhido = default;
             btnOk.Click += (_, __) =>
             {
                 if (grid2.CurrentRow == null) return;
@@ -638,6 +676,7 @@ namespace Pedeai.Forms
 
             dlg.Controls.Add(grid2);
             dlg.Controls.Add(pnlBottom);
+            dlg.Controls.Add(pnlCat);
             dlg.Controls.Add(txtF);
             dlg.Controls.Add(pnlTop);
 
@@ -654,6 +693,91 @@ namespace Pedeai.Forms
             };
             var erro = _bll.AdicionarItem(item);
             if (!string.IsNullOrEmpty(erro)) { MessageBox.Show(erro); return; }
+            CarregarItens(codMar);
+            int codMarSync = codMar;
+            System.Threading.Tasks.Task.Run(async () =>
+                await DB.SupabaseService.SincronizarItensMarmitaAsync(codMarSync));
+        }
+
+        private void BtnConfGrupos_Click(object sender, EventArgs e)
+        {
+            int codMar = GetSelectedMarmitaCod();
+            if (codMar <= 0) { MessageBox.Show("Selecione uma marmita primeiro."); return; }
+
+            var itens = _bll.ListarItens(codMar);
+            if (itens.Count == 0) { MessageBox.Show("Esta marmita não possui ingredientes cadastrados."); return; }
+
+            // Agrupa por nome do grupo, pega o max atual de cada grupo
+            var grupos = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+            foreach (var it in itens)
+            {
+                string g = string.IsNullOrWhiteSpace(it.maritmGrupo) ? "Geral" : it.maritmGrupo.Trim();
+                if (!grupos.ContainsKey(g)) grupos[g] = it.maritmGrupoMax < 1 ? 1 : it.maritmGrupoMax;
+            }
+
+            // Ordena grupos na ordem preferencial
+            var ordemGrupos = new[] { "Arroz", "Feijão", "Feijao", "Carne", "Guarnição", "Guarnicao", "Salada", "Talher", "Geral", "Adicional" };
+            var sortedKeys = new List<string>(grupos.Keys);
+            sortedKeys.Sort((a, b) =>
+            {
+                int ai = Array.FindIndex(ordemGrupos, k => k.Equals(a, StringComparison.OrdinalIgnoreCase));
+                int bi = Array.FindIndex(ordemGrupos, k => k.Equals(b, StringComparison.OrdinalIgnoreCase));
+                int av = ai < 0 ? 99 : ai; int bv = bi < 0 ? 99 : bi;
+                return av != bv ? av.CompareTo(bv) : string.Compare(a, b, StringComparison.OrdinalIgnoreCase);
+            });
+
+            // Monta dialog
+            var dlg = new Form
+            {
+                Text = "Configurar máximo por grupo",
+                Size = new Size(380, 80 + sortedKeys.Count * 36 + 60),
+                FormBorderStyle = FormBorderStyle.FixedDialog,
+                MaximizeBox = false, MinimizeBox = false,
+                StartPosition = FormStartPosition.CenterParent,
+                BackColor = ClrBg
+            };
+
+            var pnlTop2 = new Panel { Dock = DockStyle.Top, Height = 40, BackColor = ClrHeader };
+            var lblT2 = new Label { Text = "Qtd. obrigatória (máx.) por grupo", ForeColor = Color.White, Font = new Font("Segoe UI", 9F, FontStyle.Bold), Dock = DockStyle.Fill, TextAlign = ContentAlignment.MiddleCenter };
+            pnlTop2.Controls.Add(lblT2);
+
+            var pnlScroll = new Panel { Dock = DockStyle.Fill, AutoScroll = true, Padding = new Padding(12, 8, 12, 8) };
+            var numSpinners = new Dictionary<string, NumericUpDown>(StringComparer.OrdinalIgnoreCase);
+            int yPos = 8;
+            foreach (var gName in sortedKeys)
+            {
+                var lblG = new Label { Text = gName + ":", Left = 0, Top = yPos + 4, Width = 140, AutoSize = false, Height = 22, TextAlign = ContentAlignment.MiddleLeft, ForeColor = ClrText, Font = new Font("Segoe UI", 9F, FontStyle.Bold) };
+                var numG = new NumericUpDown { Left = 148, Top = yPos, Width = 70, Height = 26, Value = grupos[gName], Minimum = 1, Maximum = 50, DecimalPlaces = 0, BackColor = Color.White, ForeColor = ClrText };
+                pnlScroll.Controls.Add(lblG);
+                pnlScroll.Controls.Add(numG);
+                numSpinners[gName] = numG;
+                yPos += 36;
+            }
+
+            var pnlBot = new Panel { Dock = DockStyle.Bottom, Height = 44, BackColor = ClrFoot };
+            var btnOk2 = MkBtn("Salvar", ClrGreen, 110);
+            btnOk2.Left = 10; btnOk2.Top = 7;
+            var btnCnc2 = MkBtn("Cancelar", ClrBrown, 100);
+            btnCnc2.Left = 128; btnCnc2.Top = 7;
+            btnCnc2.Click += (_, __) => dlg.DialogResult = DialogResult.Cancel;
+            pnlBot.Controls.Add(btnOk2);
+            pnlBot.Controls.Add(btnCnc2);
+            btnOk2.Click += (_, __) => dlg.DialogResult = DialogResult.OK;
+
+            dlg.Controls.Add(pnlScroll);
+            dlg.Controls.Add(pnlBot);
+            dlg.Controls.Add(pnlTop2);
+
+            if (dlg.ShowDialog(this) != DialogResult.OK) return;
+
+            // Aplica novos maximos a todos os itens de cada grupo
+            foreach (var it in itens)
+            {
+                string g = string.IsNullOrWhiteSpace(it.maritmGrupo) ? "Geral" : it.maritmGrupo.Trim();
+                if (numSpinners.TryGetValue(g, out var spinner))
+                    it.maritmGrupoMax = (int)spinner.Value;
+            }
+            _bll.AtualizarGruposMax(codMar, itens);
             CarregarItens(codMar);
             int codMarSync = codMar;
             System.Threading.Tasks.Task.Run(async () =>

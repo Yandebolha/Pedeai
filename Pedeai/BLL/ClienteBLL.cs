@@ -22,5 +22,8 @@ namespace Pedeai.BLL
 
         public void IncrementarTotais(int codigoCliente, decimal valorPedido)
             => _dal.IncrementarTotais(codigoCliente, valorPedido);
+
+        public void DecrementarTotais(int codigoCliente, decimal valorPedido)
+            => _dal.DecrementarTotais(codigoCliente, valorPedido);
     }
 }

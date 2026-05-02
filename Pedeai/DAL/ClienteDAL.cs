@@ -24,7 +24,10 @@ namespace Pedeai.DAL
                                COALESCE((SELECT SUM(pw.pediValor_Total) FROM pedido_web pw
                                          WHERE pw.Codigo_Cliente = c.Codigo
                                            AND pw.pediSituacao <> 6), 0) AS TotalGasto,
-                               COALESCE(c.clieGasto_Mensal, 0) AS GastoMensal,
+                               COALESCE((SELECT SUM(pw2.pediValor_Total) FROM pedido_web pw2
+                                         WHERE pw2.Codigo_Cliente = c.Codigo
+                                           AND pw2.pediSituacao <> 6
+                                           AND DATE_FORMAT(pw2.pediData_Lancamento, '%Y-%m') = DATE_FORMAT(NOW(), '%Y-%m')), 0) AS GastoMensal,
                                COALESCE(c.cliePedidos_Mensal, 0) AS PedidosMensal,
                                c.Situacao
                         FROM cliente c WHERE 1=1";
@@ -207,6 +210,30 @@ namespace Pedeai.DAL
                         ELSE 1
                     END,
                     cliePedidos_Mes_Ref = @mes
+                  WHERE Codigo = @cod", conn);
+            cmd.Parameters.AddWithValue("@val", valorPedido);
+            cmd.Parameters.AddWithValue("@mes", mesAtual);
+            cmd.Parameters.AddWithValue("@cod", codigoCliente);
+            cmd.ExecuteNonQuery();
+        }
+
+        public void DecrementarTotais(int codigoCliente, decimal valorPedido)
+        {
+            if (codigoCliente <= 0) return;
+            string mesAtual = DateTime.Today.ToString("yyyy-MM");
+            using var conn = AbrirConexao();
+            using var cmd = new MySqlCommand(
+                @"UPDATE cliente SET
+                    clieTotalPedidos = GREATEST(clieTotalPedidos - 1, 0),
+                    clieTotalGasto   = GREATEST(clieTotalGasto   - @val, 0),
+                    clieGasto_Mensal = CASE
+                        WHEN clieGasto_Mes_Ref = @mes THEN GREATEST(clieGasto_Mensal - @val, 0)
+                        ELSE clieGasto_Mensal
+                    END,
+                    cliePedidos_Mensal = CASE
+                        WHEN cliePedidos_Mes_Ref = @mes THEN GREATEST(cliePedidos_Mensal - 1, 0)
+                        ELSE cliePedidos_Mensal
+                    END
                   WHERE Codigo = @cod", conn);
             cmd.Parameters.AddWithValue("@val", valorPedido);
             cmd.Parameters.AddWithValue("@mes", mesAtual);

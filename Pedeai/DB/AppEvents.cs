@@ -12,5 +12,11 @@ namespace Pedeai
 
         public static void OnNovoPedidoWebRecebido(int count)
             => NovoPedidoWebRecebido?.Invoke(count);
+
+        /// <summary>Disparado quando o Admin altera a configuração de conexão com o site.</summary>
+        public static event Action<bool> SiteConectadoChanged;
+
+        public static void OnSiteConectadoChanged(bool habilitado)
+            => SiteConectadoChanged?.Invoke(habilitado);
     }
 }

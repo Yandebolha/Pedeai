@@ -19,25 +19,32 @@ export function Header({ searchQuery, onSearchChange }: HeaderProps) {
   const { data: store } = useQuery({
     queryKey: ['store'],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data } = await supabase
         .from('loja')
         .select('*')
         .limit(1)
-        .single();
-      if (error) throw error;
-      return data as Loja;
+        .maybeSingle();
+      return (data ?? null) as Loja | null;
     },
   });
 
   return (
     <header className="sticky top-0 z-50 bg-white border-b border-gray-100 px-4 py-3">
       <div className="max-w-7xl mx-auto flex flex-col gap-3">
-        {/* Top Section: Address and Cart */}
+        {/* Top Section: Logo + Address and Cart */}
         <div className="flex items-center justify-between">
           <div 
-            className="flex items-center gap-1 cursor-pointer hover:opacity-70 transition-opacity"
+            className="flex items-center gap-2 cursor-pointer hover:opacity-70 transition-opacity"
             onClick={() => navigate('/address')}
           >
+            {store?.logo_url && (
+              <img
+                src={store.logo_url}
+                alt={store.nome || 'Logo'}
+                className="w-8 h-8 rounded-full object-cover flex-shrink-0"
+                referrerPolicy="no-referrer"
+              />
+            )}
             <MapPin className="w-4 h-4 text-red-600" />
             <span className="text-sm font-semibold text-gray-800 truncate max-w-[200px]">
               {store?.endereco || 'Carregando endereço...'}

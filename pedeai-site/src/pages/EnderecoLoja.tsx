@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/lib/supabase';
+import { supabase, empresaCodigo, isEmpresaCodigoMissing } from '@/lib/supabase';
 import { Loja } from '@/types/database';
 import { ChevronLeft, MapPin, Phone, Clock, Info } from 'lucide-react';
 
@@ -10,13 +10,17 @@ export default function EnderecoLoja() {
   const { data: store, isLoading } = useQuery({
     queryKey: ['store'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('loja')
-        .select('*')
-        .limit(1)
-        .single();
-      if (error) throw error;
-      return data as Loja;
+      let q = supabase.from('loja').select('*');
+      if (empresaCodigo) q = q.eq('empresa_codigo', empresaCodigo);
+      const { data, error } = await q.limit(1).maybeSingle();
+      if (error) {
+        if (isEmpresaCodigoMissing(error)) {
+          const { data: d2 } = await supabase.from('loja').select('*').limit(1).maybeSingle();
+          return (d2 ?? null) as Loja | null;
+        }
+        return null;
+      }
+      return (data ?? null) as Loja | null;
     },
   });
 

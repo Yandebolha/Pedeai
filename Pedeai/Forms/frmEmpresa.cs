@@ -19,6 +19,7 @@ namespace Pedeai.Forms
         private ConfiguracaoImpressaoBLL _impBLL;
         private Empresa _empresa;
         private Usuario _usuarioEditando;
+        private string  _caminhoLogo = ""; // caminho local ou URL da logo
 
         public frmEmpresa()
         {
@@ -37,7 +38,84 @@ namespace Pedeai.Forms
                 // Aba "Sistema" visível apenas para Admin (nivel 9)
                 if (!UsuarioSessao.TemNivel(9))
                     tabControl.TabPages.Remove(tabSistema);
+                else
+                    InicializarSistemaTab();
             };
+        }
+
+        // ── ABA SISTEMA ──────────────────────────────────────────────────────
+        private CheckBox _chkConectarSite;
+
+        private void InicializarSistemaTab()
+        {
+            // Usa o objeto _empresa (já carregado do MySQL pelo Load) como fonte de verdade,
+            // evitando dependência do cache estático que pode falhar silenciosamente.
+            bool conectado = _empresa.empHabilitar_Site;
+            DB.SupabaseService.SiteConectado = conectado;
+
+            // Oculta botão de sincronização quando o site está desabilitado
+            btnSincronizarSite.Visible = conectado;
+            lblSincStatus.Visible      = false;
+
+            // Seção "Conexão com o Site"
+            var lblSecTit = new Label
+            {
+                Text      = "Conexão com o Site",
+                Left = 20, Top = 16, AutoSize = true,
+                Font      = new System.Drawing.Font("Segoe UI", 11F, System.Drawing.FontStyle.Bold),
+                ForeColor = System.Drawing.Color.FromArgb(130, 80, 30)
+            };
+            var lblSecDesc = new Label
+            {
+                Text      = "Quando desmarcado, o sistema não sincroniza dados nem recebe pedidos do site.\r\nUse quando o cliente não tiver acesso ao módulo web.",
+                Left = 20, Top = 44, Width = 560, Height = 38,
+                ForeColor = System.Drawing.Color.FromArgb(80, 70, 60)
+            };
+            _chkConectarSite = new CheckBox
+            {
+                Text      = "Habilitar conexão com o site",
+                Left = 20, Top = 88,
+                Checked   = conectado,
+                AutoSize  = true,
+                Font      = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold),
+                ForeColor = conectado
+                    ? System.Drawing.Color.FromArgb(39, 130, 57)
+                    : System.Drawing.Color.FromArgb(192, 57, 43)
+            };
+            _chkConectarSite.CheckedChanged += (_, __) =>
+            {
+                bool hab = _chkConectarSite.Checked;
+                // Persiste via EmpresaBLL (caminho testado e confiável)
+                _empresa.empHabilitar_Site = hab;
+                _empBLL.Salvar(_empresa);
+                DB.SupabaseService.SiteConectado = hab;
+                // Atualiza visual
+                _chkConectarSite.ForeColor = hab
+                    ? System.Drawing.Color.FromArgb(39, 130, 57)
+                    : System.Drawing.Color.FromArgb(192, 57, 43);
+                btnSincronizarSite.Visible = hab;
+                lblSincStatus.Visible      = false;
+                // Notifica Form1 para ocultar/mostrar btnBuscarWeb
+                AppEvents.OnSiteConectadoChanged(hab);
+            };
+
+            var sep = new Label
+            {
+                Left = 20, Top = 124, Width = 560, Height = 1,
+                BackColor = System.Drawing.Color.FromArgb(180, 160, 130)
+            };
+
+            tabSistema.Controls.Add(lblSecTit);
+            tabSistema.Controls.Add(lblSecDesc);
+            tabSistema.Controls.Add(_chkConectarSite);
+            tabSistema.Controls.Add(sep);
+
+            // Move existing controls down to make room
+            foreach (Control c in tabSistema.Controls)
+            {
+                if (c == lblSecTit || c == lblSecDesc || c == _chkConectarSite || c == sep) continue;
+                c.Top += 140;
+            }
         }
 
         // ── ABA EMPRESA ──────────────────────────────────────────────────────
@@ -52,9 +130,17 @@ namespace Pedeai.Forms
             txtEmpEnd.Text      = _empresa.empEndereco;
             txtEmpCodigo.Text   = _empresa.empCodigo_Empresa;
             txtEmpImgBB.Text    = _empresa.empImgBBKey;
+            _caminhoLogo        = _empresa.empLogo_Url ?? "";
+            if (!string.IsNullOrWhiteSpace(_caminhoLogo))
+            {
+                if (_caminhoLogo.StartsWith("http", StringComparison.OrdinalIgnoreCase))
+                    _ = CarregarPreviewLogoAsync(_caminhoLogo);
+                else if (System.IO.File.Exists(_caminhoLogo))
+                    picLogo.Image = Image.FromFile(_caminhoLogo);
+            }
         }
 
-        private void BtnSalvarEmpresa_Click(object sender, EventArgs e)
+        private async void BtnSalvarEmpresa_Click(object sender, EventArgs e)
         {
             _empresa.empNome          = txtEmpNome.Text.Trim();
             _empresa.empNome_Fantasia = txtEmpFantasia.Text.Trim();
@@ -63,11 +149,65 @@ namespace Pedeai.Forms
             _empresa.empEmail         = txtEmpEmail.Text.Trim();
             _empresa.empEndereco      = txtEmpEnd.Text.Trim();
             _empresa.empImgBBKey      = txtEmpImgBB.Text.Trim();
+            // Preserva URL já existente quando não foi selecionado novo arquivo
+            if (_caminhoLogo.StartsWith("http", StringComparison.OrdinalIgnoreCase))
+                _empresa.empLogo_Url = _caminhoLogo;
             var erro = _empBLL.Salvar(_empresa);
             if (!string.IsNullOrEmpty(erro)) { MessageBox.Show("Erro: " + erro); return; }
+
+            // Upload da logo para ImgBB se for arquivo local — aguarda antes de sincronizar
+            if (!string.IsNullOrWhiteSpace(_caminhoLogo)
+                && !_caminhoLogo.StartsWith("http", StringComparison.OrdinalIgnoreCase)
+                && System.IO.File.Exists(_caminhoLogo))
+            {
+                btnSalvEmp.Enabled = false;
+                btnSalvEmp.Text    = "⏳ Enviando logo...";
+                try
+                {
+                    string url = await DB.SupabaseService.UploadLogoEmpresaAsync(_caminhoLogo);
+                    if (!string.IsNullOrEmpty(url))
+                    {
+                        _empresa.empLogo_Url = url;
+                        _empBLL.Salvar(_empresa);
+                        _caminhoLogo = url;
+                    }
+                }
+                catch { }
+                finally
+                {
+                    btnSalvEmp.Enabled = true;
+                    btnSalvEmp.Text    = "✓  Salvar Empresa";
+                }
+            }
+
             MessageBox.Show("Dados da empresa salvos com sucesso!", "OK", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            // Atualiza nome no Supabase em background
-            _ = AtualizarNomeSupabaseAsync(_empresa);
+            // Sincroniza loja no Supabase (inclui logo_url)
+            _ = DB.SupabaseService.SincronizarLojaAsync();
+        }
+
+        private void BtnSelLogo_Click(object sender, EventArgs e)
+        {
+            using var dlg = new OpenFileDialog
+            {
+                Title  = "Selecionar logo da empresa",
+                Filter = "Imagens|*.jpg;*.jpeg;*.png;*.gif;*.webp"
+            };
+            if (dlg.ShowDialog(this) != DialogResult.OK) return;
+            _caminhoLogo = dlg.FileName;
+            try { picLogo.Image = Image.FromFile(_caminhoLogo); } catch { }
+        }
+
+        private async System.Threading.Tasks.Task CarregarPreviewLogoAsync(string url)
+        {
+            try
+            {
+                using var client = new System.Net.Http.HttpClient();
+                var bytes = await client.GetByteArrayAsync(url);
+                using var ms = new System.IO.MemoryStream(bytes);
+                var img = Image.FromStream(ms);
+                if (IsHandleCreated) Invoke(new Action(() => { try { picLogo.Image = img; } catch { } }));
+            }
+            catch { }
         }
 
         private async void BtnSincronizarSite_Click(object sender, EventArgs e)
@@ -594,6 +734,7 @@ namespace Pedeai.Forms
             if (r2 != DialogResult.Yes) return;
 
             Cursor = Cursors.WaitCursor;
+
             var erro = DB.DbMigrator.ResetarBanco();
             Cursor = Cursors.Default;
 

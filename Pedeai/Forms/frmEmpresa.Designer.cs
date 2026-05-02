@@ -21,6 +21,8 @@ namespace Pedeai.Forms
             this.txtEmpEnd = new System.Windows.Forms.TextBox();
             this.txtEmpCodigo = new System.Windows.Forms.TextBox();
             this.txtEmpImgBB = new System.Windows.Forms.TextBox();
+            this.picLogo = new System.Windows.Forms.PictureBox();
+            this.btnSelLogo = new System.Windows.Forms.Button();
             this.txtUsrNome = new System.Windows.Forms.TextBox();
             this.txtUsrLogin = new System.Windows.Forms.TextBox();
             this.txtUsrSenha = new System.Windows.Forms.TextBox();
@@ -86,6 +88,7 @@ namespace Pedeai.Forms
             this.lblResetAviso = new System.Windows.Forms.Label();
             this.btnResetarBanco = new System.Windows.Forms.Button();
             this.pnlBuscaUsuarios.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.picLogo)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numLargura)).BeginInit();
             this.tabControl.SuspendLayout();
             this.tabEmp.SuspendLayout();
@@ -731,6 +734,8 @@ namespace Pedeai.Forms
             this.tabEmp.Controls.Add(this.txtEmpEnd);
             this.tabEmp.Controls.Add(this.txtEmpCodigo);
             this.tabEmp.Controls.Add(this.txtEmpImgBB);
+            this.tabEmp.Controls.Add(this.picLogo);
+            this.tabEmp.Controls.Add(this.btnSelLogo);
             this.tabEmp.Controls.Add(this.btnSalvEmp);
             this.tabEmp.Controls.Add(this.btnSincronizarSite);
             this.tabEmp.Controls.Add(this.btnDiagnostico);
@@ -743,6 +748,7 @@ namespace Pedeai.Forms
             this.tabEmp.Controls.Add(this.lblEmpEnd);
             this.tabEmp.Controls.Add(this.lblEmpCodigo);
             this.tabEmp.Controls.Add(this.lblEmpImgBB);
+            this.tabEmp.Controls.Add(this.lblEmpLogo);
             this.tabEmp.Controls.Add(this.lblEmpTitle);
             this.tabEmp.ForeColor = System.Drawing.Color.FromArgb(50, 50, 50);
             this.tabEmp.Location = new System.Drawing.Point(4, 30);
@@ -759,7 +765,7 @@ namespace Pedeai.Forms
             this.btnSalvEmp.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnSalvEmp.Font = new System.Drawing.Font("Segoe UI", 9.5F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.btnSalvEmp.ForeColor = System.Drawing.Color.White;
-            this.btnSalvEmp.Location = new System.Drawing.Point(168, 348);
+            this.btnSalvEmp.Location = new System.Drawing.Point(168, 465);
             this.btnSalvEmp.Name = "btnSalvEmp";
             this.btnSalvEmp.Size = new System.Drawing.Size(160, 32);
             this.btnSalvEmp.TabIndex = 6;
@@ -775,7 +781,7 @@ namespace Pedeai.Forms
             this.btnSincronizarSite.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnSincronizarSite.Font = new System.Drawing.Font("Segoe UI", 9.5F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.btnSincronizarSite.ForeColor = System.Drawing.Color.White;
-            this.btnSincronizarSite.Location = new System.Drawing.Point(340, 348);
+            this.btnSincronizarSite.Location = new System.Drawing.Point(340, 465);
             this.btnSincronizarSite.Name = "btnSincronizarSite";
             this.btnSincronizarSite.Size = new System.Drawing.Size(220, 32);
             this.btnSincronizarSite.TabIndex = 7;
@@ -791,7 +797,7 @@ namespace Pedeai.Forms
             this.btnDiagnostico.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnDiagnostico.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular);
             this.btnDiagnostico.ForeColor = System.Drawing.Color.White;
-            this.btnDiagnostico.Location = new System.Drawing.Point(572, 348);
+            this.btnDiagnostico.Location = new System.Drawing.Point(572, 465);
             this.btnDiagnostico.Name = "btnDiagnostico";
             this.btnDiagnostico.Size = new System.Drawing.Size(160, 32);
             this.btnDiagnostico.TabIndex = 8;
@@ -805,12 +811,39 @@ namespace Pedeai.Forms
             this.lblSincStatus.BackColor = System.Drawing.Color.Transparent;
             this.lblSincStatus.ForeColor = System.Drawing.Color.FromArgb(30, 100, 180);
             this.lblSincStatus.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Italic);
-            this.lblSincStatus.Location = new System.Drawing.Point(168, 388);
+            this.lblSincStatus.Location = new System.Drawing.Point(168, 505);
             this.lblSincStatus.Name = "lblSincStatus";
             this.lblSincStatus.Size = new System.Drawing.Size(392, 22);
             this.lblSincStatus.TabIndex = 99;
             this.lblSincStatus.Text = "";
             this.lblSincStatus.Visible = false;
+            // 
+            // picLogo
+            // 
+            this.picLogo.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.picLogo.Location = new System.Drawing.Point(168, 348);
+            this.picLogo.Name = "picLogo";
+            this.picLogo.Size = new System.Drawing.Size(100, 100);
+            this.picLogo.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+            this.picLogo.BackColor = System.Drawing.Color.White;
+            this.picLogo.TabIndex = 98;
+            this.picLogo.TabStop = false;
+            // 
+            // btnSelLogo
+            // 
+            this.btnSelLogo.BackColor = System.Drawing.Color.FromArgb(130, 80, 30);
+            this.btnSelLogo.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.btnSelLogo.FlatAppearance.BorderSize = 0;
+            this.btnSelLogo.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnSelLogo.Font = new System.Drawing.Font("Segoe UI", 9.5F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.btnSelLogo.ForeColor = System.Drawing.Color.White;
+            this.btnSelLogo.Location = new System.Drawing.Point(280, 348);
+            this.btnSelLogo.Name = "btnSelLogo";
+            this.btnSelLogo.Size = new System.Drawing.Size(170, 32);
+            this.btnSelLogo.TabIndex = 97;
+            this.btnSelLogo.Text = "\U0001f4f7  Selecionar Logo";
+            this.btnSelLogo.UseVisualStyleBackColor = false;
+            this.btnSelLogo.Click += new System.EventHandler(this.BtnSelLogo_Click);
             // 
             // tabUsr
             // 
@@ -1002,6 +1035,7 @@ namespace Pedeai.Forms
             this.pnlBuscaUsuarios.ResumeLayout(false);
             this.pnlBuscaUsuarios.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numLargura)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.picLogo)).EndInit();
             this.tabControl.ResumeLayout(false);
             this.tabEmp.ResumeLayout(false);
             this.tabEmp.PerformLayout();
@@ -1100,8 +1134,11 @@ namespace Pedeai.Forms
         private System.Windows.Forms.Label lblEmpEnd      = new System.Windows.Forms.Label { Text = "Endereço:", AutoSize = true, Left = 22, Top = 247, ForeColor = System.Drawing.Color.FromArgb(70,70,70) };
         private System.Windows.Forms.Label lblEmpCodigo    = new System.Windows.Forms.Label { Text = "Código da Empresa:", AutoSize = true, Left = 22, Top = 278, ForeColor = System.Drawing.Color.FromArgb(120,60,10), Font = new System.Drawing.Font("Segoe UI", 8.5F, System.Drawing.FontStyle.Bold) };
         private System.Windows.Forms.Label lblEmpImgBB     = new System.Windows.Forms.Label { Text = "ImgBB API Key:", AutoSize = true, Left = 22, Top = 318, ForeColor = System.Drawing.Color.FromArgb(70,70,70) };
+        private System.Windows.Forms.Label lblEmpLogo      = new System.Windows.Forms.Label { Text = "Logo do Site:", AutoSize = true, Left = 22, Top = 372, ForeColor = System.Drawing.Color.FromArgb(70,70,70) };
         internal System.Windows.Forms.TextBox txtEmpCodigo;
         internal System.Windows.Forms.TextBox txtEmpImgBB;
+        internal System.Windows.Forms.PictureBox picLogo;
+        internal System.Windows.Forms.Button btnSelLogo;
         // labels usuario
         private System.Windows.Forms.Label lblUsrNome      = new System.Windows.Forms.Label { Text = "Nome:",              AutoSize = true, Left = 22, Top = 25,  ForeColor = System.Drawing.Color.FromArgb(70,70,70) };
         private System.Windows.Forms.Label lblUsrLogin     = new System.Windows.Forms.Label { Text = "Login:",             AutoSize = true, Left = 22, Top = 65,  ForeColor = System.Drawing.Color.FromArgb(70,70,70) };

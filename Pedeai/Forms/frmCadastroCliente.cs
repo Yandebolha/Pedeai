@@ -20,7 +20,10 @@ namespace Pedeai.Forms
             InitializeComponent();
             if (System.ComponentModel.LicenseManager.UsageMode == System.ComponentModel.LicenseUsageMode.Designtime) return;
             _bll = new ClienteBLL();
-            Load += (_, __) => CarregarGrid();
+            Load += (_, __) => { CarregarGrid();
+                btnBuscarWeb.Visible = DB.SupabaseService.SiteConectado;
+            };
+            AppEvents.SiteConectadoChanged += OnSiteConectadoChanged;
         }
 
         private void TxtCpf_TextChanged(object sender, EventArgs e)
@@ -255,6 +258,20 @@ namespace Pedeai.Forms
         {
             if (keyData == Keys.Escape) { Close(); return true; }
             return base.ProcessCmdKey(ref msg, keyData);
+        }
+
+        private void OnSiteConectadoChanged(bool habilitado)
+        {
+            if (btnBuscarWeb.InvokeRequired)
+                btnBuscarWeb.BeginInvoke(new Action(() => btnBuscarWeb.Visible = habilitado));
+            else
+                btnBuscarWeb.Visible = habilitado;
+        }
+
+        protected override void OnFormClosed(FormClosedEventArgs e)
+        {
+            AppEvents.SiteConectadoChanged -= OnSiteConectadoChanged;
+            base.OnFormClosed(e);
         }
     }
 }

@@ -21,6 +21,7 @@ export interface Database {
           endereco: string | null
           telefone: string | null
           created_at: string
+          empresa_codigo: string | null
         }
       }
       grupo_mercadoria: {
@@ -31,6 +32,7 @@ export interface Database {
           ordem: number
           ativo: boolean
           created_at: string
+          empresa_codigo: string | null
         }
       }
       mercadoria: {
@@ -46,7 +48,10 @@ export interface Database {
           destaque: boolean
           fracionado: boolean | null
           qtd_sabores: number | null
+          is_adicional: boolean | null
+          preco_adicional: number | null
           created_at: string
+          empresa_codigo: string | null
         }
       }
       cliente: {

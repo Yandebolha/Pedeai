@@ -34,7 +34,10 @@ namespace Pedeai.Forms
             InitializeComponent();
             if (System.ComponentModel.LicenseManager.UsageMode == System.ComponentModel.LicenseUsageMode.Designtime) return;
             _bll = new MercadoriaBLL(); _grpBLL = new GrupoMercadoriaBLL();
-            Load += (_, __) => { AdicionarFiltroCat(); CarregarGrid(); };
+            Load += (_, __) => { AdicionarFiltroCat(); CarregarGrid();
+                btnSincSite.Visible = DB.SupabaseService.SiteConectado;
+            };
+            AppEvents.SiteConectadoChanged += OnSiteConectadoChanged;
         }
 
 
@@ -518,6 +521,20 @@ namespace Pedeai.Forms
             public int Codigo; public string Nome;
             public CatItem(int c, string n) { Codigo = c; Nome = n; }
             public override string ToString() => Nome;
+        }
+
+        private void OnSiteConectadoChanged(bool habilitado)
+        {
+            if (btnSincSite.InvokeRequired)
+                btnSincSite.BeginInvoke(new Action(() => btnSincSite.Visible = habilitado));
+            else
+                btnSincSite.Visible = habilitado;
+        }
+
+        protected override void OnFormClosed(FormClosedEventArgs e)
+        {
+            AppEvents.SiteConectadoChanged -= OnSiteConectadoChanged;
+            base.OnFormClosed(e);
         }
     }
 }

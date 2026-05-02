@@ -42,15 +42,103 @@ namespace Pedeai.DB
         // Cache: sabe se o Supabase tem colunas fracionado/qtd_sabores na tabela mercadoria
         // null = não testado ainda, true = tem, false = não tem
         private static bool? _supabaseTemColFracionado = null;
+        private static bool? _supabaseTemColIsAdicional   = null;
+        /// <summary>
+        /// Indica se as colunas empresa_codigo já foram criadas no Supabase (migration executada).
+        /// null = não testado; true = existem; false = não existem (PGRST204 detectado).
+        /// Quando false, o campo empresa_codigo é omitido dos payloads e filtros automaticamente.
+        /// </summary>
+        private static bool? _supabaseTemColEmpresaCodigo = null;
 
+        /// <summary>
+        /// Quando false, todas as operações com o Supabase são bloqueadas.
+        /// Definido pelo Administrador na aba Sistema de Empresa/Usuários.
+        /// </summary>
+        public static bool SiteConectado { get; set; } = true;
+
+        /// <summary>Código único da empresa local. Usado para isolar dados no Supabase multi-tenant.</summary>
+        private static string _empresaCodigo = "";
+
+        /// <summary>Carrega o código da empresa do MySQL. Deve ser chamado na inicialização do sistema.</summary>
+        public static void CarregarEmpresaCodigo()
+        {
+            try
+            {
+                using var conn = AbrirMysql();
+                using var cmd  = new MySqlCommand(
+                    "SELECT COALESCE(empCodigo_Empresa,'') AS cod, COALESCE(empHabilitar_Site,1) AS hab FROM empresa ORDER BY Codigo LIMIT 1", conn);
+                using var r = cmd.ExecuteReader();
+                if (r.Read())
+                {
+                    _empresaCodigo = r["cod"]?.ToString()?.Trim() ?? "";
+                    SiteConectado  = r["hab"]?.ToString() != "0";
+                }
+            }
+            catch { /* fallback: código vazio → não filtra */ }
+        }
+
+        /// <summary>
+        /// Salva o estado de SiteConectado no banco local.
+        /// Chamado pelo frmEmpresa quando o Admin altera o checkbox.
+        /// </summary>
+        public static void SalvarSiteConectado(bool habilitado)
+        {
+            SiteConectado = habilitado;
+            try
+            {
+                using var conn = AbrirMysql();
+                using var cmd  = new MySqlCommand(
+                    "UPDATE empresa SET empHabilitar_Site=@v ORDER BY Codigo LIMIT 1", conn);
+                cmd.Parameters.AddWithValue("@v", habilitado ? 1 : 0);
+                cmd.ExecuteNonQuery();
+            }
+            catch { }
+        }
+
+        /// <summary>
+        /// Helper: retorna true somente quando empresa_codigo está configurado E a coluna
+        /// já foi confirmada no Supabase (ou ainda não foi testada = assume que existe).
+        /// Retorna false quando PGRST204 já foi detectado anteriormente nesta sessão.
+        /// </summary>
+        private static bool UsarEmpresaCodigo
+            => !string.IsNullOrWhiteSpace(_empresaCodigo) && _supabaseTemColEmpresaCodigo != false;
+
+        /// <summary>Helper: retorna filtro URL para empresa_codigo, vazio se não configurado.</summary>
+        private static string EmpresaFilter(bool prefixAmpersand = true)
+            => UsarEmpresaCodigo
+               ? (prefixAmpersand ? "&" : "") + $"empresa_codigo=eq.{Uri.EscapeDataString(_empresaCodigo)}"
+               : "";
+
+        /// <summary>
+        /// Reivindica automaticamente os registros do Supabase que ainda não têm empresa_codigo
+        /// preenchido, atribuindo o código desta instalação.
+        /// Isso substitui qualquer UPDATE manual no SQL — cada cliente "marca" seus dados
+        /// na primeira sincronização após a migração, sem intervenção manual.
+        /// </summary>
+        private static async Task CorrigirEmpresaCodigoNuloAsync()
+        {
+            if (!UsarEmpresaCodigo) return;
+            var payload = new { empresa_codigo = _empresaCodigo };
+            var tabelas = new[]
+            {
+                TBL_LOJA, TBL_GRUPO_MERC, TBL_MERCADORIAS,
+                TBL_COMP_GRUPO, TBL_COMPLEMENTO,
+                "cupom", "bairro", "forma_pagamento", "taxa_entrega",
+                "cliente", "enderecos_salvo", "pedido_web", "itens_pedido_web"
+            };
+            foreach (var tbl in tabelas)
+            {
+                try { await PatchAsync(tbl, "empresa_codigo=is.null", payload); }
+                catch { /* ignora se a coluna ainda não existir nesta instalação */ }
+            }
+        }
         // Lock por produto: evita condição de corrida quando dois threads tentam criar o mesmo produto
         // ao mesmo tempo (ex: salvar produto + sync periódico rodando simultaneamente)
         private static readonly System.Collections.Concurrent.ConcurrentDictionary<int, System.Threading.SemaphoreSlim>
             _produtoSyncLocks = new();
 
         /// <summary>Clears the per-run group cache. Call at the start of a full sync.</summary>
-        public static void ResetSyncCache() { _gruposSincronizados.Clear(); _supabaseTemColFracionado = null; }
-
+        public static void ResetSyncCache() { _gruposSincronizados.Clear(); _supabaseTemColFracionado = null; _supabaseTemColIsAdicional = null; _supabaseTemColEmpresaCodigo = null; }
         static SupabaseService()
         {
             _http = new HttpClient { Timeout = TimeSpan.FromSeconds(30) };
@@ -115,31 +203,81 @@ namespace Pedeai.DB
 
         private static async Task<JObject> PostAsync(string endpoint, object body)
         {
-            var json    = JsonConvert.SerializeObject(body);
+            object safeBody = _supabaseTemColEmpresaCodigo == false ? RemoveEmpresaCodigo(body) : body;
+            var json    = JsonConvert.SerializeObject(safeBody);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
             using var req = new HttpRequestMessage(HttpMethod.Post, $"{BASE}/{endpoint}") { Content = content };
             req.Headers.Add("Prefer", "return=representation");
             var resp     = await _http.SendAsync(req);
             var respBody = await resp.Content.ReadAsStringAsync();
             if (!resp.IsSuccessStatusCode)
+            {
+                // Detecta coluna ausente — desabilita empresa_codigo e tenta novamente
+                if (respBody.Contains("PGRST204") && respBody.Contains("empresa_codigo"))
+                {
+                    _supabaseTemColEmpresaCodigo = false;
+                    return await PostAsync(endpoint, body); // retry sem empresa_codigo
+                }
                 throw new Exception($"Supabase POST {resp.StatusCode}: {respBody}");
+            }
+            if (_supabaseTemColEmpresaCodigo == null)
+                _supabaseTemColEmpresaCodigo = true; // confirmado que existe
             var token = JToken.Parse(respBody);
             if (token is JArray arr && arr.Count > 0) return (JObject)arr[0];
             if (token is JObject obj) return obj;
             return null;
         }
 
+        /// <summary>
+        /// Remove o campo empresa_codigo de um payload anônimo, convertendo para JObject.
+        /// Usado quando a migration ainda não foi executada no Supabase.
+        /// </summary>
+        private static object RemoveEmpresaCodigo(object body)
+        {
+            try
+            {
+                var j = JObject.Parse(JsonConvert.SerializeObject(body));
+                j.Remove("empresa_codigo");
+                return j;
+            }
+            catch { return body; }
+        }
+
         private static async Task PatchAsync(string endpoint, string filter, object body)
         {
-            var json    = JsonConvert.SerializeObject(body);
+            // Remove filtro de empresa_codigo do filter quando coluna não existe
+            string safeFilter = filter;
+            if (_supabaseTemColEmpresaCodigo == false && safeFilter.Contains("empresa_codigo"))
+            {
+                safeFilter = System.Text.RegularExpressions.Regex.Replace(
+                    safeFilter, @"&?empresa_codigo=[^&]*", "").TrimStart('&');
+            }
+
+            // Remove campo empresa_codigo do payload quando coluna não existe
+            object safeBody = body;
+            if (_supabaseTemColEmpresaCodigo == false)
+                safeBody = RemoveEmpresaCodigo(body);
+
+            var json    = JsonConvert.SerializeObject(safeBody);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
-            using var req = new HttpRequestMessage(new HttpMethod("PATCH"), $"{BASE}/{endpoint}?{filter}") { Content = content };
+            using var req = new HttpRequestMessage(new HttpMethod("PATCH"), $"{BASE}/{endpoint}?{safeFilter}") { Content = content };
             req.Headers.Add("Prefer", "return=minimal");
             var resp = await _http.SendAsync(req);
             if (!resp.IsSuccessStatusCode)
             {
                 var rb = await resp.Content.ReadAsStringAsync();
+                // Detecta coluna ausente — desabilita empresa_codigo e tenta novamente
+                if (rb.Contains("PGRST204") && rb.Contains("empresa_codigo"))
+                {
+                    _supabaseTemColEmpresaCodigo = false;
+                    await PatchAsync(endpoint, filter, body); // retry sem empresa_codigo
+                    return;
+                }
                 throw new Exception($"Supabase PATCH {resp.StatusCode}: {rb}");
+            }
+            else if (_supabaseTemColEmpresaCodigo == null)
+            {
+                _supabaseTemColEmpresaCodigo = true; // confirmado que existe
             }
         }
 
@@ -212,6 +350,7 @@ namespace Pedeai.DB
 
         public static async Task<string> SincronizarGrupoAsync(int codigoGrupo)
         {
+            if (!SiteConectado) return "";
             try
             {
                 string nome, imagemUrl; int ordem; bool ativo, habSite;
@@ -273,10 +412,18 @@ namespace Pedeai.DB
 
                 // habSite controls visibility on the site (ativo flag), but we always sync the record
                 bool ativoSite = habSite && ativo;
-                var payload = new { nome, ordem, ativo = ativoSite, imagem_url = imagemUrl };
+                var payload = UsarEmpresaCodigo
+                    ? (object)new { nome, ordem, ativo = ativoSite, imagem_url = imagemUrl, empresa_codigo = _empresaCodigo }
+                    : (object)new { nome, ordem, ativo = ativoSite, imagem_url = imagemUrl };
 
                 if (!string.IsNullOrWhiteSpace(uuid))
-                    await PatchAsync("grupo_mercadoria", $"id=eq.{uuid}", payload);
+                {
+                    // Quando empresa_codigo existe, filtra para só atualizar nossos registros
+                    string patchFilter = UsarEmpresaCodigo
+                        ? $"id=eq.{uuid}&empresa_codigo=eq.{Uri.EscapeDataString(_empresaCodigo)}"
+                        : $"id=eq.{uuid}";
+                    await PatchAsync("grupo_mercadoria", patchFilter, payload);
+                }
                 else
                 {
                     var result = await PostAsync("grupo_mercadoria", payload);
@@ -298,6 +445,7 @@ namespace Pedeai.DB
 
         public static async Task<string> SincronizarProdutoAsync(int codigoMercadoria, bool forcarAtivoFalse = false)
         {
+            if (!SiteConectado) return "";
             // Garante que somente uma thread por vez sincroniza o mesmo produto,
             // evitando criação de duplicatas por chamadas concorrentes.
             var prodLock = _produtoSyncLocks.GetOrAdd(codigoMercadoria, _ => new System.Threading.SemaphoreSlim(1, 1));
@@ -305,7 +453,7 @@ namespace Pedeai.DB
             try
             {
                 string nome, descricao, imagemUrl, situacao;
-                decimal precoVenda, precoPromo;
+                decimal precoVenda, precoPromo, precoAdicional;
                 bool destaque, habSite, fracionado;
                 int codigoGrupo, qtdSabores;
 
@@ -313,23 +461,25 @@ namespace Pedeai.DB
                 using (var cmd  = new MySqlCommand(
                     "SELECT mercMercadoria, mercApresentacao, mercPreco_Venda, mercPreco_Promocional, " +
                     "mercImagem_Url, mercDestaque, mercHabilitar_Site, Codigo_Grupo, Situacao, " +
-                    "COALESCE(mercFracionado,0) AS mercFracionado, COALESCE(mercQtd_Sabores,1) AS mercQtd_Sabores " +
+                    "COALESCE(mercFracionado,0) AS mercFracionado, COALESCE(mercQtd_Sabores,1) AS mercQtd_Sabores, " +
+                    "COALESCE(mercPreco_Adicional,0) AS mercPreco_Adicional " +
                     "FROM mercadoria WHERE Codigo=@c LIMIT 1", conn))
                 {
                     cmd.Parameters.AddWithValue("@c", codigoMercadoria);
                     using var r = cmd.ExecuteReader();
                     if (!r.Read()) return "";
-                    nome        = r["mercMercadoria"]?.ToString() ?? "";
-                    descricao   = r["mercApresentacao"]?.ToString() ?? "";
-                    precoVenda  = r["mercPreco_Venda"] == DBNull.Value ? 0m : Convert.ToDecimal(r["mercPreco_Venda"]);
-                    precoPromo  = r["mercPreco_Promocional"] == DBNull.Value ? 0m : Convert.ToDecimal(r["mercPreco_Promocional"]);
-                    imagemUrl   = r["mercImagem_Url"]?.ToString() ?? "";
-                    destaque    = r["mercDestaque"]      != DBNull.Value && Convert.ToBoolean(r["mercDestaque"]);
-                    habSite     = r["mercHabilitar_Site"] != DBNull.Value && Convert.ToBoolean(r["mercHabilitar_Site"]);
-                    codigoGrupo = r["Codigo_Grupo"] == DBNull.Value ? 0 : Convert.ToInt32(r["Codigo_Grupo"]);
-                    situacao    = r["Situacao"]?.ToString() ?? "A";
-                    fracionado  = r["mercFracionado"]?.ToString() == "1";
-                    qtdSabores  = r["mercQtd_Sabores"] == DBNull.Value ? 1 : Convert.ToInt32(r["mercQtd_Sabores"]);
+                    nome           = r["mercMercadoria"]?.ToString() ?? "";
+                    descricao      = r["mercApresentacao"]?.ToString() ?? "";
+                    precoVenda     = r["mercPreco_Venda"] == DBNull.Value ? 0m : Convert.ToDecimal(r["mercPreco_Venda"]);
+                    precoPromo     = r["mercPreco_Promocional"] == DBNull.Value ? 0m : Convert.ToDecimal(r["mercPreco_Promocional"]);
+                    imagemUrl      = r["mercImagem_Url"]?.ToString() ?? "";
+                    destaque       = r["mercDestaque"]      != DBNull.Value && Convert.ToBoolean(r["mercDestaque"]);
+                    habSite        = r["mercHabilitar_Site"] != DBNull.Value && Convert.ToBoolean(r["mercHabilitar_Site"]);
+                    codigoGrupo    = r["Codigo_Grupo"] == DBNull.Value ? 0 : Convert.ToInt32(r["Codigo_Grupo"]);
+                    situacao       = r["Situacao"]?.ToString() ?? "A";
+                    fracionado     = r["mercFracionado"]?.ToString() == "1";
+                    qtdSabores     = r["mercQtd_Sabores"] == DBNull.Value ? 1 : Convert.ToInt32(r["mercQtd_Sabores"]);
+                    precoAdicional = r["mercPreco_Adicional"] == DBNull.Value ? 0m : Convert.ToDecimal(r["mercPreco_Adicional"]);
                 }
 
                 // Never send local file paths to Supabase
@@ -401,10 +551,27 @@ namespace Pedeai.DB
                     {
                         var sample = await GetAsync($"{TBL_MERCADORIAS}?limit=1");
                         _supabaseTemColFracionado = sample.Count > 0 && sample[0]["fracionado"] != null;
+                        _supabaseTemColIsAdicional = sample.Count > 0 && sample[0]["is_adicional"] != null;
                     }
-                    catch { _supabaseTemColFracionado = false; }
+                    catch { _supabaseTemColFracionado = false; _supabaseTemColIsAdicional = false; }
                 }
-                bool usarFracionado = _supabaseTemColFracionado == true;
+                bool usarFracionado  = _supabaseTemColFracionado  == true;
+                bool usarIsAdicional = _supabaseTemColIsAdicional  == true;
+
+                // Determina se produto está marcado como adicional no MySQL (tem vínculo tipo='A')
+                bool ehAdicional = false;
+                if (usarIsAdicional)
+                {
+                    try
+                    {
+                        using var connA = AbrirMysql();
+                        using var cmdA  = new MySqlCommand(
+                            "SELECT COUNT(*) FROM mercadoria_vinculo_grupo WHERE Codigo_Mercadoria=@c AND tipo='A' AND Situacao='A' LIMIT 1", connA);
+                        cmdA.Parameters.AddWithValue("@c", codigoMercadoria);
+                        ehAdicional = Convert.ToInt32(cmdA.ExecuteScalar()) > 0;
+                    }
+                    catch { }
+                }
 
                 // Resolve UUID by name+fracionado lookup in Supabase if not stored in MySQL
                 // Filtra por fracionado para não pegar registro antigo com flag diferente
@@ -431,21 +598,57 @@ namespace Pedeai.DB
                 // Monta payload base — inclui fracionado/qtd_sabores se colunas existirem no Supabase
                 object BuildPayload(bool comImagem)
                 {
-                    if (usarFracionado)
+                    string emp = _empresaCodigo;
+                    bool temEmp = UsarEmpresaCodigo;
+                    if (usarFracionado && usarIsAdicional)
                         return string.IsNullOrWhiteSpace(grupoUuid)
-                            ? (object)new { nome, descricao, preco_venda = precoVenda,
+                            ? temEmp ? (object)new { nome, descricao, preco_venda = precoVenda,
+                                            imagem_url = comImagem ? imagemUrl : null,
+                                            ativo = ativoSite, destaque, fracionado, qtd_sabores = qtdSabores,
+                                            is_adicional = ehAdicional, preco_adicional = precoAdicional, empresa_codigo = emp }
+                                     : (object)new { nome, descricao, preco_venda = precoVenda,
+                                            imagem_url = comImagem ? imagemUrl : null,
+                                            ativo = ativoSite, destaque, fracionado, qtd_sabores = qtdSabores,
+                                            is_adicional = ehAdicional, preco_adicional = precoAdicional }
+                            : temEmp ? (object)new { grupo_id = grupoUuid, nome, descricao,
+                                            preco_venda = precoVenda,
+                                            imagem_url = comImagem ? imagemUrl : null,
+                                            ativo = ativoSite, destaque, fracionado, qtd_sabores = qtdSabores,
+                                            is_adicional = ehAdicional, preco_adicional = precoAdicional, empresa_codigo = emp }
+                                     : (object)new { grupo_id = grupoUuid, nome, descricao,
+                                            preco_venda = precoVenda,
+                                            imagem_url = comImagem ? imagemUrl : null,
+                                            ativo = ativoSite, destaque, fracionado, qtd_sabores = qtdSabores,
+                                            is_adicional = ehAdicional, preco_adicional = precoAdicional };
+                    else if (usarFracionado)
+                        return string.IsNullOrWhiteSpace(grupoUuid)
+                            ? temEmp ? (object)new { nome, descricao, preco_venda = precoVenda,
+                                            imagem_url = comImagem ? imagemUrl : null,
+                                            ativo = ativoSite, destaque, fracionado, qtd_sabores = qtdSabores, empresa_codigo = emp }
+                                     : (object)new { nome, descricao, preco_venda = precoVenda,
                                             imagem_url = comImagem ? imagemUrl : null,
                                             ativo = ativoSite, destaque, fracionado, qtd_sabores = qtdSabores }
-                            : (object)new { grupo_id = grupoUuid, nome, descricao,
+                            : temEmp ? (object)new { grupo_id = grupoUuid, nome, descricao,
+                                            preco_venda = precoVenda,
+                                            imagem_url = comImagem ? imagemUrl : null,
+                                            ativo = ativoSite, destaque, fracionado, qtd_sabores = qtdSabores, empresa_codigo = emp }
+                                     : (object)new { grupo_id = grupoUuid, nome, descricao,
                                             preco_venda = precoVenda,
                                             imagem_url = comImagem ? imagemUrl : null,
                                             ativo = ativoSite, destaque, fracionado, qtd_sabores = qtdSabores };
                     else
                         return string.IsNullOrWhiteSpace(grupoUuid)
-                            ? (object)new { nome, descricao, preco_venda = precoVenda,
+                            ? temEmp ? (object)new { nome, descricao, preco_venda = precoVenda,
+                                            imagem_url = comImagem ? imagemUrl : null,
+                                            ativo = ativoSite, destaque, empresa_codigo = emp }
+                                     : (object)new { nome, descricao, preco_venda = precoVenda,
                                             imagem_url = comImagem ? imagemUrl : null,
                                             ativo = ativoSite, destaque }
-                            : (object)new { grupo_id = grupoUuid, nome, descricao,
+                            : temEmp ? (object)new { grupo_id = grupoUuid, nome, descricao,
+                                            preco_venda = precoVenda,
+                                            imagem_url = comImagem ? imagemUrl : null,
+                                            ativo = ativoSite, destaque, empresa_codigo = emp }
+                                     : (object)new { grupo_id = grupoUuid, nome, descricao,
                                             preco_venda = precoVenda,
                                             imagem_url = comImagem ? imagemUrl : null,
                                             ativo = ativoSite, destaque };
@@ -538,6 +741,7 @@ namespace Pedeai.DB
 
         public static async Task<string> SincronizarMarmitaAsync(int codigoMarmita)
         {
+            if (!SiteConectado) return "";
             try
             {
                 string descricao, situacao, imagemUrl;
@@ -612,23 +816,23 @@ namespace Pedeai.DB
                     catch { }
                 }
 
-                var postPayload = new
-                {
-                    grupo_id    = grupoUuid,
-                    nome        = descricao,
-                    descricao   = "Marmita",
-                    preco_venda = valor,
-                    imagem_url  = imagemUrl,
-                    ativo       = ativoSite,
-                    destaque
-                };
+                bool temEmpMar = UsarEmpresaCodigo;
+                var postPayload = temEmpMar
+                    ? (object)new { grupo_id = grupoUuid, nome = descricao, descricao = "Marmita",
+                                    preco_venda = valor, imagem_url = imagemUrl, ativo = ativoSite, destaque,
+                                    empresa_codigo = _empresaCodigo }
+                    : (object)new { grupo_id = grupoUuid, nome = descricao, descricao = "Marmita",
+                                    preco_venda = valor, imagem_url = imagemUrl, ativo = ativoSite, destaque };
 
                 if (!string.IsNullOrWhiteSpace(uuid))
                 {
                     // PATCH: only update imagem_url if we actually have one (don't clear existing)
                     object patchPayload = string.IsNullOrWhiteSpace(imagemUrl)
-                        ? (object)new { grupo_id = grupoUuid, nome = descricao, descricao = "Marmita",
-                                        preco_venda = valor, ativo = ativoSite, destaque }
+                        ? temEmpMar
+                            ? (object)new { grupo_id = grupoUuid, nome = descricao, descricao = "Marmita",
+                                            preco_venda = valor, ativo = ativoSite, destaque, empresa_codigo = _empresaCodigo }
+                            : (object)new { grupo_id = grupoUuid, nome = descricao, descricao = "Marmita",
+                                            preco_venda = valor, ativo = ativoSite, destaque }
                         : postPayload;
                     await PatchAsync(TBL_MERCADORIAS, $"id=eq.{uuid}", patchPayload);
                 }
@@ -936,29 +1140,59 @@ namespace Pedeai.DB
         {
             try
             {
-                string nome, endereco, telefone;
+                string nome, endereco, telefone, logoUrl;
                 using (var conn = AbrirMysql())
                 using (var cmd  = new MySqlCommand(
                     "SELECT COALESCE(NULLIF(empNome_Fantasia,''), empNome) AS nome, " +
-                    "empEndereco, empTelefone FROM empresa ORDER BY Codigo LIMIT 1", conn))
+                    "empEndereco, empTelefone, COALESCE(empLogo_Url,'') AS empLogo_Url FROM empresa ORDER BY Codigo LIMIT 1", conn))
                 {
                     using var r = cmd.ExecuteReader();
                     if (!r.Read()) return;
                     nome     = r["nome"]?.ToString() ?? "";
                     endereco = r["empEndereco"]?.ToString() ?? "";
                     telefone = r["empTelefone"]?.ToString() ?? "";
+                    logoUrl  = r["empLogo_Url"]?.ToString() ?? "";
                 }
 
                 var lojas = await GetAsync("loja?limit=1");
-                if (lojas.Count == 0) return;
+
+                if (lojas.Count == 0)
+                {
+                    // Tabela vazia — cria a linha inicial
+                    var insert = new
+                    {
+                        nome     = string.IsNullOrWhiteSpace(nome) ? "Minha Loja" : nome,
+                        endereco,
+                        telefone,
+                        logo_url = logoUrl,
+                    };
+                    try { await PostAsync("loja", insert); } catch { }
+                    // Relê para pegar o id gerado
+                    lojas = await GetAsync("loja?limit=1");
+                    if (lojas.Count == 0) return;
+                }
+
                 string lojaId = lojas[0]["id"]?.ToString() ?? "";
                 if (string.IsNullOrWhiteSpace(lojaId)) return;
 
-                object payload = string.IsNullOrWhiteSpace(nome)
+                // 1. Envia nome/endereco/telefone (campos que sempre existem)
+                object basePayload = string.IsNullOrWhiteSpace(nome)
                     ? (object)new { endereco, telefone }
                     : new { nome, endereco, telefone };
+                await PatchAsync("loja", $"id=eq.{lojaId}", basePayload);
 
-                await PatchAsync("loja", $"id=eq.{lojaId}", payload);
+                // 2. Envia logo_url separadamente — se a coluna não existir, não quebra o sync principal
+                if (!string.IsNullOrWhiteSpace(logoUrl))
+                {
+                    try
+                    {
+                        await PatchAsync("loja", $"id=eq.{lojaId}", new { logo_url = logoUrl });
+                    }
+                    catch (Exception exLogo)
+                    {
+                        Logger.Log("SupabaseService", "SincronizarLojaAsync", $"Erro ao enviar logo_url: {exLogo.Message}");
+                    }
+                }
             }
             catch (Exception ex)
             {
@@ -966,15 +1200,60 @@ namespace Pedeai.DB
             }
         }
 
+        // ── Reset Supabase ────────────────────────────────────────────────────
+
+        /// <summary>
+        /// Remove todos os dados desta empresa no Supabase.
+        /// Usa o empresa_codigo como filtro para não afetar outros clientes.
+        /// Se empresa_codigo não estiver configurado, apaga tudo (TRUNCATE via DELETE sem filtro).
+        /// </summary>
+        public static async Task LimparTudoSupabaseAsync()
+        {
+            if (!SiteConectado) return;
+
+            string empFilter = UsarEmpresaCodigo
+                ? $"empresa_codigo=eq.{Uri.EscapeDataString(_empresaCodigo)}"
+                : "id=neq.00000000-0000-0000-0000-000000000000"; // sem filtro de empresa → apaga tudo
+
+            // Ordem importa: dependentes antes dos pais
+            string[] tabelas = {
+                "itens_pedido_web",
+                "pedido_web",
+                "enderecos_salvo",
+                "cliente",
+                "cupom",
+                "complemento",
+                "complemento_grupo",
+                "adicional",
+                "mercadoria",
+                "grupo_mercadoria",
+                "forma_pagamento",
+                "taxa_entrega",
+                "bairro",
+                "loja",
+            };
+
+            foreach (var tabela in tabelas)
+            {
+                try { await DeleteAsync(tabela, empFilter); }
+                catch { /* ignora tabelas que não existem ou falhas pontuais */ }
+            }
+
+            // Reseta o cache de UUID após limpar
+            ResetSyncCache();
+        }
+
         // ── Web Orders Import ─────────────────────────────────────────────────
 
         public static async Task<List<PedidoWebSupabase>> BuscarPedidosPendentesAsync()
         {
             var result = new List<PedidoWebSupabase>();
+            if (!SiteConectado) return result;
             try
             {
                 // Accept any order that hasn't been processed yet (website may use "pendente" or "banda")
-                var arr = await GetAsync("pedido_web?status=in.(pendente,banda,novo,aguardando)&order=created_at.asc&limit=50");
+                string empFilter = EmpresaFilter(true);
+                var arr = await GetAsync($"pedido_web?status=in.(pendente,banda,novo,aguardando){empFilter}&order=created_at.asc&limit=50");
                 foreach (JObject item in arr)
                 {
                     result.Add(new PedidoWebSupabase
@@ -1119,12 +1398,15 @@ namespace Pedeai.DB
             var sb = new System.Text.StringBuilder();
             try
             {
-                // Fetch all clients — paginate in batches of 1000
+                // Fetch only clients of this empresa — paginate in batches of 1000
                 var todos = new List<JObject>();
                 int offset = 0;
+                string empQ = UsarEmpresaCodigo
+                    ? $"empresa_codigo=eq.{Uri.EscapeDataString(_empresaCodigo)}&"
+                    : "";
                 while (true)
                 {
-                    var lote = await GetAsync($"cliente?order=nome.asc&limit=1000&offset={offset}");
+                    var lote = await GetAsync($"cliente?{empQ}order=nome.asc&limit=1000&offset={offset}");
                     if (lote.Count == 0) break;
                     foreach (JObject j in lote) todos.Add(j);
                     if (lote.Count < 1000) break;
@@ -2022,6 +2304,7 @@ namespace Pedeai.DB
         /// </summary>
         public static async Task SincronizarItensMarmitaAsync(int codigoMarmita)
         {
+            if (!SiteConectado) return;
             try
             {
                 // 1. UUID da marmita no Supabase
@@ -3046,8 +3329,10 @@ namespace Pedeai.DB
 
         public static async Task SincronizarTudoAsync()
         {
+            if (!SiteConectado) return;
             try
             {
+                await CorrigirEmpresaCodigoNuloAsync(); // reivindica registros órfãos (migração automática)
                 await SincronizarLojaAsync();
                 await SincronizarFormasPagamentoAsync();
                 await SincronizarTodosGruposAsync();
@@ -3071,8 +3356,12 @@ namespace Pedeai.DB
         /// </summary>
         public static async Task<string> SincronizarTudoComProgressoAsync(IProgress<string> progress)
         {
+            if (!SiteConectado) return "Conexão com o site está desabilitada.";
             var todosErros = new List<string>();
             ResetSyncCache(); // clear per-run group cache to avoid stale hits
+
+            progress?.Report("Reivindicando registros sem código de empresa...");
+            await CorrigirEmpresaCodigoNuloAsync();
 
             progress?.Report("Sincronizando dados da loja...");
             await SincronizarLojaAsync();
@@ -3408,6 +3697,23 @@ namespace Pedeai.DB
             catch (Exception ex)
             {
                 Logger.Log("SupabaseService", "UploadProdutoImagemAsync", $"Erro produto {codigoProduto}", ex);
+            }
+        }
+
+        /// <summary>Faz upload da logo da empresa para ImgBB e retorna a URL pública.</summary>
+        public static async Task<string> UploadLogoEmpresaAsync(string localPath)
+        {
+            try
+            {
+                if (!System.IO.File.Exists(localPath)) return "";
+                string imgbbKey = GetImgBBKey();
+                if (string.IsNullOrWhiteSpace(imgbbKey)) return "";
+                return await UploadImgBBAsync(localPath, imgbbKey);
+            }
+            catch (Exception ex)
+            {
+                Logger.Log("SupabaseService", "UploadLogoEmpresaAsync", "Erro upload logo", ex);
+                return "";
             }
         }
     }

@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { ChevronLeft, MapPin, Phone, Loader2, Save, ShoppingCart, Check, X, CreditCard, Banknote, QrCode, Tag, User, FileText } from 'lucide-react';
-import { supabase } from '@/lib/supabase';
+import { supabase, empresaCodigo, isEmpresaCodigoMissing } from '@/lib/supabase';
 import { EnderecoSalvo, Loja } from '@/types/database';
 import { useCartStore } from '@/store/useCartStore';
 import { useQuery } from '@tanstack/react-query';
@@ -38,9 +38,17 @@ export default function Checkout() {
   const { data: store } = useQuery({
     queryKey: ['store'],
     queryFn: async () => {
-      const { data, error } = await supabase.from('loja').select('*').limit(1).single();
-      if (error) throw error;
-      return data as Loja;
+      let q = supabase.from('loja').select('*');
+      if (empresaCodigo) q = q.eq('empresa_codigo', empresaCodigo);
+      const { data, error } = await q.limit(1).maybeSingle();
+      if (error) {
+        if (isEmpresaCodigoMissing(error)) {
+          const { data: d2 } = await supabase.from('loja').select('*').limit(1).maybeSingle();
+          return (d2 ?? null) as Loja | null;
+        }
+        return null;
+      }
+      return (data ?? null) as Loja | null;
     },
   });
 
@@ -257,12 +265,20 @@ export default function Checkout() {
 
     setLoading(true);
     try {
-      const { data, error } = await supabase
+      let cupomQuery = supabase
         .from('cupom')
         .select('*')
         .eq('codigo', couponCode.trim())
-        .eq('ativo', true)
-        .single();
+        .eq('ativo', true);
+      if (empresaCodigo) cupomQuery = cupomQuery.eq('empresa_codigo', empresaCodigo);
+      let { data, error } = await cupomQuery.single();
+      if (error && isEmpresaCodigoMissing(error)) {
+        // coluna ainda não existe no Supabase — busca sem filtro de empresa
+        const fallback = await supabase.from('cupom').select('*')
+          .eq('codigo', couponCode.trim()).eq('ativo', true).single();
+        data = fallback.data;
+        error = fallback.error;
+      }
 
       if (error || !data) {
         alert('Cupom inválido ou não encontrado.');
@@ -357,7 +373,8 @@ export default function Checkout() {
           troco: paymentMethod?.tipo === 'dinheiro' ? parseFloat(troco.replace(',', '.')) || 0 : null,
           endereco_entrega: addressStr,
           cupom_id: appliedCoupon?.id || null,
-          status: 'pendente'
+          status: 'pendente',
+          ...(empresaCodigo ? { empresa_codigo: empresaCodigo } : {})
         }])
         .select()
         .single();

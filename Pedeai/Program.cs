@@ -48,6 +48,9 @@ namespace Pedeai
             var empresa = new EmpresaDAL().Carregar();
             TentarAutoRenovarLicenca(empresa);
 
+            // ── Carrega configurações de integração com o site (empresa_codigo + SiteConectado) ──
+            DB.SupabaseService.CarregarEmpresaCodigo();
+
             // ── Registro no Supabase + sync de licença ────────────────────
             // Roda em thread separada para não bloquear a UI, mas aguarda
             // até 8s para que a ChaveLicenca já esteja salva antes do reload.

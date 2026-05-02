@@ -741,6 +741,14 @@ namespace Pedeai.DB
                 AddColumnIfNotExists(conn, db, "empresa", "empImgBBKey",
                     "VARCHAR(200) NOT NULL DEFAULT ''");
 
+                // ── empresa: logo URL ─────────────────────────────────────
+                AddColumnIfNotExists(conn, db, "empresa", "empLogo_Url",
+                    "VARCHAR(500) NOT NULL DEFAULT ''");
+
+                // ── empresa: habilitar conexão com o site (Admin only) ────
+                AddColumnIfNotExists(conn, db, "empresa", "empHabilitar_Site",
+                    "TINYINT(1) NOT NULL DEFAULT 1");
+
                 return true;
             }
             catch (Exception ex)
@@ -864,6 +872,7 @@ namespace Pedeai.DB
                     "turno", "estoque_item", "cliente", "cupom", "fornecedor",
                     "marmita_item", "marmita",
                     "mercadoria", "grupo_mercadoria",
+                    "bairro", "taxa_entrega", "forma_pagamento",
                     // WhatsApp / Promoções / Cardápio
                     "promocao_item", "promocao",
                     "cardapio_dia_item", "cardapio_dia",

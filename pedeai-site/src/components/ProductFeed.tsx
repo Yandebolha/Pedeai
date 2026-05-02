@@ -6,7 +6,7 @@ import { Plus, Minus, X, ShoppingBag, Check } from 'lucide-react';
 import { useCartStore, SelectedComplemento, SelectedAdicional } from '@/store/useCartStore';
 import { motion, AnimatePresence } from 'motion/react';
 import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/lib/supabase';
+import { supabase, empresaCodigo, isEmpresaCodigoMissing } from '@/lib/supabase';
 
 interface ProductFeedProps {
   products: Produto[];
@@ -21,7 +21,7 @@ export function ProductFeed({ products, categoryName }: ProductFeedProps) {
   const [selectedSabores, setSelectedSabores] = useState<string[]>([]);
   const [modalQuantity, setModalQuantity] = useState(1);
 
-  const { data: complementGrupos } = useQuery<ComplementoGrupoComItens[]>({
+  const { data: complementGrupos, isLoading: isLoadingGrupos } = useQuery<ComplementoGrupoComItens[]>({
     queryKey: ['complemento_grupo', selectedProduct?.id],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -56,24 +56,65 @@ export function ProductFeed({ products, categoryName }: ProductFeedProps) {
   const { data: saboresDisponiveis } = useQuery<Produto[]>({
     queryKey: ['sabores', selectedProduct?.grupo_id],
     queryFn: async () => {
-      const { data, error } = await supabase
+      let q = supabase
         .from('mercadoria')
         .select('*')
         .eq('grupo_id', selectedProduct!.grupo_id!)
         .eq('ativo', true)
         .neq('fracionado', true)
-        .neq('id', selectedProduct!.id)
-        .order('nome');
-      if (error) throw error;
+        .neq('is_adicional', true)
+        .neq('id', selectedProduct!.id);
+      if (empresaCodigo) q = q.eq('empresa_codigo', empresaCodigo);
+      const { data, error } = await q.order('nome');
+      if (error) {
+        if (isEmpresaCodigoMissing(error)) {
+          const { data: d2, error: e2 } = await supabase.from('mercadoria').select('*')
+            .eq('grupo_id', selectedProduct!.grupo_id!).eq('ativo', true)
+            .neq('fracionado', true).neq('is_adicional', true).neq('id', selectedProduct!.id).order('nome');
+          if (e2) throw e2;
+          return d2 as Produto[];
+        }
+        throw error;
+      }
       return data as Produto[];
     },
     enabled: !!(selectedProduct?.fracionado && selectedProduct?.grupo_id),
   });
 
+  // Busca adicionais disponíveis para a categoria (produtos marcados como is_adicional)
+  // Usado tanto em marmita quanto em pizza/fracionado
+  const { data: adicionaisCategoriaList } = useQuery<Produto[]>({
+    queryKey: ['adicionais_categoria', selectedProduct?.grupo_id],
+    queryFn: async () => {
+      let q = supabase
+        .from('mercadoria')
+        .select('*')
+        .eq('grupo_id', selectedProduct!.grupo_id!)
+        .eq('ativo', true)
+        .eq('is_adicional', true);
+      if (empresaCodigo) q = q.eq('empresa_codigo', empresaCodigo);
+      const { data, error } = await q.order('nome');
+      if (error) {
+        if (isEmpresaCodigoMissing(error)) {
+          const { data: d2, error: e2 } = await supabase.from('mercadoria').select('*')
+            .eq('grupo_id', selectedProduct!.grupo_id!).eq('ativo', true).eq('is_adicional', true).order('nome');
+          if (e2) throw e2;
+          return d2 as Produto[];
+        }
+        throw error;
+      }
+      return data as Produto[];
+    },
+    enabled: !!selectedProduct?.grupo_id,
+  });
+
+  const [selectedAdicionaisCategoria, setSelectedAdicionaisCategoria] = useState<SelectedAdicional[]>([]);
+
   useEffect(() => {
     if (selectedProduct) {
       setSelectedComplementos({});
       setSelectedAdicionais([]);
+      setSelectedAdicionaisCategoria([]);
       setSelectedSabores([]);
       setModalQuantity(1);
     }
@@ -100,9 +141,20 @@ export function ProductFeed({ products, categoryName }: ProductFeedProps) {
       })
     : [];
 
+  // Grupos "Adicional" são renderizados como adicionais +/- (não como checkbox/radio)
+  const gruposNormais = sortedGrupos.filter((g) => g.nome.toLowerCase() !== 'adicional');
+  const itensAdicionaisDeGrupo: { id: string; nome: string; preco: number }[] = sortedGrupos
+    .filter((g) => g.nome.toLowerCase() === 'adicional')
+    .flatMap((g) => (g.complemento || []).filter((c) => c.ativo).map((c) => ({ id: c.id, nome: c.nome, preco: c.preco })));
+
   // ── Fracionado (múltiplos sabores) ───────────────────────────────────────
   const isFracionado = selectedProduct?.fracionado === true;
   const qtdSabores = selectedProduct?.qtd_sabores || 2;
+
+  // Marmita: produto fracionado com grupos normais de complemento (Arroz, Feijão, etc.)
+  // Pizza: produto fracionado sem grupos de complemento (usa sabores da mesma categoria)
+  const isMarmita = isFracionado && !isLoadingGrupos && gruposNormais.length > 0;
+  const isPizzaStyle = isFracionado && !isLoadingGrupos && sortedGrupos.length === 0;
 
   const toggleSabor = (id: string) => {
     setSelectedSabores((prev) => {
@@ -112,26 +164,45 @@ export function ProductFeed({ products, categoryName }: ProductFeedProps) {
     });
   };
 
-  // Preço calculado = média dos sabores selecionados
+  // Preço calculado = média dos sabores selecionados (apenas para pizza)
   const precoCalculado = useMemo(() => {
-    if (!isFracionado || !saboresDisponiveis || selectedSabores.length !== qtdSabores) return null;
+    if (!isPizzaStyle || !saboresDisponiveis || selectedSabores.length !== qtdSabores) return null;
     const soma = selectedSabores.reduce((acc, id) => {
       const prod = saboresDisponiveis.find((p) => p.id === id);
       return acc + (prod ? (prod.preco_promocional ?? prod.preco_venda) : 0);
     }, 0);
     return soma / qtdSabores;
-  }, [isFracionado, selectedSabores, qtdSabores, saboresDisponiveis]);
+  }, [isPizzaStyle, selectedSabores, qtdSabores, saboresDisponiveis]);
 
-  const canAdd = isFracionado
+  // Total dos complementos selecionados na marmita
+  const complementosTotal = useMemo(() => {
+    if (!complementGrupos) return 0;
+    return (Object.entries(selectedComplementos) as [string, string[]][]).reduce((acc: number, [grupoId, itemIds]) => {
+      const grupo = complementGrupos.find((g) => g.id === grupoId);
+      return acc + itemIds.reduce((sum: number, itemId: string) => {
+        const item = (grupo?.complemento as ComplementoItem[] | undefined)?.find((c) => c.id === itemId);
+        return sum + (item?.preco || 0);
+      }, 0);
+    }, 0);
+  }, [complementGrupos, selectedComplementos]);
+
+  const canAdd = isMarmita
+    ? complementGrupos!.filter((g) => g.obrigatorio).every((g) => (selectedComplementos[g.id]?.length || 0) >= g.minimo)
+    : isPizzaStyle
     ? selectedSabores.length === qtdSabores
     : (!complementGrupos ||
         complementGrupos
-          .filter((g) => g.obrigatorio && g.nome.toLowerCase() !== 'geral')
+          .filter((g) => g.obrigatorio)
           .every((g) => (selectedComplementos[g.id]?.length || 0) >= g.minimo));
 
   const adicionaisTotal = selectedAdicionais.reduce((acc, a) => acc + a.preco * a.quantity, 0);
+  const adicionaisCatTotal = selectedAdicionaisCategoria.reduce((acc, a) => acc + a.preco * a.quantity, 0);
   const itemBasePrice = selectedProduct ? (selectedProduct.preco_promocional || selectedProduct.preco_venda) : 0;
-  const finalPrice = isFracionado ? (precoCalculado ?? itemBasePrice) : (itemBasePrice + adicionaisTotal);
+  const finalPrice = isMarmita
+    ? itemBasePrice + complementosTotal + adicionaisCatTotal
+    : isPizzaStyle
+    ? (precoCalculado ?? itemBasePrice) + adicionaisCatTotal
+    : (itemBasePrice + adicionaisTotal);
 
   return (
     <div className="px-4 py-6">
@@ -257,8 +328,8 @@ export function ProductFeed({ products, categoryName }: ProductFeedProps) {
                     </p>
                   </div>
 
-                  {/* ── Seletor de Sabores (produto fracionado) ── */}
-                  {isFracionado && (
+                  {/* ── Seletor de Sabores (pizza / produto fracionado sem grupos) ── */}
+                  {isPizzaStyle && (
                     <div className="border-t border-gray-100 -mx-6">
                       {/* Cabeçalho */}
                       <div className="flex items-center justify-between bg-gray-50 px-6 py-3">
@@ -342,10 +413,71 @@ export function ProductFeed({ products, categoryName }: ProductFeedProps) {
                     </div>
                   )}
 
+                  {/* ── Adicionais da categoria (para marmita e pizza) ── */}
+                  {(isMarmita || isPizzaStyle) && ((adicionaisCategoriaList && adicionaisCategoriaList.length > 0) || itensAdicionaisDeGrupo.length > 0) && (
+                    <div className="border-t border-gray-100 -mx-6">
+                      <div className="flex items-center justify-between bg-gray-50 px-6 py-3">
+                        <div>
+                          <h3 className="font-bold text-gray-900 text-[15px] leading-tight">Adicionais</h3>
+                          <p className="text-xs text-gray-500 mt-0.5">Itens extras opcionais</p>
+                        </div>
+                      </div>
+                      <div className="divide-y divide-gray-100 bg-white">
+                        {[...(adicionaisCategoriaList || []).map((ad) => ({
+                          id: ad.id,
+                          nome: ad.nome,
+                          preco: ad.preco_adicional && ad.preco_adicional > 0 ? ad.preco_adicional : (ad.preco_promocional ?? ad.preco_venda),
+                        })), ...itensAdicionaisDeGrupo].map((ad) => {
+                          const selectedQty = selectedAdicionaisCategoria.find((a) => a.id === ad.id)?.quantity || 0;
+                          return (
+                            <div key={ad.id} className="flex items-center gap-4 px-6 py-4">
+                              <div className="flex items-center gap-2 flex-shrink-0">
+                                <button
+                                  onClick={() => {
+                                    setSelectedAdicionaisCategoria((prev) => {
+                                      const existing = prev.find((a) => a.id === ad.id);
+                                      if (!existing || existing.quantity === 0) return prev;
+                                      if (existing.quantity === 1) return prev.filter((a) => a.id !== ad.id);
+                                      return prev.map((a) => (a.id === ad.id ? { ...a, quantity: a.quantity - 1 } : a));
+                                    });
+                                  }}
+                                  disabled={selectedQty === 0}
+                                  className="w-7 h-7 flex items-center justify-center rounded-full border-2 border-gray-300 text-gray-500 hover:border-red-600 hover:text-red-600 transition-colors disabled:opacity-30"
+                                >
+                                  <Minus className="w-3.5 h-3.5" />
+                                </button>
+                                <span className="text-sm font-bold w-5 text-center text-gray-700">{selectedQty}</span>
+                                <button
+                                  onClick={() => {
+                                    setSelectedAdicionaisCategoria((prev) => {
+                                      const existing = prev.find((a) => a.id === ad.id);
+                                      if (!existing)
+                                        return [...prev, { id: ad.id, nome: ad.nome, preco: ad.preco, quantity: 1 }];
+                                      return prev.map((a) => (a.id === ad.id ? { ...a, quantity: a.quantity + 1 } : a));
+                                    });
+                                  }}
+                                  className="w-7 h-7 flex items-center justify-center rounded-full border-2 border-red-600 text-red-600 hover:bg-red-50 transition-colors"
+                                >
+                                  <Plus className="w-3.5 h-3.5" />
+                                </button>
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <p className="text-sm font-semibold text-gray-800 uppercase tracking-wide leading-tight">{ad.nome}</p>
+                                <p className="text-xs text-green-700 font-bold mt-0.5">
+                                  + R$ {ad.preco.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                                </p>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+
                   {/* Grupos de Complementos */}
-                  {sortedGrupos && sortedGrupos.length > 0 && (
+                  {gruposNormais.length > 0 && (
                     <div className="space-y-0 pt-2 border-t border-gray-100 -mx-6">
-                      {sortedGrupos.map((grupo) => {
+                      {gruposNormais.map((grupo) => {
                         const selectedCount = selectedComplementos[grupo.id]?.length || 0;
                         const isMulti = grupo.maximo > 1;
                         const subtitle = grupo.minimo === grupo.maximo
@@ -493,7 +625,21 @@ export function ProductFeed({ products, categoryName }: ProductFeedProps) {
                   )}
 
                   <div className="pt-4 border-t border-gray-100">
-                    {isFracionado ? (
+                    {isMarmita ? (
+                      <>
+                        <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">Preço</span>
+                        <div className="flex items-baseline gap-2 mt-1">
+                          <span className="text-2xl font-black text-green-700">
+                            R$ {(itemBasePrice + complementosTotal + adicionaisCatTotal).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                          </span>
+                          {(complementosTotal > 0 || adicionaisCatTotal > 0) && (
+                            <span className="text-xs text-gray-400">
+                              (base{complementosTotal > 0 ? ' + complementos' : ''}{adicionaisCatTotal > 0 ? ' + adicionais' : ''})
+                            </span>
+                          )}
+                        </div>
+                      </>
+                    ) : isPizzaStyle ? (
                       <>
                         <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">
                           {selectedSabores.length === qtdSabores ? 'Preço calculado' : `A partir de · selecione ${qtdSabores} sabores`}
@@ -551,8 +697,8 @@ export function ProductFeed({ products, categoryName }: ProductFeedProps) {
                     <button
                       disabled={!canAdd}
                       onClick={() => {
-                        if (isFracionado && precoCalculado !== null && saboresDisponiveis) {
-                          // Produto fracionado: adiciona com sabores como complementos e preço calculado
+                        if (isPizzaStyle && precoCalculado !== null && saboresDisponiveis) {
+                          // Pizza/fracionado: adiciona com sabores como complementos e preço calculado
                           const saboresComp: SelectedComplemento[] = [{
                             grupoId: 'sabores',
                             grupoNome: '🍕 Sabores',
@@ -567,7 +713,8 @@ export function ProductFeed({ products, categoryName }: ProductFeedProps) {
                             preco_venda: precoCalculado,
                             preco_promocional: null,
                           };
-                          addItem(produtoOverride, modalQuantity, saboresComp, []);
+                          addItem(produtoOverride, modalQuantity, saboresComp,
+                            selectedAdicionaisCategoria.filter((a) => a.quantity > 0));
                           setSelectedProduct(null);
                           return;
                         }
@@ -588,7 +735,9 @@ export function ProductFeed({ products, categoryName }: ProductFeedProps) {
                           selectedProduct,
                           modalQuantity,
                           complementosList,
-                          selectedAdicionais.filter((a) => a.quantity > 0)
+                          isMarmita
+                            ? selectedAdicionaisCategoria.filter((a) => a.quantity > 0)
+                            : selectedAdicionais.filter((a) => a.quantity > 0)
                         );
                         setSelectedProduct(null);
                       }}
@@ -598,7 +747,7 @@ export function ProductFeed({ products, categoryName }: ProductFeedProps) {
                       <span>
                         {canAdd
                           ? `Adicionar · R$ ${(finalPrice * modalQuantity).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`
-                          : isFracionado
+                          : isPizzaStyle
                           ? `Escolha ${qtdSabores - selectedSabores.length} sabor${qtdSabores - selectedSabores.length !== 1 ? 'es' : ''} ainda`
                           : 'Escolha as opções obrigatórias'}
                       </span>
