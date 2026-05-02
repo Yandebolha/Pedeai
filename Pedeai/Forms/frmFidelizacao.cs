@@ -207,6 +207,7 @@ namespace Pedeai.Forms
             numCupomValor.Value     = cfg.fidCupom_Valor > 0 ? Math.Min(cfg.fidCupom_Valor, numCupomValor.Maximum) : 10m;
             numCupomMin.Value       = cfg.fidCupom_Minimo >= 0 ? cfg.fidCupom_Minimo : 0m;
             numCupomValidade.Value  = cfg.fidCupom_Validade > 0 ? Math.Min(cfg.fidCupom_Validade, 365) : 30;
+            numCupomLimiteUsos.Value = cfg.fidCupom_Limite_Usos > 0 ? Math.Min(cfg.fidCupom_Limite_Usos, 99) : 1;
             txtProdNome.Text        = cfg.fidProduto_Nome ?? "";
             _produtoCodigo          = cfg.fidProduto_Codigo;
             numProdQtde.Value       = cfg.fidProduto_Qtde > 0 ? cfg.fidProduto_Qtde : 1;
@@ -231,6 +232,7 @@ namespace Pedeai.Forms
             numCupomValor.Value     = 10m;
             numCupomMin.Value       = 0m;
             numCupomValidade.Value  = 30;
+            numCupomLimiteUsos.Value = 1;
             txtProdNome.Text        = "";
             _produtoCodigo          = 0;
             numProdQtde.Value       = 1;
@@ -269,7 +271,8 @@ namespace Pedeai.Forms
                 fidCupom_Tipo     = cmbCupomTipo.SelectedIndex == 1 ? "FIXO" : "PERCENTUAL",
                 fidCupom_Valor    = numCupomValor.Value,
                 fidCupom_Minimo   = numCupomMin.Value,
-                fidCupom_Validade = (int)numCupomValidade.Value,
+                fidCupom_Validade    = (int)numCupomValidade.Value,
+                fidCupom_Limite_Usos = (int)numCupomLimiteUsos.Value,
                 fidProduto_Nome   = txtProdNome.Text.Trim(),
                 fidProduto_Codigo = _produtoCodigo,
                 fidProduto_Qtde   = (int)numProdQtde.Value,
@@ -298,24 +301,48 @@ namespace Pedeai.Forms
             using var dlg = new Form();
             dlg.Text            = "Selecionar Produto";
             dlg.StartPosition   = FormStartPosition.CenterParent;
-            dlg.Size            = new Size(600, 420);
+            dlg.Size            = new Size(660, 460);
             dlg.FormBorderStyle = FormBorderStyle.FixedDialog;
             dlg.MaximizeBox     = dlg.MinimizeBox = false;
             dlg.BackColor       = Color.FromArgb(245, 237, 216);
 
+            // Filtros lado a lado: [Nome: textbox] [Categoria: combobox]
+            var pnlFiltros = new Panel { Dock = DockStyle.Top, Height = 38, Padding = new Padding(4, 4, 4, 2) };
+
+            var lblNome = new Label
+            {
+                Text = "Nome:", Left = 4, Top = 10, Width = 46, Height = 20,
+                Font = new Font("Segoe UI", 9F),
+                TextAlign = ContentAlignment.MiddleRight
+            };
             var txtFiltro = new TextBox
             {
-                Dock = DockStyle.Top, Height = 28,
-                Font = new Font("Segoe UI", 10F),
+                Left = 52, Top = 7, Width = 185, Height = 26,
+                Font = new Font("Segoe UI", 9.5F),
                 PlaceholderText = "Filtrar por nome...",
                 BorderStyle = BorderStyle.FixedSingle
             };
+            var lblCat = new Label
+            {
+                Text = "Categoria:", Left = 246, Top = 10, Width = 72, Height = 20,
+                Font = new Font("Segoe UI", 9F),
+                TextAlign = ContentAlignment.MiddleRight
+            };
+            var cmbCategoria = new ComboBox
+            {
+                Left = 320, Top = 6, Width = 310, Height = 26,
+                Font = new Font("Segoe UI", 9.5F),
+                DropDownStyle = ComboBoxStyle.DropDownList
+            };
+
+            pnlFiltros.Controls.AddRange(new Control[] { lblNome, txtFiltro, lblCat, cmbCategoria });
 
             var grid = new DataGridView
             {
                 Dock = DockStyle.Fill, ReadOnly = true, AllowUserToAddRows = false,
                 SelectionMode = DataGridViewSelectionMode.FullRowSelect,
-                RowHeadersVisible = false, AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill,
+                RowHeadersVisible = false,
+                AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill,
                 BackgroundColor = Color.FromArgb(245, 237, 216), GridColor = Color.FromArgb(200, 185, 160),
                 DefaultCellStyle = { BackColor = Color.FromArgb(245, 237, 216), ForeColor = Color.FromArgb(50, 50, 50),
                     SelectionBackColor = Color.FromArgb(224, 113, 42), SelectionForeColor = Color.White },
@@ -323,27 +350,49 @@ namespace Pedeai.Forms
                     Font = new Font("Segoe UI", 9F, FontStyle.Bold) },
                 BorderStyle = BorderStyle.None, Font = new Font("Segoe UI", 9F), MultiSelect = false
             };
-            grid.Columns.Add(new DataGridViewTextBoxColumn { Name = "Codigo", HeaderText = "Cód", FillWeight = 10 });
-            grid.Columns.Add(new DataGridViewTextBoxColumn { Name = "Nome",   HeaderText = "Produto", FillWeight = 65 });
-            grid.Columns.Add(new DataGridViewTextBoxColumn { Name = "Preco",  HeaderText = "Preço R$", FillWeight = 25 });
+            // Colunas: Cód fixo, Nome e Categoria preenchem proporcionalmente, Preço fixo
+            var colCod  = new DataGridViewTextBoxColumn { Name = "Codigo",    HeaderText = "Cód",       Width = 55,  MinimumWidth = 55,  AutoSizeMode = DataGridViewAutoSizeColumnMode.None };
+            var colNome = new DataGridViewTextBoxColumn { Name = "Nome",      HeaderText = "Produto",   FillWeight = 60 };
+            var colCat  = new DataGridViewTextBoxColumn { Name = "Categoria", HeaderText = "Categoria", FillWeight = 35 };
+            var colPreco= new DataGridViewTextBoxColumn { Name = "Preco",     HeaderText = "Preço R$",  Width = 90,  MinimumWidth = 90,  AutoSizeMode = DataGridViewAutoSizeColumnMode.None };
+            colPreco.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
+            grid.Columns.AddRange(colCod, colNome, colCat, colPreco);
 
             var mercBLL = new MercadoriaBLL();
             var dt = mercBLL.Listar();
 
-            void Preencher(string filtro)
+            // Popular categorias no ComboBox
+            cmbCategoria.Items.Add("(Todas as categorias)");
+            foreach (System.Data.DataRow r in dt.Rows)
+            {
+                string cat = r["Categoria"]?.ToString() ?? "";
+                if (!string.IsNullOrWhiteSpace(cat) && !cmbCategoria.Items.Contains(cat))
+                    cmbCategoria.Items.Add(cat);
+            }
+            cmbCategoria.SelectedIndex = 0;
+
+            void Preencher(string filtroNome, string filtroCategoria)
             {
                 grid.Rows.Clear();
                 foreach (System.Data.DataRow r in dt.Rows)
                 {
                     string nome = r["Nome"]?.ToString() ?? "";
-                    if (!string.IsNullOrWhiteSpace(filtro) &&
-                        nome.IndexOf(filtro, StringComparison.OrdinalIgnoreCase) < 0) continue;
-                    grid.Rows.Add(r["Codigo"], nome,
+                    string cat  = r["Categoria"]?.ToString() ?? "";
+                    if (!string.IsNullOrWhiteSpace(filtroNome) &&
+                        nome.IndexOf(filtroNome, StringComparison.OrdinalIgnoreCase) < 0) continue;
+                    if (!string.IsNullOrWhiteSpace(filtroCategoria) &&
+                        cat.IndexOf(filtroCategoria, StringComparison.OrdinalIgnoreCase) < 0) continue;
+                    grid.Rows.Add(r["Codigo"], nome, cat,
                         r["Preco"] == System.DBNull.Value ? "" : Convert.ToDecimal(r["Preco"]).ToString("N2"));
                 }
             }
-            Preencher("");
-            txtFiltro.TextChanged += (_, __) => Preencher(txtFiltro.Text.Trim());
+
+            string CategoriaSelecionada() =>
+                cmbCategoria.SelectedIndex <= 0 ? "" : cmbCategoria.SelectedItem?.ToString() ?? "";
+
+            Preencher("", "");
+            txtFiltro.TextChanged             += (_, __) => Preencher(txtFiltro.Text.Trim(), CategoriaSelecionada());
+            cmbCategoria.SelectedIndexChanged += (_, __) => Preencher(txtFiltro.Text.Trim(), CategoriaSelecionada());
 
             (int cod, string nome) escolhido = (0, "");
 
@@ -369,7 +418,7 @@ namespace Pedeai.Forms
 
             dlg.Controls.Add(grid);
             dlg.Controls.Add(btnOk);
-            dlg.Controls.Add(txtFiltro);
+            dlg.Controls.Add(pnlFiltros);
 
             if (dlg.ShowDialog(this) == DialogResult.OK && escolhido.cod > 0)
             {

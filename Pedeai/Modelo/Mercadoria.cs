@@ -23,7 +23,9 @@ namespace Pedeai.Modelo
         public DateTime mercData_Cadastro { get; set; }
 
         // Precificação específica quando usado como Adicional (não altera preço de estoque)
-        public decimal mercPreco_Adicional { get; set; }
+        public decimal mercPreco_Adicional   { get; set; }
+        // Quantidade máxima que pode ser adicionada por pedido (0 = ilimitado)
+        public int     mercAdicional_Qtd_Max { get; set; } = 1;
 
         // Produto fracionado (múltiplos sabores, ex: pizza)
         public bool mercFracionado    { get; set; }

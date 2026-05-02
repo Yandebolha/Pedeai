@@ -7,7 +7,7 @@ import { useCartStore } from '@/store/useCartStore';
 import { ShoppingBag, ArrowRight, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useQuery } from '@tanstack/react-query';
-import { supabase, empresaCodigo, isEmpresaCodigoMissing } from '@/lib/supabase';
+import { supabase } from '@/lib/supabase';
 import { Categoria, Produto, Loja } from '@/types/database';
 
 export default function Home() {
@@ -21,17 +21,13 @@ export default function Home() {
   const { data: store, isLoading: isLoadingStore } = useQuery({
     queryKey: ['store'],
     queryFn: async () => {
-      let q = supabase.from('loja').select('*');
-      if (empresaCodigo) q = q.eq('empresa_codigo', empresaCodigo);
-      const { data, error } = await q.limit(1).maybeSingle();
-      if (error) {
-        if (isEmpresaCodigoMissing(error)) {
-          const { data: d2 } = await supabase.from('loja').select('*').limit(1).maybeSingle();
-          return (d2 ?? null) as Loja | null;
-        }
-        return null; // falha silenciosa — loja vazia não bloqueia o cardápio
-      }
-      return (data ?? null) as Loja | null;
+      const { data, error } = await supabase
+        .from('loja')
+        .select('*')
+        .limit(1)
+        .single();
+      if (error) throw error;
+      return data as Loja;
     },
   });
 
@@ -39,17 +35,12 @@ export default function Home() {
   const { data: categoriesRaw, isLoading: isLoadingCats } = useQuery({
     queryKey: ['categories'],
     queryFn: async () => {
-      let q = supabase.from('grupo_mercadoria').select('*').eq('ativo', true);
-      if (empresaCodigo) q = q.eq('empresa_codigo', empresaCodigo);
-      const { data, error } = await q.order('ordem');
-      if (error) {
-        if (isEmpresaCodigoMissing(error)) {
-          const { data: d2, error: e2 } = await supabase.from('grupo_mercadoria').select('*').eq('ativo', true).order('ordem');
-          if (e2) throw e2;
-          return d2 as Categoria[];
-        }
-        throw error;
-      }
+      const { data, error } = await supabase
+        .from('grupo_mercadoria')
+        .select('*')
+        .eq('ativo', true)
+        .order('ordem');
+      if (error) throw error;
       return data as Categoria[];
     },
   });
@@ -70,17 +61,13 @@ export default function Home() {
   const { data: products, isLoading: isLoadingProds } = useQuery({
     queryKey: ['products'],
     queryFn: async () => {
-      let q = supabase.from('mercadoria').select('*').eq('ativo', true).neq('is_adicional', true);
-      if (empresaCodigo) q = q.eq('empresa_codigo', empresaCodigo);
-      const { data, error } = await q.order('destaque', { ascending: false });
-      if (error) {
-        if (isEmpresaCodigoMissing(error)) {
-          const { data: d2, error: e2 } = await supabase.from('mercadoria').select('*').eq('ativo', true).neq('is_adicional', true).order('destaque', { ascending: false });
-          if (e2) throw e2;
-          return d2 as Produto[];
-        }
-        throw error;
-      }
+      const { data, error } = await supabase
+        .from('mercadoria')
+        .select('*')
+        .eq('ativo', true)
+        .not('is_adicional', 'is', true)
+        .order('destaque', { ascending: false });
+      if (error) throw error;
       return data as Produto[];
     },
   });
@@ -116,7 +103,7 @@ export default function Home() {
     ? `Resultados para "${searchQuery}"`
     : (categories?.find((c) => c.id === selectedCategoryId)?.nome || 'Produtos');
 
-  if (isLoadingCats || isLoadingProds) {
+  if (isLoadingCats || isLoadingProds || isLoadingStore) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-white">
         <div className="flex flex-col items-center gap-2">
@@ -136,7 +123,7 @@ export default function Home() {
         <div className="px-4 py-4">
           <div className="w-full aspect-[21/9] rounded-xl overflow-hidden shadow-sm">
             <img
-              src={store?.banner_url || store?.logo_url || 'https://picsum.photos/seed/food-banner/800/400'}
+              src={store?.banner_url || 'https://picsum.photos/seed/food-banner/800/400'}
               alt={store?.nome || 'Banner da loja'}
               className="w-full h-full object-cover"
               referrerPolicy="no-referrer"

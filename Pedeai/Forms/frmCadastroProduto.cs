@@ -158,6 +158,7 @@ namespace Pedeai.Forms
             _caminhoImagem = ""; lblImagem.Text = "nenhuma imagem selecionada"; lblImagem.ForeColor = Color.Gray;
             numPreco.Value = 0; numCusto.Value = 0; numPromo.Value = 0; numEstoque.Value = 0;
             numPrecoAdicional.Value = 0; numPrecoAdicional.Visible = false; lblPrecoAdicional.Visible = false;
+            numQtdAdicional.Value = 1;  numQtdAdicional.Visible  = false; lblQtdAdicional.Visible  = false;
             numQtdSabores.Value = 1; numQtdSabores.Visible = false; lblQtdSabores.Visible = false;
             chkControlaEstoque.Checked = false; chkDestaque.Checked = false; chkSite.Checked = false;
             _loadingForm = true;
@@ -192,6 +193,7 @@ namespace Pedeai.Forms
             chkSite.Checked            = obj.mercHabilitar_Site;
             cmbSituacao.SelectedItem   = obj.Situacao == "I" ? "Inativo" : "Ativo";
             numPrecoAdicional.Value    = obj.mercPreco_Adicional;
+            numQtdAdicional.Value      = Math.Max(1, obj.mercAdicional_Qtd_Max);
             cmbCategoria.Text = "";
             foreach (CatItem item in cmbCategoria.Items)
                 if (item.Codigo == obj.Codigo_Grupo) { cmbCategoria.SelectedItem = item; break; }
@@ -209,6 +211,8 @@ namespace Pedeai.Forms
             finally { _loadingForm = false; }
             lblPrecoAdicional.Visible  = chkAdicionais.Checked;
             numPrecoAdicional.Visible  = chkAdicionais.Checked;
+            lblQtdAdicional.Visible    = chkAdicionais.Checked;
+            numQtdAdicional.Visible    = chkAdicionais.Checked;
             lblQtdSabores.Visible      = chkFracionado.Checked;
             numQtdSabores.Visible      = chkFracionado.Checked;
             // Ajusta visibilidade do painel sem evento
@@ -250,8 +254,9 @@ namespace Pedeai.Forms
                 mercDestaque          = chkDestaque.Checked,
                 mercOrdem             = 0,
                 mercHabilitar_Site    = chkSite.Checked,
-                mercPreco_Adicional   = chkAdicionais.Checked ? numPrecoAdicional.Value : 0m,
-                mercFracionado        = chkFracionado.Checked,
+                mercPreco_Adicional      = chkAdicionais.Checked ? numPrecoAdicional.Value : 0m,
+                mercAdicional_Qtd_Max    = chkAdicionais.Checked ? (int)numQtdAdicional.Value : 1,
+                mercFracionado           = chkFracionado.Checked,
                 mercQtd_Sabores       = chkFracionado.Checked ? (int)numQtdSabores.Value : 1,
                 Situacao              = cmbSituacao.SelectedItem?.ToString() == "Inativo" ? "I" : "A",
             };
@@ -351,6 +356,8 @@ namespace Pedeai.Forms
             // Preço de Adicional: visível apenas quando Adicionais está marcado
             lblPrecoAdicional.Visible = chkAdicionais.Checked;
             numPrecoAdicional.Visible = chkAdicionais.Checked;
+            lblQtdAdicional.Visible   = chkAdicionais.Checked;
+            numQtdAdicional.Visible   = chkAdicionais.Checked;
 
             if (isMarmitasComp)
             {

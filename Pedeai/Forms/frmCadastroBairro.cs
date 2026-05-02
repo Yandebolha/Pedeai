@@ -22,9 +22,7 @@ namespace Pedeai.Forms
             {
                 _bll.EnsureMigrations();
                 Carregar();
-                btnSincronizar.Visible = DB.SupabaseService.SiteConectado;
             };
-            AppEvents.SiteConectadoChanged += OnSiteConectadoChanged;
         }
 
         private void Carregar()
@@ -219,20 +217,6 @@ namespace Pedeai.Forms
             _bll.Salvar(obj);
             pnlForm.Visible = false;
             Carregar();
-        }
-
-        private void OnSiteConectadoChanged(bool habilitado)
-        {
-            if (btnSincronizar.InvokeRequired)
-                btnSincronizar.BeginInvoke(new Action(() => btnSincronizar.Visible = habilitado));
-            else
-                btnSincronizar.Visible = habilitado;
-        }
-
-        protected override void OnFormClosed(FormClosedEventArgs e)
-        {
-            AppEvents.SiteConectadoChanged -= OnSiteConectadoChanged;
-            base.OnFormClosed(e);
         }
 
     }

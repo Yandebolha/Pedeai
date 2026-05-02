@@ -11,15 +11,14 @@ export const mockLoja: Loja = {
   endereco: 'Rua das Flores, 123',
   telefone: '(11) 99999-9999',
   created_at: new Date().toISOString(),
-  empresa_codigo: null,
 };
 
 export const mockCategorias: Categoria[] = [
-  { id: 'c1e1e1e1-e1e1-1e1e-a1e1-e1e1e1e1e1e1', nome: 'Pizzas', imagem_url: 'https://picsum.photos/seed/pizza/100/100', ordem: 1, ativo: true, created_at: '', empresa_codigo: null },
-  { id: 'c2e2e2e2-e2e2-2e2e-a2e2-e2e2e2e2e2e2', nome: 'HambÃºrgueres', imagem_url: 'https://picsum.photos/seed/burger/100/100', ordem: 2, ativo: true, created_at: '', empresa_codigo: null },
-  { id: 'c3e3e3e3-e3e3-3e3e-a3e3-e3e3e3e3e3e3', nome: 'Bebidas', imagem_url: 'https://picsum.photos/seed/drinks/100/100', ordem: 3, ativo: true, created_at: '', empresa_codigo: null },
-  { id: 'c4e4e4e4-e4e4-4e4e-a4e4-e4e4e4e4e4e4', nome: 'Sobremesas', imagem_url: 'https://picsum.photos/seed/dessert/100/100', ordem: 4, ativo: true, created_at: '', empresa_codigo: null },
-  { id: 'c5e5e5e5-e5e5-5e5e-a5e5-e5e5e5e5e5e5', nome: 'Japonesa', imagem_url: 'https://picsum.photos/seed/sushi/100/100', ordem: 5, ativo: true, created_at: '', empresa_codigo: null },
+  { id: 'c1e1e1e1-e1e1-1e1e-a1e1-e1e1e1e1e1e1', nome: 'Pizzas', imagem_url: 'https://picsum.photos/seed/pizza/100/100', ordem: 1, ativo: true, created_at: '' },
+  { id: 'c2e2e2e2-e2e2-2e2e-a2e2-e2e2e2e2e2e2', nome: 'HambÃºrgueres', imagem_url: 'https://picsum.photos/seed/burger/100/100', ordem: 2, ativo: true, created_at: '' },
+  { id: 'c3e3e3e3-e3e3-3e3e-a3e3-e3e3e3e3e3e3', nome: 'Bebidas', imagem_url: 'https://picsum.photos/seed/drinks/100/100', ordem: 3, ativo: true, created_at: '' },
+  { id: 'c4e4e4e4-e4e4-4e4e-a4e4-e4e4e4e4e4e4', nome: 'Sobremesas', imagem_url: 'https://picsum.photos/seed/dessert/100/100', ordem: 4, ativo: true, created_at: '' },
+  { id: 'c5e5e5e5-e5e5-5e5e-a5e5-e5e5e5e5e5e5', nome: 'Japonesa', imagem_url: 'https://picsum.photos/seed/sushi/100/100', ordem: 5, ativo: true, created_at: '' },
 ];
 
 export const mockProdutos: Produto[] = [
@@ -35,10 +34,7 @@ export const mockProdutos: Produto[] = [
     destaque: true,
     fracionado: false,
     qtd_sabores: 2,
-    is_adicional: null,
-    preco_adicional: null,
     created_at: '',
-    empresa_codigo: null,
   },
   {
     id: 'f1e1e1e1-e1e1-1e1e-a1e1-e1e1e1e1e1e2',
@@ -52,10 +48,7 @@ export const mockProdutos: Produto[] = [
     destaque: false,
     fracionado: false,
     qtd_sabores: 2,
-    is_adicional: null,
-    preco_adicional: null,
     created_at: '',
-    empresa_codigo: null,
   },
   {
     id: 'f2e2e2e2-e2e2-2e2e-a2e2-e2e2e2e2e2e1',
@@ -69,10 +62,7 @@ export const mockProdutos: Produto[] = [
     destaque: true,
     fracionado: false,
     qtd_sabores: 2,
-    is_adicional: null,
-    preco_adicional: null,
     created_at: '',
-    empresa_codigo: null,
   },
   {
     id: 'f3e3e3e3-e3e3-3e3e-a3e3-e3e3e3e3e3e1',
@@ -86,10 +76,7 @@ export const mockProdutos: Produto[] = [
     destaque: false,
     fracionado: false,
     qtd_sabores: 2,
-    is_adicional: null,
-    preco_adicional: null,
     created_at: '',
-    empresa_codigo: null,
   },
 ];
 

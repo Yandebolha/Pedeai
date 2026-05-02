@@ -30,7 +30,8 @@ namespace Pedeai.DAL
                 fidCupom_Tipo     = r["fidCupom_Tipo"]?.ToString() ?? "PERCENTUAL",
                 fidCupom_Valor    = r["fidCupom_Valor"] == DBNull.Value ? 10m : Convert.ToDecimal(r["fidCupom_Valor"]),
                 fidCupom_Minimo   = r["fidCupom_Minimo"] == DBNull.Value ? 0m : Convert.ToDecimal(r["fidCupom_Minimo"]),
-                fidCupom_Validade = r["fidCupom_Validade"] == DBNull.Value ? 30 : Convert.ToInt32(r["fidCupom_Validade"]),
+                fidCupom_Validade    = r["fidCupom_Validade"] == DBNull.Value ? 30 : Convert.ToInt32(r["fidCupom_Validade"]),
+                fidCupom_Limite_Usos = r["fidCupom_Limite_Usos"] == DBNull.Value ? 1 : Convert.ToInt32(r["fidCupom_Limite_Usos"]),
                 fidProduto_Codigo = r["fidProduto_Codigo"] == DBNull.Value ? 0 : Convert.ToInt32(r["fidProduto_Codigo"]),
                 fidProduto_Nome   = r["fidProduto_Nome"]?.ToString() ?? "",
                 fidProduto_Qtde   = r["fidProduto_Qtde"] == DBNull.Value ? 1 : Convert.ToInt32(r["fidProduto_Qtde"]),
@@ -58,8 +59,8 @@ namespace Pedeai.DAL
                 using var conn = AbrirConexao();
                 var sql = @"INSERT INTO config_fidelizacao
                     (fidNome, fidAtivo, fidMeta_Gasto, fidMeta_Tipo, fidPremio_Tipo, fidCupom_Tipo, fidCupom_Valor,
-                     fidCupom_Minimo, fidCupom_Validade, fidProduto_Codigo, fidProduto_Nome, fidProduto_Qtde, fidMensagem, Info)
-                    VALUES (@nome, @ativo, @meta, @mtp, @tipo, @ctipo, @cval, @cmin, @cvalid, @pcod, @pnom, @pqtd, @msg, '')";
+                     fidCupom_Minimo, fidCupom_Validade, fidCupom_Limite_Usos, fidProduto_Codigo, fidProduto_Nome, fidProduto_Qtde, fidMensagem, Info)
+                    VALUES (@nome, @ativo, @meta, @mtp, @tipo, @ctipo, @cval, @cmin, @cvalid, @clim, @pcod, @pnom, @pqtd, @msg, '')";
                 using var cmd = new MySqlCommand(sql, conn);
                 BindParams(cmd, cfg);
                 cmd.ExecuteNonQuery();
@@ -77,7 +78,7 @@ namespace Pedeai.DAL
                 var sql = @"UPDATE config_fidelizacao SET
                     fidNome=@nome, fidAtivo=@ativo, fidMeta_Gasto=@meta, fidMeta_Tipo=@mtp, fidPremio_Tipo=@tipo,
                     fidCupom_Tipo=@ctipo, fidCupom_Valor=@cval, fidCupom_Minimo=@cmin,
-                    fidCupom_Validade=@cvalid, fidProduto_Codigo=@pcod, fidProduto_Nome=@pnom,
+                    fidCupom_Validade=@cvalid, fidCupom_Limite_Usos=@clim, fidProduto_Codigo=@pcod, fidProduto_Nome=@pnom,
                     fidProduto_Qtde=@pqtd, fidMensagem=@msg
                     WHERE Codigo=@cod";
                 using var cmd = new MySqlCommand(sql, conn);
@@ -113,6 +114,7 @@ namespace Pedeai.DAL
             cmd.Parameters.AddWithValue("@cval",  cfg.fidCupom_Valor);
             cmd.Parameters.AddWithValue("@cmin",  cfg.fidCupom_Minimo);
             cmd.Parameters.AddWithValue("@cvalid",cfg.fidCupom_Validade);
+            cmd.Parameters.AddWithValue("@clim",  cfg.fidCupom_Limite_Usos > 0 ? cfg.fidCupom_Limite_Usos : 1);
             cmd.Parameters.AddWithValue("@pcod",  cfg.fidProduto_Codigo > 0 ? (object)cfg.fidProduto_Codigo : DBNull.Value);
             cmd.Parameters.AddWithValue("@pnom",  cfg.fidProduto_Nome ?? "");
             cmd.Parameters.AddWithValue("@pqtd",  cfg.fidProduto_Qtde > 0 ? cfg.fidProduto_Qtde : 1);
@@ -215,6 +217,7 @@ namespace Pedeai.DAL
                 JOIN cupom c ON c.cupomCodigo = h.fidCupomCodigo
                 WHERE h.Codigo_Cliente = @cli
                   AND c.Situacao = 'A'
+                  AND (c.cupomTipo IS NULL OR c.cupomTipo <> 'PRODUTO')
                   AND (c.cupomLimite_Usos = 0 OR c.cupomUsos_Realizados < c.cupomLimite_Usos)
                   AND c.cupomValido_Ate >= CURDATE()
                 ORDER BY c.cupomValido_Ate ASC
@@ -248,7 +251,7 @@ namespace Pedeai.DAL
                 (auxCodigo, Codigo, cupomCodigo, cupomDescricao, cupomTipo, cupomValor,
                  cupomPedido_Minimo, cupomLimite_Usos, cupomUsos_Realizados,
                  cupomValido_Ate, cupomData_Cadastro, Situacao, Status_Transmissao, Info)
-                VALUES (@aux, @cod, @ccode, @desc, @tipo, @val, @min, 1, 0, @valid, NOW(), 'A', 'N', '')";
+                VALUES (@aux, @cod, @ccode, @desc, @tipo, @val, @min, @lim, 0, @valid, NOW(), 'A', 'N', '')";
             using var cmd = new MySqlCommand(sql, conn);
             cmd.Parameters.AddWithValue("@aux",   nextAux);
             cmd.Parameters.AddWithValue("@cod",   nextCod);
@@ -258,8 +261,31 @@ namespace Pedeai.DAL
             cmd.Parameters.AddWithValue("@val",   cfg.fidCupom_Valor);
             cmd.Parameters.AddWithValue("@min",   cfg.fidCupom_Minimo);
             cmd.Parameters.AddWithValue("@valid", DateTime.Today.AddDays(cfg.fidCupom_Validade > 0 ? cfg.fidCupom_Validade : 30));
+            cmd.Parameters.AddWithValue("@lim",   cfg.fidCupom_Limite_Usos > 0 ? cfg.fidCupom_Limite_Usos : 1);
             cmd.ExecuteNonQuery();
         }
+        /// <summary>Cria um cupom de prêmio PRODUTO no MySQL para sincronização web (prefixo FIDP).</summary>
+        public void CriarCupomPremioProduto(string codigo, ConfigFidelizacao cfg, decimal preco)
+        {
+            using var conn = AbrirConexao();
+            int nextCod = ProximoCodigo("cupom", conn);
+            int nextAux = ProximoAuxCodigo("cupom", conn);
+            int qtde    = cfg.fidProduto_Qtde > 0 ? cfg.fidProduto_Qtde : 1;
+            var sql = @"INSERT IGNORE INTO cupom
+                (auxCodigo, Codigo, cupomCodigo, cupomDescricao, cupomTipo, cupomValor,
+                 cupomPedido_Minimo, cupomLimite_Usos, cupomUsos_Realizados,
+                 cupomValido_Ate, cupomData_Cadastro, Situacao, Status_Transmissao, Info)
+                VALUES (@aux, @cod, @ccode, @desc, 'PRODUTO', @val, 0, 1, 0, @valid, NOW(), 'A', 'N', '')";
+            using var cmd = new MySqlCommand(sql, conn);
+            cmd.Parameters.AddWithValue("@aux",   nextAux);
+            cmd.Parameters.AddWithValue("@cod",   nextCod);
+            cmd.Parameters.AddWithValue("@ccode", codigo);
+            cmd.Parameters.AddWithValue("@desc",  $"Prêmio produto: {qtde}x {cfg.fidProduto_Nome}");
+            cmd.Parameters.AddWithValue("@val",   preco * qtde);
+            cmd.Parameters.AddWithValue("@valid", DateTime.Today.AddDays(365));
+            cmd.ExecuteNonQuery();
+        }
+
         /// <summary>Retorna o prêmio PRODUTO pendente mais recente do cliente (ainda não resgatado).</summary>
         public (int historicoCod, int codigoProduto, string nomeProduto, int qtde) BuscarPremioProdutoPendente(int codigoCliente)
         {

@@ -158,6 +158,8 @@ export default function Checkout() {
       if (clientData) {
         setClientFound(clientData);
         setShowClientForm(false);
+        // Busca e aplica automaticamente cupom de fidelização do cliente
+        await aplicarCupomFidelizacaoDoCliente(clientData.id);
       } else {
         setClientFound(null);
         setShowClientForm(true);
@@ -316,6 +318,41 @@ export default function Checkout() {
   const discountValue = appliedCoupon?.tipo === 'porcentagem' ? (cartTotal * appliedCoupon.valor / 100) : (appliedCoupon?.valor || 0);
   const totalOrder = Math.max(0, cartTotal + deliveryFee - discountValue);
 
+  /** Busca o cupom de fidelização vinculado ao cliente e aplica automaticamente,
+   *  desde que não haja já um cupom aplicado manualmente. */
+  const aplicarCupomFidelizacaoDoCliente = async (clienteId: string) => {
+    if (appliedCoupon) return; // já tem cupom aplicado — não sobrescreve
+    try {
+      const now = new Date().toISOString();
+      // Busca até 10 cupons do cliente — filtra client-side por usos disponíveis
+      const { data } = await supabase
+        .from('cupom')
+        .select('id, codigo, valor, tipo, validade, limite_usos, usos_realizados')
+        .eq('cliente_id', clienteId)
+        .eq('ativo', true)
+        .gt('validade', now)
+        .order('validade', { ascending: true })
+        .limit(10);
+
+      // Aceita cupom que ainda tem usos disponíveis (limite_usos=0 = ilimitado)
+      const disponivel = data?.find(c =>
+        (c.limite_usos ?? 1) === 0 ||
+        (c.usos_realizados ?? 0) < (c.limite_usos ?? 1)
+      );
+
+      if (disponivel) {
+        setAppliedCoupon({
+          id: disponivel.id,
+          valor: Number(disponivel.valor),
+          tipo: disponivel.tipo as 'fixo' | 'porcentagem',
+          codigo: disponivel.codigo,
+        });
+      }
+    } catch {
+      // ignora erro silenciosamente — não bloqueia o fluxo
+    }
+  };
+
   const handleConfirmOrder = async () => {
     setLoading(true);
     const rawWhatsapp = whatsapp.replace(/\D/g, '');
@@ -463,14 +500,29 @@ export default function Checkout() {
 
         {/* Client Status / Registration */}
         {clientFound && (
-          <div className="bg-blue-50 p-4 rounded-2xl border border-blue-100 flex items-center gap-3 animate-in fade-in slide-in-from-bottom-2">
-            <div className="bg-blue-600 p-2 rounded-full">
-              <User className="w-4 h-4 text-white" />
+          <div className="bg-blue-50 p-4 rounded-2xl border border-blue-100 space-y-2 animate-in fade-in slide-in-from-bottom-2">
+            <div className="flex items-center gap-3">
+              <div className="bg-blue-600 p-2 rounded-full shrink-0">
+                <User className="w-4 h-4 text-white" />
+              </div>
+              <div>
+                <p className="text-sm font-bold text-blue-900">Olá, {clientFound.nome}!</p>
+                <p className="text-xs text-blue-700">Seu cadastro foi localizado com sucesso.</p>
+              </div>
             </div>
-            <div>
-              <p className="text-sm font-bold text-blue-900">Olá, {clientFound.nome}!</p>
-              <p className="text-xs text-blue-700">Seu cadastro foi localizado com sucesso.</p>
-            </div>
+            {appliedCoupon && (appliedCoupon.codigo.startsWith('FID') || appliedCoupon.tipo === 'produto') && (
+              <div className="flex items-center gap-2 px-3 py-2 bg-amber-50 rounded-xl border border-amber-200 animate-in zoom-in-95">
+                <Tag className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+                <p className="text-xs text-amber-800 font-medium">
+                  {appliedCoupon.tipo === 'produto'
+                    ? <>🎁 Prêmio Fidelidade: <span className="font-black">Produto Grátis</span> — R$ {appliedCoupon.valor.toFixed(2)} de desconto aplicado!</>
+                    : <>Cupom de fidelidade <span className="font-black">{appliedCoupon.codigo}</span> aplicado automaticamente!{' '}
+                      {appliedCoupon.tipo === 'porcentagem'
+                        ? `${appliedCoupon.valor}% de desconto`
+                        : `R$ ${appliedCoupon.valor.toFixed(2)} de desconto`}</>}
+                </p>
+              </div>
+            )}
           </div>
         )}
 

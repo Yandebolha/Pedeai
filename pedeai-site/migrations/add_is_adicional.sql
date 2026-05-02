@@ -1,4 +1,4 @@
-0-- Migração 1: Adiciona suporte a "Adicionais" por categoria para produtos fracionados
+-- Migração 1: Adiciona suporte a "Adicionais" por categoria para produtos fracionados
 -- Migração 2: Adiciona empresa_codigo para isolamento multi-tenant
 -- Execute este script no SQL Editor do Supabase
 --

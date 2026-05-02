@@ -1,6 +1,7 @@
 using System;
 using System.Data;
 using System.Diagnostics;
+using System.Threading.Tasks;
 using Pedeai.DAL;
 using Pedeai.Modelo;
 
@@ -112,12 +113,35 @@ namespace Pedeai.BLL
                         cupomGerado = $"PROD:{cfg.fidProduto_Codigo}";
                         int qtde    = cfg.fidProduto_Qtde > 0 ? cfg.fidProduto_Qtde : 1;
                         descricao   = $"Prêmio produto: {qtde}x {cfg.fidProduto_Nome}";
+
+                        // Criar cupom web para sincronização com Supabase
+                        try
+                        {
+                            decimal productPrice = 0m;
+                            if (cfg.fidProduto_Codigo > 0)
+                                productPrice = new MercadoriaBLL().PesquisaCodigo(cfg.fidProduto_Codigo)?.mercPreco_Venda ?? 0m;
+                            string webCupomCode = GerarCodigoCupomPremioProduto(cliente.clieNome_RazaoSocial, codigoConfig);
+                            _dal.CriarCupomPremioProduto(webCupomCode, cfg, productPrice);
+                            int cliCod = codigoCliente;
+                            Task.Run(async () =>
+                            {
+                                try { await DB.SupabaseService.SincronizarCupomFidelizacaoAsync(webCupomCode, cliCod); }
+                                catch { }
+                            });
+                        }
+                        catch { /* não bloqueia o fluxo principal */ }
                     }
                     else
                     {
                         cupomGerado = GerarCodigoCupom(cliente.clieNome_RazaoSocial, codigoConfig);
                         _dal.CriarCupomFidelizacao(cupomGerado, cfg);
                         descricao = $"Cupom {cupomGerado} ({cfg.fidCupom_Tipo} {cfg.fidCupom_Valor:N2})";
+                        // Sincroniza o novo cupom para o Supabase vinculado ao cliente
+                        Task.Run(async () =>
+                        {
+                            try { await DB.SupabaseService.SincronizarCupomFidelizacaoAsync(cupomGerado, codigoCliente); }
+                            catch { }
+                        });
                     }
 
                     string telefone = !string.IsNullOrWhiteSpace(cliente.clieCelular)
@@ -175,6 +199,19 @@ namespace Pedeai.BLL
             // disparam para o mesmo cliente no mesmo segundo
             string configSufixo = codigoConfig > 0 ? $"R{codigoConfig}" : "";
             return $"FID{DateTime.Now:yyyyMMddHHmmss}{configSufixo}{sufixo}";
+        }
+
+        /// <summary>Gera código único para cupom web de prêmio PRODUTO (prefixo FIDP para sincronização).</summary>
+        private static string GerarCodigoCupomPremioProduto(string nomeCliente, int codigoConfig = 0)
+        {
+            string sufixo = "";
+            if (!string.IsNullOrWhiteSpace(nomeCliente))
+            {
+                var partes = nomeCliente.Trim().ToUpperInvariant().Split(' ');
+                sufixo = partes[0].Length > 4 ? partes[0].Substring(0, 4) : partes[0];
+            }
+            string configSufixo = codigoConfig > 0 ? $"R{codigoConfig}" : "";
+            return $"FIDP{DateTime.Now:yyyyMMddHHmmss}{configSufixo}{sufixo}";
         }
 
         /// <summary>Retorna o prêmio PRODUTO pendente mais recente do cliente, ou (0,0,"",0).</summary>

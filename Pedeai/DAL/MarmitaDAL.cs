@@ -222,26 +222,5 @@ namespace Pedeai.DAL
             }
             catch (Exception ex) { return ex.Message; }
         }
-
-        /// <summary>
-        /// Atualiza o maritmGrupoMax de todos os itens de uma marmita de acordo com a lista fornecida.
-        /// </summary>
-        public void AtualizarGruposMax(int codigoMarmita, System.Collections.Generic.List<MarmitaItem> itens)
-        {
-            try
-            {
-                using var conn = AbrirConexao();
-                foreach (var it in itens)
-                {
-                    using var cmd = new MySqlCommand(
-                        "UPDATE marmita_item SET maritmGrupoMax=@mx WHERE Codigo=@c AND Codigo_Marmita=@mar", conn);
-                    cmd.Parameters.AddWithValue("@mx",  it.maritmGrupoMax < 1 ? 1 : it.maritmGrupoMax);
-                    cmd.Parameters.AddWithValue("@c",   it.Codigo);
-                    cmd.Parameters.AddWithValue("@mar", codigoMarmita);
-                    cmd.ExecuteNonQuery();
-                }
-            }
-            catch (Exception ex) { System.Diagnostics.Debug.WriteLine($"AtualizarGruposMax erro: {ex.Message}"); }
-        }
     }
 }

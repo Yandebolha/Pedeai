@@ -40,6 +40,8 @@ namespace Pedeai.Forms
             this.chkComplementos    = new System.Windows.Forms.CheckBox();
             this.lblPrecoAdicional  = new System.Windows.Forms.Label();
             this.numPrecoAdicional  = new System.Windows.Forms.NumericUpDown();
+            this.lblQtdAdicional    = new System.Windows.Forms.Label();
+            this.numQtdAdicional    = new System.Windows.Forms.NumericUpDown();
             this.chkFracionado      = new System.Windows.Forms.CheckBox();
             this.lblQtdSabores      = new System.Windows.Forms.Label();
             this.numQtdSabores      = new System.Windows.Forms.NumericUpDown();
@@ -123,6 +125,7 @@ namespace Pedeai.Forms
             this.pnlForm.Controls.Add(this.lblPub);  this.pnlForm.Controls.Add(this.chkSite); this.pnlForm.Controls.Add(this.chkDestaque);
             this.pnlForm.Controls.Add(this.chkAdicionais); this.pnlForm.Controls.Add(this.chkComplementos);
             this.pnlForm.Controls.Add(this.lblPrecoAdicional); this.pnlForm.Controls.Add(this.numPrecoAdicional);
+            this.pnlForm.Controls.Add(this.lblQtdAdicional); this.pnlForm.Controls.Add(this.numQtdAdicional);
             this.pnlForm.Controls.Add(this.chkFracionado);
             this.pnlForm.Controls.Add(this.lblQtdSabores); this.pnlForm.Controls.Add(this.numQtdSabores);
             this.pnlForm.Controls.Add(this.pnlVinculos);
@@ -173,6 +176,10 @@ namespace Pedeai.Forms
             this.lblPrecoAdicional.Text="Preço Adicional R$:"; this.lblPrecoAdicional.AutoSize=true; this.lblPrecoAdicional.Left=240; this.lblPrecoAdicional.Top=151; this.lblPrecoAdicional.Visible=false;
             this.numPrecoAdicional.Left=365; this.numPrecoAdicional.Top=148; this.numPrecoAdicional.Width=90; this.numPrecoAdicional.Visible=false;
             this.numPrecoAdicional.DecimalPlaces=2; this.numPrecoAdicional.Maximum=999999;
+            // Qtd. Máx. Adicional
+            this.lblQtdAdicional.Text="Qtd. Máx:"; this.lblQtdAdicional.AutoSize=true; this.lblQtdAdicional.Left=462; this.lblQtdAdicional.Top=151; this.lblQtdAdicional.Visible=false;
+            this.numQtdAdicional.Left=530; this.numQtdAdicional.Top=148; this.numQtdAdicional.Width=55; this.numQtdAdicional.Visible=false;
+            this.numQtdAdicional.Minimum=1; this.numQtdAdicional.Maximum=99; this.numQtdAdicional.Value=1;
             // row 5c — Fracionado (pizza com múltiplos sabores)
             this.chkFracionado.Text="Fracionado (múltiplos sabores)"; this.chkFracionado.Left=10; this.chkFracionado.Top=178; this.chkFracionado.AutoSize=true;
             this.chkFracionado.CheckedChanged+=new System.EventHandler(this.ChkFracionado_CheckedChanged);
@@ -253,6 +260,8 @@ namespace Pedeai.Forms
         internal System.Windows.Forms.CheckBox      chkComplementos;
         internal System.Windows.Forms.Label         lblPrecoAdicional;
         internal System.Windows.Forms.NumericUpDown numPrecoAdicional;
+        private  System.Windows.Forms.Label         lblQtdAdicional;
+        internal System.Windows.Forms.NumericUpDown numQtdAdicional;
         internal System.Windows.Forms.CheckBox      chkFracionado;
         private  System.Windows.Forms.Label         lblQtdSabores;
         internal System.Windows.Forms.NumericUpDown numQtdSabores;

@@ -495,6 +495,8 @@ namespace Pedeai.DB
                     "VARCHAR(20) NOT NULL DEFAULT 'VALOR'");
                 // Corrige bancos existentes que gravaram a coluna como VARCHAR(10)
                 Exec(conn, "ALTER TABLE config_fidelizacao MODIFY COLUMN fidMeta_Tipo VARCHAR(20) NOT NULL DEFAULT 'VALOR'");
+                AddColumnIfNotExists(conn, db, "config_fidelizacao", "fidCupom_Limite_Usos",
+                    "INT NOT NULL DEFAULT 1");
                 // ── historico_fidelizacao ─────────────────────────────────────
                 Exec(conn, @"
                     CREATE TABLE IF NOT EXISTS historico_fidelizacao (
@@ -732,6 +734,8 @@ namespace Pedeai.DB
                 // ── mercadoria: campos de precificação de adicional/complemento e fracionado ──
                 AddColumnIfNotExists(conn, db, "mercadoria", "mercPreco_Adicional",
                     "DECIMAL(10,2) NOT NULL DEFAULT 0 COMMENT 'Preço do produto quando usado como Adicional'");
+                AddColumnIfNotExists(conn, db, "mercadoria", "mercAdicional_Qtd_Max",
+                    "INT NOT NULL DEFAULT 1 COMMENT 'Quantidade máxima por pedido quando usado como Adicional (1=padrão)'");
                 AddColumnIfNotExists(conn, db, "mercadoria", "mercFracionado",
                     "TINYINT(1) NOT NULL DEFAULT 0 COMMENT '1=produto com múltiplos sabores (ex: pizza)'");
                 AddColumnIfNotExists(conn, db, "mercadoria", "mercQtd_Sabores",

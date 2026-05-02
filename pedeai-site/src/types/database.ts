@@ -64,6 +64,20 @@ export interface Database {
           created_at: string
         }
       }
+      cupom: {
+        Row: {
+          id: string
+          codigo: string
+          valor: number | null
+          tipo: string | null
+          validade: string | null
+          ativo: boolean
+          cliente_id: string | null
+          limite_usos: number
+          usos_realizados: number
+          created_at: string
+        }
+      }
       pedido_web: {
         Row: {
           id: string
@@ -134,6 +148,7 @@ export interface Database {
           preco: number
           ordem: number
           ativo: boolean
+          max_qtde: number
           created_at: string
         }
       }

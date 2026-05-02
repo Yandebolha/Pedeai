@@ -36,6 +36,8 @@ namespace Pedeai.Forms
             this.numCupomMin = new System.Windows.Forms.NumericUpDown();
             this.lblCupomVal = new System.Windows.Forms.Label();
             this.numCupomValidade = new System.Windows.Forms.NumericUpDown();
+            this.lblCupomLimite = new System.Windows.Forms.Label();
+            this.numCupomLimiteUsos = new System.Windows.Forms.NumericUpDown();
             this.pnlProduto = new System.Windows.Forms.Panel();
             this.lblProdNome = new System.Windows.Forms.Label();
             this.txtProdNome = new System.Windows.Forms.TextBox();
@@ -67,6 +69,7 @@ namespace Pedeai.Forms
             ((System.ComponentModel.ISupportInitialize)(this.numCupomValor)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numCupomMin)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numCupomValidade)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numCupomLimiteUsos)).BeginInit();
             this.pnlProduto.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numProdQtde)).BeginInit();
             this.pnlListaBotoes.SuspendLayout();
@@ -265,6 +268,8 @@ namespace Pedeai.Forms
             this.pnlCupom.Controls.Add(this.numCupomMin);
             this.pnlCupom.Controls.Add(this.lblCupomVal);
             this.pnlCupom.Controls.Add(this.numCupomValidade);
+            this.pnlCupom.Controls.Add(this.lblCupomLimite);
+            this.pnlCupom.Controls.Add(this.numCupomLimiteUsos);
             this.pnlCupom.Location = new System.Drawing.Point(16, 266);
             this.pnlCupom.Name = "pnlCupom";
             this.pnlCupom.Size = new System.Drawing.Size(750, 112);
@@ -369,6 +374,26 @@ namespace Pedeai.Forms
             0,
             0,
             0});
+            // 
+            // lblCupomLimite
+            // 
+            this.lblCupomLimite.AutoSize = true;
+            this.lblCupomLimite.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(50)))), ((int)(((byte)(50)))), ((int)(((byte)(50)))));
+            this.lblCupomLimite.Location = new System.Drawing.Point(510, 54);
+            this.lblCupomLimite.Name = "lblCupomLimite";
+            this.lblCupomLimite.TabIndex = 6;
+            this.lblCupomLimite.Text = "Limite Usos:";
+            // 
+            // numCupomLimiteUsos
+            // 
+            this.numCupomLimiteUsos.Location = new System.Drawing.Point(608, 50);
+            this.numCupomLimiteUsos.Minimum = new decimal(new int[] { 1, 0, 0, 0 });
+            this.numCupomLimiteUsos.Maximum = new decimal(new int[] { 99, 0, 0, 0 });
+            this.numCupomLimiteUsos.Value   = new decimal(new int[] { 1, 0, 0, 0 });
+            this.numCupomLimiteUsos.Name = "numCupomLimiteUsos";
+            this.numCupomLimiteUsos.Size = new System.Drawing.Size(65, 25);
+            this.numCupomLimiteUsos.TabIndex = 5;
+            this.numCupomLimiteUsos.Font = new System.Drawing.Font("Segoe UI", 9.5F);
             // 
             // pnlProduto
             // 
@@ -713,6 +738,7 @@ namespace Pedeai.Forms
             ((System.ComponentModel.ISupportInitialize)(this.numCupomValor)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.numCupomMin)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.numCupomValidade)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numCupomLimiteUsos)).EndInit();
             this.pnlProduto.ResumeLayout(false);
             this.pnlProduto.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numProdQtde)).EndInit();
@@ -756,6 +782,8 @@ namespace Pedeai.Forms
         private System.Windows.Forms.NumericUpDown numCupomMin;
         private System.Windows.Forms.Label        lblCupomVal;
         private System.Windows.Forms.NumericUpDown numCupomValidade;
+        private System.Windows.Forms.Label        lblCupomLimite;
+        private System.Windows.Forms.NumericUpDown numCupomLimiteUsos;
         private System.Windows.Forms.Panel        pnlProduto;
         private System.Windows.Forms.Label        lblProdNome;
         private System.Windows.Forms.TextBox      txtProdNome;

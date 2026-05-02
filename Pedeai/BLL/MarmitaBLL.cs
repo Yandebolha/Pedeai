@@ -49,8 +49,5 @@ namespace Pedeai.BLL
         }
 
         public string RemoverItem(int codigoItem) => _dal.RemoverItem(codigoItem);
-
-        public void AtualizarGruposMax(int codigoMarmita, List<MarmitaItem> itens)
-            => _dal.AtualizarGruposMax(codigoMarmita, itens);
     }
 }

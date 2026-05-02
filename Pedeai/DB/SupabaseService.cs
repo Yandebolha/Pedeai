@@ -49,6 +49,11 @@ namespace Pedeai.DB
         /// Quando false, o campo empresa_codigo é omitido dos payloads e filtros automaticamente.
         /// </summary>
         private static bool? _supabaseTemColEmpresaCodigo = null;
+        /// <summary>
+        /// Indica se a coluna max_qtde já existe na tabela adicional (migration executada).
+        /// null = não testado; true = existe; false = não existe — campo omitido automaticamente.
+        /// </summary>
+        private static bool? _supabaseTemColAdicionalMaxQtde = null;
 
         /// <summary>
         /// Quando false, todas as operações com o Supabase são bloqueadas.
@@ -138,7 +143,7 @@ namespace Pedeai.DB
             _produtoSyncLocks = new();
 
         /// <summary>Clears the per-run group cache. Call at the start of a full sync.</summary>
-        public static void ResetSyncCache() { _gruposSincronizados.Clear(); _supabaseTemColFracionado = null; _supabaseTemColIsAdicional = null; _supabaseTemColEmpresaCodigo = null; }
+        public static void ResetSyncCache() { _gruposSincronizados.Clear(); _supabaseTemColFracionado = null; _supabaseTemColIsAdicional = null; _supabaseTemColEmpresaCodigo = null; _supabaseTemColAdicionalMaxQtde = null; }
         static SupabaseService()
         {
             _http = new HttpClient { Timeout = TimeSpan.FromSeconds(30) };
@@ -203,6 +208,9 @@ namespace Pedeai.DB
 
         private static async Task<JObject> PostAsync(string endpoint, object body)
         {
+            // Omite max_qtde se coluna ainda não existe no Supabase
+            if (_supabaseTemColAdicionalMaxQtde == false && endpoint.StartsWith("adicional"))
+                body = RemoveField(body, "max_qtde");
             object safeBody = _supabaseTemColEmpresaCodigo == false ? RemoveEmpresaCodigo(body) : body;
             var json    = JsonConvert.SerializeObject(safeBody);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
@@ -218,10 +226,18 @@ namespace Pedeai.DB
                     _supabaseTemColEmpresaCodigo = false;
                     return await PostAsync(endpoint, body); // retry sem empresa_codigo
                 }
+                // Detecta max_qtde ausente na tabela adicional — desabilita e tenta novamente
+                if (endpoint.StartsWith("adicional") && (respBody.Contains("max_qtde") || respBody.Contains("PGRST204") && respBody.Contains("max_qtde")))
+                {
+                    _supabaseTemColAdicionalMaxQtde = false;
+                    return await PostAsync(endpoint, body);
+                }
                 throw new Exception($"Supabase POST {resp.StatusCode}: {respBody}");
             }
             if (_supabaseTemColEmpresaCodigo == null)
                 _supabaseTemColEmpresaCodigo = true; // confirmado que existe
+            if (_supabaseTemColAdicionalMaxQtde == null && endpoint.StartsWith("adicional"))
+                _supabaseTemColAdicionalMaxQtde = true;
             var token = JToken.Parse(respBody);
             if (token is JArray arr && arr.Count > 0) return (JObject)arr[0];
             if (token is JObject obj) return obj;
@@ -243,8 +259,23 @@ namespace Pedeai.DB
             catch { return body; }
         }
 
+        private static object RemoveField(object body, string field)
+        {
+            try
+            {
+                var j = JObject.Parse(JsonConvert.SerializeObject(body));
+                j.Remove(field);
+                return j;
+            }
+            catch { return body; }
+        }
+
         private static async Task PatchAsync(string endpoint, string filter, object body)
         {
+            // Omite max_qtde se coluna ainda não existe no Supabase
+            if (_supabaseTemColAdicionalMaxQtde == false && endpoint.StartsWith("adicional"))
+                body = RemoveField(body, "max_qtde");
+
             // Remove filtro de empresa_codigo do filter quando coluna não existe
             string safeFilter = filter;
             if (_supabaseTemColEmpresaCodigo == false && safeFilter.Contains("empresa_codigo"))
@@ -273,12 +304,21 @@ namespace Pedeai.DB
                     await PatchAsync(endpoint, filter, body); // retry sem empresa_codigo
                     return;
                 }
+                // Detecta max_qtde ausente na tabela adicional — desabilita e tenta novamente
+                if (endpoint.StartsWith("adicional") && rb.Contains("max_qtde"))
+                {
+                    _supabaseTemColAdicionalMaxQtde = false;
+                    await PatchAsync(endpoint, filter, body);
+                    return;
+                }
                 throw new Exception($"Supabase PATCH {resp.StatusCode}: {rb}");
             }
             else if (_supabaseTemColEmpresaCodigo == null)
             {
                 _supabaseTemColEmpresaCodigo = true; // confirmado que existe
             }
+            if (_supabaseTemColAdicionalMaxQtde == null && endpoint.StartsWith("adicional"))
+                _supabaseTemColAdicionalMaxQtde = true;
         }
 
         private static async Task DeleteAsync(string endpoint, string filter)
@@ -966,9 +1006,11 @@ namespace Pedeai.DB
                 {
                     codigo,
                     valor,
-                    tipo     = supaTipo,
-                    validade = validade.HasValue ? validade.Value.Date.Add(new TimeSpan(23, 59, 59)).ToString("yyyy-MM-ddTHH:mm:ss") : (string)null,
+                    tipo            = supaTipo,
+                    validade        = validade.HasValue ? validade.Value.Date.Add(new TimeSpan(23, 59, 59)).ToString("yyyy-MM-ddTHH:mm:ss") : (string)null,
                     ativo,
+                    limite_usos     = limiteUsos,
+                    usos_realizados = usosRealizados,
                 };
 
                 if (!string.IsNullOrWhiteSpace(uuid))
@@ -1007,6 +1049,123 @@ namespace Pedeai.DB
             catch (Exception ex)
             {
                 Logger.Log("SupabaseService", "SincronizarTodosCuponsAsync", "Erro", ex);
+            }
+        }
+
+        // ── Cupons de Fidelização (vinculados a cliente_id) ─────────────────────
+
+        /// <summary>
+        /// Sincroniza um único cupão de fidelização ao Supabase, vinculando-o ao
+        /// cliente através do campo cliente_id. Chamado ao criar o cupão no BLL.
+        /// </summary>
+        public static async Task SincronizarCupomFidelizacaoAsync(string codigoCupom, int codigoCliente)
+        {
+            if (!SiteConectado || string.IsNullOrWhiteSpace(codigoCupom)) return;
+            try
+            {
+                string tipo, situacao;
+                decimal valor;
+                DateTime? validade;
+                int limiteUsos, usosRealizados, codigoCupomMysql;
+                using (var conn = AbrirMysql())
+                using (var cmd  = new MySqlCommand(
+                    "SELECT Codigo, cupomTipo, cupomValor, cupomValido_Ate, Situacao, " +
+                    "COALESCE(cupomLimite_Usos,1) AS lim, COALESCE(cupomUsos_Realizados,0) AS usos " +
+                    "FROM cupom WHERE cupomCodigo=@cod AND cupomCodigo LIKE 'FID%' LIMIT 1", conn))
+                {
+                    cmd.Parameters.AddWithValue("@cod", codigoCupom);
+                    using var r = cmd.ExecuteReader();
+                    if (!r.Read()) return;
+                    codigoCupomMysql = Convert.ToInt32(r["Codigo"]);
+                    tipo            = r["cupomTipo"]?.ToString() ?? "PERCENTUAL";
+                    valor           = r["cupomValor"] == DBNull.Value ? 0m : Convert.ToDecimal(r["cupomValor"]);
+                    situacao        = r["Situacao"]?.ToString() ?? "A";
+                    limiteUsos      = Convert.ToInt32(r["lim"]);
+                    usosRealizados  = Convert.ToInt32(r["usos"]);
+                    var v           = r["cupomValido_Ate"];
+                    validade        = v == DBNull.Value ? (DateTime?)null : Convert.ToDateTime(v);
+                }
+
+                string clienteUuid = GetSupabaseUuid("cliente", "Codigo", codigoCliente);
+                if (string.IsNullOrWhiteSpace(clienteUuid)) return; // cliente ainda não sincronizado
+
+                string supaTipo = tipo.ToUpper() switch {
+                    "VALOR"      => "fixo",
+                    "PERCENTUAL" => "porcentagem",
+                    "PRODUTO"    => "produto",
+                    _            => "fixo"
+                };
+                var payload = new
+                {
+                    codigo          = codigoCupom,
+                    valor,
+                    tipo            = supaTipo,
+                    validade        = validade.HasValue
+                        ? validade.Value.Date.Add(new TimeSpan(23, 59, 59)).ToString("yyyy-MM-ddTHH:mm:ss")
+                        : (string)null,
+                    ativo           = situacao == "A",
+                    cliente_id      = clienteUuid,
+                    limite_usos     = limiteUsos,
+                    usos_realizados = usosRealizados,
+                };
+
+                // Verifica se já existe no Supabase pelo código
+                var existing = await GetAsync($"cupom?codigo=eq.{Uri.EscapeDataString(codigoCupom)}&limit=1");
+                if (existing.Count > 0)
+                {
+                    string uuid = existing[0]["id"]?.ToString() ?? "";
+                    if (!string.IsNullOrWhiteSpace(uuid))
+                    {
+                        await PatchAsync("cupom", $"id=eq.{uuid}", payload);
+                        // Garante que o UUID do Supabase está salvo no MySQL para rastrear usos
+                        SaveSupabaseUuid("cupom", "Codigo", codigoCupomMysql, uuid);
+                    }
+                }
+                else
+                {
+                    var result = await PostAsync("cupom", payload);
+                    string newUuid = result?["id"]?.ToString() ?? "";
+                    if (!string.IsNullOrWhiteSpace(newUuid))
+                        SaveSupabaseUuid("cupom", "Codigo", codigoCupomMysql, newUuid);
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.Log("SupabaseService", "SincronizarCupomFidelizacaoAsync", $"Erro {codigoCupom}", ex);
+            }
+        }
+
+        /// <summary>
+        /// Sincroniza TODOS os cupôns de fidelização (FID%) ativos do MySQL para o Supabase,
+        /// vinculando cada um ao cliente correto via cliente_id.
+        /// </summary>
+        public static async Task SincronizarTodosCuponsFidelizacaoAsync()
+        {
+            if (!SiteConectado) return;
+            try
+            {
+                // Lê todos os cupôns FID com o código do cliente via historico_fidelizacao
+                var registros = new List<(string codigo, int codigoCliente)>();
+                using (var conn = AbrirMysql())
+                using (var cmd  = new MySqlCommand(
+                    "SELECT c.cupomCodigo, h.Codigo_Cliente " +
+                    "FROM cupom c " +
+                    "JOIN historico_fidelizacao h ON h.fidCupomCodigo = c.cupomCodigo " +
+                    "WHERE c.Situacao='A' AND c.cupomCodigo LIKE 'FID%' " +
+                    "AND (c.cupomLimite_Usos = 0 OR c.cupomUsos_Realizados < c.cupomLimite_Usos) " +
+                    "AND c.cupomValido_Ate >= CURDATE()", conn))
+                {
+                    using var r = cmd.ExecuteReader();
+                    while (r.Read())
+                        registros.Add((r["cupomCodigo"].ToString(), Convert.ToInt32(r["Codigo_Cliente"])));
+                }
+
+                foreach (var (codigo, codigoCliente) in registros)
+                    await SincronizarCupomFidelizacaoAsync(codigo, codigoCliente);
+            }
+            catch (Exception ex)
+            {
+                Logger.Log("SupabaseService", "SincronizarTodosCuponsFidelizacaoAsync", "Erro", ex);
             }
         }
 
@@ -1741,6 +1900,16 @@ namespace Pedeai.DB
                 if (codigoClienteLocal > 0)
                 {
                     try { new DAL.ClienteDAL().IncrementarTotais(codigoClienteLocal, supaPedido.Total); }
+                    catch { }
+
+                    // Verificar fidelização — mesmo comportamento dos pedidos locais
+                    try
+                    {
+                        int pedCod = nextCod; int cliCod = codigoClienteLocal;
+                        var premioMsg = new BLL.FidelizacaoBLL().VerificarEDispararPremio(cliCod, pedCod);
+                        if (!string.IsNullOrEmpty(premioMsg))
+                            Logger.Log("SupabaseService", "ImportarPedidoAsync", "Fidelizacao: " + premioMsg);
+                    }
                     catch { }
                 }
 
@@ -2759,54 +2928,67 @@ namespace Pedeai.DB
                     }
                 }
 
-                // 4. Adicionais: sincroniza na tabela `adicional` com o preço específico do adicional
-                foreach (var (codGrupo, nomeGrupo) in compList.Count > 0 ? new List<(int,string)>() : new List<(int,string)>()) { } // placeholder
+                // 4. Adicionais: sincroniza na tabela `adicional` vinculado a cada produto fracionado do grupo
                 foreach (var (codGrupo, nomeGrupo) in adList)
                 {
                     if (codGrupo <= 0) continue;
 
-                    // Lê preço de adicional e nome do produto no MySQL
-                    string nomeAd = ""; decimal precoAd = 0m;
+                    // Lê nome, preço_adicional e qtd_max do produto no MySQL
+                    string nomeAd = ""; decimal precoAd = 0m; int qtdMaxAd = 1;
                     using (var conn = AbrirMysql())
                     using (var cmd = new MySqlCommand(
-                        "SELECT mercMercadoria, COALESCE(mercPreco_Adicional,0) AS precoad " +
+                        "SELECT mercMercadoria, COALESCE(mercPreco_Adicional,0) AS precoad, COALESCE(mercAdicional_Qtd_Max,1) AS maxad " +
                         "FROM mercadoria WHERE Codigo=@c LIMIT 1", conn))
                     {
                         cmd.Parameters.AddWithValue("@c", codigoMercadoria);
                         using var r = cmd.ExecuteReader();
-                        if (r.Read()) { nomeAd = r["mercMercadoria"]?.ToString() ?? ""; precoAd = Convert.ToDecimal(r["precoad"]); }
+                        if (r.Read()) { nomeAd = r["mercMercadoria"]?.ToString() ?? ""; precoAd = Convert.ToDecimal(r["precoad"]); qtdMaxAd = r["maxad"] == DBNull.Value ? 1 : Convert.ToInt32(r["maxad"]); }
                     }
                     if (string.IsNullOrWhiteSpace(nomeAd)) continue;
 
-                    // Garante que a tabela `adicional` existe no Supabase (mesma estrutura que complemento)
-                    // Upsert na tabela adicional vinculado ao grupo
-                    string grpUuidAd = GetSupabaseUuid("grupo_mercadoria", "Codigo", codGrupo);
-                    if (string.IsNullOrWhiteSpace(grpUuidAd))
+                    // Busca todos os produtos ATIVOS do grupo no MySQL (fracionados ou não)
+                    var codsFracionados = new List<int>();
+                    using (var conn = AbrirMysql())
+                    using (var cmd = new MySqlCommand(
+                        "SELECT Codigo FROM mercadoria WHERE Codigo_Grupo=@g AND Situacao='A'", conn))
                     {
-                        await SincronizarGrupoAsync(codGrupo);
-                        grpUuidAd = GetSupabaseUuid("grupo_mercadoria", "Codigo", codGrupo);
+                        cmd.Parameters.AddWithValue("@g", codGrupo);
+                        using var r = cmd.ExecuteReader();
+                        while (r.Read()) codsFracionados.Add(r.GetInt32(0));
                     }
-                    if (string.IsNullOrWhiteSpace(grpUuidAd)) continue;
 
-                    try
+                    // Upsert um registro na tabela `adicional` por produto fracionado do grupo
+                    foreach (var codFrac in codsFracionados)
                     {
-                        var existAd = await GetAsync(
-                            $"adicional?grupo_id=eq.{grpUuidAd}&nome=eq.{Uri.EscapeDataString(nomeAd)}&limit=1");
-                        if (existAd.Count > 0)
-                            await PatchAsync("adicional", $"id=eq.{existAd[0]["id"]}",
-                                new { nome = nomeAd, preco = precoAd, ativo = true });
-                        else
-                            await PostAsync("adicional", new
-                            {
-                                grupo_id = grpUuidAd,
-                                nome     = nomeAd,
-                                preco    = precoAd,
-                                ativo    = true,
-                            });
-                    }
-                    catch (Exception ex)
-                    {
-                        Logger.Log("SupabaseService", "SincronizarVinculosGrupoAsync", $"Erro ao upsert adicional '{nomeAd}'", ex);
+                        string fracUuid = GetSupabaseUuid("mercadoria", "Codigo", codFrac);
+                        if (string.IsNullOrWhiteSpace(fracUuid))
+                        {
+                            await SincronizarProdutoAsync(codFrac);
+                            fracUuid = GetSupabaseUuid("mercadoria", "Codigo", codFrac);
+                        }
+                        if (string.IsNullOrWhiteSpace(fracUuid)) continue;
+
+                        try
+                        {
+                            var existAd = await GetAsync(
+                                $"adicional?mercadoria_id=eq.{fracUuid}&nome=eq.{Uri.EscapeDataString(nomeAd)}&limit=1");
+                            if (existAd.Count > 0)
+                                await PatchAsync("adicional", $"id=eq.{existAd[0]["id"]}",
+                                    new { nome = nomeAd, preco = precoAd, max_qtde = qtdMaxAd, ativo = true });
+                            else
+                                await PostAsync("adicional", new
+                                {
+                                    mercadoria_id = fracUuid,
+                                    nome          = nomeAd,
+                                    preco         = precoAd,
+                                    max_qtde      = qtdMaxAd,
+                                    ativo         = true,
+                                });
+                        }
+                        catch (Exception ex)
+                        {
+                            Logger.Log("SupabaseService", "SincronizarVinculosGrupoAsync", $"Erro ao upsert adicional '{nomeAd}' para produto {codFrac}", ex);
+                        }
                     }
                 }
 
@@ -2842,7 +3024,55 @@ namespace Pedeai.DB
                     qtdSabores   = r["qtd"] == DBNull.Value ? 1 : Convert.ToInt32(r["qtd"]);
                     codigoGrupo  = r["Codigo_Grupo"] == DBNull.Value ? 0 : Convert.ToInt32(r["Codigo_Grupo"]);
                 }
-                if (!fracionado || codigoGrupo <= 0) return;
+                if (codigoGrupo <= 0) return;
+
+                // Sincroniza adicionais do grupo para QUALQUER produto da categoria (fracionado ou não)
+                try
+                {
+                    var adicionaisMysql = new List<(string nome, decimal preco, int maxad)>();
+                    using (var conn = AbrirMysql())
+                    using (var cmd = new MySqlCommand(
+                        @"SELECT m.mercMercadoria, COALESCE(m.mercPreco_Adicional,0) AS precoad, COALESCE(m.mercAdicional_Qtd_Max,1) AS maxad
+                          FROM mercadoria_vinculo_grupo mvg
+                          JOIN mercadoria m ON m.Codigo = mvg.Codigo_Mercadoria
+                          WHERE mvg.Codigo_Grupo=@g AND mvg.tipo='A' AND mvg.Situacao='A' AND m.Situacao='A'", conn))
+                    {
+                        cmd.Parameters.AddWithValue("@g", codigoGrupo);
+                        using var r = cmd.ExecuteReader();
+                        while (r.Read())
+                            adicionaisMysql.Add((r.GetString(0), Convert.ToDecimal(r["precoad"]), r["maxad"] == DBNull.Value ? 1 : Convert.ToInt32(r["maxad"])));
+                    }
+
+                    foreach (var (nomeAd, precoAd, maxAd) in adicionaisMysql)
+                    {
+                        try
+                        {
+                            var existAd = await GetAsync(
+                                $"adicional?mercadoria_id=eq.{produtoUuid}&nome=eq.{Uri.EscapeDataString(nomeAd)}&limit=1");
+                            if (existAd.Count > 0)
+                                await PatchAsync("adicional", $"id=eq.{existAd[0]["id"]}",
+                                    new { nome = nomeAd, preco = precoAd, max_qtde = maxAd, ativo = true });
+                            else
+                                await PostAsync("adicional", new
+                                {
+                                    mercadoria_id = produtoUuid,
+                                    nome          = nomeAd,
+                                    preco         = precoAd,
+                                    max_qtde      = maxAd,
+                                    ativo         = true,
+                                });
+                        }
+                        catch (Exception exAd) { Logger.Log("SupabaseService", "SincronizarFracionadoAsync", $"Erro adicional '{nomeAd}'", exAd); }
+                    }
+                    if (adicionaisMysql.Count > 0)
+                        Logger.Log("SupabaseService", "SincronizarFracionadoAsync", $"Produto {codigoMercadoria}: {adicionaisMysql.Count} adicionais sincronizados");
+                }
+                catch (Exception ex)
+                {
+                    Logger.Log("SupabaseService", "SincronizarFracionadoAsync", $"Erro ao sincronizar adicionais do produto {codigoMercadoria}", ex);
+                }
+
+                if (!fracionado) return;
 
                 // Busca todos os produtos ATIVOS da mesma categoria que NÃO são fracionados
                 // (fracionados são "tamanhos" como Pizza Grande — não entram como sabor)
@@ -2956,17 +3186,19 @@ namespace Pedeai.DB
             {
                 using var conn = AbrirMysql();
                 int codCupom = 0, limite = 0, usos = 0;
+                string codigoCupomStr = "";
                 using (var cmdFind = new MySqlCommand(
-                    "SELECT Codigo, COALESCE(cupomLimite_Usos,0) AS lim, " +
+                    "SELECT Codigo, cupomCodigo, COALESCE(cupomLimite_Usos,0) AS lim, " +
                     "COALESCE(cupomUsos_Realizados,0) AS usos " +
                     "FROM cupom WHERE supabase_uuid=@u LIMIT 1", conn))
                 {
                     cmdFind.Parameters.AddWithValue("@u", cupomSupabaseId);
                     using var r = cmdFind.ExecuteReader();
                     if (!r.Read()) return;
-                    codCupom = Convert.ToInt32(r["Codigo"]);
-                    limite   = Convert.ToInt32(r["lim"]);
-                    usos     = Convert.ToInt32(r["usos"]);
+                    codCupom        = Convert.ToInt32(r["Codigo"]);
+                    codigoCupomStr  = r["cupomCodigo"]?.ToString() ?? "";
+                    limite          = Convert.ToInt32(r["lim"]);
+                    usos            = Convert.ToInt32(r["usos"]);
                 }
 
                 usos++;
@@ -2980,7 +3212,27 @@ namespace Pedeai.DB
                 cmdUpd.ExecuteNonQuery();
 
                 // Re-sync to Supabase to reflect updated usage / deactivation
-                Task.Run(async () => await SincronizarCupomAsync(codCupom));
+                if (codigoCupomStr.StartsWith("FID", StringComparison.OrdinalIgnoreCase))
+                {
+                    // FID coupons need special sync that preserves cliente_id
+                    int codigoCliente = 0;
+                    using (var cmdH = new MySqlCommand(
+                        "SELECT Codigo_Cliente FROM historico_fidelizacao WHERE fidCupomCodigo=@c LIMIT 1", conn))
+                    {
+                        cmdH.Parameters.AddWithValue("@c", codigoCupomStr);
+                        var obj = cmdH.ExecuteScalar();
+                        if (obj != null && obj != DBNull.Value) codigoCliente = Convert.ToInt32(obj);
+                    }
+                    if (codigoCliente > 0)
+                    {
+                        string cod = codigoCupomStr; int cli = codigoCliente;
+                        Task.Run(async () => await SincronizarCupomFidelizacaoAsync(cod, cli));
+                    }
+                }
+                else
+                {
+                    Task.Run(async () => await SincronizarCupomAsync(codCupom));
+                }
             }
             catch (Exception ex)
             {
@@ -3341,6 +3593,7 @@ namespace Pedeai.DB
                 await SincronizarTodosVinculosAsync();
                 await SincronizarTodasImagensAsync();
                 await SincronizarTodosCuponsAsync();
+                await SincronizarTodosCuponsFidelizacaoAsync();
                 await SincronizarTodosBairrosAsync();
                 await SincronizarTodosClientesAsync();
             }
@@ -3386,6 +3639,9 @@ namespace Pedeai.DB
 
             progress?.Report("Sincronizando cupons...");
             await SincronizarTodosCuponsAsync();
+
+            progress?.Report("Sincronizando cupôns de fidelização...");
+            await SincronizarTodosCuponsFidelizacaoAsync();
 
             progress?.Report("Sincronizando bairros e taxas de entrega...");
             await SincronizarTodosBairrosAsync();

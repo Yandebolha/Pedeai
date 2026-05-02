@@ -12,7 +12,8 @@ namespace Pedeai.Modelo
         public string  fidCupom_Tipo     { get; set; } = "PERCENTUAL"; // PERCENTUAL | FIXO
         public decimal fidCupom_Valor    { get; set; } = 10m;   // % ou R$
         public decimal fidCupom_Minimo   { get; set; } = 0m;    // pedido mínimo para usar o cupom
-        public int     fidCupom_Validade { get; set; } = 30;    // dias de validade
+        public int     fidCupom_Validade    { get; set; } = 30;    // dias de validade
+        public int     fidCupom_Limite_Usos { get; set; } = 1;     // quantas vezes o cupom pode ser usado
         // Produto settings
         public int     fidProduto_Codigo { get; set; } = 0;
         public string  fidProduto_Nome   { get; set; } = "";

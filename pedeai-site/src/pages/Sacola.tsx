@@ -1,18 +1,36 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useCartStore } from '@/store/useCartStore';
-import { ChevronLeft, Minus, Plus, Trash2, ShoppingBag, Loader2, X, CreditCard, Banknote, QrCode } from 'lucide-react';
+import { useCartStore, CartItem, SelectedComplemento, SelectedAdicional } from '@/store/useCartStore';
+import { ChevronLeft, Minus, Plus, Trash2, ShoppingBag, Loader2, X, CreditCard, Banknote, QrCode, Pencil } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
-import { Loja, FormaPagamento } from '@/types/database';
+import { Loja, FormaPagamento, Produto } from '@/types/database';
 import { motion, AnimatePresence } from 'motion/react';
+import { ProductModal } from '@/components/ProductModal';
 
 export default function Sacola() {
   const navigate = useNavigate();
-  const { items, removeItem, updateQuantity, getTotal } = useCartStore();
+  const { items, removeItem, updateQuantity, addItem, getTotal } = useCartStore();
   const subtotal = getTotal();
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [selectedPayment, setSelectedPayment] = useState<FormaPagamento | null>(null);
+  const [editingItem, setEditingItem] = useState<CartItem | null>(null);
+
+  /** Reconstruct initialComplementos Record from CartItem.complementos */
+  const getInitialComplementos = (item: CartItem): Record<string, string[]> => {
+    const map: Record<string, string[]> = {};
+    item.complementos.filter(c => c.grupoId !== 'sabores').forEach(c => {
+      if (!map[c.grupoId]) map[c.grupoId] = [];
+      map[c.grupoId].push(c.itemId);
+    });
+    return map;
+  };
+
+  /** Reconstruct initialSabores from CartItem.complementos */
+  const getInitialSabores = (item: CartItem): string[] => {
+    const saboresComp = item.complementos.find(c => c.grupoId === 'sabores');
+    return saboresComp ? saboresComp.itemId.split(',').filter(Boolean) : [];
+  };
 
   // Busca dados da loja para pegar a taxa de entrega real
   const { data: store, isLoading: isLoadingStore } = useQuery({
@@ -134,13 +152,22 @@ export default function Sacola() {
                   </div>
                   
                   <div className="flex items-center justify-between mt-2">
-                    <span className="text-sm font-bold text-red-600">
-                      R$ {(
-                        (item.product.preco_promocional || item.product.preco_venda) +
-                        (item.adicionais?.reduce((acc, a) => acc + a.preco * a.quantity, 0) || 0)
-                      ).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                    </span>
-                    
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-bold text-red-600">
+                        R$ {(
+                          (item.product.preco_promocional || item.product.preco_venda) +
+                          (item.adicionais?.reduce((acc, a) => acc + a.preco * a.quantity, 0) || 0)
+                        ).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                      </span>
+                      <button
+                        onClick={() => setEditingItem(item)}
+                        className="p-1 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
+                        title="Editar item"
+                      >
+                        <Pencil className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+
                     <div className="flex items-center gap-3 bg-gray-50 rounded-lg p-1 border border-gray-100">
                       <button 
                         onClick={() => {
@@ -195,6 +222,22 @@ export default function Sacola() {
           </button>
         </div>
       </div>
+
+      {/* Modal de Edição de Item */}
+      <ProductModal
+        product={editingItem?.product ?? null}
+        onClose={() => setEditingItem(null)}
+        initialComplementos={editingItem ? getInitialComplementos(editingItem) : undefined}
+        initialAdicionais={editingItem?.adicionais}
+        initialSabores={editingItem ? getInitialSabores(editingItem) : undefined}
+        initialQuantity={editingItem?.quantity}
+        editMode
+        onAdd={(p: Produto, q: number, c: SelectedComplemento[], a: SelectedAdicional[]) => {
+          if (editingItem) removeItem(editingItem.id);
+          addItem(p, q, c, a);
+          setEditingItem(null);
+        }}
+      />
 
       {/* Modal de Formas de Pagamento */}
       <AnimatePresence>
