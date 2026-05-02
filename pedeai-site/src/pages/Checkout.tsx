@@ -19,7 +19,7 @@ export default function Checkout() {
   const [whatsapp, setWhatsapp] = useState('');
   const [troco, setTroco] = useState('');
   const [couponCode, setCouponCode] = useState('');
-  const [appliedCoupon, setAppliedCoupon] = useState<{ id: string, valor: number, tipo: 'fixo' | 'porcentagem', codigo: string } | null>(null);
+  const [appliedCoupon, setAppliedCoupon] = useState<{ id: string, valor: number, tipo: string, codigo: string, produto_nome?: string | null } | null>(null);
   const [loading, setLoading] = useState(false);
   const [addressesFound, setAddressesFound] = useState<EnderecoSalvo[]>([]);
   const [selectedAddress, setSelectedAddress] = useState<EnderecoSalvo | null>(null);
@@ -315,7 +315,27 @@ export default function Checkout() {
   };
 
   const deliveryFee = bairroTaxa !== null ? bairroTaxa : Number(store?.taxa_entrega ?? 0);
-  const discountValue = appliedCoupon?.tipo === 'porcentagem' ? (cartTotal * appliedCoupon.valor / 100) : (appliedCoupon?.valor || 0);
+  const discountValue = (() => {
+    if (!appliedCoupon) return 0;
+    if (appliedCoupon.tipo === 'porcentagem') return cartTotal * appliedCoupon.valor / 100;
+    if (appliedCoupon.tipo === 'produto') {
+      // Desconta o preço real do item do carrinho que corresponde ao produto prêmio
+      const nomePremio = appliedCoupon.produto_nome?.toLowerCase().trim();
+      if (nomePremio) {
+        const itemPremio = cartItems.find(item =>
+          item.product.nome.toLowerCase().trim() === nomePremio
+        );
+        if (itemPremio) {
+          const precoItem = (itemPremio.product.preco_promocional || itemPremio.product.preco_venda)
+            + itemPremio.adicionais.reduce((a, ad) => a + ad.preco * ad.quantity, 0);
+          return precoItem * itemPremio.quantity;
+        }
+      }
+      // Fallback: usa o valor armazenado no cupão
+      return appliedCoupon.valor || 0;
+    }
+    return appliedCoupon.valor || 0;
+  })();
   const totalOrder = Math.max(0, cartTotal + deliveryFee - discountValue);
 
   /** Busca o cupom de fidelização vinculado ao cliente e aplica automaticamente,
@@ -327,7 +347,7 @@ export default function Checkout() {
       // Busca até 10 cupons do cliente — filtra client-side por usos disponíveis
       const { data } = await supabase
         .from('cupom')
-        .select('id, codigo, valor, tipo, validade, limite_usos, usos_realizados')
+        .select('id, codigo, valor, tipo, validade, limite_usos, usos_realizados, produto_nome')
         .eq('cliente_id', clienteId)
         .eq('ativo', true)
         .gt('validade', now)
@@ -344,8 +364,9 @@ export default function Checkout() {
         setAppliedCoupon({
           id: disponivel.id,
           valor: Number(disponivel.valor),
-          tipo: disponivel.tipo as 'fixo' | 'porcentagem',
+          tipo: disponivel.tipo as string,
           codigo: disponivel.codigo,
+          produto_nome: disponivel.produto_nome ?? null,
         });
       }
     } catch {
@@ -441,7 +462,12 @@ export default function Checkout() {
 
       if (itemsError) throw itemsError;
 
-      // 4. Fluxo de Sucesso
+      // 4. Incrementa usos_realizados do cupom (não bloqueia o fluxo se falhar)
+      if (appliedCoupon?.id) {
+        try { await supabase.rpc('increment_cupom_uso', { cupom_id: appliedCoupon.id }); } catch { }
+      }
+
+      // 5. Fluxo de Sucesso
       setShowSummary(false);
       setShowSuccess(true);
       clearCart();

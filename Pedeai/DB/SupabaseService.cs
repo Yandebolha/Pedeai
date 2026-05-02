@@ -54,6 +54,11 @@ namespace Pedeai.DB
         /// null = não testado; true = existe; false = não existe — campo omitido automaticamente.
         /// </summary>
         private static bool? _supabaseTemColAdicionalMaxQtde = null;
+        /// <summary>
+        /// Indica se a coluna produto_nome já existe na tabela cupom (migration executada).
+        /// null = não testado; true = existe; false = não existe — campo omitido automaticamente.
+        /// </summary>
+        private static bool? _supabaseTemColCupomProdutoNome = null;
 
         /// <summary>
         /// Quando false, todas as operações com o Supabase são bloqueadas.
@@ -143,7 +148,7 @@ namespace Pedeai.DB
             _produtoSyncLocks = new();
 
         /// <summary>Clears the per-run group cache. Call at the start of a full sync.</summary>
-        public static void ResetSyncCache() { _gruposSincronizados.Clear(); _supabaseTemColFracionado = null; _supabaseTemColIsAdicional = null; _supabaseTemColEmpresaCodigo = null; _supabaseTemColAdicionalMaxQtde = null; }
+        public static void ResetSyncCache() { _gruposSincronizados.Clear(); _supabaseTemColFracionado = null; _supabaseTemColIsAdicional = null; _supabaseTemColEmpresaCodigo = null; _supabaseTemColAdicionalMaxQtde = null; _supabaseTemColCupomProdutoNome = null; }
         static SupabaseService()
         {
             _http = new HttpClient { Timeout = TimeSpan.FromSeconds(30) };
@@ -211,6 +216,9 @@ namespace Pedeai.DB
             // Omite max_qtde se coluna ainda não existe no Supabase
             if (_supabaseTemColAdicionalMaxQtde == false && endpoint.StartsWith("adicional"))
                 body = RemoveField(body, "max_qtde");
+            // Omite produto_nome se coluna ainda não existe no Supabase
+            if (_supabaseTemColCupomProdutoNome == false && endpoint.StartsWith("cupom"))
+                body = RemoveField(body, "produto_nome");
             object safeBody = _supabaseTemColEmpresaCodigo == false ? RemoveEmpresaCodigo(body) : body;
             var json    = JsonConvert.SerializeObject(safeBody);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
@@ -230,6 +238,12 @@ namespace Pedeai.DB
                 if (endpoint.StartsWith("adicional") && (respBody.Contains("max_qtde") || respBody.Contains("PGRST204") && respBody.Contains("max_qtde")))
                 {
                     _supabaseTemColAdicionalMaxQtde = false;
+                    return await PostAsync(endpoint, body);
+                }
+                // Detecta produto_nome ausente na tabela cupom — desabilita e tenta novamente
+                if (endpoint.StartsWith("cupom") && respBody.Contains("produto_nome"))
+                {
+                    _supabaseTemColCupomProdutoNome = false;
                     return await PostAsync(endpoint, body);
                 }
                 throw new Exception($"Supabase POST {resp.StatusCode}: {respBody}");
@@ -275,6 +289,9 @@ namespace Pedeai.DB
             // Omite max_qtde se coluna ainda não existe no Supabase
             if (_supabaseTemColAdicionalMaxQtde == false && endpoint.StartsWith("adicional"))
                 body = RemoveField(body, "max_qtde");
+            // Omite produto_nome se coluna ainda não existe no Supabase
+            if (_supabaseTemColCupomProdutoNome == false && endpoint.StartsWith("cupom"))
+                body = RemoveField(body, "produto_nome");
 
             // Remove filtro de empresa_codigo do filter quando coluna não existe
             string safeFilter = filter;
@@ -311,6 +328,13 @@ namespace Pedeai.DB
                     await PatchAsync(endpoint, filter, body);
                     return;
                 }
+                // Detecta produto_nome ausente na tabela cupom — desabilita e tenta novamente
+                if (endpoint.StartsWith("cupom") && rb.Contains("produto_nome"))
+                {
+                    _supabaseTemColCupomProdutoNome = false;
+                    await PatchAsync(endpoint, filter, body);
+                    return;
+                }
                 throw new Exception($"Supabase PATCH {resp.StatusCode}: {rb}");
             }
             else if (_supabaseTemColEmpresaCodigo == null)
@@ -319,6 +343,8 @@ namespace Pedeai.DB
             }
             if (_supabaseTemColAdicionalMaxQtde == null && endpoint.StartsWith("adicional"))
                 _supabaseTemColAdicionalMaxQtde = true;
+            if (_supabaseTemColCupomProdutoNome == null && endpoint.StartsWith("cupom"))
+                _supabaseTemColCupomProdutoNome = true;
         }
 
         private static async Task DeleteAsync(string endpoint, string filter)
@@ -1063,14 +1089,15 @@ namespace Pedeai.DB
             if (!SiteConectado || string.IsNullOrWhiteSpace(codigoCupom)) return;
             try
             {
-                string tipo, situacao;
+                string tipo, situacao, descricao;
                 decimal valor;
                 DateTime? validade;
                 int limiteUsos, usosRealizados, codigoCupomMysql;
                 using (var conn = AbrirMysql())
                 using (var cmd  = new MySqlCommand(
                     "SELECT Codigo, cupomTipo, cupomValor, cupomValido_Ate, Situacao, " +
-                    "COALESCE(cupomLimite_Usos,1) AS lim, COALESCE(cupomUsos_Realizados,0) AS usos " +
+                    "COALESCE(cupomLimite_Usos,1) AS lim, COALESCE(cupomUsos_Realizados,0) AS usos, " +
+                    "COALESCE(cupomDescricao,'') AS descricao " +
                     "FROM cupom WHERE cupomCodigo=@cod AND cupomCodigo LIKE 'FID%' LIMIT 1", conn))
                 {
                     cmd.Parameters.AddWithValue("@cod", codigoCupom);
@@ -1082,12 +1109,40 @@ namespace Pedeai.DB
                     situacao        = r["Situacao"]?.ToString() ?? "A";
                     limiteUsos      = Convert.ToInt32(r["lim"]);
                     usosRealizados  = Convert.ToInt32(r["usos"]);
+                    descricao       = r["descricao"]?.ToString() ?? "";
                     var v           = r["cupomValido_Ate"];
                     validade        = v == DBNull.Value ? (DateTime?)null : Convert.ToDateTime(v);
                 }
 
+                // Extrai nome do produto prêmio da descrição: "Prêmio produto: 1x Média" → "Média"
+                string produtoNome = null;
+                if (tipo.ToUpper() == "PRODUTO" && !string.IsNullOrWhiteSpace(descricao))
+                {
+                    var match = System.Text.RegularExpressions.Regex.Match(descricao, @"\d+x\s+(.+)$");
+                    if (match.Success) produtoNome = match.Groups[1].Value.Trim();
+                }
+
                 string clienteUuid = GetSupabaseUuid("cliente", "Codigo", codigoCliente);
-                if (string.IsNullOrWhiteSpace(clienteUuid)) return; // cliente ainda não sincronizado
+                if (string.IsNullOrWhiteSpace(clienteUuid))
+                {
+                    // UUID não está em cache local — tenta buscar direto no Supabase pelo codigo MySQL
+                    try
+                    {
+                        var clienteRows = await GetAsync($"cliente?codigo=eq.{codigoCliente}&limit=1");
+                        if (clienteRows.Count > 0)
+                        {
+                            clienteUuid = clienteRows[0]["id"]?.ToString() ?? "";
+                            if (!string.IsNullOrWhiteSpace(clienteUuid))
+                                SaveSupabaseUuid("cliente", "Codigo", codigoCliente, clienteUuid);
+                        }
+                    }
+                    catch { }
+                }
+                if (string.IsNullOrWhiteSpace(clienteUuid))
+                {
+                    Logger.Log("SupabaseService", "SincronizarCupomFidelizacaoAsync", $"Cliente {codigoCliente} não encontrado no Supabase — cupom {codigoCupom} não sincronizado");
+                    return;
+                }
 
                 string supaTipo = tipo.ToUpper() switch {
                     "VALOR"      => "fixo",
@@ -1107,6 +1162,7 @@ namespace Pedeai.DB
                     cliente_id      = clienteUuid,
                     limite_usos     = limiteUsos,
                     usos_realizados = usosRealizados,
+                    produto_nome    = produtoNome,
                 };
 
                 // Verifica se já existe no Supabase pelo código
@@ -1144,7 +1200,11 @@ namespace Pedeai.DB
             if (!SiteConectado) return;
             try
             {
-                // Lê todos os cupôns FID com o código do cliente via historico_fidelizacao
+                // Lê todos os cupôns FID com o código do cliente via historico_fidelizacao.
+                // Parte 1: cupons PERCENTUAL/VALOR (fidCupomCodigo = cupomCodigo direto).
+                // Parte 2: cupons PRODUTO (FIDP%) — historico armazena "PROD:X"; emparelha por
+                //          proximidade de data (CriarCupomPremioProduto e RegistrarHistorico
+                //          são chamados em sequência no mesmo request, sempre dentro de 60s).
                 var registros = new List<(string codigo, int codigoCliente)>();
                 using (var conn = AbrirMysql())
                 using (var cmd  = new MySqlCommand(
@@ -1152,6 +1212,18 @@ namespace Pedeai.DB
                     "FROM cupom c " +
                     "JOIN historico_fidelizacao h ON h.fidCupomCodigo = c.cupomCodigo " +
                     "WHERE c.Situacao='A' AND c.cupomCodigo LIKE 'FID%' " +
+                    "AND c.cupomTipo <> 'PRODUTO' " +
+                    "AND (c.cupomLimite_Usos = 0 OR c.cupomUsos_Realizados < c.cupomLimite_Usos) " +
+                    "AND c.cupomValido_Ate >= CURDATE() " +
+                    "UNION " +
+                    "SELECT c.cupomCodigo, h.Codigo_Cliente " +
+                    "FROM cupom c " +
+                    "JOIN historico_fidelizacao h ON (" +
+                    "    h.fidCupomCodigo LIKE 'PROD:%' " +
+                    "    AND h.fidCupomCodigo <> 'PROD:OK' " +
+                    "    AND ABS(TIMESTAMPDIFF(SECOND, c.cupomData_Cadastro, h.fidData)) <= 60) " +
+                    "WHERE c.cupomTipo='PRODUTO' AND c.cupomCodigo LIKE 'FIDP%' " +
+                    "AND c.Situacao='A' " +
                     "AND (c.cupomLimite_Usos = 0 OR c.cupomUsos_Realizados < c.cupomLimite_Usos) " +
                     "AND c.cupomValido_Ate >= CURDATE()", conn))
                 {
@@ -1160,6 +1232,7 @@ namespace Pedeai.DB
                         registros.Add((r["cupomCodigo"].ToString(), Convert.ToInt32(r["Codigo_Cliente"])));
                 }
 
+                Logger.Log("SupabaseService", "SincronizarTodosCuponsFidelizacaoAsync", $"Cupons encontrados: {registros.Count}");
                 foreach (var (codigo, codigoCliente) in registros)
                     await SincronizarCupomFidelizacaoAsync(codigo, codigoCliente);
             }

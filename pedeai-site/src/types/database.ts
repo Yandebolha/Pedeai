@@ -75,6 +75,7 @@ export interface Database {
           cliente_id: string | null
           limite_usos: number
           usos_realizados: number
+          produto_nome: string | null
           created_at: string
         }
       }
