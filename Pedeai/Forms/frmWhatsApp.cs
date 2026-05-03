@@ -22,6 +22,7 @@ namespace Pedeai.Forms
             ConstruirUI();
             if (System.ComponentModel.LicenseManager.UsageMode == System.ComponentModel.LicenseUsageMode.Designtime) return;
             _promDal = new DAL.PromocaoDAL();
+            _promDal.EnsureMigrations();
             Load += FrmWhatsApp_Load;
         }
 
@@ -809,6 +810,12 @@ namespace Pedeai.Forms
             var numValor = new NumericUpDown { Left = 508, Top = 22, Width = 80, DecimalPlaces = 2, Maximum = 9999, Value = 10m, Font = new Font("Segoe UI", 9F), BorderStyle = BorderStyle.FixedSingle };
             pnlForm.Controls.Add(numValor);
 
+            pnlForm.Controls.Add(MkLbl(pnlForm, "Qtd. Cupons:", 596, 4));
+            var numLimiteCupons = new NumericUpDown { Left = 596, Top = 22, Width = 80, DecimalPlaces = 0, Minimum = 0, Maximum = 99999, Value = 0, Font = new Font("Segoe UI", 9F), BorderStyle = BorderStyle.FixedSingle };
+            pnlForm.Controls.Add(numLimiteCupons);
+            pnlForm.Controls.Add(MkLbl(pnlForm, "(0=ilimitado)", 596, 44));
+            pnlForm.Height = 112;
+
             var btnNovaProm    = MkBtn(pnlForm, "➕ Nova",              8,   68, 80,  Color.FromArgb(52, 73, 94));
             var btnSalvarProm  = MkBtn(pnlForm, "💾 Salvar",            96,  68, 100, CorHeader);
             var btnExcluirProm = MkBtn(pnlForm, "🗑 Excluir",           204, 68, 90,  Color.FromArgb(150, 60, 40));
@@ -838,7 +845,7 @@ namespace Pedeai.Forms
             tab.Controls.Add(pnlForm);
 
             // ── Helpers locais ───────────────────────────────────────────────
-            void LimparForm() { txtNome.Text = ""; cmbTipo.SelectedIndex = 0; numValor.Value = 10m; _promCodigoAtual = 0; _gridPromItens.Rows.Clear(); }
+            void LimparForm() { txtNome.Text = ""; cmbTipo.SelectedIndex = 0; numValor.Value = 10m; numLimiteCupons.Value = 0; _promCodigoAtual = 0; _gridPromItens.Rows.Clear(); }
 
             void CarregarForm(DataGridViewRow v)
             {
@@ -864,9 +871,9 @@ namespace Pedeai.Forms
                 if (dtpFim.Value.Date < dtpInicio.Value.Date) { MessageBox.Show("Data fim menor que início."); return; }
                 string tipo = cmbTipo.SelectedItem?.ToString() ?? "PERCENTUAL";
                 if (_promCodigoAtual > 0)
-                    _promDal.Atualizar(_promCodigoAtual, txtNome.Text.Trim(), dtpInicio.Value, dtpFim.Value, tipo, numValor.Value);
+                    _promDal.Atualizar(_promCodigoAtual, txtNome.Text.Trim(), dtpInicio.Value, dtpFim.Value, tipo, numValor.Value, (int)numLimiteCupons.Value);
                 else
-                    _promCodigoAtual = _promDal.Salvar(txtNome.Text.Trim(), dtpInicio.Value, dtpFim.Value, tipo, numValor.Value);
+                    _promCodigoAtual = _promDal.Salvar(txtNome.Text.Trim(), dtpInicio.Value, dtpFim.Value, tipo, numValor.Value, (int)numLimiteCupons.Value);
                 CarregarGridPromocoes();
                 MessageBox.Show(_promCodigoAtual > 0 ? "Promoção salva! Agora adicione produtos." : "Atualizado.",
                     "Promoções", MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -933,7 +940,7 @@ namespace Pedeai.Forms
                         cupomTipo        = tipoD,
                         cupomValor       = valDesc,
                         cupomPedido_Minimo = 0,
-                        cupomLimite_Usos = 0,
+                        cupomLimite_Usos = (int)numLimiteCupons.Value,
                         cupomValido_Ate  = dataFimCupom,
                         Situacao         = "A",
                         Status_Transmissao = "N",
@@ -983,10 +990,11 @@ namespace Pedeai.Forms
                     if (_gridPromocoes.Columns["Nome"]      != null) { _gridPromocoes.Columns["Nome"].HeaderText = "Promoção"; _gridPromocoes.Columns["Nome"].FillWeight = 38; }
                     if (_gridPromocoes.Columns["Inicio"]    != null) { _gridPromocoes.Columns["Inicio"].HeaderText = "Início"; _gridPromocoes.Columns["Inicio"].FillWeight = 17; }
                     if (_gridPromocoes.Columns["Fim"]       != null) { _gridPromocoes.Columns["Fim"].HeaderText = "Fim"; _gridPromocoes.Columns["Fim"].FillWeight = 17; }
-                    if (_gridPromocoes.Columns["TipoDesc"]  != null) _gridPromocoes.Columns["TipoDesc"].Visible = false;
-                    if (_gridPromocoes.Columns["ValorDesc"] != null) { _gridPromocoes.Columns["ValorDesc"].HeaderText = "Desc."; _gridPromocoes.Columns["ValorDesc"].FillWeight = 14; }
-                    if (_gridPromocoes.Columns["Ativo"]     != null) _gridPromocoes.Columns["Ativo"].Visible = false;
-                    if (_gridPromocoes.Columns["Produtos"]  != null) { _gridPromocoes.Columns["Produtos"].HeaderText = "Produtos"; _gridPromocoes.Columns["Produtos"].FillWeight = 14; }
+                    if (_gridPromocoes.Columns["TipoDesc"]     != null) _gridPromocoes.Columns["TipoDesc"].Visible = false;
+                    if (_gridPromocoes.Columns["ValorDesc"]    != null) { _gridPromocoes.Columns["ValorDesc"].HeaderText = "Desc."; _gridPromocoes.Columns["ValorDesc"].FillWeight = 14; }
+                    if (_gridPromocoes.Columns["Ativo"]        != null) _gridPromocoes.Columns["Ativo"].Visible = false;
+                    if (_gridPromocoes.Columns["LimiteCupons"] != null) _gridPromocoes.Columns["LimiteCupons"].Visible = false;
+                    if (_gridPromocoes.Columns["Produtos"]     != null) { _gridPromocoes.Columns["Produtos"].HeaderText = "Produtos"; _gridPromocoes.Columns["Produtos"].FillWeight = 14; }
                 }
             }
             catch { }

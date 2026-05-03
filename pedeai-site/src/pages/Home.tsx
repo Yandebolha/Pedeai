@@ -7,7 +7,7 @@ import { useCartStore } from '@/store/useCartStore';
 import { ShoppingBag, ArrowRight, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/lib/supabase';
+import { supabase, empresaCodigo, isEmpresaCodigoMissing } from '@/lib/supabase';
 import { Categoria, Produto, Loja } from '@/types/database';
 
 export default function Home() {
@@ -19,28 +19,37 @@ export default function Home() {
 
   // Busca as informações da loja (como o banner_url)
   const { data: store, isLoading: isLoadingStore } = useQuery({
-    queryKey: ['store'],
+    queryKey: ['store', empresaCodigo],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('loja')
-        .select('*')
-        .limit(1)
-        .single();
-      if (error) throw error;
-      return data as Loja;
+      let q = supabase.from('loja').select('*');
+      if (empresaCodigo) q = (q as any).eq('empresa_codigo', empresaCodigo);
+      const { data, error } = await (q as any).limit(1).maybeSingle();
+      if (error) {
+        if (isEmpresaCodigoMissing(error)) {
+          const { data: d2 } = await supabase.from('loja').select('*').limit(1).maybeSingle();
+          return (d2 ?? null) as Loja | null;
+        }
+        return null;
+      }
+      return (data ?? null) as Loja | null;
     },
   });
 
   // Busca as categorias reais do banco de dados
   const { data: categoriesRaw, isLoading: isLoadingCats } = useQuery({
-    queryKey: ['categories'],
+    queryKey: ['categories', empresaCodigo],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('grupo_mercadoria')
-        .select('*')
-        .eq('ativo', true)
-        .order('ordem');
-      if (error) throw error;
+      let q = supabase.from('grupo_mercadoria').select('*').eq('ativo', true).order('ordem');
+      if (empresaCodigo) q = (q as any).eq('empresa_codigo', empresaCodigo);
+      const { data, error } = await q;
+      if (error) {
+        if (isEmpresaCodigoMissing(error)) {
+          const { data: d2, error: e2 } = await supabase.from('grupo_mercadoria').select('*').eq('ativo', true).order('ordem');
+          if (e2) throw e2;
+          return d2 as Categoria[];
+        }
+        throw error;
+      }
       return data as Categoria[];
     },
   });
@@ -59,15 +68,19 @@ export default function Home() {
 
   // Busca os produtos reais do banco de dados
   const { data: products, isLoading: isLoadingProds } = useQuery({
-    queryKey: ['products'],
+    queryKey: ['products', empresaCodigo],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('mercadoria')
-        .select('*')
-        .eq('ativo', true)
-        .not('is_adicional', 'is', true)
-        .order('destaque', { ascending: false });
-      if (error) throw error;
+      let q = supabase.from('mercadoria').select('*').eq('ativo', true).not('is_adicional', 'is', true).order('destaque', { ascending: false });
+      if (empresaCodigo) q = (q as any).eq('empresa_codigo', empresaCodigo);
+      const { data, error } = await q;
+      if (error) {
+        if (isEmpresaCodigoMissing(error)) {
+          const { data: d2, error: e2 } = await supabase.from('mercadoria').select('*').eq('ativo', true).not('is_adicional', 'is', true).order('destaque', { ascending: false });
+          if (e2) throw e2;
+          return d2 as Produto[];
+        }
+        throw error;
+      }
       return data as Produto[];
     },
   });

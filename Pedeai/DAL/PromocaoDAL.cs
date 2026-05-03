@@ -7,6 +7,19 @@ namespace Pedeai.DAL
 {
     public class PromocaoDAL : BaseDAL
     {
+        public void EnsureMigrations()
+        {
+            using var conn = AbrirConexao();
+            using var chk = new MySqlCommand(
+                "SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='promocao' AND COLUMN_NAME='prom_Limite_Cupons'", conn);
+            if (Convert.ToInt32(chk.ExecuteScalar()) == 0)
+            {
+                using var alt = new MySqlCommand(
+                    "ALTER TABLE promocao ADD COLUMN prom_Limite_Cupons INT NOT NULL DEFAULT 0", conn);
+                alt.ExecuteNonQuery();
+            }
+        }
+
         public DataTable Listar()
         {
             var dt = new DataTable();
@@ -17,6 +30,7 @@ namespace Pedeai.DAL
                        p.prom_Desconto_Tipo AS TipoDesc,
                        p.prom_Desconto_Valor AS ValorDesc,
                        p.prom_Ativo AS Ativo,
+                       COALESCE(p.prom_Limite_Cupons, 0) AS LimiteCupons,
                        COUNT(i.Codigo) AS Produtos
                 FROM promocao p
                 LEFT JOIN promocao_item i ON i.Codigo_Promocao = p.Codigo
@@ -27,35 +41,37 @@ namespace Pedeai.DAL
         }
 
         public int Salvar(string nome, DateTime inicio, DateTime fim,
-            string tipoDesc, decimal valorDesc)
+            string tipoDesc, decimal valorDesc, int limiteCupons = 0)
         {
             using var conn = AbrirConexao();
             using var cmd = new MySqlCommand(@"
                 INSERT INTO promocao (prom_Nome, prom_DataInicio, prom_DataFim,
-                    prom_Desconto_Tipo, prom_Desconto_Valor, prom_Ativo)
-                VALUES (@nome, @ini, @fim, @tipo, @val, 1)", conn);
+                    prom_Desconto_Tipo, prom_Desconto_Valor, prom_Ativo, prom_Limite_Cupons)
+                VALUES (@nome, @ini, @fim, @tipo, @val, 1, @lim)", conn);
             cmd.Parameters.AddWithValue("@nome", nome);
             cmd.Parameters.AddWithValue("@ini",  inicio.Date);
             cmd.Parameters.AddWithValue("@fim",  fim.Date.Add(new TimeSpan(23, 59, 59)));
             cmd.Parameters.AddWithValue("@tipo", tipoDesc);
             cmd.Parameters.AddWithValue("@val",  valorDesc);
+            cmd.Parameters.AddWithValue("@lim",  limiteCupons < 0 ? 0 : limiteCupons);
             cmd.ExecuteNonQuery();
             return (int)cmd.LastInsertedId;
         }
 
         public void Atualizar(int codigo, string nome, DateTime inicio, DateTime fim,
-            string tipoDesc, decimal valorDesc)
+            string tipoDesc, decimal valorDesc, int limiteCupons = 0)
         {
             using var conn = AbrirConexao();
             using var cmd = new MySqlCommand(@"
                 UPDATE promocao SET prom_Nome=@nome, prom_DataInicio=@ini, prom_DataFim=@fim,
-                    prom_Desconto_Tipo=@tipo, prom_Desconto_Valor=@val
+                    prom_Desconto_Tipo=@tipo, prom_Desconto_Valor=@val, prom_Limite_Cupons=@lim
                 WHERE Codigo=@id", conn);
             cmd.Parameters.AddWithValue("@nome", nome);
             cmd.Parameters.AddWithValue("@ini",  inicio.Date);
             cmd.Parameters.AddWithValue("@fim",  fim.Date.Add(new TimeSpan(23, 59, 59)));
             cmd.Parameters.AddWithValue("@tipo", tipoDesc);
             cmd.Parameters.AddWithValue("@val",  valorDesc);
+            cmd.Parameters.AddWithValue("@lim",  limiteCupons < 0 ? 0 : limiteCupons);
             cmd.Parameters.AddWithValue("@id",   codigo);
             cmd.ExecuteNonQuery();
         }

@@ -19,7 +19,8 @@ namespace Pedeai.Forms
         private ConfiguracaoImpressaoBLL _impBLL;
         private Empresa _empresa;
         private Usuario _usuarioEditando;
-        private string  _caminhoLogo = ""; // caminho local ou URL da logo
+        private string  _caminhoLogo   = ""; // caminho local ou URL da logo
+        private string  _caminhoBanner = ""; // caminho local ou URL do banner
 
         public frmEmpresa()
         {
@@ -138,6 +139,14 @@ namespace Pedeai.Forms
                 else if (System.IO.File.Exists(_caminhoLogo))
                     picLogo.Image = Image.FromFile(_caminhoLogo);
             }
+            _caminhoBanner = _empresa.empBanner_Url ?? "";
+            if (!string.IsNullOrWhiteSpace(_caminhoBanner))
+            {
+                if (_caminhoBanner.StartsWith("http", StringComparison.OrdinalIgnoreCase))
+                    _ = CarregarPreviewBannerAsync(_caminhoBanner);
+                else if (System.IO.File.Exists(_caminhoBanner))
+                    picBanner.Image = Image.FromFile(_caminhoBanner);
+            }
         }
 
         private async void BtnSalvarEmpresa_Click(object sender, EventArgs e)
@@ -152,6 +161,8 @@ namespace Pedeai.Forms
             // Preserva URL já existente quando não foi selecionado novo arquivo
             if (_caminhoLogo.StartsWith("http", StringComparison.OrdinalIgnoreCase))
                 _empresa.empLogo_Url = _caminhoLogo;
+            if (_caminhoBanner.StartsWith("http", StringComparison.OrdinalIgnoreCase))
+                _empresa.empBanner_Url = _caminhoBanner;
             var erro = _empBLL.Salvar(_empresa);
             if (!string.IsNullOrEmpty(erro)) { MessageBox.Show("Erro: " + erro); return; }
 
@@ -180,6 +191,31 @@ namespace Pedeai.Forms
                 }
             }
 
+            // Upload do banner para ImgBB/Storage se for arquivo local
+            if (!string.IsNullOrWhiteSpace(_caminhoBanner)
+                && !_caminhoBanner.StartsWith("http", StringComparison.OrdinalIgnoreCase)
+                && System.IO.File.Exists(_caminhoBanner))
+            {
+                btnSalvEmp.Enabled = false;
+                btnSalvEmp.Text    = "⏳ Enviando banner...";
+                try
+                {
+                    string url = await DB.SupabaseService.UploadBannerEmpresaAsync(_caminhoBanner);
+                    if (!string.IsNullOrEmpty(url))
+                    {
+                        _empresa.empBanner_Url = url;
+                        _empBLL.Salvar(_empresa);
+                        _caminhoBanner = url;
+                    }
+                }
+                catch { }
+                finally
+                {
+                    btnSalvEmp.Enabled = true;
+                    btnSalvEmp.Text    = "✓  Salvar Empresa";
+                }
+            }
+
             MessageBox.Show("Dados da empresa salvos com sucesso!", "OK", MessageBoxButtons.OK, MessageBoxIcon.Information);
             // Sincroniza loja no Supabase (inclui logo_url)
             _ = DB.SupabaseService.SincronizarLojaAsync();
@@ -197,6 +233,18 @@ namespace Pedeai.Forms
             try { picLogo.Image = Image.FromFile(_caminhoLogo); } catch { }
         }
 
+        private void BtnSelBanner_Click(object sender, EventArgs e)
+        {
+            using var dlg = new OpenFileDialog
+            {
+                Title  = "Selecionar banner do site (imagem grande no topo)",
+                Filter = "Imagens|*.jpg;*.jpeg;*.png;*.gif;*.webp"
+            };
+            if (dlg.ShowDialog(this) != DialogResult.OK) return;
+            _caminhoBanner = dlg.FileName;
+            try { picBanner.Image = Image.FromFile(_caminhoBanner); } catch { }
+        }
+
         private async System.Threading.Tasks.Task CarregarPreviewLogoAsync(string url)
         {
             try
@@ -206,6 +254,19 @@ namespace Pedeai.Forms
                 using var ms = new System.IO.MemoryStream(bytes);
                 var img = Image.FromStream(ms);
                 if (IsHandleCreated) Invoke(new Action(() => { try { picLogo.Image = img; } catch { } }));
+            }
+            catch { }
+        }
+
+        private async System.Threading.Tasks.Task CarregarPreviewBannerAsync(string url)
+        {
+            try
+            {
+                using var client = new System.Net.Http.HttpClient();
+                var bytes = await client.GetByteArrayAsync(url);
+                using var ms = new System.IO.MemoryStream(bytes);
+                var img = Image.FromStream(ms);
+                if (IsHandleCreated) Invoke(new Action(() => { try { picBanner.Image = img; } catch { } }));
             }
             catch { }
         }

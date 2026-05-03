@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useCartStore, CartItem, SelectedComplemento, SelectedAdicional } from '@/store/useCartStore';
 import { ChevronLeft, Minus, Plus, Trash2, ShoppingBag, Loader2, X, CreditCard, Banknote, QrCode, Pencil } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/lib/supabase';
+import { supabase, empresaCodigo, isEmpresaCodigoMissing } from '@/lib/supabase';
 import { Loja, FormaPagamento, Produto } from '@/types/database';
 import { motion, AnimatePresence } from 'motion/react';
 import { ProductModal } from '@/components/ProductModal';
@@ -34,27 +34,37 @@ export default function Sacola() {
 
   // Busca dados da loja para pegar a taxa de entrega real
   const { data: store, isLoading: isLoadingStore } = useQuery({
-    queryKey: ['store'],
+    queryKey: ['store', empresaCodigo],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('loja')
-        .select('*')
-        .limit(1)
-        .single();
-      if (error) throw error;
-      return data as Loja;
+      let q = supabase.from('loja').select('*');
+      if (empresaCodigo) q = (q as any).eq('empresa_codigo', empresaCodigo);
+      const { data, error } = await (q as any).limit(1).maybeSingle();
+      if (error) {
+        if (isEmpresaCodigoMissing(error)) {
+          const { data: d2 } = await supabase.from('loja').select('*').limit(1).maybeSingle();
+          return (d2 ?? null) as Loja | null;
+        }
+        return null;
+      }
+      return (data ?? null) as Loja | null;
     },
   });
 
   // Busca as formas de pagamento do banco
   const { data: paymentMethods } = useQuery({
-    queryKey: ['payment-methods'],
+    queryKey: ['payment-methods', empresaCodigo],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('forma_pagamento')
-        .select('*')
-        .eq('ativo', true);
-      if (error) throw error;
+      let q = supabase.from('forma_pagamento').select('*').eq('ativo', true);
+      if (empresaCodigo) q = (q as any).eq('empresa_codigo', empresaCodigo);
+      const { data, error } = await q;
+      if (error) {
+        if (isEmpresaCodigoMissing(error)) {
+          const { data: d2, error: e2 } = await supabase.from('forma_pagamento').select('*').eq('ativo', true);
+          if (e2) throw e2;
+          return d2 as FormaPagamento[];
+        }
+        throw error;
+      }
       return data as FormaPagamento[];
     },
   });

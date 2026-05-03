@@ -23,6 +23,8 @@ namespace Pedeai.Forms
             this.txtEmpImgBB = new System.Windows.Forms.TextBox();
             this.picLogo = new System.Windows.Forms.PictureBox();
             this.btnSelLogo = new System.Windows.Forms.Button();
+            this.picBanner = new System.Windows.Forms.PictureBox();
+            this.btnSelBanner = new System.Windows.Forms.Button();
             this.txtUsrNome = new System.Windows.Forms.TextBox();
             this.txtUsrLogin = new System.Windows.Forms.TextBox();
             this.txtUsrSenha = new System.Windows.Forms.TextBox();
@@ -89,6 +91,7 @@ namespace Pedeai.Forms
             this.btnResetarBanco = new System.Windows.Forms.Button();
             this.pnlBuscaUsuarios.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.picLogo)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.picBanner)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numLargura)).BeginInit();
             this.tabControl.SuspendLayout();
             this.tabEmp.SuspendLayout();
@@ -736,6 +739,9 @@ namespace Pedeai.Forms
             this.tabEmp.Controls.Add(this.txtEmpImgBB);
             this.tabEmp.Controls.Add(this.picLogo);
             this.tabEmp.Controls.Add(this.btnSelLogo);
+            this.tabEmp.Controls.Add(this.picBanner);
+            this.tabEmp.Controls.Add(this.btnSelBanner);
+            this.tabEmp.Controls.Add(this.lblEmpBanner);
             this.tabEmp.Controls.Add(this.btnSalvEmp);
             this.tabEmp.Controls.Add(this.btnSincronizarSite);
             this.tabEmp.Controls.Add(this.btnDiagnostico);
@@ -844,6 +850,35 @@ namespace Pedeai.Forms
             this.btnSelLogo.Text = "\U0001f4f7  Selecionar Logo";
             this.btnSelLogo.UseVisualStyleBackColor = false;
             this.btnSelLogo.Click += new System.EventHandler(this.BtnSelLogo_Click);
+            //
+            // picBanner
+            //
+            ((System.ComponentModel.ISupportInitialize)(this.picBanner)).BeginInit();
+            this.picBanner.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.picBanner.Location = new System.Drawing.Point(500, 348);
+            this.picBanner.Name = "picBanner";
+            this.picBanner.Size = new System.Drawing.Size(280, 100);
+            this.picBanner.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+            this.picBanner.BackColor = System.Drawing.Color.WhiteSmoke;
+            this.picBanner.TabIndex = 102;
+            this.picBanner.TabStop = false;
+            ((System.ComponentModel.ISupportInitialize)(this.picBanner)).EndInit();
+            //
+            // btnSelBanner
+            //
+            this.btnSelBanner.BackColor = System.Drawing.Color.FromArgb(30, 100, 170);
+            this.btnSelBanner.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.btnSelBanner.FlatAppearance.BorderSize = 0;
+            this.btnSelBanner.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnSelBanner.Font = new System.Drawing.Font("Segoe UI", 9.5F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.btnSelBanner.ForeColor = System.Drawing.Color.White;
+            this.btnSelBanner.Location = new System.Drawing.Point(500, 455);
+            this.btnSelBanner.Name = "btnSelBanner";
+            this.btnSelBanner.Size = new System.Drawing.Size(180, 32);
+            this.btnSelBanner.TabIndex = 103;
+            this.btnSelBanner.Text = "\U0001f5bc  Selecionar Banner";
+            this.btnSelBanner.UseVisualStyleBackColor = false;
+            this.btnSelBanner.Click += new System.EventHandler(this.BtnSelBanner_Click);
             // 
             // tabUsr
             // 
@@ -1135,10 +1170,13 @@ namespace Pedeai.Forms
         private System.Windows.Forms.Label lblEmpCodigo    = new System.Windows.Forms.Label { Text = "Código da Empresa:", AutoSize = true, Left = 22, Top = 278, ForeColor = System.Drawing.Color.FromArgb(120,60,10), Font = new System.Drawing.Font("Segoe UI", 8.5F, System.Drawing.FontStyle.Bold) };
         private System.Windows.Forms.Label lblEmpImgBB     = new System.Windows.Forms.Label { Text = "ImgBB API Key:", AutoSize = true, Left = 22, Top = 318, ForeColor = System.Drawing.Color.FromArgb(70,70,70) };
         private System.Windows.Forms.Label lblEmpLogo      = new System.Windows.Forms.Label { Text = "Logo do Site:", AutoSize = true, Left = 22, Top = 372, ForeColor = System.Drawing.Color.FromArgb(70,70,70) };
+        private System.Windows.Forms.Label lblEmpBanner     = new System.Windows.Forms.Label { Text = "Banner do Site:", AutoSize = true, Left = 500, Top = 330, ForeColor = System.Drawing.Color.FromArgb(70,70,70) };
         internal System.Windows.Forms.TextBox txtEmpCodigo;
         internal System.Windows.Forms.TextBox txtEmpImgBB;
         internal System.Windows.Forms.PictureBox picLogo;
         internal System.Windows.Forms.Button btnSelLogo;
+        internal System.Windows.Forms.PictureBox picBanner;
+        internal System.Windows.Forms.Button btnSelBanner;
         // labels usuario
         private System.Windows.Forms.Label lblUsrNome      = new System.Windows.Forms.Label { Text = "Nome:",              AutoSize = true, Left = 22, Top = 25,  ForeColor = System.Drawing.Color.FromArgb(70,70,70) };
         private System.Windows.Forms.Label lblUsrLogin     = new System.Windows.Forms.Label { Text = "Login:",             AutoSize = true, Left = 22, Top = 65,  ForeColor = System.Drawing.Color.FromArgb(70,70,70) };

@@ -26,6 +26,8 @@ namespace Pedeai.Modelo
         public string empImgBBKey { get; set; } = "";
         /// <summary>URL da logo da empresa exibida no site.</summary>
         public string empLogo_Url { get; set; } = "";
+        /// <summary>URL do banner exibido na página principal do site.</summary>
+        public string empBanner_Url { get; set; } = "";
         /// <summary>
         /// Quando false, o sistema não se conecta ao site: desabilita sincronização, polling de pedidos
         /// e qualquer outra integração com o Supabase. Visível e editável apenas pelo Administrador.

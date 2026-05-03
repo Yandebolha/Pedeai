@@ -2,7 +2,7 @@ import { MapPin, ChevronDown, Search, ShoppingBag } from 'lucide-react';
 import { useCartStore } from '@/store/useCartStore';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/lib/supabase';
+import { supabase, empresaCodigo, isEmpresaCodigoMissing } from '@/lib/supabase';
 import { Loja } from '@/types/database';
 
 interface HeaderProps {
@@ -17,13 +17,18 @@ export function Header({ searchQuery, onSearchChange }: HeaderProps) {
 
   // Busca as informações da loja (incluindo o endereço)
   const { data: store } = useQuery({
-    queryKey: ['store'],
+    queryKey: ['store', empresaCodigo],
     queryFn: async () => {
-      const { data } = await supabase
-        .from('loja')
-        .select('*')
-        .limit(1)
-        .maybeSingle();
+      let q = supabase.from('loja').select('*');
+      if (empresaCodigo) q = (q as any).eq('empresa_codigo', empresaCodigo);
+      const { data, error } = await (q as any).limit(1).maybeSingle();
+      if (error) {
+        if (isEmpresaCodigoMissing(error)) {
+          const { data: d2 } = await supabase.from('loja').select('*').limit(1).maybeSingle();
+          return (d2 ?? null) as Loja | null;
+        }
+        return null;
+      }
       return (data ?? null) as Loja | null;
     },
   });

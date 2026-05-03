@@ -748,7 +748,9 @@ namespace Pedeai.DB
                 // ── empresa: logo URL ─────────────────────────────────────
                 AddColumnIfNotExists(conn, db, "empresa", "empLogo_Url",
                     "VARCHAR(500) NOT NULL DEFAULT ''");
-
+                // ── empresa: banner URL (imagem grande no topo do site) ──────────────
+                AddColumnIfNotExists(conn, db, "empresa", "empBanner_Url",
+                    "VARCHAR(500) NOT NULL DEFAULT ''");
                 // ── empresa: habilitar conexão com o site (Admin only) ────
                 AddColumnIfNotExists(conn, db, "empresa", "empHabilitar_Site",
                     "TINYINT(1) NOT NULL DEFAULT 1");

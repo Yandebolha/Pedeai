@@ -222,5 +222,22 @@ namespace Pedeai.DAL
             }
             catch (Exception ex) { return ex.Message; }
         }
+
+        /// <summary>Atualiza maritmGrupoMax de todos os itens de um grupo específico em uma marmita.</summary>
+        public string AtualizarGrupoMax(int codigoMarmita, string grupo, int max)
+        {
+            try
+            {
+                using var conn = AbrirConexao();
+                using var cmd = new MySqlCommand(
+                    "UPDATE marmita_item SET maritmGrupoMax=@max WHERE Codigo_Marmita=@mar AND maritmGrupo=@grp", conn);
+                cmd.Parameters.AddWithValue("@max", max < 1 ? 1 : max);
+                cmd.Parameters.AddWithValue("@mar", codigoMarmita);
+                cmd.Parameters.AddWithValue("@grp", grupo);
+                cmd.ExecuteNonQuery();
+                return "";
+            }
+            catch (Exception ex) { return ex.Message; }
+        }
     }
 }

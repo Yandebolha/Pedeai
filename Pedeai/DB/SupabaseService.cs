@@ -1398,18 +1398,20 @@ namespace Pedeai.DB
         {
             try
             {
-                string nome, endereco, telefone, logoUrl;
+                string nome, endereco, telefone, logoUrl, bannerUrl;
                 using (var conn = AbrirMysql())
                 using (var cmd  = new MySqlCommand(
                     "SELECT COALESCE(NULLIF(empNome_Fantasia,''), empNome) AS nome, " +
-                    "empEndereco, empTelefone, COALESCE(empLogo_Url,'') AS empLogo_Url FROM empresa ORDER BY Codigo LIMIT 1", conn))
+                    "empEndereco, empTelefone, COALESCE(empLogo_Url,'') AS empLogo_Url, " +
+                    "COALESCE(empBanner_Url,'') AS empBanner_Url FROM empresa ORDER BY Codigo LIMIT 1", conn))
                 {
                     using var r = cmd.ExecuteReader();
                     if (!r.Read()) return;
-                    nome     = r["nome"]?.ToString() ?? "";
-                    endereco = r["empEndereco"]?.ToString() ?? "";
-                    telefone = r["empTelefone"]?.ToString() ?? "";
-                    logoUrl  = r["empLogo_Url"]?.ToString() ?? "";
+                    nome      = r["nome"]?.ToString() ?? "";
+                    endereco  = r["empEndereco"]?.ToString() ?? "";
+                    telefone  = r["empTelefone"]?.ToString() ?? "";
+                    logoUrl   = r["empLogo_Url"]?.ToString() ?? "";
+                    bannerUrl = r["empBanner_Url"]?.ToString() ?? "";
                 }
 
                 var lojas = await GetAsync("loja?limit=1");
@@ -1419,10 +1421,11 @@ namespace Pedeai.DB
                     // Tabela vazia — cria a linha inicial
                     var insert = new
                     {
-                        nome     = string.IsNullOrWhiteSpace(nome) ? "Minha Loja" : nome,
+                        nome      = string.IsNullOrWhiteSpace(nome) ? "Minha Loja" : nome,
                         endereco,
                         telefone,
-                        logo_url = logoUrl,
+                        logo_url   = logoUrl,
+                        banner_url = bannerUrl,
                     };
                     try { await PostAsync("loja", insert); } catch { }
                     // Relê para pegar o id gerado
@@ -1440,7 +1443,8 @@ namespace Pedeai.DB
                 await PatchAsync("loja", $"id=eq.{lojaId}", basePayload);
 
                 // 2. Envia logo_url separadamente — se a coluna não existir, não quebra o sync principal
-                if (!string.IsNullOrWhiteSpace(logoUrl))
+                //    Só envia URLs válidas (não envia caminhos de arquivo local)
+                if (!string.IsNullOrWhiteSpace(logoUrl) && logoUrl.StartsWith("http", StringComparison.OrdinalIgnoreCase))
                 {
                     try
                     {
@@ -1449,6 +1453,19 @@ namespace Pedeai.DB
                     catch (Exception exLogo)
                     {
                         Logger.Log("SupabaseService", "SincronizarLojaAsync", $"Erro ao enviar logo_url: {exLogo.Message}");
+                    }
+                }
+
+                // 3. Envia banner_url separadamente
+                if (!string.IsNullOrWhiteSpace(bannerUrl) && bannerUrl.StartsWith("http", StringComparison.OrdinalIgnoreCase))
+                {
+                    try
+                    {
+                        await PatchAsync("loja", $"id=eq.{lojaId}", new { banner_url = bannerUrl });
+                    }
+                    catch (Exception exBanner)
+                    {
+                        Logger.Log("SupabaseService", "SincronizarLojaAsync", $"Erro ao enviar banner_url: {exBanner.Message}");
                     }
                 }
             }
@@ -2579,14 +2596,19 @@ namespace Pedeai.DB
                 string marmitaUuid = GetSupabaseUuid("marmita", "Codigo", codigoMarmita);
                 if (string.IsNullOrWhiteSpace(marmitaUuid)) return;
 
-                // 2. Busca itens agrupados: nome, preco, grupo, maxGrupo
-                var itensRaw = new List<(string nome, decimal preco, string grupo, int maxGrupo)>();
+                // 2. Busca itens agrupados: nome, preco, grupo, maxGrupo, maxAd
+                var itensRaw = new List<(string nome, decimal preco, string grupo, int maxGrupo, int maxAd)>();
                 using (var conn = AbrirMysql())
                 using (var cmd = new MySqlCommand(@"
                     SELECT mi.maritmNome,
-                           COALESCE(m.mercPreco_Venda, 0) AS preco,
+                           CASE WHEN COALESCE(mi.maritmGrupo,'') = 'Adicionais'
+                                     AND COALESCE(m.mercPreco_Adicional,0) > 0
+                                THEN m.mercPreco_Adicional
+                                ELSE COALESCE(m.mercPreco_Venda, 0)
+                           END AS preco,
                            COALESCE(mi.maritmGrupo, 'Geral')    AS grupo,
-                           COALESCE(mi.maritmGrupoMax, 1)        AS maxGrupo
+                           COALESCE(mi.maritmGrupoMax, 1)        AS maxGrupo,
+                           COALESCE(m.mercAdicional_Qtd_Max, 1)  AS maxAd
                     FROM marmita_item mi
                     LEFT JOIN mercadoria m ON m.Codigo = mi.maritmCodigo_Merc
                     WHERE mi.Codigo_Marmita = @c
@@ -2599,19 +2621,25 @@ namespace Pedeai.DB
                             r["maritmNome"]?.ToString() ?? "",
                             Convert.ToDecimal(r["preco"]),
                             r["grupo"]?.ToString()?.Trim() is string g && g.Length > 0 ? g : "Geral",
-                            r["maxGrupo"] == DBNull.Value ? 1 : Convert.ToInt32(r["maxGrupo"])
+                            r["maxGrupo"] == DBNull.Value ? 1 : Convert.ToInt32(r["maxGrupo"]),
+                            r["maxAd"]    == DBNull.Value ? 1 : Convert.ToInt32(r["maxAd"])
                         ));
                 }
 
                 if (!itensRaw.Any()) return;
 
-                // 3. Agrupa por grupo
+                // 3. Agrupa por grupo — separa "Adicionais" dos complementos normais
                 var porGrupo = itensRaw
+                    .Where(i => !i.grupo.Equals("Adicionais", StringComparison.OrdinalIgnoreCase))
                     .GroupBy(i => i.grupo, StringComparer.OrdinalIgnoreCase)
                     .ToDictionary(
                         g => g.Key,
                         g => (itens: g.ToList(), maxGrupo: g.First().maxGrupo),
                         StringComparer.OrdinalIgnoreCase);
+
+                var adicionaisItens = itensRaw
+                    .Where(i => i.grupo.Equals("Adicionais", StringComparison.OrdinalIgnoreCase))
+                    .ToList();
 
                 // 4. Busca todos os grupos de complemento existentes desta marmita no Supabase
                 var gruposExistentes = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase); // nome → id
@@ -2694,7 +2722,7 @@ namespace Pedeai.DB
                     var nomesNoGrupo = new HashSet<string>(grupoItens.Select(i => i.nome), StringComparer.OrdinalIgnoreCase);
 
                     // Upsert itens do grupo
-                    foreach (var (nome, preco, _, __) in grupoItens)
+                    foreach (var (nome, preco, _, __, ___) in grupoItens)
                     {
                         try
                         {
@@ -2723,6 +2751,54 @@ namespace Pedeai.DB
                         await DeleteAsync(TBL_COMP_GRUPO, $"id=eq.{kvGrupoOld.Value}");
                     }
                     catch { }
+                }
+
+                // 7. Sincroniza itens do grupo "Adicionais" para a tabela `adicional` do Supabase
+                //    Cada item aparece com +/- seletor de quantidade e tem seu preço somado ao total.
+                if (adicionaisItens.Any())
+                {
+                    // Garante que o grupo "Adicionais" não exista como complemento_grupo (limpeza)
+                    if (gruposExistentes.TryGetValue("Adicionais", out string adGrupoId))
+                    {
+                        try { await DeleteAsync(TBL_COMPLEMENTO, $"grupo_id=eq.{adGrupoId}"); } catch { }
+                        try { await DeleteAsync(TBL_COMP_GRUPO, $"id=eq.{adGrupoId}"); } catch { }
+                    }
+
+                    // Busca adicionais existentes desta marmita no Supabase
+                    var adExistentes = new Dictionary<string, (string id, decimal preco, int maxQtde)>(StringComparer.OrdinalIgnoreCase);
+                    try
+                    {
+                        var adArr = await GetAsync($"adicional?mercadoria_id=eq.{marmitaUuid}&select=id,nome,preco,max_qtde");
+                        foreach (JObject a in adArr)
+                        {
+                            string n = a["nome"]?.ToString(); string id = a["id"]?.ToString();
+                            if (!string.IsNullOrEmpty(n) && !string.IsNullOrEmpty(id))
+                                adExistentes[n] = (id, a["preco"] == null ? 0m : Convert.ToDecimal(a["preco"]),
+                                                       a["max_qtde"] == null ? 1 : Convert.ToInt32(a["max_qtde"]));
+                        }
+                    }
+                    catch { }
+
+                    int maxGrupoAd = adicionaisItens.FirstOrDefault().maxGrupo < 1 ? 1 : adicionaisItens.First().maxGrupo;
+                    var nomesAd = new HashSet<string>(adicionaisItens.Select(i => i.nome), StringComparer.OrdinalIgnoreCase);
+
+                    foreach (var (nome, preco, _, maxG, maxAd) in adicionaisItens)
+                    {
+                        int qtdeMax = maxAd > 0 ? maxAd : 1;
+                        try
+                        {
+                            if (adExistentes.TryGetValue(nome, out var existing))
+                                await PatchAsync("adicional", $"id=eq.{existing.id}", new { nome, preco, max_qtde = qtdeMax, ativo = true });
+                            else
+                                await PostAsync("adicional", new { mercadoria_id = marmitaUuid, nome, preco, max_qtde = qtdeMax, ativo = true });
+                        }
+                        catch { }
+                    }
+
+                    // Remove adicionais que não existem mais no grupo
+                    foreach (var kvAd in adExistentes)
+                        if (!nomesAd.Contains(kvAd.Key))
+                            try { await DeleteAsync("adicional", $"id=eq.{kvAd.Value.id}"); } catch { }
                 }
             }
             catch (Exception ex)
@@ -4061,15 +4137,91 @@ namespace Pedeai.DB
             try
             {
                 if (!System.IO.File.Exists(localPath)) return "";
+
+                // Tenta ImgBB se a chave estiver configurada
                 string imgbbKey = GetImgBBKey();
-                if (string.IsNullOrWhiteSpace(imgbbKey)) return "";
-                return await UploadImgBBAsync(localPath, imgbbKey);
+                if (!string.IsNullOrWhiteSpace(imgbbKey))
+                {
+                    string imgbbUrl = await UploadImgBBAsync(localPath, imgbbKey);
+                    if (!string.IsNullOrWhiteSpace(imgbbUrl)) return imgbbUrl;
+                }
+
+                // Fallback: Supabase Storage (bucket "produtos", pasta "logos/")
+                var ext      = System.IO.Path.GetExtension(localPath).ToLower();
+                if (string.IsNullOrEmpty(ext)) ext = ".jpg";
+                var fileName    = $"logos/logo_empresa{ext}";
+                var mimeType    = ext == ".png" ? "image/png"
+                                : ext == ".gif" ? "image/gif"
+                                : ext == ".webp" ? "image/webp"
+                                : "image/jpeg";
+                var storageBase = "https://uwgcmnmzjjinfmxlskks.supabase.co/storage/v1/object";
+                var uploadUrl   = $"{storageBase}/produtos/{fileName}";
+
+                using var content = new ByteArrayContent(System.IO.File.ReadAllBytes(localPath));
+                content.Headers.ContentType = new MediaTypeHeaderValue(mimeType);
+                using var req = new HttpRequestMessage(HttpMethod.Post, uploadUrl) { Content = content };
+                req.Headers.Add("apikey", KEY);
+                req.Headers.Authorization = new AuthenticationHeaderValue("Bearer", KEY);
+                req.Headers.Add("x-upsert", "true");
+
+                var resp = await _http.SendAsync(req);
+                if (resp.IsSuccessStatusCode)
+                    return $"https://uwgcmnmzjjinfmxlskks.supabase.co/storage/v1/object/public/produtos/{fileName}";
+
+                var errBody = await resp.Content.ReadAsStringAsync();
+                Logger.Log("SupabaseService", "UploadLogoEmpresaAsync", $"Storage upload falhou {resp.StatusCode}: {errBody}");
             }
             catch (Exception ex)
             {
                 Logger.Log("SupabaseService", "UploadLogoEmpresaAsync", "Erro upload logo", ex);
-                return "";
             }
+            return "";
+        }
+
+        public static async Task<string> UploadBannerEmpresaAsync(string localPath)
+        {
+            try
+            {
+                if (!System.IO.File.Exists(localPath)) return "";
+
+                // Tenta ImgBB se a chave estiver configurada
+                string imgbbKey = GetImgBBKey();
+                if (!string.IsNullOrWhiteSpace(imgbbKey))
+                {
+                    string imgbbUrl = await UploadImgBBAsync(localPath, imgbbKey);
+                    if (!string.IsNullOrWhiteSpace(imgbbUrl)) return imgbbUrl;
+                }
+
+                // Fallback: Supabase Storage (bucket "produtos", pasta "banners/")
+                var ext      = System.IO.Path.GetExtension(localPath).ToLower();
+                if (string.IsNullOrEmpty(ext)) ext = ".jpg";
+                var fileName    = $"banners/banner_empresa{ext}";
+                var mimeType    = ext == ".png" ? "image/png"
+                                : ext == ".gif" ? "image/gif"
+                                : ext == ".webp" ? "image/webp"
+                                : "image/jpeg";
+                var storageBase = "https://uwgcmnmzjjinfmxlskks.supabase.co/storage/v1/object";
+                var uploadUrl   = $"{storageBase}/produtos/{fileName}";
+
+                using var content = new ByteArrayContent(System.IO.File.ReadAllBytes(localPath));
+                content.Headers.ContentType = new MediaTypeHeaderValue(mimeType);
+                using var req = new HttpRequestMessage(HttpMethod.Post, uploadUrl) { Content = content };
+                req.Headers.Add("apikey", KEY);
+                req.Headers.Authorization = new AuthenticationHeaderValue("Bearer", KEY);
+                req.Headers.Add("x-upsert", "true");
+
+                var resp = await _http.SendAsync(req);
+                if (resp.IsSuccessStatusCode)
+                    return $"https://uwgcmnmzjjinfmxlskks.supabase.co/storage/v1/object/public/produtos/{fileName}";
+
+                var errBody = await resp.Content.ReadAsStringAsync();
+                Logger.Log("SupabaseService", "UploadBannerEmpresaAsync", $"Storage upload falhou {resp.StatusCode}: {errBody}");
+            }
+            catch (Exception ex)
+            {
+                Logger.Log("SupabaseService", "UploadBannerEmpresaAsync", "Erro upload banner", ex);
+            }
+            return "";
         }
     }
 

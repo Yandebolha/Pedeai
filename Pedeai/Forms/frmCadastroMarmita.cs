@@ -262,29 +262,38 @@ namespace Pedeai.Forms
 
             // Sub-grid: Itens da marmita selecionada
             var pnlItemsSec = new Panel { Dock = DockStyle.Fill, BackColor = ClrBg };
-            var pnlItemsTool = new Panel { Dock = DockStyle.Top, Height = 36, BackColor = ClrFoot };
-            var lblItemsTit = new Label
+
+            // Linha 1: título
+            var pnlItemsTitle = new Panel { Dock = DockStyle.Top, Height = 24, BackColor = ClrBg, Padding = new Padding(0, 2, 0, 0) };
+            pnlItemsTitle.Controls.Add(new Label
             {
                 Text = "Ingredientes / Produtos da marmita selecionada",
                 ForeColor = Color.FromArgb(100, 80, 50),
                 Font = new Font("Segoe UI", 8.5F, FontStyle.Bold),
-                Dock = DockStyle.Left, Width = 310, TextAlign = ContentAlignment.MiddleLeft
-            };
+                Dock = DockStyle.Fill, TextAlign = ContentAlignment.MiddleLeft
+            });
+
+            // Linha 2: botões
+            var pnlItemsTool = new Panel { Dock = DockStyle.Top, Height = 36, BackColor = ClrFoot };
             btnAddItem = MkBtn("+ Adicionar Produto", ClrOrange, 160);
             btnAddItem.Dock = DockStyle.Right;
             btnAddItem.Click += BtnAddItem_Click;
             btnRemItem = MkBtn("Remover", ClrRed, 90);
             btnRemItem.Dock = DockStyle.Right;
             btnRemItem.Click += BtnRemItem_Click;
+            var btnLimiteGrupo = MkBtn("🔒 Limite por Grupo", Color.FromArgb(100, 80, 140), 150);
+            btnLimiteGrupo.Dock = DockStyle.Right;
+            btnLimiteGrupo.Click += BtnLimiteGrupo_Click;
             pnlItemsTool.Controls.Add(btnRemItem);
+            pnlItemsTool.Controls.Add(btnLimiteGrupo);
             pnlItemsTool.Controls.Add(btnAddItem);
-            pnlItemsTool.Controls.Add(lblItemsTit);
 
             gridItens = MkGrid();
             gridItens.Dock = DockStyle.Fill;
 
             pnlItemsSec.Controls.Add(gridItens);
             pnlItemsSec.Controls.Add(pnlItemsTool);
+            pnlItemsSec.Controls.Add(pnlItemsTitle);
 
             pnlRight.Controls.Add(pnlItemsSec);
             pnlRight.Controls.Add(pnlForm);
@@ -696,6 +705,101 @@ namespace Pedeai.Forms
             CarregarItens(codMarSync);
             System.Threading.Tasks.Task.Run(async () =>
                 await DB.SupabaseService.SincronizarItensMarmitaAsync(codMarSync));
+        }
+
+        private void BtnLimiteGrupo_Click(object sender, EventArgs e)
+        {
+            int codMar = GetSelectedMarmitaCod();
+            if (codMar <= 0) { MessageBox.Show("Selecione uma marmita primeiro."); return; }
+
+            var itens = _bll.ListarItens(codMar);
+            if (itens.Count == 0) { MessageBox.Show("Adicione produtos à marmita antes de definir limites."); return; }
+
+            // Agrupa por nome de grupo com o max atual
+            var grupos = new System.Collections.Generic.Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+            foreach (var item in itens)
+            {
+                string g = string.IsNullOrWhiteSpace(item.maritmGrupo) ? "Geral" : item.maritmGrupo;
+                if (!grupos.ContainsKey(g)) grupos[g] = item.maritmGrupoMax;
+            }
+
+            // Diálogo
+            using var dlg = new Form
+            {
+                Text = "Limites por Grupo",
+                StartPosition = FormStartPosition.CenterParent,
+                Size = new Size(380, grupos.Count * 44 + 110),
+                FormBorderStyle = FormBorderStyle.FixedDialog,
+                MaximizeBox = false, MinimizeBox = false,
+                BackColor = ClrBg
+            };
+
+            var pnlTop = new Panel { Dock = DockStyle.Top, Height = 36, BackColor = ClrHeader };
+            pnlTop.Controls.Add(new Label
+            {
+                Text = "Definir quantidade máxima por grupo",
+                ForeColor = Color.White, Font = new Font("Segoe UI", 9.5F, FontStyle.Bold),
+                Dock = DockStyle.Fill, TextAlign = ContentAlignment.MiddleCenter
+            });
+
+            var pnlContent = new Panel { Dock = DockStyle.Fill, AutoScroll = true, Padding = new Padding(12, 8, 12, 8) };
+            var rows = new System.Collections.Generic.List<(string Grupo, NumericUpDown Num)>();
+            int y = 8;
+            foreach (var kv in grupos)
+            {
+                var lblG = new Label
+                {
+                    Text = kv.Key, Left = 0, Top = y + 4, Width = 180,
+                    Font = new Font("Segoe UI", 9.5F, FontStyle.Bold),
+                    ForeColor = Color.FromArgb(60, 40, 20)
+                };
+                var numG = new NumericUpDown
+                {
+                    Left = 190, Top = y, Width = 80, Height = 26,
+                    Minimum = 1, Maximum = 50, Value = kv.Value,
+                    DecimalPlaces = 0, Font = new Font("Segoe UI", 10F, FontStyle.Bold),
+                    BackColor = Color.White
+                };
+                pnlContent.Controls.Add(lblG);
+                pnlContent.Controls.Add(numG);
+                rows.Add((kv.Key, numG));
+                y += 38;
+            }
+
+            var pnlBtns = new Panel { Dock = DockStyle.Bottom, Height = 40, BackColor = ClrFoot };
+            var btnOk = new Button
+            {
+                Text = "✔  Salvar Limites", Left = 12, Top = 6, Width = 150, Height = 28,
+                BackColor = ClrGreen, ForeColor = Color.White, FlatStyle = FlatStyle.Flat,
+                Font = new Font("Segoe UI", 9F, FontStyle.Bold), Cursor = Cursors.Hand
+            };
+            btnOk.FlatAppearance.BorderSize = 0;
+            var btnCnc = new Button
+            {
+                Text = "Cancelar", Left = 172, Top = 6, Width = 90, Height = 28,
+                BackColor = ClrBrown, ForeColor = Color.White, FlatStyle = FlatStyle.Flat,
+                Font = new Font("Segoe UI", 9F, FontStyle.Bold), Cursor = Cursors.Hand
+            };
+            btnCnc.FlatAppearance.BorderSize = 0;
+            btnCnc.Click += (_, __) => dlg.DialogResult = DialogResult.Cancel;
+            btnOk.Click += (_, __) =>
+            {
+                foreach (var (grupo, num) in rows)
+                {
+                    var err = _bll.AtualizarGrupoMax(codMar, grupo, (int)num.Value);
+                    if (!string.IsNullOrEmpty(err)) { MessageBox.Show($"Erro ao salvar grupo '{grupo}': {err}"); return; }
+                }
+                dlg.DialogResult = DialogResult.OK;
+            };
+            pnlBtns.Controls.Add(btnOk);
+            pnlBtns.Controls.Add(btnCnc);
+
+            dlg.Controls.Add(pnlContent);
+            dlg.Controls.Add(pnlBtns);
+            dlg.Controls.Add(pnlTop);
+
+            if (dlg.ShowDialog(this) == DialogResult.OK)
+                CarregarItens(codMar);
         }
 
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData)

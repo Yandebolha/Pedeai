@@ -49,5 +49,14 @@ namespace Pedeai.BLL
         }
 
         public string RemoverItem(int codigoItem) => _dal.RemoverItem(codigoItem);
+
+        /// <summary>Atualiza o limite máximo de produtos de um grupo na marmita e sincroniza com o Supabase.</summary>
+        public string AtualizarGrupoMax(int codigoMarmita, string grupo, int max)
+        {
+            var erro = _dal.AtualizarGrupoMax(codigoMarmita, grupo, max);
+            if (string.IsNullOrEmpty(erro))
+                Task.Run(async () => await Pedeai.DB.SupabaseService.SincronizarItensMarmitaAsync(codigoMarmita));
+            return erro;
+        }
     }
 }
