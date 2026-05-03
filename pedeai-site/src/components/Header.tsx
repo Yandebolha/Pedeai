@@ -41,7 +41,7 @@ export function Header({ searchQuery, onSearchChange }: HeaderProps) {
               <img
                 src={store.logo_url}
                 alt={store.nome || 'Logo'}
-                className="w-8 h-8 rounded-full object-cover flex-shrink-0"
+                className="w-12 h-12 rounded-lg object-contain flex-shrink-0"
                 referrerPolicy="no-referrer"
               />
             )}

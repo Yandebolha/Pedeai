@@ -40,24 +40,19 @@ namespace Pedeai.DAL
             return (Convert.ToInt32(r["Codigo"]), r["card_Titulo"]?.ToString() ?? "", r["card_Observacao"]?.ToString() ?? "");
         }
 
-        public int SalvarCabecalho(DateTime data, string titulo, string observacao)
+        public int SalvarCabecalho(int codigo, DateTime data, string titulo, string observacao)
         {
             using var conn = AbrirConexao();
-            // Upsert: verifica se já exists essa data
-            using var chk = new MySqlCommand(
-                "SELECT Codigo FROM cardapio_dia WHERE card_Data=@dt LIMIT 1", conn);
-            chk.Parameters.AddWithValue("@dt", data.Date);
-            var existente = chk.ExecuteScalar();
-            if (existente != null)
+            if (codigo > 0)
             {
-                int cod = Convert.ToInt32(existente);
                 using var upd = new MySqlCommand(
-                    "UPDATE cardapio_dia SET card_Titulo=@tit, card_Observacao=@obs WHERE Codigo=@id", conn);
+                    "UPDATE cardapio_dia SET card_Data=@dt, card_Titulo=@tit, card_Observacao=@obs WHERE Codigo=@id", conn);
+                upd.Parameters.AddWithValue("@dt",  data.Date);
                 upd.Parameters.AddWithValue("@tit", titulo ?? "");
                 upd.Parameters.AddWithValue("@obs", observacao ?? "");
-                upd.Parameters.AddWithValue("@id",  cod);
+                upd.Parameters.AddWithValue("@id",  codigo);
                 upd.ExecuteNonQuery();
-                return cod;
+                return codigo;
             }
             using var cmd = new MySqlCommand(@"
                 INSERT INTO cardapio_dia (card_Data, card_Titulo, card_Observacao)

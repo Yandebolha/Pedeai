@@ -1089,7 +1089,7 @@ namespace Pedeai.Forms
 
             btnSalvarCard.Click += (_, __) =>
             {
-                _cardCodigoAtual = _cardDal.SalvarCabecalho(dtpCard.Value, txtTitulo.Text.Trim(), txtObs.Text.Trim());
+                _cardCodigoAtual = _cardDal.SalvarCabecalho(_cardCodigoAtual, dtpCard.Value, txtTitulo.Text.Trim(), txtObs.Text.Trim());
                 // Persiste itens da grid
                 _cardDal.LimparItens(_cardCodigoAtual);
                 foreach (DataGridViewRow r in _gridCardapio.Rows)
@@ -1263,9 +1263,18 @@ namespace Pedeai.Forms
             using var dlg = new Form
             {
                 Text = "Selecionar Produto", StartPosition = FormStartPosition.CenterParent,
-                Size = new Size(520, 400), FormBorderStyle = FormBorderStyle.FixedDialog,
+                Size = new Size(520, 430), FormBorderStyle = FormBorderStyle.FixedDialog,
                 MaximizeBox = false, MinimizeBox = false, BackColor = Color.FromArgb(245, 237, 216)
             };
+
+            // Filtro de categoria
+            var pnlCat = new Panel { Dock = DockStyle.Top, Height = 30, BackColor = Color.FromArgb(235, 226, 208), Padding = new Padding(4, 3, 4, 3) };
+            var lblCat = new Label { Text = "Categoria:", Left = 4, Top = 7, AutoSize = true, ForeColor = Color.FromArgb(60, 50, 30), Font = new Font("Segoe UI", 8.5F) };
+            var cmbCat = new ComboBox { Left = 72, Top = 4, Width = 200, DropDownStyle = ComboBoxStyle.DropDownList, Font = new Font("Segoe UI", 9F), BackColor = Color.White };
+            cmbCat.Items.Add("Todas");
+            pnlCat.Controls.Add(lblCat);
+            pnlCat.Controls.Add(cmbCat);
+
             var txtF = new TextBox { Dock = DockStyle.Top, Height = 28, PlaceholderText = "Filtrar...", BorderStyle = BorderStyle.FixedSingle, Font = new Font("Segoe UI", 9F) };
             var grd  = CriarGrid();
             grd.Dock = DockStyle.Fill;
@@ -1276,13 +1285,29 @@ namespace Pedeai.Forms
             System.Data.DataTable dtProd = null;
             try { dtProd = new BLL.MercadoriaBLL().Listar(); } catch { }
 
+            // Carrega categorias distintas no ComboBox
+            if (dtProd != null)
+            {
+                var cats = new System.Collections.Generic.HashSet<string>();
+                foreach (System.Data.DataRow r in dtProd.Rows)
+                {
+                    string cat = r["Categoria"]?.ToString() ?? "";
+                    if (!string.IsNullOrWhiteSpace(cat)) cats.Add(cat);
+                }
+                foreach (var c in cats) cmbCat.Items.Add(c);
+            }
+            cmbCat.SelectedIndex = 0;
+
             void Preencher(string filtro)
             {
                 grd.Rows.Clear();
                 if (dtProd == null) return;
+                string catSel = cmbCat.SelectedItem?.ToString() ?? "Todas";
                 foreach (System.Data.DataRow r in dtProd.Rows)
                 {
                     string nomeP = r["Nome"]?.ToString() ?? "";
+                    string catP  = r["Categoria"]?.ToString() ?? "";
+                    if (catSel != "Todas" && catP != catSel) continue;
                     if (!string.IsNullOrWhiteSpace(filtro) && nomeP.IndexOf(filtro, StringComparison.OrdinalIgnoreCase) < 0) continue;
                     string precoStr = r["Preco"] == System.DBNull.Value ? "" : Convert.ToDecimal(r["Preco"]).ToString("N2");
                     grd.Rows.Add(r["Codigo"], nomeP, precoStr);
@@ -1290,6 +1315,7 @@ namespace Pedeai.Forms
             }
             Preencher("");
             txtF.TextChanged += (_, __) => Preencher(txtF.Text.Trim());
+            cmbCat.SelectedIndexChanged += (_, __) => Preencher(txtF.Text.Trim());
 
             (int c, string n) resultado = (0, "");
             void Selecionar() { if (grd.CurrentRow == null) return; resultado = (Convert.ToInt32(grd.CurrentRow.Cells["Codigo"].Value), grd.CurrentRow.Cells["Nome"].Value?.ToString() ?? ""); dlg.DialogResult = DialogResult.OK; }
@@ -1298,7 +1324,7 @@ namespace Pedeai.Forms
             var btnOk = new Button { Text = "Selecionar", Dock = DockStyle.Bottom, Height = 32, BackColor = CorHeader, ForeColor = Color.White, FlatStyle = FlatStyle.Flat };
             btnOk.FlatAppearance.BorderSize = 0;
             btnOk.Click += (_, __) => Selecionar();
-            dlg.Controls.Add(grd); dlg.Controls.Add(btnOk); dlg.Controls.Add(txtF);
+            dlg.Controls.Add(grd); dlg.Controls.Add(btnOk); dlg.Controls.Add(pnlCat); dlg.Controls.Add(txtF);
             dlg.ShowDialog(this);
             return resultado;
         }

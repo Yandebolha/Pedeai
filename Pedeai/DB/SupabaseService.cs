@@ -1020,7 +1020,10 @@ namespace Pedeai.DB
                 // If no stored UUID, check Supabase by codigo to avoid duplicates
                 if (string.IsNullOrWhiteSpace(uuid))
                 {
-                    var existing = await GetAsync($"cupom?codigo=eq.{Uri.EscapeDataString(codigo)}&limit=1");
+                    string searchFilter = $"cupom?codigo=eq.{Uri.EscapeDataString(codigo)}&limit=1";
+                    if (UsarEmpresaCodigo)
+                        searchFilter += $"&empresa_codigo=eq.{Uri.EscapeDataString(_empresaCodigo)}";
+                    var existing = await GetAsync(searchFilter);
                     if (existing.Count > 0)
                     {
                         uuid = existing[0]["id"]?.ToString() ?? "";
@@ -1028,19 +1031,41 @@ namespace Pedeai.DB
                             SaveSupabaseUuid("cupom", "Codigo", codigoCupom, uuid);
                     }
                 }
-                var payload = new
-                {
-                    codigo,
-                    valor,
-                    tipo            = supaTipo,
-                    validade        = validade.HasValue ? validade.Value.Date.Add(new TimeSpan(23, 59, 59)).ToString("yyyy-MM-ddTHH:mm:ss") : (string)null,
-                    ativo,
-                    limite_usos     = limiteUsos,
-                    usos_realizados = usosRealizados,
-                };
+
+                string validadeStr = validade.HasValue
+                    ? validade.Value.Date.Add(new TimeSpan(23, 59, 59)).ToString("yyyy-MM-ddTHH:mm:ss")
+                    : (string)null;
+
+                var payload = UsarEmpresaCodigo
+                    ? (object)new
+                    {
+                        codigo,
+                        valor,
+                        tipo            = supaTipo,
+                        validade        = validadeStr,
+                        ativo,
+                        limite_usos     = limiteUsos,
+                        usos_realizados = usosRealizados,
+                        empresa_codigo  = _empresaCodigo,
+                    }
+                    : (object)new
+                    {
+                        codigo,
+                        valor,
+                        tipo            = supaTipo,
+                        validade        = validadeStr,
+                        ativo,
+                        limite_usos     = limiteUsos,
+                        usos_realizados = usosRealizados,
+                    };
 
                 if (!string.IsNullOrWhiteSpace(uuid))
-                    await PatchAsync("cupom", $"id=eq.{uuid}", payload);
+                {
+                    string patchFilter = UsarEmpresaCodigo
+                        ? $"id=eq.{uuid}&empresa_codigo=eq.{Uri.EscapeDataString(_empresaCodigo)}"
+                        : $"id=eq.{uuid}";
+                    await PatchAsync("cupom", patchFilter, payload);
+                }
                 else
                 {
                     var result = await PostAsync("cupom", payload);

@@ -33,8 +33,8 @@ namespace Pedeai.Forms
         private System.Drawing.Image _marmitaPreviewImg = null;
 
         // Produtos disponíveis (para adicionar aos itens)
-        private readonly List<(int Codigo, string Nome, decimal Preco)> _produtos
-            = new List<(int, string, decimal)>();
+        private readonly List<(int Codigo, string Nome, decimal Preco, string Categoria)> _produtos
+            = new List<(int, string, decimal, string)>();
 
         // Controles
         private DataGridView gridMarmitas;
@@ -355,7 +355,8 @@ namespace Pedeai.Forms
                         _produtos.Add((
                             Convert.ToInt32(r["Codigo"]),
                             r["Nome"]?.ToString() ?? "",
-                            r["Preco"] == DBNull.Value ? 0m : Convert.ToDecimal(r["Preco"])));
+                            r["Preco"] == DBNull.Value ? 0m : Convert.ToDecimal(r["Preco"]),
+                            r["Categoria"]?.ToString() ?? ""));
             }
             catch { }
         }
@@ -586,6 +587,23 @@ namespace Pedeai.Forms
             var lblTit = new Label { Text = "Selecionar Produto", ForeColor = Color.White, Font = new Font("Segoe UI", 10F, FontStyle.Bold), Dock = DockStyle.Fill, TextAlign = ContentAlignment.MiddleCenter };
             pnlTop.Controls.Add(lblTit);
 
+            // Filtro de categoria
+            var pnlCatFilter = new Panel { Dock = DockStyle.Top, Height = 30, BackColor = ClrFoot, Padding = new Padding(4, 3, 4, 3) };
+            var lblCat = new Label { Text = "Categoria:", Left = 4, Top = 7, AutoSize = true, ForeColor = Color.FromArgb(100, 80, 50), Font = new Font("Segoe UI", 8.5F) };
+            var cmbCatFilter = new ComboBox
+            {
+                Left = 72, Top = 4, Width = 200, Height = 22,
+                DropDownStyle = ComboBoxStyle.DropDownList,
+                Font = new Font("Segoe UI", 9F), BackColor = Color.White
+            };
+            cmbCatFilter.Items.Add("Todas");
+            var cats = new System.Collections.Generic.HashSet<string>();
+            foreach (var p in _produtos) if (!string.IsNullOrWhiteSpace(p.Categoria)) cats.Add(p.Categoria);
+            foreach (var c in cats) cmbCatFilter.Items.Add(c);
+            cmbCatFilter.SelectedIndex = 0;
+            pnlCatFilter.Controls.Add(lblCat);
+            pnlCatFilter.Controls.Add(cmbCatFilter);
+
             var txtF = new TextBox { Dock = DockStyle.Top, Height = 28, BackColor = Color.White, ForeColor = ClrText, Font = new Font("Segoe UI", 10F), PlaceholderText = "Filtrar por nome...", BorderStyle = BorderStyle.FixedSingle };
 
             var grid2 = MkGrid();
@@ -594,12 +612,17 @@ namespace Pedeai.Forms
             var Preencher = new Action<string>(f =>
             {
                 grid2.Rows.Clear();
+                string catSel = cmbCatFilter.SelectedItem?.ToString() ?? "Todas";
                 foreach (var p in _produtos)
-                    if (string.IsNullOrWhiteSpace(f) || p.Nome.IndexOf(f, StringComparison.OrdinalIgnoreCase) >= 0)
-                        grid2.Rows.Add(p.Nome);
+                {
+                    if (catSel != "Todas" && p.Categoria != catSel) continue;
+                    if (!string.IsNullOrWhiteSpace(f) && p.Nome.IndexOf(f, StringComparison.OrdinalIgnoreCase) < 0) continue;
+                    grid2.Rows.Add(p.Nome);
+                }
             });
             Preencher("");
             txtF.TextChanged += (_, __) => Preencher(txtF.Text);
+            cmbCatFilter.SelectedIndexChanged += (_, __) => Preencher(txtF.Text);
 
             var pnlBottom = new Panel { Dock = DockStyle.Bottom, Height = 110, BackColor = ClrFoot, Padding = new Padding(8, 4, 8, 4) };
             var lblQ = new Label { Text = "Qtde:", Left = 8, Top = 10, AutoSize = true, ForeColor = Color.FromArgb(100, 80, 50) };
@@ -612,7 +635,7 @@ namespace Pedeai.Forms
                 BackColor = Color.White, ForeColor = ClrText,
                 Font = new Font("Segoe UI", 9F), DropDownStyle = ComboBoxStyle.DropDown
             };
-            cmbGrupo.Items.AddRange(new object[] { "Arroz", "Feijão", "Carne", "Guarnição", "Salada", "Talher", "Geral" });
+            cmbGrupo.Items.AddRange(new object[] { "Arroz", "Feijão", "Carne", "Guarnição", "Salada", "Talher", "Adicionais", "Geral" });
             cmbGrupo.Text = "Geral";
 
             var lblMaxG = new Label { Text = "Máx. grupo:", Left = 270, Top = 42, AutoSize = true, ForeColor = Color.FromArgb(100, 80, 50) };
@@ -625,7 +648,7 @@ namespace Pedeai.Forms
             btnCnc.Click += (_, __) => dlg.DialogResult = DialogResult.Cancel;
             pnlBottom.Controls.AddRange(new Control[] { lblQ, numQ, lblGrupo, cmbGrupo, lblMaxG, numMaxG, btnOk, btnCnc });
 
-            (int Codigo, string Nome, decimal Preco) escolhido = default;
+            (int Codigo, string Nome, decimal Preco, string Categoria) escolhido = default;
             btnOk.Click += (_, __) =>
             {
                 if (grid2.CurrentRow == null) return;
@@ -638,6 +661,7 @@ namespace Pedeai.Forms
 
             dlg.Controls.Add(grid2);
             dlg.Controls.Add(pnlBottom);
+            dlg.Controls.Add(pnlCatFilter);
             dlg.Controls.Add(txtF);
             dlg.Controls.Add(pnlTop);
 
