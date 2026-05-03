@@ -68,10 +68,29 @@ export default function Home() {
     });
   }, [categoriesRaw]);
 
+  // IDs das categorias desta empresa (usados para buscar produtos de forma isolada)
+  const categoryIds = useMemo(() => categoriesRaw?.map((c) => c.id) ?? [], [categoriesRaw]);
+
   // Busca os produtos reais do banco de dados
+  // Usa os IDs das categorias como filtro primário — mais robusto que filtrar por empresa_codigo
+  // na tabela mercadoria, pois grupo_mercadoria já foi filtrado por empresa_codigo.
   const { data: products, isLoading: isLoadingProds } = useQuery({
-    queryKey: ['products', empresaCodigo],
+    queryKey: ['products', empresaCodigo, categoryIds.join(',')],
+    enabled: !isLoadingCats, // aguarda categorias antes de buscar produtos
     queryFn: async () => {
+      // Caminho 1: categorias carregadas → filtra produtos pelos IDs das categorias desta empresa
+      if (categoryIds.length > 0) {
+        const { data, error } = await supabase
+          .from('mercadoria')
+          .select('*')
+          .eq('ativo', true)
+          .not('is_adicional', 'is', true)
+          .in('grupo_id', categoryIds)
+          .order('destaque', { ascending: false });
+        if (error) throw error;
+        return data as Produto[];
+      }
+      // Caminho 2 (fallback): sem categorias, tenta empresa_codigo diretamente
       const base = supabase.from('mercadoria').select('*').eq('ativo', true).not('is_adicional', 'is', true).order('destaque', { ascending: false });
       const { data, error } = empresaCodigo
         ? await base.eq('empresa_codigo', empresaCodigo)

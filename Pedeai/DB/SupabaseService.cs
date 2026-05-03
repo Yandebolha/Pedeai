@@ -470,7 +470,8 @@ namespace Pedeai.DB
                 {
                     try
                     {
-                        var check = await GetAsync($"grupo_mercadoria?id=eq.{uuid}&limit=1");
+                        // Verifica que o UUID ainda existe E pertence a esta empresa
+                        var check = await GetAsync($"grupo_mercadoria?id=eq.{uuid}{EmpresaFilter()}&limit=1");
                         if (check.Count == 0) { SaveSupabaseUuid("grupo_mercadoria", "Codigo", codigoGrupo, ""); uuid = ""; }
                     }
                     catch { /* network error — keep existing UUID, don't clear */ }
@@ -581,7 +582,8 @@ namespace Pedeai.DB
                 {
                     try
                     {
-                        var check = await GetAsync($"{TBL_MERCADORIAS}?id=eq.{uuid}&limit=1");
+                        // Verifica que o UUID pertence a esta empresa (evita usar UUID de outra empresa cacheado)
+                        var check = await GetAsync($"{TBL_MERCADORIAS}?id=eq.{uuid}{EmpresaFilter()}&limit=1");
                         if (check.Count == 0) { SaveSupabaseUuid("mercadoria", "Codigo", codigoMercadoria, ""); uuid = ""; }
                     }
                     catch { /* network error — keep existing UUID */ }
@@ -739,7 +741,11 @@ namespace Pedeai.DB
                     object patchPayload = string.IsNullOrWhiteSpace(imagemUrl)
                         ? BuildPayload(false)
                         : postPayload;
-                    await PatchAsync(TBL_MERCADORIAS, $"id=eq.{uuid}", patchPayload);
+                    // PATCH apenas no registro desta empresa (evita sobrescrever produto de outra empresa)
+                    string mercPatchFilter = UsarEmpresaCodigo
+                        ? $"id=eq.{uuid}&empresa_codigo=eq.{Uri.EscapeDataString(_empresaCodigo)}"
+                        : $"id=eq.{uuid}";
+                    await PatchAsync(TBL_MERCADORIAS, mercPatchFilter, patchPayload);
                 }
                 else
                 {
@@ -868,7 +874,8 @@ namespace Pedeai.DB
                 {
                     try
                     {
-                        var check = await GetAsync($"{TBL_MERCADORIAS}?id=eq.{uuid}&limit=1");
+                        // Verifica que o UUID pertence a esta empresa
+                        var check = await GetAsync($"{TBL_MERCADORIAS}?id=eq.{uuid}{EmpresaFilter()}&limit=1");
                         if (check.Count == 0) { SaveSupabaseUuid("marmita", "Codigo", codigoMarmita, ""); uuid = ""; }
                     }
                     catch { /* keep UUID on network error */ }
@@ -914,7 +921,11 @@ namespace Pedeai.DB
                             : (object)new { grupo_id = grupoUuid, nome = descricao, descricao = "Marmita",
                                             preco_venda = valor, ativo = ativoSite, destaque }
                         : postPayload;
-                    await PatchAsync(TBL_MERCADORIAS, $"id=eq.{uuid}", patchPayload);
+                    // PATCH apenas no registro desta empresa
+                    string marPatchFilter = UsarEmpresaCodigo
+                        ? $"id=eq.{uuid}&empresa_codigo=eq.{Uri.EscapeDataString(_empresaCodigo)}"
+                        : $"id=eq.{uuid}";
+                    await PatchAsync(TBL_MERCADORIAS, marPatchFilter, patchPayload);
                 }
                 else
                 {

@@ -70,8 +70,8 @@ namespace Pedeai.Forms
             this.txtImpLblSubtotal = new System.Windows.Forms.TextBox();
             this.txtImpLblTaxa = new System.Windows.Forms.TextBox();
             this.txtImpLblTotalPagar = new System.Windows.Forms.TextBox();
-            this.txtImpLblDesconto   = new System.Windows.Forms.TextBox();
-            this.txtImpLblCupom      = new System.Windows.Forms.TextBox();
+            this.txtImpLblDesconto = new System.Windows.Forms.TextBox();
+            this.txtImpLblCupom = new System.Windows.Forms.TextBox();
             this.txtImpLblAtendente = new System.Windows.Forms.TextBox();
             this.cmbImpressora = new System.Windows.Forms.ComboBox();
             this.numLargura = new System.Windows.Forms.NumericUpDown();
@@ -90,9 +90,9 @@ namespace Pedeai.Forms
             this.lblResetTitulo = new System.Windows.Forms.Label();
             this.lblResetAviso = new System.Windows.Forms.Label();
             this.btnResetarBanco = new System.Windows.Forms.Button();
-            this.pnlBuscaUsuarios.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.picLogo)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.picBanner)).BeginInit();
+            this.pnlBuscaUsuarios.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numLargura)).BeginInit();
             this.tabControl.SuspendLayout();
             this.tabEmp.SuspendLayout();
@@ -105,7 +105,7 @@ namespace Pedeai.Forms
             // 
             this.txtEmpNome.BackColor = System.Drawing.Color.White;
             this.txtEmpNome.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.txtEmpNome.ForeColor = System.Drawing.Color.FromArgb(50, 50, 50);
+            this.txtEmpNome.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(50)))), ((int)(((byte)(50)))), ((int)(((byte)(50)))));
             this.txtEmpNome.Location = new System.Drawing.Point(168, 86);
             this.txtEmpNome.Name = "txtEmpNome";
             this.txtEmpNome.Size = new System.Drawing.Size(360, 25);
@@ -115,7 +115,7 @@ namespace Pedeai.Forms
             // 
             this.txtEmpFantasia.BackColor = System.Drawing.Color.White;
             this.txtEmpFantasia.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.txtEmpFantasia.ForeColor = System.Drawing.Color.FromArgb(50, 50, 50);
+            this.txtEmpFantasia.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(50)))), ((int)(((byte)(50)))), ((int)(((byte)(50)))));
             this.txtEmpFantasia.Location = new System.Drawing.Point(168, 117);
             this.txtEmpFantasia.Name = "txtEmpFantasia";
             this.txtEmpFantasia.Size = new System.Drawing.Size(360, 25);
@@ -125,7 +125,7 @@ namespace Pedeai.Forms
             // 
             this.txtEmpCNPJ.BackColor = System.Drawing.Color.White;
             this.txtEmpCNPJ.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.txtEmpCNPJ.ForeColor = System.Drawing.Color.FromArgb(50, 50, 50);
+            this.txtEmpCNPJ.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(50)))), ((int)(((byte)(50)))), ((int)(((byte)(50)))));
             this.txtEmpCNPJ.Location = new System.Drawing.Point(168, 148);
             this.txtEmpCNPJ.Name = "txtEmpCNPJ";
             this.txtEmpCNPJ.Size = new System.Drawing.Size(360, 25);
@@ -135,7 +135,7 @@ namespace Pedeai.Forms
             // 
             this.txtEmpTel.BackColor = System.Drawing.Color.White;
             this.txtEmpTel.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.txtEmpTel.ForeColor = System.Drawing.Color.FromArgb(50, 50, 50);
+            this.txtEmpTel.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(50)))), ((int)(((byte)(50)))), ((int)(((byte)(50)))));
             this.txtEmpTel.Location = new System.Drawing.Point(168, 179);
             this.txtEmpTel.Name = "txtEmpTel";
             this.txtEmpTel.Size = new System.Drawing.Size(360, 25);
@@ -145,7 +145,7 @@ namespace Pedeai.Forms
             // 
             this.txtEmpEmail.BackColor = System.Drawing.Color.White;
             this.txtEmpEmail.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.txtEmpEmail.ForeColor = System.Drawing.Color.FromArgb(50, 50, 50);
+            this.txtEmpEmail.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(50)))), ((int)(((byte)(50)))), ((int)(((byte)(50)))));
             this.txtEmpEmail.Location = new System.Drawing.Point(168, 210);
             this.txtEmpEmail.Name = "txtEmpEmail";
             this.txtEmpEmail.Size = new System.Drawing.Size(360, 25);
@@ -155,7 +155,7 @@ namespace Pedeai.Forms
             // 
             this.txtEmpEnd.BackColor = System.Drawing.Color.White;
             this.txtEmpEnd.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.txtEmpEnd.ForeColor = System.Drawing.Color.FromArgb(50, 50, 50);
+            this.txtEmpEnd.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(50)))), ((int)(((byte)(50)))), ((int)(((byte)(50)))));
             this.txtEmpEnd.Location = new System.Drawing.Point(168, 241);
             this.txtEmpEnd.Name = "txtEmpEnd";
             this.txtEmpEnd.Size = new System.Drawing.Size(360, 25);
@@ -163,32 +163,86 @@ namespace Pedeai.Forms
             // 
             // txtEmpCodigo
             // 
-            this.txtEmpCodigo.BackColor = System.Drawing.Color.FromArgb(240, 230, 210);
+            this.txtEmpCodigo.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(230)))), ((int)(((byte)(210)))));
             this.txtEmpCodigo.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.txtEmpCodigo.ForeColor = System.Drawing.Color.FromArgb(120, 60, 10);
+            this.txtEmpCodigo.Font = new System.Drawing.Font("Consolas", 10F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.txtEmpCodigo.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(120)))), ((int)(((byte)(60)))), ((int)(((byte)(10)))));
             this.txtEmpCodigo.Location = new System.Drawing.Point(168, 272);
             this.txtEmpCodigo.Name = "txtEmpCodigo";
             this.txtEmpCodigo.ReadOnly = true;
-            this.txtEmpCodigo.Size = new System.Drawing.Size(140, 25);
+            this.txtEmpCodigo.Size = new System.Drawing.Size(140, 23);
             this.txtEmpCodigo.TabIndex = 6;
-            this.txtEmpCodigo.Font = new System.Drawing.Font("Consolas", 10F, System.Drawing.FontStyle.Bold);
             // 
             // txtEmpImgBB
             // 
             this.txtEmpImgBB.BackColor = System.Drawing.Color.White;
             this.txtEmpImgBB.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.txtEmpImgBB.ForeColor = System.Drawing.Color.FromArgb(50, 50, 50);
+            this.txtEmpImgBB.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(50)))), ((int)(((byte)(50)))), ((int)(((byte)(50)))));
             this.txtEmpImgBB.Location = new System.Drawing.Point(168, 314);
             this.txtEmpImgBB.Name = "txtEmpImgBB";
+            this.txtEmpImgBB.PlaceholderText = "Chave API do ImgBB (imgbb.com)";
             this.txtEmpImgBB.Size = new System.Drawing.Size(360, 25);
             this.txtEmpImgBB.TabIndex = 7;
-            this.txtEmpImgBB.PlaceholderText = "Chave API do ImgBB (imgbb.com)";
+            // 
+            // picLogo
+            // 
+            this.picLogo.BackColor = System.Drawing.Color.White;
+            this.picLogo.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.picLogo.Location = new System.Drawing.Point(168, 345);
+            this.picLogo.Name = "picLogo";
+            this.picLogo.Size = new System.Drawing.Size(100, 100);
+            this.picLogo.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+            this.picLogo.TabIndex = 98;
+            this.picLogo.TabStop = false;
+            // 
+            // btnSelLogo
+            // 
+            this.btnSelLogo.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(130)))), ((int)(((byte)(80)))), ((int)(((byte)(30)))));
+            this.btnSelLogo.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.btnSelLogo.FlatAppearance.BorderSize = 0;
+            this.btnSelLogo.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnSelLogo.Font = new System.Drawing.Font("Segoe UI", 9.5F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.btnSelLogo.ForeColor = System.Drawing.Color.White;
+            this.btnSelLogo.Location = new System.Drawing.Point(274, 375);
+            this.btnSelLogo.Name = "btnSelLogo";
+            this.btnSelLogo.Size = new System.Drawing.Size(170, 32);
+            this.btnSelLogo.TabIndex = 97;
+            this.btnSelLogo.Text = "📷  Selecionar Logo";
+            this.btnSelLogo.UseVisualStyleBackColor = false;
+            this.btnSelLogo.Click += new System.EventHandler(this.BtnSelLogo_Click);
+            // 
+            // picBanner
+            // 
+            this.picBanner.BackColor = System.Drawing.Color.WhiteSmoke;
+            this.picBanner.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.picBanner.Location = new System.Drawing.Point(168, 476);
+            this.picBanner.Name = "picBanner";
+            this.picBanner.Size = new System.Drawing.Size(480, 110);
+            this.picBanner.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+            this.picBanner.TabIndex = 102;
+            this.picBanner.TabStop = false;
+            // 
+            // btnSelBanner
+            // 
+            this.btnSelBanner.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(100)))), ((int)(((byte)(170)))));
+            this.btnSelBanner.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.btnSelBanner.FlatAppearance.BorderSize = 0;
+            this.btnSelBanner.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnSelBanner.Font = new System.Drawing.Font("Segoe UI", 9.5F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.btnSelBanner.ForeColor = System.Drawing.Color.White;
+            this.btnSelBanner.Location = new System.Drawing.Point(660, 511);
+            this.btnSelBanner.Name = "btnSelBanner";
+            this.btnSelBanner.Size = new System.Drawing.Size(170, 32);
+            this.btnSelBanner.TabIndex = 103;
+            this.btnSelBanner.Text = "🖼  Selecionar Banner";
+            this.btnSelBanner.UseVisualStyleBackColor = false;
+            this.btnSelBanner.Click += new System.EventHandler(this.BtnSelBanner_Click);
             // 
             // txtUsrNome
             // 
             this.txtUsrNome.BackColor = System.Drawing.Color.White;
             this.txtUsrNome.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.txtUsrNome.ForeColor = System.Drawing.Color.FromArgb(50, 50, 50);
+            this.txtUsrNome.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(50)))), ((int)(((byte)(50)))), ((int)(((byte)(50)))));
             this.txtUsrNome.Location = new System.Drawing.Point(168, 20);
             this.txtUsrNome.Name = "txtUsrNome";
             this.txtUsrNome.Size = new System.Drawing.Size(280, 25);
@@ -198,7 +252,7 @@ namespace Pedeai.Forms
             // 
             this.txtUsrLogin.BackColor = System.Drawing.Color.White;
             this.txtUsrLogin.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.txtUsrLogin.ForeColor = System.Drawing.Color.FromArgb(50, 50, 50);
+            this.txtUsrLogin.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(50)))), ((int)(((byte)(50)))), ((int)(((byte)(50)))));
             this.txtUsrLogin.Location = new System.Drawing.Point(168, 60);
             this.txtUsrLogin.Name = "txtUsrLogin";
             this.txtUsrLogin.Size = new System.Drawing.Size(280, 25);
@@ -208,7 +262,7 @@ namespace Pedeai.Forms
             // 
             this.txtUsrSenha.BackColor = System.Drawing.Color.White;
             this.txtUsrSenha.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.txtUsrSenha.ForeColor = System.Drawing.Color.FromArgb(50, 50, 50);
+            this.txtUsrSenha.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(50)))), ((int)(((byte)(50)))), ((int)(((byte)(50)))));
             this.txtUsrSenha.Location = new System.Drawing.Point(168, 100);
             this.txtUsrSenha.Name = "txtUsrSenha";
             this.txtUsrSenha.PasswordChar = '*';
@@ -219,7 +273,7 @@ namespace Pedeai.Forms
             // 
             this.txtUsrSenhaConf.BackColor = System.Drawing.Color.White;
             this.txtUsrSenhaConf.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.txtUsrSenhaConf.ForeColor = System.Drawing.Color.FromArgb(50, 50, 50);
+            this.txtUsrSenhaConf.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(50)))), ((int)(((byte)(50)))), ((int)(((byte)(50)))));
             this.txtUsrSenhaConf.Location = new System.Drawing.Point(168, 140);
             this.txtUsrSenhaConf.Name = "txtUsrSenhaConf";
             this.txtUsrSenhaConf.PasswordChar = '*';
@@ -230,7 +284,7 @@ namespace Pedeai.Forms
             // 
             this.cmbUsrNivel.BackColor = System.Drawing.Color.White;
             this.cmbUsrNivel.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cmbUsrNivel.ForeColor = System.Drawing.Color.FromArgb(50, 50, 50);
+            this.cmbUsrNivel.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(50)))), ((int)(((byte)(50)))), ((int)(((byte)(50)))));
             this.cmbUsrNivel.Items.AddRange(new object[] {
             "Operador",
             "Gerente",
@@ -244,7 +298,7 @@ namespace Pedeai.Forms
             // 
             this.cmbUsrSit.BackColor = System.Drawing.Color.White;
             this.cmbUsrSit.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cmbUsrSit.ForeColor = System.Drawing.Color.FromArgb(50, 50, 50);
+            this.cmbUsrSit.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(50)))), ((int)(((byte)(50)))), ((int)(((byte)(50)))));
             this.cmbUsrSit.Items.AddRange(new object[] {
             "Ativo",
             "Inativo"});
@@ -269,7 +323,7 @@ namespace Pedeai.Forms
             this.lstUsuarios.BackColor = System.Drawing.Color.White;
             this.lstUsuarios.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.lstUsuarios.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.lstUsuarios.ForeColor = System.Drawing.Color.FromArgb(50, 50, 50);
+            this.lstUsuarios.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(50)))), ((int)(((byte)(50)))), ((int)(((byte)(50)))));
             this.lstUsuarios.ItemHeight = 17;
             this.lstUsuarios.Location = new System.Drawing.Point(0, 25);
             this.lstUsuarios.Name = "lstUsuarios";
@@ -282,10 +336,10 @@ namespace Pedeai.Forms
             this.txtPesquisa.BackColor = System.Drawing.Color.White;
             this.txtPesquisa.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.txtPesquisa.Dock = System.Windows.Forms.DockStyle.Top;
-            this.txtPesquisa.ForeColor = System.Drawing.Color.FromArgb(50, 50, 50);
+            this.txtPesquisa.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(50)))), ((int)(((byte)(50)))), ((int)(((byte)(50)))));
             this.txtPesquisa.Location = new System.Drawing.Point(0, 0);
             this.txtPesquisa.Name = "txtPesquisa";
-            this.txtPesquisa.Size = new System.Drawing.Size(460, 25);
+            this.txtPesquisa.Size = new System.Drawing.Size(600, 25);
             this.txtPesquisa.TabIndex = 1;
             this.txtPesquisa.TextChanged += new System.EventHandler(this.TxtPesquisa_TextChanged);
             // 
@@ -306,7 +360,7 @@ namespace Pedeai.Forms
             // 
             // btnPesquisarUsr
             // 
-            this.btnPesquisarUsr.BackColor = System.Drawing.Color.FromArgb(224, 113, 42);
+            this.btnPesquisarUsr.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(113)))), ((int)(((byte)(42)))));
             this.btnPesquisarUsr.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnPesquisarUsr.FlatAppearance.BorderSize = 0;
             this.btnPesquisarUsr.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
@@ -321,7 +375,7 @@ namespace Pedeai.Forms
             // 
             // btnSalvUsr
             // 
-            this.btnSalvUsr.BackColor = System.Drawing.Color.FromArgb(87, 120, 38);
+            this.btnSalvUsr.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(87)))), ((int)(((byte)(120)))), ((int)(((byte)(38)))));
             this.btnSalvUsr.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnSalvUsr.FlatAppearance.BorderSize = 0;
             this.btnSalvUsr.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
@@ -350,11 +404,6 @@ namespace Pedeai.Forms
             this.btnCancelarUsr.UseVisualStyleBackColor = false;
             this.btnCancelarUsr.Visible = false;
             this.btnCancelarUsr.Click += new System.EventHandler(this.BtnCancelarUsuario_Click);
-            // ── Módulos Liberados — grade 4 colunas × 4 linhas ───────────────
-            // Linha 1 (y=260): Dashboard | Pedidos | Financeiro | Turno de Caixa
-            // Linha 2 (y=286): Produtos | Categorias | Clientes | Estoque
-            // Linha 3 (y=312): Fornecedores | Cupons | Empresa | Ent. Mercadoria
-            // Linha 4 (y=338): Cancelar Pedidos | Avisos | Consultar Pedido | Fidelização
             // 
             // chkModDashboard
             // 
@@ -380,15 +429,6 @@ namespace Pedeai.Forms
             this.chkModFinanceiro.TabIndex = 8;
             this.chkModFinanceiro.Text = "Financeiro";
             // 
-            // chkModTurno
-            // 
-            this.chkModTurno.Location = new System.Drawing.Point(690, 260);
-            this.chkModTurno.Name = "chkModTurno";
-            this.chkModTurno.Size = new System.Drawing.Size(164, 22);
-            this.chkModTurno.TabIndex = 24;
-            this.chkModTurno.Text = "Turno de Caixa";
-            this.chkModTurno.ForeColor = System.Drawing.Color.FromArgb(50, 50, 50);
-            // 
             // chkModProdutos
             // 
             this.chkModProdutos.Location = new System.Drawing.Point(168, 286);
@@ -413,15 +453,6 @@ namespace Pedeai.Forms
             this.chkModClientes.TabIndex = 11;
             this.chkModClientes.Text = "Clientes";
             // 
-            // chkModEstoque
-            // 
-            this.chkModEstoque.Location = new System.Drawing.Point(690, 286);
-            this.chkModEstoque.Name = "chkModEstoque";
-            this.chkModEstoque.Size = new System.Drawing.Size(164, 22);
-            this.chkModEstoque.TabIndex = 25;
-            this.chkModEstoque.Text = "Estoque";
-            this.chkModEstoque.ForeColor = System.Drawing.Color.FromArgb(50, 50, 50);
-            // 
             // chkModFornecedores
             // 
             this.chkModFornecedores.Location = new System.Drawing.Point(168, 312);
@@ -438,6 +469,15 @@ namespace Pedeai.Forms
             this.chkModCupons.TabIndex = 13;
             this.chkModCupons.Text = "Cupons";
             // 
+            // chkModEstoque
+            // 
+            this.chkModEstoque.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(50)))), ((int)(((byte)(50)))), ((int)(((byte)(50)))));
+            this.chkModEstoque.Location = new System.Drawing.Point(690, 286);
+            this.chkModEstoque.Name = "chkModEstoque";
+            this.chkModEstoque.Size = new System.Drawing.Size(164, 22);
+            this.chkModEstoque.TabIndex = 25;
+            this.chkModEstoque.Text = "Estoque";
+            // 
             // chkModEmpresa
             // 
             this.chkModEmpresa.Location = new System.Drawing.Point(516, 312);
@@ -445,14 +485,6 @@ namespace Pedeai.Forms
             this.chkModEmpresa.Size = new System.Drawing.Size(164, 22);
             this.chkModEmpresa.TabIndex = 14;
             this.chkModEmpresa.Text = "Empresa";
-            // 
-            // chkModEntradaMercadoria
-            // 
-            this.chkModEntradaMercadoria.Location = new System.Drawing.Point(690, 312);
-            this.chkModEntradaMercadoria.Name = "chkModEntradaMercadoria";
-            this.chkModEntradaMercadoria.Size = new System.Drawing.Size(164, 22);
-            this.chkModEntradaMercadoria.TabIndex = 16;
-            this.chkModEntradaMercadoria.Text = "Entrada Mercadoria";
             // 
             // chkModCancelarPedidos
             // 
@@ -462,6 +494,14 @@ namespace Pedeai.Forms
             this.chkModCancelarPedidos.TabIndex = 15;
             this.chkModCancelarPedidos.Text = "Cancelar Pedidos";
             // 
+            // chkModEntradaMercadoria
+            // 
+            this.chkModEntradaMercadoria.Location = new System.Drawing.Point(690, 312);
+            this.chkModEntradaMercadoria.Name = "chkModEntradaMercadoria";
+            this.chkModEntradaMercadoria.Size = new System.Drawing.Size(164, 22);
+            this.chkModEntradaMercadoria.TabIndex = 16;
+            this.chkModEntradaMercadoria.Text = "Entrada Mercadoria";
+            // 
             // chkModAvisos
             // 
             this.chkModAvisos.Location = new System.Drawing.Point(342, 338);
@@ -470,56 +510,65 @@ namespace Pedeai.Forms
             this.chkModAvisos.TabIndex = 17;
             this.chkModAvisos.Text = "Avisos";
             // 
+            // chkModTurno
+            // 
+            this.chkModTurno.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(50)))), ((int)(((byte)(50)))), ((int)(((byte)(50)))));
+            this.chkModTurno.Location = new System.Drawing.Point(690, 260);
+            this.chkModTurno.Name = "chkModTurno";
+            this.chkModTurno.Size = new System.Drawing.Size(164, 22);
+            this.chkModTurno.TabIndex = 24;
+            this.chkModTurno.Text = "Turno de Caixa";
+            // 
             // chkModConsultarPedido
             // 
+            this.chkModConsultarPedido.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(50)))), ((int)(((byte)(50)))), ((int)(((byte)(50)))));
             this.chkModConsultarPedido.Location = new System.Drawing.Point(516, 338);
             this.chkModConsultarPedido.Name = "chkModConsultarPedido";
             this.chkModConsultarPedido.Size = new System.Drawing.Size(164, 22);
             this.chkModConsultarPedido.TabIndex = 26;
             this.chkModConsultarPedido.Text = "Consultar Pedido";
-            this.chkModConsultarPedido.ForeColor = System.Drawing.Color.FromArgb(50, 50, 50);
             // 
             // chkModFidelizacao
             // 
+            this.chkModFidelizacao.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(50)))), ((int)(((byte)(50)))), ((int)(((byte)(50)))));
             this.chkModFidelizacao.Location = new System.Drawing.Point(690, 338);
             this.chkModFidelizacao.Name = "chkModFidelizacao";
             this.chkModFidelizacao.Size = new System.Drawing.Size(164, 22);
             this.chkModFidelizacao.TabIndex = 27;
             this.chkModFidelizacao.Text = "Fidelização";
-            this.chkModFidelizacao.ForeColor = System.Drawing.Color.FromArgb(50, 50, 50);
             // 
             // chkModWhatsApp
             // 
+            this.chkModWhatsApp.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(50)))), ((int)(((byte)(50)))), ((int)(((byte)(50)))));
             this.chkModWhatsApp.Location = new System.Drawing.Point(168, 364);
+            this.chkModWhatsApp.Name = "chkModWhatsApp";
+            this.chkModWhatsApp.Size = new System.Drawing.Size(164, 22);
+            this.chkModWhatsApp.TabIndex = 28;
+            this.chkModWhatsApp.Text = "WhatsApp";
             // 
             // chkModBairros
             // 
+            this.chkModBairros.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(50)))), ((int)(((byte)(50)))), ((int)(((byte)(50)))));
             this.chkModBairros.Location = new System.Drawing.Point(342, 364);
             this.chkModBairros.Name = "chkModBairros";
             this.chkModBairros.Size = new System.Drawing.Size(164, 22);
             this.chkModBairros.TabIndex = 29;
             this.chkModBairros.Text = "Bairros / Taxa";
-            this.chkModBairros.ForeColor = System.Drawing.Color.FromArgb(50, 50, 50);
-            this.chkModWhatsApp.Name = "chkModWhatsApp";
-            this.chkModWhatsApp.Size = new System.Drawing.Size(164, 22);
-            this.chkModWhatsApp.TabIndex = 28;
-            this.chkModWhatsApp.Text = "WhatsApp";
-            this.chkModWhatsApp.ForeColor = System.Drawing.Color.FromArgb(50, 50, 50);
             // 
             // chkModMarmitas
             // 
+            this.chkModMarmitas.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(50)))), ((int)(((byte)(50)))), ((int)(((byte)(50)))));
             this.chkModMarmitas.Location = new System.Drawing.Point(516, 364);
             this.chkModMarmitas.Name = "chkModMarmitas";
             this.chkModMarmitas.Size = new System.Drawing.Size(164, 22);
             this.chkModMarmitas.TabIndex = 30;
             this.chkModMarmitas.Text = "Marmitas";
-            this.chkModMarmitas.ForeColor = System.Drawing.Color.FromArgb(50, 50, 50);
             // 
             // txtImpNomeEmpresa
             // 
             this.txtImpNomeEmpresa.BackColor = System.Drawing.Color.White;
             this.txtImpNomeEmpresa.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.txtImpNomeEmpresa.ForeColor = System.Drawing.Color.FromArgb(50, 50, 50);
+            this.txtImpNomeEmpresa.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(50)))), ((int)(((byte)(50)))), ((int)(((byte)(50)))));
             this.txtImpNomeEmpresa.Location = new System.Drawing.Point(208, 30);
             this.txtImpNomeEmpresa.Name = "txtImpNomeEmpresa";
             this.txtImpNomeEmpresa.Size = new System.Drawing.Size(400, 25);
@@ -529,7 +578,7 @@ namespace Pedeai.Forms
             // 
             this.txtImpEndereco.BackColor = System.Drawing.Color.White;
             this.txtImpEndereco.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.txtImpEndereco.ForeColor = System.Drawing.Color.FromArgb(50, 50, 50);
+            this.txtImpEndereco.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(50)))), ((int)(((byte)(50)))), ((int)(((byte)(50)))));
             this.txtImpEndereco.Location = new System.Drawing.Point(208, 62);
             this.txtImpEndereco.Name = "txtImpEndereco";
             this.txtImpEndereco.Size = new System.Drawing.Size(400, 25);
@@ -539,7 +588,7 @@ namespace Pedeai.Forms
             // 
             this.txtImpTelefone.BackColor = System.Drawing.Color.White;
             this.txtImpTelefone.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.txtImpTelefone.ForeColor = System.Drawing.Color.FromArgb(50, 50, 50);
+            this.txtImpTelefone.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(50)))), ((int)(((byte)(50)))), ((int)(((byte)(50)))));
             this.txtImpTelefone.Location = new System.Drawing.Point(208, 94);
             this.txtImpTelefone.Name = "txtImpTelefone";
             this.txtImpTelefone.Size = new System.Drawing.Size(400, 25);
@@ -549,7 +598,7 @@ namespace Pedeai.Forms
             // 
             this.txtImpCNPJ.BackColor = System.Drawing.Color.White;
             this.txtImpCNPJ.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.txtImpCNPJ.ForeColor = System.Drawing.Color.FromArgb(50, 50, 50);
+            this.txtImpCNPJ.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(50)))), ((int)(((byte)(50)))), ((int)(((byte)(50)))));
             this.txtImpCNPJ.Location = new System.Drawing.Point(208, 126);
             this.txtImpCNPJ.Name = "txtImpCNPJ";
             this.txtImpCNPJ.Size = new System.Drawing.Size(400, 25);
@@ -559,7 +608,7 @@ namespace Pedeai.Forms
             // 
             this.txtImpSeparador.BackColor = System.Drawing.Color.White;
             this.txtImpSeparador.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.txtImpSeparador.ForeColor = System.Drawing.Color.FromArgb(50, 50, 50);
+            this.txtImpSeparador.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(50)))), ((int)(((byte)(50)))), ((int)(((byte)(50)))));
             this.txtImpSeparador.Location = new System.Drawing.Point(208, 158);
             this.txtImpSeparador.Name = "txtImpSeparador";
             this.txtImpSeparador.Size = new System.Drawing.Size(400, 25);
@@ -569,7 +618,7 @@ namespace Pedeai.Forms
             // 
             this.txtImpAvisoFiscal.BackColor = System.Drawing.Color.White;
             this.txtImpAvisoFiscal.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.txtImpAvisoFiscal.ForeColor = System.Drawing.Color.FromArgb(50, 50, 50);
+            this.txtImpAvisoFiscal.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(50)))), ((int)(((byte)(50)))), ((int)(((byte)(50)))));
             this.txtImpAvisoFiscal.Location = new System.Drawing.Point(208, 190);
             this.txtImpAvisoFiscal.Name = "txtImpAvisoFiscal";
             this.txtImpAvisoFiscal.Size = new System.Drawing.Size(400, 25);
@@ -579,7 +628,7 @@ namespace Pedeai.Forms
             // 
             this.txtImpRodapeTexto.BackColor = System.Drawing.Color.White;
             this.txtImpRodapeTexto.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.txtImpRodapeTexto.ForeColor = System.Drawing.Color.FromArgb(50, 50, 50);
+            this.txtImpRodapeTexto.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(50)))), ((int)(((byte)(50)))), ((int)(((byte)(50)))));
             this.txtImpRodapeTexto.Location = new System.Drawing.Point(208, 222);
             this.txtImpRodapeTexto.Multiline = true;
             this.txtImpRodapeTexto.Name = "txtImpRodapeTexto";
@@ -590,7 +639,7 @@ namespace Pedeai.Forms
             // 
             this.txtImpLblNumero.BackColor = System.Drawing.Color.White;
             this.txtImpLblNumero.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.txtImpLblNumero.ForeColor = System.Drawing.Color.FromArgb(50, 50, 50);
+            this.txtImpLblNumero.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(50)))), ((int)(((byte)(50)))), ((int)(((byte)(50)))));
             this.txtImpLblNumero.Location = new System.Drawing.Point(208, 300);
             this.txtImpLblNumero.Name = "txtImpLblNumero";
             this.txtImpLblNumero.Size = new System.Drawing.Size(200, 25);
@@ -600,7 +649,7 @@ namespace Pedeai.Forms
             // 
             this.txtImpLblColItem.BackColor = System.Drawing.Color.White;
             this.txtImpLblColItem.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.txtImpLblColItem.ForeColor = System.Drawing.Color.FromArgb(50, 50, 50);
+            this.txtImpLblColItem.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(50)))), ((int)(((byte)(50)))), ((int)(((byte)(50)))));
             this.txtImpLblColItem.Location = new System.Drawing.Point(208, 332);
             this.txtImpLblColItem.Name = "txtImpLblColItem";
             this.txtImpLblColItem.Size = new System.Drawing.Size(200, 25);
@@ -610,7 +659,7 @@ namespace Pedeai.Forms
             // 
             this.txtImpLblColTotal.BackColor = System.Drawing.Color.White;
             this.txtImpLblColTotal.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.txtImpLblColTotal.ForeColor = System.Drawing.Color.FromArgb(50, 50, 50);
+            this.txtImpLblColTotal.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(50)))), ((int)(((byte)(50)))), ((int)(((byte)(50)))));
             this.txtImpLblColTotal.Location = new System.Drawing.Point(208, 364);
             this.txtImpLblColTotal.Name = "txtImpLblColTotal";
             this.txtImpLblColTotal.Size = new System.Drawing.Size(200, 25);
@@ -620,7 +669,7 @@ namespace Pedeai.Forms
             // 
             this.txtImpLblSubtotal.BackColor = System.Drawing.Color.White;
             this.txtImpLblSubtotal.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.txtImpLblSubtotal.ForeColor = System.Drawing.Color.FromArgb(50, 50, 50);
+            this.txtImpLblSubtotal.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(50)))), ((int)(((byte)(50)))), ((int)(((byte)(50)))));
             this.txtImpLblSubtotal.Location = new System.Drawing.Point(208, 396);
             this.txtImpLblSubtotal.Name = "txtImpLblSubtotal";
             this.txtImpLblSubtotal.Size = new System.Drawing.Size(200, 25);
@@ -630,7 +679,7 @@ namespace Pedeai.Forms
             // 
             this.txtImpLblTaxa.BackColor = System.Drawing.Color.White;
             this.txtImpLblTaxa.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.txtImpLblTaxa.ForeColor = System.Drawing.Color.FromArgb(50, 50, 50);
+            this.txtImpLblTaxa.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(50)))), ((int)(((byte)(50)))), ((int)(((byte)(50)))));
             this.txtImpLblTaxa.Location = new System.Drawing.Point(208, 428);
             this.txtImpLblTaxa.Name = "txtImpLblTaxa";
             this.txtImpLblTaxa.Size = new System.Drawing.Size(200, 25);
@@ -640,7 +689,7 @@ namespace Pedeai.Forms
             // 
             this.txtImpLblTotalPagar.BackColor = System.Drawing.Color.White;
             this.txtImpLblTotalPagar.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.txtImpLblTotalPagar.ForeColor = System.Drawing.Color.FromArgb(50, 50, 50);
+            this.txtImpLblTotalPagar.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(50)))), ((int)(((byte)(50)))), ((int)(((byte)(50)))));
             this.txtImpLblTotalPagar.Location = new System.Drawing.Point(208, 524);
             this.txtImpLblTotalPagar.Name = "txtImpLblTotalPagar";
             this.txtImpLblTotalPagar.Size = new System.Drawing.Size(200, 25);
@@ -650,7 +699,7 @@ namespace Pedeai.Forms
             // 
             this.txtImpLblDesconto.BackColor = System.Drawing.Color.White;
             this.txtImpLblDesconto.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.txtImpLblDesconto.ForeColor = System.Drawing.Color.FromArgb(50, 50, 50);
+            this.txtImpLblDesconto.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(50)))), ((int)(((byte)(50)))), ((int)(((byte)(50)))));
             this.txtImpLblDesconto.Location = new System.Drawing.Point(208, 460);
             this.txtImpLblDesconto.Name = "txtImpLblDesconto";
             this.txtImpLblDesconto.Size = new System.Drawing.Size(200, 25);
@@ -660,7 +709,7 @@ namespace Pedeai.Forms
             // 
             this.txtImpLblCupom.BackColor = System.Drawing.Color.White;
             this.txtImpLblCupom.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.txtImpLblCupom.ForeColor = System.Drawing.Color.FromArgb(50, 50, 50);
+            this.txtImpLblCupom.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(50)))), ((int)(((byte)(50)))), ((int)(((byte)(50)))));
             this.txtImpLblCupom.Location = new System.Drawing.Point(208, 492);
             this.txtImpLblCupom.Name = "txtImpLblCupom";
             this.txtImpLblCupom.Size = new System.Drawing.Size(200, 25);
@@ -670,7 +719,7 @@ namespace Pedeai.Forms
             // 
             this.txtImpLblAtendente.BackColor = System.Drawing.Color.White;
             this.txtImpLblAtendente.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.txtImpLblAtendente.ForeColor = System.Drawing.Color.FromArgb(50, 50, 50);
+            this.txtImpLblAtendente.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(50)))), ((int)(((byte)(50)))), ((int)(((byte)(50)))));
             this.txtImpLblAtendente.Location = new System.Drawing.Point(208, 556);
             this.txtImpLblAtendente.Name = "txtImpLblAtendente";
             this.txtImpLblAtendente.Size = new System.Drawing.Size(200, 25);
@@ -680,7 +729,7 @@ namespace Pedeai.Forms
             // 
             this.cmbImpressora.BackColor = System.Drawing.Color.White;
             this.cmbImpressora.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cmbImpressora.ForeColor = System.Drawing.Color.FromArgb(50, 50, 50);
+            this.cmbImpressora.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(50)))), ((int)(((byte)(50)))), ((int)(((byte)(50)))));
             this.cmbImpressora.Items.AddRange(new object[] {
             "(Impressora padr�o do sistema)"});
             this.cmbImpressora.Location = new System.Drawing.Point(208, 594);
@@ -691,7 +740,7 @@ namespace Pedeai.Forms
             // numLargura
             // 
             this.numLargura.BackColor = System.Drawing.Color.White;
-            this.numLargura.ForeColor = System.Drawing.Color.FromArgb(50, 50, 50);
+            this.numLargura.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(50)))), ((int)(((byte)(50)))), ((int)(((byte)(50)))));
             this.numLargura.Location = new System.Drawing.Point(208, 626);
             this.numLargura.Maximum = new decimal(new int[] {
             120,
@@ -724,12 +773,12 @@ namespace Pedeai.Forms
             this.tabControl.Name = "tabControl";
             this.tabControl.Padding = new System.Drawing.Point(14, 5);
             this.tabControl.SelectedIndex = 0;
-            this.tabControl.Size = new System.Drawing.Size(1004, 676);
+            this.tabControl.Size = new System.Drawing.Size(1004, 800);
             this.tabControl.TabIndex = 0;
             // 
             // tabEmp
             // 
-            this.tabEmp.BackColor = System.Drawing.Color.FromArgb(245, 237, 216);
+            this.tabEmp.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(245)))), ((int)(((byte)(237)))), ((int)(((byte)(216)))));
             this.tabEmp.Controls.Add(this.txtEmpNome);
             this.tabEmp.Controls.Add(this.txtEmpFantasia);
             this.tabEmp.Controls.Add(this.txtEmpCNPJ);
@@ -742,32 +791,21 @@ namespace Pedeai.Forms
             this.tabEmp.Controls.Add(this.btnSelLogo);
             this.tabEmp.Controls.Add(this.picBanner);
             this.tabEmp.Controls.Add(this.btnSelBanner);
-            this.tabEmp.Controls.Add(this.lblEmpBanner);
             this.tabEmp.Controls.Add(this.btnSalvEmp);
             this.tabEmp.Controls.Add(this.btnSincronizarSite);
             this.tabEmp.Controls.Add(this.btnDiagnostico);
             this.tabEmp.Controls.Add(this.btnCorrigirDados);
             this.tabEmp.Controls.Add(this.lblSincStatus);
-            this.tabEmp.Controls.Add(this.lblEmpNome);
-            this.tabEmp.Controls.Add(this.lblEmpFantasia);
-            this.tabEmp.Controls.Add(this.lblEmpCNPJ);
-            this.tabEmp.Controls.Add(this.lblEmpTel);
-            this.tabEmp.Controls.Add(this.lblEmpEmail);
-            this.tabEmp.Controls.Add(this.lblEmpEnd);
-            this.tabEmp.Controls.Add(this.lblEmpCodigo);
-            this.tabEmp.Controls.Add(this.lblEmpImgBB);
-            this.tabEmp.Controls.Add(this.lblEmpLogo);
-            this.tabEmp.Controls.Add(this.lblEmpTitle);
-            this.tabEmp.ForeColor = System.Drawing.Color.FromArgb(50, 50, 50);
+            this.tabEmp.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(50)))), ((int)(((byte)(50)))), ((int)(((byte)(50)))));
             this.tabEmp.Location = new System.Drawing.Point(4, 30);
             this.tabEmp.Name = "tabEmp";
-            this.tabEmp.Size = new System.Drawing.Size(996, 680);
+            this.tabEmp.Size = new System.Drawing.Size(996, 766);
             this.tabEmp.TabIndex = 0;
             this.tabEmp.Text = "  Dados da Empresa  ";
             // 
             // btnSalvEmp
             // 
-            this.btnSalvEmp.BackColor = System.Drawing.Color.FromArgb(87, 120, 38);
+            this.btnSalvEmp.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(87)))), ((int)(((byte)(120)))), ((int)(((byte)(38)))));
             this.btnSalvEmp.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnSalvEmp.FlatAppearance.BorderSize = 0;
             this.btnSalvEmp.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
@@ -783,7 +821,7 @@ namespace Pedeai.Forms
             // 
             // btnSincronizarSite
             // 
-            this.btnSincronizarSite.BackColor = System.Drawing.Color.FromArgb(30, 100, 180);
+            this.btnSincronizarSite.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(100)))), ((int)(((byte)(180)))));
             this.btnSincronizarSite.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnSincronizarSite.FlatAppearance.BorderSize = 0;
             this.btnSincronizarSite.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
@@ -799,11 +837,11 @@ namespace Pedeai.Forms
             // 
             // btnDiagnostico
             // 
-            this.btnDiagnostico.BackColor = System.Drawing.Color.FromArgb(60, 60, 60);
+            this.btnDiagnostico.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(60)))), ((int)(((byte)(60)))));
             this.btnDiagnostico.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnDiagnostico.FlatAppearance.BorderSize = 0;
             this.btnDiagnostico.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnDiagnostico.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular);
+            this.btnDiagnostico.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.btnDiagnostico.ForeColor = System.Drawing.Color.White;
             this.btnDiagnostico.Location = new System.Drawing.Point(572, 602);
             this.btnDiagnostico.Name = "btnDiagnostico";
@@ -815,90 +853,34 @@ namespace Pedeai.Forms
             // 
             // btnCorrigirDados
             // 
-            this.btnCorrigirDados.BackColor = System.Drawing.Color.FromArgb(140, 60, 60);
+            this.btnCorrigirDados.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(140)))), ((int)(((byte)(60)))), ((int)(((byte)(60)))));
             this.btnCorrigirDados.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnCorrigirDados.FlatAppearance.BorderSize = 0;
             this.btnCorrigirDados.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnCorrigirDados.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular);
+            this.btnCorrigirDados.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.btnCorrigirDados.ForeColor = System.Drawing.Color.White;
             this.btnCorrigirDados.Location = new System.Drawing.Point(744, 602);
             this.btnCorrigirDados.Name = "btnCorrigirDados";
             this.btnCorrigirDados.Size = new System.Drawing.Size(210, 32);
             this.btnCorrigirDados.TabIndex = 9;
-            this.btnCorrigirDados.Text = "\uD83D\uDD27 Corrigir Dados";
+            this.btnCorrigirDados.Text = "🔧 Corrigir Dados";
             this.btnCorrigirDados.UseVisualStyleBackColor = false;
             this.btnCorrigirDados.Click += new System.EventHandler(this.BtnCorrigirDados_Click);
             // 
-            this.lblSincStatus.AutoSize = false;
+            // lblSincStatus
+            // 
             this.lblSincStatus.BackColor = System.Drawing.Color.Transparent;
-            this.lblSincStatus.ForeColor = System.Drawing.Color.FromArgb(30, 100, 180);
-            this.lblSincStatus.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Italic);
+            this.lblSincStatus.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point);
+            this.lblSincStatus.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(100)))), ((int)(((byte)(180)))));
             this.lblSincStatus.Location = new System.Drawing.Point(168, 642);
             this.lblSincStatus.Name = "lblSincStatus";
             this.lblSincStatus.Size = new System.Drawing.Size(392, 22);
             this.lblSincStatus.TabIndex = 99;
-            this.lblSincStatus.Text = "";
             this.lblSincStatus.Visible = false;
-            // 
-            // picLogo
-            // 
-            this.picLogo.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.picLogo.Location = new System.Drawing.Point(168, 338);
-            this.picLogo.Name = "picLogo";
-            this.picLogo.Size = new System.Drawing.Size(100, 100);
-            this.picLogo.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
-            this.picLogo.BackColor = System.Drawing.Color.White;
-            this.picLogo.TabIndex = 98;
-            this.picLogo.TabStop = false;
-            // 
-            // btnSelLogo
-            // 
-            this.btnSelLogo.BackColor = System.Drawing.Color.FromArgb(130, 80, 30);
-            this.btnSelLogo.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.btnSelLogo.FlatAppearance.BorderSize = 0;
-            this.btnSelLogo.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnSelLogo.Font = new System.Drawing.Font("Segoe UI", 9.5F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.btnSelLogo.ForeColor = System.Drawing.Color.White;
-            this.btnSelLogo.Location = new System.Drawing.Point(280, 370);
-            this.btnSelLogo.Name = "btnSelLogo";
-            this.btnSelLogo.Size = new System.Drawing.Size(170, 32);
-            this.btnSelLogo.TabIndex = 97;
-            this.btnSelLogo.Text = "\U0001f4f7  Selecionar Logo";
-            this.btnSelLogo.UseVisualStyleBackColor = false;
-            this.btnSelLogo.Click += new System.EventHandler(this.BtnSelLogo_Click);
-            //
-            // picBanner
-            //
-            ((System.ComponentModel.ISupportInitialize)(this.picBanner)).BeginInit();
-            this.picBanner.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.picBanner.Location = new System.Drawing.Point(168, 476);
-            this.picBanner.Name = "picBanner";
-            this.picBanner.Size = new System.Drawing.Size(480, 110);
-            this.picBanner.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
-            this.picBanner.BackColor = System.Drawing.Color.WhiteSmoke;
-            this.picBanner.TabIndex = 102;
-            this.picBanner.TabStop = false;
-            ((System.ComponentModel.ISupportInitialize)(this.picBanner)).EndInit();
-            //
-            // btnSelBanner
-            //
-            this.btnSelBanner.BackColor = System.Drawing.Color.FromArgb(30, 100, 170);
-            this.btnSelBanner.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.btnSelBanner.FlatAppearance.BorderSize = 0;
-            this.btnSelBanner.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnSelBanner.Font = new System.Drawing.Font("Segoe UI", 9.5F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.btnSelBanner.ForeColor = System.Drawing.Color.White;
-            this.btnSelBanner.Location = new System.Drawing.Point(660, 511);
-            this.btnSelBanner.Name = "btnSelBanner";
-            this.btnSelBanner.Size = new System.Drawing.Size(170, 32);
-            this.btnSelBanner.TabIndex = 103;
-            this.btnSelBanner.Text = "\U0001f5bc  Selecionar Banner";
-            this.btnSelBanner.UseVisualStyleBackColor = false;
-            this.btnSelBanner.Click += new System.EventHandler(this.BtnSelBanner_Click);
             // 
             // tabUsr
             // 
-            this.tabUsr.BackColor = System.Drawing.Color.FromArgb(245, 237, 216);
+            this.tabUsr.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(245)))), ((int)(((byte)(237)))), ((int)(((byte)(216)))));
             this.tabUsr.Controls.Add(this.txtUsrNome);
             this.tabUsr.Controls.Add(this.txtUsrLogin);
             this.tabUsr.Controls.Add(this.txtUsrSenha);
@@ -929,23 +911,16 @@ namespace Pedeai.Forms
             this.tabUsr.Controls.Add(this.btnSalvUsr);
             this.tabUsr.Controls.Add(this.btnCancelarUsr);
             this.tabUsr.Controls.Add(this.pnlBuscaUsuarios);
-            this.tabUsr.Controls.Add(this.lblUsrNome);
-            this.tabUsr.Controls.Add(this.lblUsrLogin);
-            this.tabUsr.Controls.Add(this.lblUsrSenha);
-            this.tabUsr.Controls.Add(this.lblUsrSenhaConf);
-            this.tabUsr.Controls.Add(this.lblUsrNivel);
-            this.tabUsr.Controls.Add(this.lblUsrSit);
-            this.tabUsr.Controls.Add(this.lblUsrModulos);
-            this.tabUsr.ForeColor = System.Drawing.Color.FromArgb(50, 50, 50);
+            this.tabUsr.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(50)))), ((int)(((byte)(50)))), ((int)(((byte)(50)))));
             this.tabUsr.Location = new System.Drawing.Point(4, 30);
             this.tabUsr.Name = "tabUsr";
-            this.tabUsr.Size = new System.Drawing.Size(996, 607);
+            this.tabUsr.Size = new System.Drawing.Size(996, 642);
             this.tabUsr.TabIndex = 1;
             this.tabUsr.Text = "  Usuários  ";
             // 
             // tabImp
             // 
-            this.tabImp.BackColor = System.Drawing.Color.FromArgb(245, 237, 216);
+            this.tabImp.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(245)))), ((int)(((byte)(237)))), ((int)(((byte)(216)))));
             this.tabImp.Controls.Add(this.txtImpNomeEmpresa);
             this.tabImp.Controls.Add(this.txtImpEndereco);
             this.tabImp.Controls.Add(this.txtImpTelefone);
@@ -966,27 +941,7 @@ namespace Pedeai.Forms
             this.tabImp.Controls.Add(this.numLargura);
             this.tabImp.Controls.Add(this.btnSalvImp);
             this.tabImp.Controls.Add(this.btnTesteImp);
-            this.tabImp.Controls.Add(this.lblImpNome);
-            this.tabImp.Controls.Add(this.lblImpEnd);
-            this.tabImp.Controls.Add(this.lblImpTel);
-            this.tabImp.Controls.Add(this.lblImpCNPJ);
-            this.tabImp.Controls.Add(this.lblImpSep);
-            this.tabImp.Controls.Add(this.lblImpAviso);
-            this.tabImp.Controls.Add(this.lblImpRodape);
-            this.tabImp.Controls.Add(this.lblImpNum);
-            this.tabImp.Controls.Add(this.lblImpColItem);
-            this.tabImp.Controls.Add(this.lblImpColTotal);
-            this.tabImp.Controls.Add(this.lblImpSubtotal);
-            this.tabImp.Controls.Add(this.lblImpTaxa);
-            this.tabImp.Controls.Add(this.lblImpDesconto);
-            this.tabImp.Controls.Add(this.lblImpCupom);
-            this.tabImp.Controls.Add(this.lblImpTotalPagar);
-            this.tabImp.Controls.Add(this.lblImpAtendente);
-            this.tabImp.Controls.Add(this.lblImpressora);
-            this.tabImp.Controls.Add(this.lblLargura);
-            this.tabImp.Controls.Add(this.lblImpTitle);
-            this.tabImp.Controls.Add(this.lblImpRotulos);
-            this.tabImp.ForeColor = System.Drawing.Color.FromArgb(50, 50, 50);
+            this.tabImp.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(50)))), ((int)(((byte)(50)))), ((int)(((byte)(50)))));
             this.tabImp.Location = new System.Drawing.Point(4, 30);
             this.tabImp.Name = "tabImp";
             this.tabImp.Size = new System.Drawing.Size(996, 642);
@@ -995,7 +950,7 @@ namespace Pedeai.Forms
             // 
             // btnSalvImp
             // 
-            this.btnSalvImp.BackColor = System.Drawing.Color.FromArgb(87, 120, 38);
+            this.btnSalvImp.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(87)))), ((int)(((byte)(120)))), ((int)(((byte)(38)))));
             this.btnSalvImp.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnSalvImp.FlatAppearance.BorderSize = 0;
             this.btnSalvImp.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
@@ -1010,7 +965,7 @@ namespace Pedeai.Forms
             // 
             // btnTesteImp
             // 
-            this.btnTesteImp.BackColor = System.Drawing.Color.FromArgb(224, 113, 42);
+            this.btnTesteImp.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(113)))), ((int)(((byte)(42)))));
             this.btnTesteImp.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnTesteImp.FlatAppearance.BorderSize = 0;
             this.btnTesteImp.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
@@ -1025,11 +980,11 @@ namespace Pedeai.Forms
             // 
             // tabSistema
             // 
+            this.tabSistema.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(245)))), ((int)(((byte)(237)))), ((int)(((byte)(216)))));
             this.tabSistema.Controls.Add(this.lblResetTitulo);
             this.tabSistema.Controls.Add(this.lblResetAviso);
             this.tabSistema.Controls.Add(this.btnResetarBanco);
-            this.tabSistema.BackColor = System.Drawing.Color.FromArgb(245, 237, 216);
-            this.tabSistema.ForeColor = System.Drawing.Color.FromArgb(50, 50, 50);
+            this.tabSistema.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(50)))), ((int)(((byte)(50)))), ((int)(((byte)(50)))));
             this.tabSistema.Location = new System.Drawing.Point(4, 30);
             this.tabSistema.Name = "tabSistema";
             this.tabSistema.Size = new System.Drawing.Size(996, 642);
@@ -1040,24 +995,28 @@ namespace Pedeai.Forms
             // 
             this.lblResetTitulo.AutoSize = true;
             this.lblResetTitulo.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.lblResetTitulo.ForeColor = System.Drawing.Color.FromArgb(176, 110, 42);
+            this.lblResetTitulo.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(176)))), ((int)(((byte)(110)))), ((int)(((byte)(42)))));
             this.lblResetTitulo.Location = new System.Drawing.Point(30, 30);
             this.lblResetTitulo.Name = "lblResetTitulo";
+            this.lblResetTitulo.Size = new System.Drawing.Size(126, 21);
+            this.lblResetTitulo.TabIndex = 0;
             this.lblResetTitulo.Text = "Zona de Perigo";
             // 
             // lblResetAviso
             // 
-            this.lblResetAviso.AutoSize = false;
             this.lblResetAviso.Font = new System.Drawing.Font("Segoe UI", 9.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.lblResetAviso.ForeColor = System.Drawing.Color.FromArgb(80, 80, 80);
+            this.lblResetAviso.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(80)))), ((int)(((byte)(80)))), ((int)(((byte)(80)))));
             this.lblResetAviso.Location = new System.Drawing.Point(30, 70);
             this.lblResetAviso.Name = "lblResetAviso";
             this.lblResetAviso.Size = new System.Drawing.Size(600, 80);
-            this.lblResetAviso.Text = "Reseta completamente o banco de dados apagando TODOS os registros, incluindo usuários.\r\nApós o reset, o único acesso disponível será: login 'admin' com senha '$up0rte'.\r\nEsta operação é irreversível.";
+            this.lblResetAviso.TabIndex = 1;
+            this.lblResetAviso.Text = "Reseta completamente o banco de dados apagando TODOS os registros, incluindo usuá" +
+    "rios.\r\nApós o reset, o único acesso disponível será: login \'admin\' com senha \'$u" +
+    "p0rte\'.\r\nEsta operação é irreversível.";
             // 
             // btnResetarBanco
             // 
-            this.btnResetarBanco.BackColor = System.Drawing.Color.FromArgb(180, 40, 40);
+            this.btnResetarBanco.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(180)))), ((int)(((byte)(40)))), ((int)(((byte)(40)))));
             this.btnResetarBanco.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnResetarBanco.FlatAppearance.BorderSize = 0;
             this.btnResetarBanco.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
@@ -1070,7 +1029,6 @@ namespace Pedeai.Forms
             this.btnResetarBanco.Text = "⚠  Resetar Banco de Dados";
             this.btnResetarBanco.UseVisualStyleBackColor = false;
             this.btnResetarBanco.Click += new System.EventHandler(this.BtnResetarBanco_Click);
-            this.btnResetarBanco.Click += new System.EventHandler(this.BtnResetarBanco_Click);
             // 
             // frmEmpresa
             // 
@@ -1078,15 +1036,16 @@ namespace Pedeai.Forms
             this.ClientSize = new System.Drawing.Size(1004, 800);
             this.Controls.Add(this.tabControl);
             this.Font = new System.Drawing.Font("Segoe UI", 9.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.ForeColor = System.Drawing.Color.FromArgb(60, 60, 60);
+            this.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(60)))), ((int)(((byte)(60)))));
             this.MinimumSize = new System.Drawing.Size(960, 700);
             this.Name = "frmEmpresa";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "Empresa e Usuários";
+            ((System.ComponentModel.ISupportInitialize)(this.picLogo)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.picBanner)).EndInit();
             this.pnlBuscaUsuarios.ResumeLayout(false);
             this.pnlBuscaUsuarios.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numLargura)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.picLogo)).EndInit();
             this.tabControl.ResumeLayout(false);
             this.tabEmp.ResumeLayout(false);
             this.tabEmp.PerformLayout();
