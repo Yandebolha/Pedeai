@@ -80,6 +80,7 @@ namespace Pedeai.Forms
             this.btnSalvEmp = new System.Windows.Forms.Button();
             this.btnSincronizarSite = new System.Windows.Forms.Button();
             this.btnDiagnostico = new System.Windows.Forms.Button();
+            this.btnCorrigirDados = new System.Windows.Forms.Button();
             this.lblSincStatus = new System.Windows.Forms.Label();
             this.tabUsr = new System.Windows.Forms.TabPage();
             this.tabImp = new System.Windows.Forms.TabPage();
@@ -745,6 +746,7 @@ namespace Pedeai.Forms
             this.tabEmp.Controls.Add(this.btnSalvEmp);
             this.tabEmp.Controls.Add(this.btnSincronizarSite);
             this.tabEmp.Controls.Add(this.btnDiagnostico);
+            this.tabEmp.Controls.Add(this.btnCorrigirDados);
             this.tabEmp.Controls.Add(this.lblSincStatus);
             this.tabEmp.Controls.Add(this.lblEmpNome);
             this.tabEmp.Controls.Add(this.lblEmpFantasia);
@@ -759,7 +761,7 @@ namespace Pedeai.Forms
             this.tabEmp.ForeColor = System.Drawing.Color.FromArgb(50, 50, 50);
             this.tabEmp.Location = new System.Drawing.Point(4, 30);
             this.tabEmp.Name = "tabEmp";
-            this.tabEmp.Size = new System.Drawing.Size(996, 607);
+            this.tabEmp.Size = new System.Drawing.Size(996, 680);
             this.tabEmp.TabIndex = 0;
             this.tabEmp.Text = "  Dados da Empresa  ";
             // 
@@ -771,7 +773,7 @@ namespace Pedeai.Forms
             this.btnSalvEmp.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnSalvEmp.Font = new System.Drawing.Font("Segoe UI", 9.5F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.btnSalvEmp.ForeColor = System.Drawing.Color.White;
-            this.btnSalvEmp.Location = new System.Drawing.Point(168, 465);
+            this.btnSalvEmp.Location = new System.Drawing.Point(168, 602);
             this.btnSalvEmp.Name = "btnSalvEmp";
             this.btnSalvEmp.Size = new System.Drawing.Size(160, 32);
             this.btnSalvEmp.TabIndex = 6;
@@ -787,7 +789,7 @@ namespace Pedeai.Forms
             this.btnSincronizarSite.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnSincronizarSite.Font = new System.Drawing.Font("Segoe UI", 9.5F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.btnSincronizarSite.ForeColor = System.Drawing.Color.White;
-            this.btnSincronizarSite.Location = new System.Drawing.Point(340, 465);
+            this.btnSincronizarSite.Location = new System.Drawing.Point(340, 602);
             this.btnSincronizarSite.Name = "btnSincronizarSite";
             this.btnSincronizarSite.Size = new System.Drawing.Size(220, 32);
             this.btnSincronizarSite.TabIndex = 7;
@@ -803,7 +805,7 @@ namespace Pedeai.Forms
             this.btnDiagnostico.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnDiagnostico.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular);
             this.btnDiagnostico.ForeColor = System.Drawing.Color.White;
-            this.btnDiagnostico.Location = new System.Drawing.Point(572, 465);
+            this.btnDiagnostico.Location = new System.Drawing.Point(572, 602);
             this.btnDiagnostico.Name = "btnDiagnostico";
             this.btnDiagnostico.Size = new System.Drawing.Size(160, 32);
             this.btnDiagnostico.TabIndex = 8;
@@ -811,13 +813,27 @@ namespace Pedeai.Forms
             this.btnDiagnostico.UseVisualStyleBackColor = false;
             this.btnDiagnostico.Click += new System.EventHandler(this.BtnDiagnostico_Click);
             // 
-            // lblSincStatus
+            // btnCorrigirDados
+            // 
+            this.btnCorrigirDados.BackColor = System.Drawing.Color.FromArgb(140, 60, 60);
+            this.btnCorrigirDados.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.btnCorrigirDados.FlatAppearance.BorderSize = 0;
+            this.btnCorrigirDados.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnCorrigirDados.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular);
+            this.btnCorrigirDados.ForeColor = System.Drawing.Color.White;
+            this.btnCorrigirDados.Location = new System.Drawing.Point(744, 602);
+            this.btnCorrigirDados.Name = "btnCorrigirDados";
+            this.btnCorrigirDados.Size = new System.Drawing.Size(210, 32);
+            this.btnCorrigirDados.TabIndex = 9;
+            this.btnCorrigirDados.Text = "\uD83D\uDD27 Corrigir Dados";
+            this.btnCorrigirDados.UseVisualStyleBackColor = false;
+            this.btnCorrigirDados.Click += new System.EventHandler(this.BtnCorrigirDados_Click);
             // 
             this.lblSincStatus.AutoSize = false;
             this.lblSincStatus.BackColor = System.Drawing.Color.Transparent;
             this.lblSincStatus.ForeColor = System.Drawing.Color.FromArgb(30, 100, 180);
             this.lblSincStatus.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Italic);
-            this.lblSincStatus.Location = new System.Drawing.Point(168, 505);
+            this.lblSincStatus.Location = new System.Drawing.Point(168, 642);
             this.lblSincStatus.Name = "lblSincStatus";
             this.lblSincStatus.Size = new System.Drawing.Size(392, 22);
             this.lblSincStatus.TabIndex = 99;
@@ -827,7 +843,7 @@ namespace Pedeai.Forms
             // picLogo
             // 
             this.picLogo.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.picLogo.Location = new System.Drawing.Point(168, 348);
+            this.picLogo.Location = new System.Drawing.Point(168, 338);
             this.picLogo.Name = "picLogo";
             this.picLogo.Size = new System.Drawing.Size(100, 100);
             this.picLogo.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
@@ -843,7 +859,7 @@ namespace Pedeai.Forms
             this.btnSelLogo.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnSelLogo.Font = new System.Drawing.Font("Segoe UI", 9.5F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.btnSelLogo.ForeColor = System.Drawing.Color.White;
-            this.btnSelLogo.Location = new System.Drawing.Point(280, 348);
+            this.btnSelLogo.Location = new System.Drawing.Point(280, 370);
             this.btnSelLogo.Name = "btnSelLogo";
             this.btnSelLogo.Size = new System.Drawing.Size(170, 32);
             this.btnSelLogo.TabIndex = 97;
@@ -855,9 +871,9 @@ namespace Pedeai.Forms
             //
             ((System.ComponentModel.ISupportInitialize)(this.picBanner)).BeginInit();
             this.picBanner.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.picBanner.Location = new System.Drawing.Point(500, 348);
+            this.picBanner.Location = new System.Drawing.Point(168, 476);
             this.picBanner.Name = "picBanner";
-            this.picBanner.Size = new System.Drawing.Size(280, 100);
+            this.picBanner.Size = new System.Drawing.Size(480, 110);
             this.picBanner.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.picBanner.BackColor = System.Drawing.Color.WhiteSmoke;
             this.picBanner.TabIndex = 102;
@@ -872,9 +888,9 @@ namespace Pedeai.Forms
             this.btnSelBanner.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnSelBanner.Font = new System.Drawing.Font("Segoe UI", 9.5F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.btnSelBanner.ForeColor = System.Drawing.Color.White;
-            this.btnSelBanner.Location = new System.Drawing.Point(500, 455);
+            this.btnSelBanner.Location = new System.Drawing.Point(660, 511);
             this.btnSelBanner.Name = "btnSelBanner";
-            this.btnSelBanner.Size = new System.Drawing.Size(180, 32);
+            this.btnSelBanner.Size = new System.Drawing.Size(170, 32);
             this.btnSelBanner.TabIndex = 103;
             this.btnSelBanner.Text = "\U0001f5bc  Selecionar Banner";
             this.btnSelBanner.UseVisualStyleBackColor = false;
@@ -1059,11 +1075,11 @@ namespace Pedeai.Forms
             // frmEmpresa
             // 
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(13)))), ((int)(((byte)(19)))), ((int)(((byte)(40)))));
-            this.ClientSize = new System.Drawing.Size(1004, 740);
+            this.ClientSize = new System.Drawing.Size(1004, 800);
             this.Controls.Add(this.tabControl);
             this.Font = new System.Drawing.Font("Segoe UI", 9.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.ForeColor = System.Drawing.Color.FromArgb(60, 60, 60);
-            this.MinimumSize = new System.Drawing.Size(960, 620);
+            this.MinimumSize = new System.Drawing.Size(960, 700);
             this.Name = "frmEmpresa";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "Empresa e Usuários";
@@ -1156,6 +1172,7 @@ namespace Pedeai.Forms
         private System.Windows.Forms.Button         btnSalvEmp;
         private System.Windows.Forms.Button         btnSincronizarSite;
         private System.Windows.Forms.Button         btnDiagnostico;
+        private System.Windows.Forms.Button         btnCorrigirDados;
         private System.Windows.Forms.Label          lblSincStatus;
         private System.Windows.Forms.Button         btnSalvImp;
         private System.Windows.Forms.Button         btnTesteImp;
@@ -1169,8 +1186,8 @@ namespace Pedeai.Forms
         private System.Windows.Forms.Label lblEmpEnd      = new System.Windows.Forms.Label { Text = "Endereço:", AutoSize = true, Left = 22, Top = 247, ForeColor = System.Drawing.Color.FromArgb(70,70,70) };
         private System.Windows.Forms.Label lblEmpCodigo    = new System.Windows.Forms.Label { Text = "Código da Empresa:", AutoSize = true, Left = 22, Top = 278, ForeColor = System.Drawing.Color.FromArgb(120,60,10), Font = new System.Drawing.Font("Segoe UI", 8.5F, System.Drawing.FontStyle.Bold) };
         private System.Windows.Forms.Label lblEmpImgBB     = new System.Windows.Forms.Label { Text = "ImgBB API Key:", AutoSize = true, Left = 22, Top = 318, ForeColor = System.Drawing.Color.FromArgb(70,70,70) };
-        private System.Windows.Forms.Label lblEmpLogo      = new System.Windows.Forms.Label { Text = "Logo do Site:", AutoSize = true, Left = 22, Top = 372, ForeColor = System.Drawing.Color.FromArgb(70,70,70) };
-        private System.Windows.Forms.Label lblEmpBanner     = new System.Windows.Forms.Label { Text = "Banner do Site:", AutoSize = true, Left = 500, Top = 330, ForeColor = System.Drawing.Color.FromArgb(70,70,70) };
+        private System.Windows.Forms.Label lblEmpLogo      = new System.Windows.Forms.Label { Text = "Logo do Site:", AutoSize = true, Left = 22, Top = 320, ForeColor = System.Drawing.Color.FromArgb(70,70,70) };
+        private System.Windows.Forms.Label lblEmpBanner     = new System.Windows.Forms.Label { Text = "Banner do Site:", AutoSize = true, Left = 22, Top = 458, ForeColor = System.Drawing.Color.FromArgb(70,70,70) };
         internal System.Windows.Forms.TextBox txtEmpCodigo;
         internal System.Windows.Forms.TextBox txtEmpImgBB;
         internal System.Windows.Forms.PictureBox picLogo;

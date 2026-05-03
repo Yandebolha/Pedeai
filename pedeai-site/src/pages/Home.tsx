@@ -21,9 +21,10 @@ export default function Home() {
   const { data: store, isLoading: isLoadingStore } = useQuery({
     queryKey: ['store', empresaCodigo],
     queryFn: async () => {
-      let q = supabase.from('loja').select('*');
-      if (empresaCodigo) q = (q as any).eq('empresa_codigo', empresaCodigo);
-      const { data, error } = await (q as any).limit(1).maybeSingle();
+      const q = supabase.from('loja').select('*');
+      const { data, error } = empresaCodigo
+        ? await q.eq('empresa_codigo', empresaCodigo).limit(1).maybeSingle()
+        : await q.limit(1).maybeSingle();
       if (error) {
         if (isEmpresaCodigoMissing(error)) {
           const { data: d2 } = await supabase.from('loja').select('*').limit(1).maybeSingle();
@@ -39,9 +40,10 @@ export default function Home() {
   const { data: categoriesRaw, isLoading: isLoadingCats } = useQuery({
     queryKey: ['categories', empresaCodigo],
     queryFn: async () => {
-      let q = supabase.from('grupo_mercadoria').select('*').eq('ativo', true).order('ordem');
-      if (empresaCodigo) q = (q as any).eq('empresa_codigo', empresaCodigo);
-      const { data, error } = await q;
+      const base = supabase.from('grupo_mercadoria').select('*').eq('ativo', true).order('ordem');
+      const { data, error } = empresaCodigo
+        ? await base.eq('empresa_codigo', empresaCodigo)
+        : await base;
       if (error) {
         if (isEmpresaCodigoMissing(error)) {
           const { data: d2, error: e2 } = await supabase.from('grupo_mercadoria').select('*').eq('ativo', true).order('ordem');
@@ -70,9 +72,10 @@ export default function Home() {
   const { data: products, isLoading: isLoadingProds } = useQuery({
     queryKey: ['products', empresaCodigo],
     queryFn: async () => {
-      let q = supabase.from('mercadoria').select('*').eq('ativo', true).not('is_adicional', 'is', true).order('destaque', { ascending: false });
-      if (empresaCodigo) q = (q as any).eq('empresa_codigo', empresaCodigo);
-      const { data, error } = await q;
+      const base = supabase.from('mercadoria').select('*').eq('ativo', true).not('is_adicional', 'is', true).order('destaque', { ascending: false });
+      const { data, error } = empresaCodigo
+        ? await base.eq('empresa_codigo', empresaCodigo)
+        : await base;
       if (error) {
         if (isEmpresaCodigoMissing(error)) {
           const { data: d2, error: e2 } = await supabase.from('mercadoria').select('*').eq('ativo', true).not('is_adicional', 'is', true).order('destaque', { ascending: false });

@@ -19,9 +19,10 @@ export function Header({ searchQuery, onSearchChange }: HeaderProps) {
   const { data: store } = useQuery({
     queryKey: ['store', empresaCodigo],
     queryFn: async () => {
-      let q = supabase.from('loja').select('*');
-      if (empresaCodigo) q = (q as any).eq('empresa_codigo', empresaCodigo);
-      const { data, error } = await (q as any).limit(1).maybeSingle();
+      const q = supabase.from('loja').select('*');
+      const { data, error } = empresaCodigo
+        ? await q.eq('empresa_codigo', empresaCodigo).limit(1).maybeSingle()
+        : await q.limit(1).maybeSingle();
       if (error) {
         if (isEmpresaCodigoMissing(error)) {
           const { data: d2 } = await supabase.from('loja').select('*').limit(1).maybeSingle();

@@ -69,6 +69,9 @@ namespace Pedeai.DB
         /// <summary>Código único da empresa local. Usado para isolar dados no Supabase multi-tenant.</summary>
         private static string _empresaCodigo = "";
 
+        /// <summary>Retorna o código de empresa configurado (somente leitura).</summary>
+        public static string EmpresaCodigoAtual => _empresaCodigo;
+
         /// <summary>Carrega o código da empresa do MySQL. Deve ser chamado na inicialização do sistema.</summary>
         public static void CarregarEmpresaCodigo()
         {
@@ -125,7 +128,12 @@ namespace Pedeai.DB
         /// Isso substitui qualquer UPDATE manual no SQL — cada cliente "marca" seus dados
         /// na primeira sincronização após a migração, sem intervenção manual.
         /// </summary>
-        private static async Task CorrigirEmpresaCodigoNuloAsync()
+        /// <summary>
+        /// Reivindica todos os registros sem empresa_codigo (NULL ou string vazia) para a empresa
+        /// atual. Deve ser chamado manualmente pelo usuário UMA VEZ, a partir do cliente da empresa
+        /// correta. Trata tanto empresa_codigo IS NULL quanto empresa_codigo = '' (string vazia).
+        /// </summary>
+        public static async Task CorrigirEmpresaCodigoNuloAsync()
         {
             if (!UsarEmpresaCodigo) return;
             var payload = new { empresa_codigo = _empresaCodigo };
@@ -138,8 +146,12 @@ namespace Pedeai.DB
             };
             foreach (var tbl in tabelas)
             {
+                // Corrige registros com NULL
                 try { await PatchAsync(tbl, "empresa_codigo=is.null", payload); }
-                catch { /* ignora se a coluna ainda não existir nesta instalação */ }
+                catch { /* ignora se a coluna não existir */ }
+                // Corrige registros com string vazia
+                try { await PatchAsync(tbl, "empresa_codigo=eq.", payload); }
+                catch { /* ignora se a coluna não existir */ }
             }
         }
         // Lock por produto: evita condição de corrida quando dois threads tentam criar o mesmo produto
@@ -467,7 +479,7 @@ namespace Pedeai.DB
                 // Check Supabase by nome to avoid duplicates if UUID not stored
                 if (string.IsNullOrWhiteSpace(uuid))
                 {
-                    var existing = await GetAsync($"grupo_mercadoria?nome=eq.{Uri.EscapeDataString(nome)}&limit=1");
+                    var existing = await GetAsync($"grupo_mercadoria?nome=eq.{Uri.EscapeDataString(nome)}{EmpresaFilter()}&limit=1");
                     if (existing.Count > 0)
                     {
                         uuid = existing[0]["id"]?.ToString() ?? "";
@@ -650,7 +662,7 @@ namespace Pedeai.DB
                         // devemos ATUALIZAR o registro existente, não criar um novo.
                         var qGrupo = string.IsNullOrWhiteSpace(grupoUuid) ? "" : $"&grupo_id=eq.{grupoUuid}";
                         var existing = await GetAsync(
-                            $"{TBL_MERCADORIAS}?nome=eq.{Uri.EscapeDataString(nome)}{qGrupo}&limit=1");
+                            $"{TBL_MERCADORIAS}?nome=eq.{Uri.EscapeDataString(nome)}{qGrupo}{EmpresaFilter()}&limit=1");
                         if (existing.Count > 0)
                         {
                             uuid = existing[0]["id"]?.ToString() ?? "";
@@ -793,14 +805,16 @@ namespace Pedeai.DB
 
             if (!string.IsNullOrEmpty(_marmitaGrupoUuid)) return _marmitaGrupoUuid;
 
-            var arr = await GetAsync("grupo_mercadoria?nome=eq.Marmitas&limit=1");
+            var arr = await GetAsync($"grupo_mercadoria?nome=eq.Marmitas{EmpresaFilter()}&limit=1");
             if (arr.Count > 0)
             {
                 _marmitaGrupoUuid = arr[0]["id"]?.ToString() ?? "";
                 return _marmitaGrupoUuid;
             }
             var result = await PostAsync("grupo_mercadoria",
-                new { nome = "Marmitas", ordem = 99, ativo = true });
+                UsarEmpresaCodigo
+                    ? (object)new { nome = "Marmitas", ordem = 99, ativo = true, empresa_codigo = _empresaCodigo }
+                    : (object)new { nome = "Marmitas", ordem = 99, ativo = true });
             _marmitaGrupoUuid = result?["id"]?.ToString() ?? "";
             return _marmitaGrupoUuid;
         }
@@ -871,7 +885,7 @@ namespace Pedeai.DB
                     try
                     {
                         var existing = await GetAsync(
-                            $"{TBL_MERCADORIAS}?nome=eq.{Uri.EscapeDataString(descricao)}&limit=1");
+                            $"{TBL_MERCADORIAS}?nome=eq.{Uri.EscapeDataString(descricao)}{EmpresaFilter()}&limit=1");
                         if (existing.Count > 0)
                         {
                             uuid = existing[0]["id"]?.ToString() ?? "";
@@ -1299,19 +1313,33 @@ namespace Pedeai.DB
                 // ── Sync to Supabase `bairro` table (mirrors MySQL structure) ──
                 try
                 {
-                    var bairroPayload = new
-                    {
-                        codigo          = codigoBairro,
-                        auxcodigo       = auxCodigo,
-                        baicidade       = cidade,
-                        bainome         = nome,
-                        baitaxa_entrega = taxa,
-                        situacao        = situacao == "A" ? "A" : "I",
-                    };
-                    // Check if row exists by codigo (integer PK)
-                    var existentes = await GetAsync($"bairro?codigo=eq.{codigoBairro}&limit=1");
+                    object bairroPayload = UsarEmpresaCodigo
+                        ? (object)new
+                        {
+                            codigo          = codigoBairro,
+                            auxcodigo       = auxCodigo,
+                            baicidade       = cidade,
+                            bainome         = nome,
+                            baitaxa_entrega = taxa,
+                            situacao        = situacao == "A" ? "A" : "I",
+                            empresa_codigo  = _empresaCodigo,
+                        }
+                        : (object)new
+                        {
+                            codigo          = codigoBairro,
+                            auxcodigo       = auxCodigo,
+                            baicidade       = cidade,
+                            bainome         = nome,
+                            baitaxa_entrega = taxa,
+                            situacao        = situacao == "A" ? "A" : "I",
+                        };
+                    // Check if row exists by codigo (integer PK) + empresa_codigo
+                    string bairroFilter = UsarEmpresaCodigo
+                        ? $"bairro?codigo=eq.{codigoBairro}&empresa_codigo=eq.{Uri.EscapeDataString(_empresaCodigo)}&limit=1"
+                        : $"bairro?codigo=eq.{codigoBairro}&limit=1";
+                    var existentes = await GetAsync(bairroFilter);
                     if (existentes.Count > 0)
-                        await PatchAsync("bairro", $"codigo=eq.{codigoBairro}", bairroPayload);
+                        await PatchAsync("bairro", $"codigo=eq.{codigoBairro}{EmpresaFilter()}", bairroPayload);
                     else
                         await PostAsync("bairro", bairroPayload);
                 }
@@ -1319,19 +1347,30 @@ namespace Pedeai.DB
 
                 // ── Sync to `taxa_entrega` (CEP + bairro + cidade + valor) ──────
                 {
-                    var payload = new
-                    {
-                        cep    = string.IsNullOrWhiteSpace(cep) ? (object)null : cep,
-                        bairro = nome,
-                        cidade = cidade,
-                        valor  = taxa
-                    };
+                    object payload = UsarEmpresaCodigo
+                        ? (object)new
+                        {
+                            cep    = string.IsNullOrWhiteSpace(cep) ? (object)null : cep,
+                            bairro = nome,
+                            cidade = cidade,
+                            valor  = taxa,
+                            empresa_codigo = _empresaCodigo,
+                        }
+                        : (object)new
+                        {
+                            cep    = string.IsNullOrWhiteSpace(cep) ? (object)null : cep,
+                            bairro = nome,
+                            cidade = cidade,
+                            valor  = taxa,
+                        };
 
-                    // Always search by bairro+cidade to avoid stale-UUID issue
-                    // (MySQL may have a UUID that no longer exists in Supabase after table reset)
+                    // Always search by bairro+cidade (+ empresa_codigo) to avoid stale-UUID issue
                     var nomeEnc   = Uri.EscapeDataString(nome);
                     var cidadeEnc = Uri.EscapeDataString(cidade);
-                    var existing  = await GetAsync($"taxa_entrega?bairro=eq.{nomeEnc}&cidade=eq.{cidadeEnc}&limit=1");
+                    string taxaFilter = UsarEmpresaCodigo
+                        ? $"taxa_entrega?bairro=eq.{nomeEnc}&cidade=eq.{cidadeEnc}&empresa_codigo=eq.{Uri.EscapeDataString(_empresaCodigo)}&limit=1"
+                        : $"taxa_entrega?bairro=eq.{nomeEnc}&cidade=eq.{cidadeEnc}&limit=1";
+                    var existing  = await GetAsync(taxaFilter);
 
                     if (situacao != "A")
                     {
@@ -1414,32 +1453,31 @@ namespace Pedeai.DB
                     bannerUrl = r["empBanner_Url"]?.ToString() ?? "";
                 }
 
-                var lojas = await GetAsync("loja?limit=1");
+                var lojas = UsarEmpresaCodigo
+                    ? await GetAsync($"loja?empresa_codigo=eq.{Uri.EscapeDataString(_empresaCodigo)}&limit=1")
+                    : await GetAsync("loja?limit=1");
 
                 if (lojas.Count == 0)
                 {
-                    // Tabela vazia — cria a linha inicial
-                    var insert = new
-                    {
-                        nome      = string.IsNullOrWhiteSpace(nome) ? "Minha Loja" : nome,
-                        endereco,
-                        telefone,
-                        logo_url   = logoUrl,
-                        banner_url = bannerUrl,
-                    };
+                    // Linha não existe para esta empresa — cria
+                    var insert = UsarEmpresaCodigo
+                        ? (object)new { nome = string.IsNullOrWhiteSpace(nome) ? "Minha Loja" : nome, endereco, telefone, logo_url = logoUrl, banner_url = bannerUrl, empresa_codigo = _empresaCodigo }
+                        : (object)new { nome = string.IsNullOrWhiteSpace(nome) ? "Minha Loja" : nome, endereco, telefone, logo_url = logoUrl, banner_url = bannerUrl };
                     try { await PostAsync("loja", insert); } catch { }
                     // Relê para pegar o id gerado
-                    lojas = await GetAsync("loja?limit=1");
+                    lojas = UsarEmpresaCodigo
+                        ? await GetAsync($"loja?empresa_codigo=eq.{Uri.EscapeDataString(_empresaCodigo)}&limit=1")
+                        : await GetAsync("loja?limit=1");
                     if (lojas.Count == 0) return;
                 }
 
                 string lojaId = lojas[0]["id"]?.ToString() ?? "";
                 if (string.IsNullOrWhiteSpace(lojaId)) return;
 
-                // 1. Envia nome/endereco/telefone (campos que sempre existem)
-                object basePayload = string.IsNullOrWhiteSpace(nome)
-                    ? (object)new { endereco, telefone }
-                    : new { nome, endereco, telefone };
+                // 1. Envia nome/endereco/telefone + empresa_codigo
+                object basePayload = UsarEmpresaCodigo
+                    ? (object)new { nome = string.IsNullOrWhiteSpace(nome) ? (string)null : nome, endereco, telefone, empresa_codigo = _empresaCodigo }
+                    : (object)new { nome = string.IsNullOrWhiteSpace(nome) ? (string)null : nome, endereco, telefone };
                 await PatchAsync("loja", $"id=eq.{lojaId}", basePayload);
 
                 // 2. Envia logo_url separadamente — se a coluna não existir, não quebra o sync principal
@@ -2477,7 +2515,7 @@ namespace Pedeai.DB
                     // 2. By nome (last resort)
                     if (string.IsNullOrWhiteSpace(uuid) && !string.IsNullOrWhiteSpace(nome))
                     {
-                        var byNome = await GetAsync($"cliente?nome=eq.{Uri.EscapeDataString(nome)}&limit=1");
+                        var byNome = await GetAsync($"cliente?nome=eq.{Uri.EscapeDataString(nome)}{EmpresaFilter()}&limit=1");
                         if (byNome.Count > 0)
                         {
                             uuid = byNome[0]["id"]?.ToString() ?? "";
@@ -3638,7 +3676,7 @@ namespace Pedeai.DB
                     sb.AppendLine($"  Payload: {payloadJson}");
 
                     // Check if already exists
-                    var existentes = await GetAsync($"grupo_mercadoria?nome=eq.{Uri.EscapeDataString(nomeGrupo)}&limit=1");
+                    var existentes = await GetAsync($"grupo_mercadoria?nome=eq.{Uri.EscapeDataString(nomeGrupo)}{EmpresaFilter()}&limit=1");
                     if (existentes.Count > 0)
                     {
                         var existId = existentes[0]["id"]?.ToString();
@@ -3703,7 +3741,7 @@ namespace Pedeai.DB
                     sb.AppendLine($"  Payload: {payloadJson}");
 
                     // Check if already exists
-                    var existentes = await GetAsync($"mercadoria?nome=eq.{Uri.EscapeDataString(nomeMerc)}&limit=1");
+                    var existentes = await GetAsync($"mercadoria?nome=eq.{Uri.EscapeDataString(nomeMerc)}{EmpresaFilter()}&limit=1");
                     if (existentes.Count > 0)
                     {
                         var existId = existentes[0]["id"]?.ToString();
@@ -3759,7 +3797,6 @@ namespace Pedeai.DB
             if (!SiteConectado) return;
             try
             {
-                await CorrigirEmpresaCodigoNuloAsync(); // reivindica registros órfãos (migração automática)
                 await SincronizarLojaAsync();
                 await SincronizarFormasPagamentoAsync();
                 await SincronizarTodosGruposAsync();
@@ -3787,9 +3824,6 @@ namespace Pedeai.DB
             if (!SiteConectado) return "Conexão com o site está desabilitada.";
             var todosErros = new List<string>();
             ResetSyncCache(); // clear per-run group cache to avoid stale hits
-
-            progress?.Report("Reivindicando registros sem código de empresa...");
-            await CorrigirEmpresaCodigoNuloAsync();
 
             progress?.Report("Sincronizando dados da loja...");
             await SincronizarLojaAsync();
@@ -3904,7 +3938,7 @@ namespace Pedeai.DB
                 try
                 {
                     var arr = await GetAsync(
-                        $"{supabaseTable}?nome=eq.{Uri.EscapeDataString(nome)}&limit=1");
+                        $"{supabaseTable}?nome=eq.{Uri.EscapeDataString(nome)}{EmpresaFilter()}&limit=1");
                     if (arr.Count > 0)
                     {
                         uuid = arr[0]["id"]?.ToString() ?? "";

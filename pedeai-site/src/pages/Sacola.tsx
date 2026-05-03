@@ -36,9 +36,10 @@ export default function Sacola() {
   const { data: store, isLoading: isLoadingStore } = useQuery({
     queryKey: ['store', empresaCodigo],
     queryFn: async () => {
-      let q = supabase.from('loja').select('*');
-      if (empresaCodigo) q = (q as any).eq('empresa_codigo', empresaCodigo);
-      const { data, error } = await (q as any).limit(1).maybeSingle();
+      const q = supabase.from('loja').select('*');
+      const { data, error } = empresaCodigo
+        ? await q.eq('empresa_codigo', empresaCodigo).limit(1).maybeSingle()
+        : await q.limit(1).maybeSingle();
       if (error) {
         if (isEmpresaCodigoMissing(error)) {
           const { data: d2 } = await supabase.from('loja').select('*').limit(1).maybeSingle();
@@ -54,9 +55,10 @@ export default function Sacola() {
   const { data: paymentMethods } = useQuery({
     queryKey: ['payment-methods', empresaCodigo],
     queryFn: async () => {
-      let q = supabase.from('forma_pagamento').select('*').eq('ativo', true);
-      if (empresaCodigo) q = (q as any).eq('empresa_codigo', empresaCodigo);
-      const { data, error } = await q;
+      const base = supabase.from('forma_pagamento').select('*').eq('ativo', true);
+      const { data, error } = empresaCodigo
+        ? await base.eq('empresa_codigo', empresaCodigo)
+        : await base;
       if (error) {
         if (isEmpresaCodigoMissing(error)) {
           const { data: d2, error: e2 } = await supabase.from('forma_pagamento').select('*').eq('ativo', true);

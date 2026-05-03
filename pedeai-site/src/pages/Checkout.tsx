@@ -86,9 +86,14 @@ export default function Checkout() {
     if (!bairro) { setBairroTaxa(null); return; }
     try {
       const cidade = nomeCidade?.trim() ?? '';
+      const taxa_q = supabase.from('taxa_entrega').select('valor').ilike('bairro', bairro);
       const { data } = cidade
-        ? await supabase.from('taxa_entrega').select('valor').ilike('bairro', bairro).ilike('cidade', cidade).limit(1)
-        : await supabase.from('taxa_entrega').select('valor').ilike('bairro', bairro).limit(1);
+        ? await (empresaCodigo
+            ? taxa_q.ilike('cidade', cidade).eq('empresa_codigo', empresaCodigo).limit(1)
+            : taxa_q.ilike('cidade', cidade).limit(1))
+        : await (empresaCodigo
+            ? taxa_q.eq('empresa_codigo', empresaCodigo).limit(1)
+            : taxa_q.limit(1));
       const raw = data && data.length > 0 ? Number(data[0].valor) : NaN;
       setBairroTaxa(isNaN(raw) ? null : raw);
     } catch { setBairroTaxa(null); }
@@ -149,11 +154,13 @@ export default function Checkout() {
     setLoading(true);
     try {
       // 1. Busca se o cliente já existe
-      const { data: clientData } = await supabase
+      const clienteQ = supabase
         .from('cliente')
         .select('id, nome, telefone, cpf_cnpj')
-        .eq('telefone', rawWhatsapp)
-        .maybeSingle();
+        .eq('telefone', rawWhatsapp);
+      const { data: clientData } = empresaCodigo
+        ? await clienteQ.eq('empresa_codigo', empresaCodigo).maybeSingle()
+        : await clienteQ.maybeSingle();
 
       if (clientData) {
         setClientFound(clientData);
@@ -166,10 +173,13 @@ export default function Checkout() {
       }
 
       // 2. Busca endereços vinculados a este WhatsApp
-      const { data: addressData } = await supabase
+      const endQ = supabase
         .from('enderecos_salvo')
         .select('id, whatsapp, endereco, numero, bairro, complemento, cidade, cep, created_at')
         .eq('whatsapp', rawWhatsapp);
+      const { data: addressData } = empresaCodigo
+        ? await endQ.eq('empresa_codigo', empresaCodigo)
+        : await endQ;
 
       if (addressData && addressData.length > 0) {
         setAddressesFound(addressData as EnderecoSalvo[]);
@@ -209,7 +219,8 @@ export default function Checkout() {
         .insert([{
           nome: clientFormData.nome,
           telefone: rawWhatsapp,
-          cpf_cnpj: rawCpfCnpj
+          cpf_cnpj: rawCpfCnpj,
+          ...(empresaCodigo ? { empresa_codigo: empresaCodigo } : {}),
         }])
         .select()
         .single();
@@ -242,7 +253,8 @@ export default function Checkout() {
           numero: formData.numero,
           bairro: formData.bairro,
           complemento: formData.complemento || null,
-          cidade: formData.cidade
+          cidade: formData.cidade,
+          ...(empresaCodigo ? { empresa_codigo: empresaCodigo } : {}),
         }])
         .select()
         .single();
@@ -388,7 +400,8 @@ export default function Checkout() {
           .insert([{
             nome: clientFormData.nome,
             telefone: rawWhatsapp,
-            cpf_cnpj: clientFormData.cpf_cnpj.replace(/\D/g, '')
+            cpf_cnpj: clientFormData.cpf_cnpj.replace(/\D/g, ''),
+            ...(empresaCodigo ? { empresa_codigo: empresaCodigo } : {}),
           }])
           .select()
           .single();
@@ -409,7 +422,8 @@ export default function Checkout() {
             bairro: formData.bairro,
             complemento: formData.complemento || null,
             cidade: formData.cidade,
-            uf: formData.uf || null
+            uf: formData.uf || null,
+            ...(empresaCodigo ? { empresa_codigo: empresaCodigo } : {}),
           }]);
 
         if (addressError) throw addressError;

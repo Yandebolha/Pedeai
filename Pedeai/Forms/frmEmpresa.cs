@@ -396,6 +396,52 @@ namespace Pedeai.Forms
             }
         }
 
+        private async void BtnCorrigirDados_Click(object sender, EventArgs e)
+        {
+            var empCodigo = DB.SupabaseService.EmpresaCodigoAtual;
+            if (string.IsNullOrWhiteSpace(empCodigo))
+            {
+                MessageBox.Show(
+                    "Código de empresa não configurado.\n" +
+                    "Configure o campo 'Código Empresa (Site)' e salve antes de corrigir.",
+                    "Sem empresa configurada", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            var confirm = MessageBox.Show(
+                $"Esta ação irá atribuir o código '{empCodigo}' a TODOS os registros no Supabase\n" +
+                "que ainda não possuem empresa_codigo (NULL ou vazio).\n\n" +
+                "⚠ Execute isto UMA ÚNICA VEZ, a partir do cliente da empresa correta.\n" +
+                "Se houver outra empresa com dados sem código no mesmo banco, eles serão\n" +
+                "reivindicados por esta empresa.\n\n" +
+                "Deseja continuar?",
+                "Corrigir empresa_codigo",
+                MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+
+            if (confirm != DialogResult.Yes) return;
+
+            btnCorrigirDados.Enabled = false;
+            btnCorrigirDados.Text    = "⏳ Corrigindo...";
+            try
+            {
+                await DB.SupabaseService.CorrigirEmpresaCodigoNuloAsync();
+                MessageBox.Show(
+                    $"Correção concluída!\nTodos os registros sem empresa_codigo foram marcados com '{empCodigo}'.\n\n" +
+                    "Recomendado: execute 'Enviar Tudo ao Site' para sincronizar novamente.",
+                    "Correção concluída", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Erro ao corrigir:\n" + ex.Message, "Erro",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            finally
+            {
+                btnCorrigirDados.Enabled = true;
+                btnCorrigirDados.Text    = "🔧 Corrigir Dados";
+            }
+        }
+
         private static async Task AtualizarNomeSupabaseAsync(Empresa empresa)
         {
             try

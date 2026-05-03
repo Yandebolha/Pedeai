@@ -11,11 +11,19 @@ export const supabase = createClient<Database>(
 );
 
 /**
- * Código único da empresa. Configurado via variável de ambiente VITE_EMPRESA_CODIGO.
- * Quando definido, todas as queries ao Supabase filtram pelo empresa_codigo para
- * garantir que cada instalação (cliente) veja apenas seus próprios dados.
+ * Código único da empresa.
+ * Lido em runtime do arquivo /public/empresa-config.js (window.__EMPRESA_CODIGO__).
+ * Isso permite trocar o código apenas editando esse arquivo no dist/ sem precisar
+ * de um novo build.
+ * Fallback para VITE_EMPRESA_CODIGO (variavel de ambiente em build time).
  */
-export const empresaCodigo: string = import.meta.env.VITE_EMPRESA_CODIGO ?? '';
+declare global {
+  interface Window { __EMPRESA_CODIGO__?: string; }
+}
+export const empresaCodigo: string =
+  (typeof window !== 'undefined' && window.__EMPRESA_CODIGO__)
+    ? window.__EMPRESA_CODIGO__
+    : (import.meta.env.VITE_EMPRESA_CODIGO ?? '');
 
 /**
  * Retorna true se o erro do Supabase indica que a coluna empresa_codigo ainda
