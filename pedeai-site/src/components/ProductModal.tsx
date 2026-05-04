@@ -310,6 +310,13 @@ export function ProductModal({
                             >
                               {isSelected && <Check className="w-3 h-3 text-white" strokeWidth={3} />}
                             </div>
+                            {sabor.imagem_url ? (
+                              <img
+                                src={sabor.imagem_url}
+                                alt={sabor.nome}
+                                className="w-12 h-12 rounded-lg object-cover flex-shrink-0"
+                              />
+                            ) : null}
                             <div className="flex-1 min-w-0">
                               <p className="text-sm font-semibold text-gray-800 uppercase leading-tight tracking-wide">{sabor.nome}</p>
                             </div>
@@ -391,6 +398,13 @@ export function ProductModal({
                                         {isSelected && <div className="w-2.5 h-2.5 bg-red-600 rounded-full" />}
                                       </div>
                                     )}
+                                    {item.imagem_url ? (
+                                      <img
+                                        src={item.imagem_url}
+                                        alt={item.nome}
+                                        className="w-12 h-12 rounded-lg object-cover flex-shrink-0"
+                                      />
+                                    ) : null}
                                     <div className="flex-1 min-w-0">
                                       <p className="text-sm font-semibold text-gray-800 uppercase leading-tight tracking-wide">{item.nome}</p>
                                       {item.preco > 0 && (
@@ -459,6 +473,13 @@ export function ProductModal({
                                 <Plus className="w-3.5 h-3.5" />
                               </button>
                             </div>
+            {adicional.imagem_url ? (
+                              <img
+                                src={adicional.imagem_url}
+                                alt={adicional.nome}
+                                className="w-12 h-12 rounded-lg object-cover flex-shrink-0"
+                              />
+                            ) : null}
                             <div className="flex-1 min-w-0">
                               <p className="text-sm font-semibold text-gray-800 uppercase tracking-wide leading-tight">{adicional.nome}</p>
                               <p className="text-xs text-green-700 font-bold mt-0.5">

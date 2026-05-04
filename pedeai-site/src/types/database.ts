@@ -138,6 +138,7 @@ export interface Database {
           preco: number
           ordem: number
           ativo: boolean
+          imagem_url: string | null
           created_at: string
         }
       }
@@ -150,6 +151,7 @@ export interface Database {
           ordem: number
           ativo: boolean
           max_qtde: number
+          imagem_url: string | null
           created_at: string
         }
       }

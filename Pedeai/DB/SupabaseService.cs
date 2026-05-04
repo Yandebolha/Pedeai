@@ -3202,16 +3202,24 @@ namespace Pedeai.DB
                 {
                     if (codGrupo <= 0) continue;
 
-                    // Lê nome, preço_adicional e qtd_max do produto no MySQL
-                    string nomeAd = ""; decimal precoAd = 0m; int qtdMaxAd = 1;
+                    // Lê nome, preço_adicional, qtd_max e imagem do produto no MySQL
+                    string nomeAd = ""; decimal precoAd = 0m; int qtdMaxAd = 1; string imgAd = "";
                     using (var conn = AbrirMysql())
                     using (var cmd = new MySqlCommand(
-                        "SELECT mercMercadoria, COALESCE(mercPreco_Adicional,0) AS precoad, COALESCE(mercAdicional_Qtd_Max,1) AS maxad " +
+                        "SELECT mercMercadoria, COALESCE(mercPreco_Adicional,0) AS precoad, COALESCE(mercAdicional_Qtd_Max,1) AS maxad, " +
+                        "COALESCE(mercImagem_Url,'') AS img " +
                         "FROM mercadoria WHERE Codigo=@c LIMIT 1", conn))
                     {
                         cmd.Parameters.AddWithValue("@c", codigoMercadoria);
                         using var r = cmd.ExecuteReader();
-                        if (r.Read()) { nomeAd = r["mercMercadoria"]?.ToString() ?? ""; precoAd = Convert.ToDecimal(r["precoad"]); qtdMaxAd = r["maxad"] == DBNull.Value ? 1 : Convert.ToInt32(r["maxad"]); }
+                        if (r.Read())
+                        {
+                            nomeAd   = r["mercMercadoria"]?.ToString() ?? "";
+                            precoAd  = Convert.ToDecimal(r["precoad"]);
+                            qtdMaxAd = r["maxad"] == DBNull.Value ? 1 : Convert.ToInt32(r["maxad"]);
+                            imgAd    = r["img"]?.ToString() ?? "";
+                            if (!imgAd.StartsWith("http", StringComparison.OrdinalIgnoreCase)) imgAd = "";
+                        }
                     }
                     if (string.IsNullOrWhiteSpace(nomeAd)) continue;
 
@@ -3244,15 +3252,23 @@ namespace Pedeai.DB
                             var existAd = await GetAsync(
                                 $"adicional?mercadoria_id=eq.{fracUuid}&nome=eq.{Uri.EscapeDataString(nomeAd)}&limit=1");
                             if (existAd.Count > 0)
-                                await PatchAsync("adicional", $"id=eq.{existAd[0]["id"]}",
-                                    temEmpAd
-                                        ? (object)new { nome = nomeAd, preco = precoAd, max_qtde = qtdMaxAd, ativo = true, empresa_codigo = _empresaCodigo }
-                                        : (object)new { nome = nomeAd, preco = precoAd, max_qtde = qtdMaxAd, ativo = true });
+                            {
+                                object patchAd = string.IsNullOrEmpty(imgAd)
+                                    ? temEmpAd ? (object)new { nome = nomeAd, preco = precoAd, max_qtde = qtdMaxAd, ativo = true, empresa_codigo = _empresaCodigo }
+                                               : (object)new { nome = nomeAd, preco = precoAd, max_qtde = qtdMaxAd, ativo = true }
+                                    : temEmpAd ? (object)new { nome = nomeAd, preco = precoAd, max_qtde = qtdMaxAd, ativo = true, imagem_url = imgAd, empresa_codigo = _empresaCodigo }
+                                               : (object)new { nome = nomeAd, preco = precoAd, max_qtde = qtdMaxAd, ativo = true, imagem_url = imgAd };
+                                await PatchAsync("adicional", $"id=eq.{existAd[0]["id"]}", patchAd);
+                            }
                             else
-                                await PostAsync("adicional",
-                                    temEmpAd
-                                        ? (object)new { mercadoria_id = fracUuid, nome = nomeAd, preco = precoAd, max_qtde = qtdMaxAd, ativo = true, empresa_codigo = _empresaCodigo }
-                                        : (object)new { mercadoria_id = fracUuid, nome = nomeAd, preco = precoAd, max_qtde = qtdMaxAd, ativo = true });
+                            {
+                                object postAd = string.IsNullOrEmpty(imgAd)
+                                    ? temEmpAd ? (object)new { mercadoria_id = fracUuid, nome = nomeAd, preco = precoAd, max_qtde = qtdMaxAd, ativo = true, empresa_codigo = _empresaCodigo }
+                                               : (object)new { mercadoria_id = fracUuid, nome = nomeAd, preco = precoAd, max_qtde = qtdMaxAd, ativo = true }
+                                    : temEmpAd ? (object)new { mercadoria_id = fracUuid, nome = nomeAd, preco = precoAd, max_qtde = qtdMaxAd, ativo = true, imagem_url = imgAd, empresa_codigo = _empresaCodigo }
+                                               : (object)new { mercadoria_id = fracUuid, nome = nomeAd, preco = precoAd, max_qtde = qtdMaxAd, ativo = true, imagem_url = imgAd };
+                                await PostAsync("adicional", postAd);
+                            }
                         }
                         catch (Exception ex)
                         {
@@ -3419,10 +3435,11 @@ namespace Pedeai.DB
                 // Sincroniza adicionais do grupo para este produto fracionado
                 try
                 {
-                    var adicionaisMysql = new List<(string nome, decimal preco, int maxad)>();
+                    var adicionaisMysql = new List<(string nome, decimal preco, int maxad, string img)>();
                     using (var conn = AbrirMysql())
                     using (var cmd = new MySqlCommand(
-                        @"SELECT m.mercMercadoria, COALESCE(m.mercPreco_Adicional,0) AS precoad, COALESCE(m.mercAdicional_Qtd_Max,1) AS maxad
+                        @"SELECT m.mercMercadoria, COALESCE(m.mercPreco_Adicional,0) AS precoad, COALESCE(m.mercAdicional_Qtd_Max,1) AS maxad,
+                                 COALESCE(m.mercImagem_Url,'') AS img
                           FROM mercadoria_vinculo_grupo mvg
                           JOIN mercadoria m ON m.Codigo = mvg.Codigo_Mercadoria
                           WHERE mvg.Codigo_Grupo=@g AND mvg.tipo='A' AND mvg.Situacao='A' AND m.Situacao='A'", conn))
@@ -3430,10 +3447,14 @@ namespace Pedeai.DB
                         cmd.Parameters.AddWithValue("@g", codigoGrupo);
                         using var r = cmd.ExecuteReader();
                         while (r.Read())
-                            adicionaisMysql.Add((r.GetString(0), Convert.ToDecimal(r["precoad"]), r["maxad"] == DBNull.Value ? 1 : Convert.ToInt32(r["maxad"])));
+                        {
+                            string imgAd2 = r["img"]?.ToString() ?? "";
+                            if (!imgAd2.StartsWith("http", StringComparison.OrdinalIgnoreCase)) imgAd2 = "";
+                            adicionaisMysql.Add((r.GetString(0), Convert.ToDecimal(r["precoad"]), r["maxad"] == DBNull.Value ? 1 : Convert.ToInt32(r["maxad"]), imgAd2));
+                        }
                     }
 
-                    foreach (var (nomeAd, precoAd, maxAd) in adicionaisMysql)
+                    foreach (var (nomeAd, precoAd, maxAd, imgAd2) in adicionaisMysql)
                     {
                         try
                         {
@@ -3442,15 +3463,23 @@ namespace Pedeai.DB
                             var existAd = await GetAsync(
                                 $"adicional?mercadoria_id=eq.{produtoUuid}&nome=eq.{Uri.EscapeDataString(nomeAd)}&limit=1");
                             if (existAd.Count > 0)
-                                await PatchAsync("adicional", $"id=eq.{existAd[0]["id"]}",
-                                    temEmpAd2
-                                        ? (object)new { nome = nomeAd, preco = precoAd, max_qtde = maxAd, ativo = true, empresa_codigo = _empresaCodigo }
-                                        : (object)new { nome = nomeAd, preco = precoAd, max_qtde = maxAd, ativo = true });
+                            {
+                                object pAd = string.IsNullOrEmpty(imgAd2)
+                                    ? temEmpAd2 ? (object)new { nome = nomeAd, preco = precoAd, max_qtde = maxAd, ativo = true, empresa_codigo = _empresaCodigo }
+                                               : (object)new { nome = nomeAd, preco = precoAd, max_qtde = maxAd, ativo = true }
+                                    : temEmpAd2 ? (object)new { nome = nomeAd, preco = precoAd, max_qtde = maxAd, ativo = true, imagem_url = imgAd2, empresa_codigo = _empresaCodigo }
+                                               : (object)new { nome = nomeAd, preco = precoAd, max_qtde = maxAd, ativo = true, imagem_url = imgAd2 };
+                                await PatchAsync("adicional", $"id=eq.{existAd[0]["id"]}", pAd);
+                            }
                             else
-                                await PostAsync("adicional",
-                                    temEmpAd2
-                                        ? (object)new { mercadoria_id = produtoUuid, nome = nomeAd, preco = precoAd, max_qtde = maxAd, ativo = true, empresa_codigo = _empresaCodigo }
-                                        : (object)new { mercadoria_id = produtoUuid, nome = nomeAd, preco = precoAd, max_qtde = maxAd, ativo = true });
+                            {
+                                object pAd = string.IsNullOrEmpty(imgAd2)
+                                    ? temEmpAd2 ? (object)new { mercadoria_id = produtoUuid, nome = nomeAd, preco = precoAd, max_qtde = maxAd, ativo = true, empresa_codigo = _empresaCodigo }
+                                               : (object)new { mercadoria_id = produtoUuid, nome = nomeAd, preco = precoAd, max_qtde = maxAd, ativo = true }
+                                    : temEmpAd2 ? (object)new { mercadoria_id = produtoUuid, nome = nomeAd, preco = precoAd, max_qtde = maxAd, ativo = true, imagem_url = imgAd2, empresa_codigo = _empresaCodigo }
+                                               : (object)new { mercadoria_id = produtoUuid, nome = nomeAd, preco = precoAd, max_qtde = maxAd, ativo = true, imagem_url = imgAd2 };
+                                await PostAsync("adicional", pAd);
+                            }
                         }
                         catch (Exception exAd) { Logger.Log("SupabaseService", "SincronizarFracionadoAsync", $"Erro adicional '{nomeAd}'", exAd); }
                     }
