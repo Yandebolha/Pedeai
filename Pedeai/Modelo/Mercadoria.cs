@@ -31,6 +31,9 @@ namespace Pedeai.Modelo
         public bool mercFracionado    { get; set; }
         public int  mercQtd_Sabores   { get; set; } = 1;
 
+        // Sabores manuais: qtd máxima quando o produto tem seleção manual de sabores
+        public int  mercQtd_Sabores_Manual { get; set; } = 0;
+
         public string Situacao { get; set; } = "A";
         public string Status_Transmissao { get; set; } = "N";
         public string Info { get; set; } = "";

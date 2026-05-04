@@ -40,14 +40,47 @@ export function ProductModal({
   const { data: complementGrupos } = useQuery<ComplementoGrupoComItens[]>({
     queryKey: ['complemento_grupo', product?.id],
     queryFn: async () => {
-      const { data, error } = await supabase
+      // 1. Busca grupos com mercadoria_id direto (modo atual)
+      const { data: direct, error } = await supabase
+        .from('complemento_grupo')
+        .select('*, complemento!inner(*)')
+        .eq('mercadoria_id', product!.id)
+        .eq('ativo', true)
+        .eq('complemento.ativo', true)
+        .order('ordem');
+      // fallback sem inner join se der erro
+      const { data: directFallback } = error ? await supabase
         .from('complemento_grupo')
         .select('*, complemento(*)')
         .eq('mercadoria_id', product!.id)
         .eq('ativo', true)
-        .order('ordem');
-      if (error) throw error;
-      return data as ComplementoGrupoComItens[];
+        .order('ordem') : { data: null };
+
+      const directData = (error ? directFallback : direct) ?? [];
+
+      // 2. Fallback: grupos via link table mercadoria_complemento_grupo (sabores/legado)
+      const { data: links } = await supabase
+        .from('mercadoria_complemento_grupo')
+        .select('grupo_id')
+        .eq('mercadoria_id', product!.id);
+
+      let linked: ComplementoGrupoComItens[] = [];
+      if (links && links.length > 0) {
+        const ids = links.map((l: { grupo_id: string }) => l.grupo_id).filter(Boolean);
+        const seen = new Set((directData).map((g) => g.id));
+        const missing = ids.filter((id: string) => !seen.has(id));
+        if (missing.length > 0) {
+          const { data: linkedGroups } = await supabase
+            .from('complemento_grupo')
+            .select('*, complemento(*)')
+            .in('id', missing)
+            .eq('ativo', true)
+            .order('ordem');
+          if (linkedGroups) linked = linkedGroups as ComplementoGrupoComItens[];
+        }
+      }
+
+      return [...directData, ...linked] as ComplementoGrupoComItens[];
     },
     enabled: !!product,
   });
@@ -66,6 +99,12 @@ export function ProductModal({
     },
     enabled: !!product,
   });
+
+  // Derive sabores a partir do complemento_grupo "Sabores*" já populado pelo sistema.
+  // Isso evita depender de mercadoria.ativo=true para itens que são sabores/complementos.
+  const saboresGrupo = complementGrupos?.find((g) => g.nome.toLowerCase().startsWith('sabores'));
+  const saboresListFinal: ComplementoItem[] = ((saboresGrupo?.complemento as ComplementoItem[] | undefined) ?? [])
+    .filter((c) => c.ativo !== false);
 
   const { data: saboresDisponiveis } = useQuery<Produto[]>({
     queryKey: ['sabores', product?.grupo_id],
@@ -107,11 +146,13 @@ export function ProductModal({
   };
 
   const sortedGrupos = complementGrupos
-    ? [...complementGrupos].sort((a, b) => {
-        const ai = GROUP_ORDER.findIndex((k) => a.nome.toLowerCase().startsWith(k));
-        const bi = GROUP_ORDER.findIndex((k) => b.nome.toLowerCase().startsWith(k));
-        return (ai === -1 ? 99 : ai) - (bi === -1 ? 99 : bi);
-      })
+    ? [...complementGrupos]
+        .filter((g) => !g.nome.toLowerCase().startsWith('sabores'))
+        .sort((a, b) => {
+          const ai = GROUP_ORDER.findIndex((k) => a.nome.toLowerCase().startsWith(k));
+          const bi = GROUP_ORDER.findIndex((k) => b.nome.toLowerCase().startsWith(k));
+          return (ai === -1 ? 99 : ai) - (bi === -1 ? 99 : bi);
+        })
     : [];
 
   const isFracionado = product?.fracionado === true;
@@ -126,13 +167,13 @@ export function ProductModal({
   };
 
   const precoCalculado = useMemo(() => {
-    if (!isFracionado || !saboresDisponiveis || selectedSabores.length !== qtdSabores) return null;
+    if (!isFracionado || saboresListFinal.length === 0 || selectedSabores.length !== qtdSabores) return null;
     const soma = selectedSabores.reduce((acc, id) => {
-      const prod = saboresDisponiveis.find((p) => p.id === id);
-      return acc + (prod ? (prod.preco_promocional ?? prod.preco_venda) : 0);
+      const item = saboresListFinal.find((p) => p.id === id);
+      return acc + (item ? item.preco : 0);
     }, 0);
     return soma / qtdSabores;
-  }, [isFracionado, selectedSabores, qtdSabores, saboresDisponiveis]);
+  }, [isFracionado, selectedSabores, qtdSabores, saboresListFinal]);
 
   const canAdd = isFracionado
     ? selectedSabores.length === qtdSabores
@@ -150,13 +191,13 @@ export function ProductModal({
   const handleConfirm = () => {
     if (!product || !canAdd) return;
 
-    if (isFracionado && precoCalculado !== null && saboresDisponiveis) {
+    if (isFracionado && precoCalculado !== null) {
       const saboresComp: SelectedComplemento[] = [{
         grupoId: 'sabores',
         grupoNome: '🍕 Sabores',
         itemId: selectedSabores.join(','),
         itemNome: selectedSabores
-          .map((id) => saboresDisponiveis.find((p) => p.id === id)?.nome || '')
+          .map((id) => saboresListFinal.find((p) => p.id === id)?.nome || '')
           .join(', '),
       }];
       const produtoOverride: Produto = {
@@ -251,10 +292,9 @@ export function ProductModal({
                     </div>
 
                     <div className="divide-y divide-gray-100 bg-white">
-                      {(saboresDisponiveis || []).map((sabor) => {
+                      {saboresListFinal.map((sabor) => {
                         const isSelected = selectedSabores.includes(sabor.id);
                         const isDisabled = !isSelected && selectedSabores.length >= qtdSabores;
-                        const precoPorSabor = sabor.preco_promocional ?? sabor.preco_venda;
                         return (
                           <button
                             key={sabor.id}
@@ -270,24 +310,16 @@ export function ProductModal({
                             >
                               {isSelected && <Check className="w-3 h-3 text-white" strokeWidth={3} />}
                             </div>
-                            {sabor.imagem_url && (
-                              <div className="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0">
-                                <img src={sabor.imagem_url} alt={sabor.nome} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
-                              </div>
-                            )}
                             <div className="flex-1 min-w-0">
                               <p className="text-sm font-semibold text-gray-800 uppercase leading-tight tracking-wide">{sabor.nome}</p>
-                              {sabor.descricao && (
-                                <p className="text-xs text-gray-400 mt-0.5 line-clamp-1">{sabor.descricao}</p>
-                              )}
                             </div>
                             <span className="text-xs font-bold text-green-700 flex-shrink-0">
-                              R$ {precoPorSabor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                              R$ {sabor.preco.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                             </span>
                           </button>
                         );
                       })}
-                      {(!saboresDisponiveis || saboresDisponiveis.length === 0) && (
+                      {saboresListFinal.length === 0 && (
                         <div className="px-6 py-8 text-center text-gray-400 text-sm">
                           Nenhum sabor disponível nesta categoria.
                         </div>

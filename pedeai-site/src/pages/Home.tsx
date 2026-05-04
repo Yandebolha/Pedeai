@@ -80,15 +80,16 @@ export default function Home() {
     queryFn: async () => {
       // Caminho 1: categorias carregadas → filtra produtos pelos IDs das categorias desta empresa
       if (categoryIds.length > 0) {
-        const { data, error } = await supabase
+        let query = supabase
           .from('mercadoria')
           .select('*')
           .eq('ativo', true)
-          .not('is_adicional', 'is', true)
           .in('grupo_id', categoryIds)
           .order('destaque', { ascending: false });
+        const { data, error } = await query;
         if (error) throw error;
-        return data as Produto[];
+        // Filtra is_adicional client-side para não depender da coluna existir no banco
+        return (data as Produto[]).filter((p) => !p.is_adicional);
       }
       // Caminho 2 (fallback): sem categorias, tenta empresa_codigo diretamente
       const base = supabase.from('mercadoria').select('*').eq('ativo', true).not('is_adicional', 'is', true).order('destaque', { ascending: false });

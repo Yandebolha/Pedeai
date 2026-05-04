@@ -130,7 +130,7 @@ namespace Pedeai.Forms
             _codigoEditando = 0;
             txtNome.Clear();
             cmbSituacao.SelectedIndex = 0;
-            chkHabSite.Checked = false;
+            chkHabSite.Checked = true;
             _previewImg?.Dispose(); _previewImg = null;
             _imagemPath = "";
             lblImagem.Text = "Nenhuma imagem selecionada";

@@ -609,7 +609,10 @@ namespace Pedeai.DB
                     }
                     catch { /* ignora — fallback para habSite */ }
                 }
-                bool ativoSite = forcarAtivoFalse ? false : (habSite || fracionado || isGrupoComFracionado);
+                // isGrupoComFracionado não controla mais visibilidade standalone:
+                // sabores/adicionais/complementos só aparecem como produto independente
+                // se o usuário marcou explicitamente "No site" (habSite=true).
+                bool ativoSite = forcarAtivoFalse ? false : (habSite || fracionado);
 
                 // Ensure group UUID is available — only do full sync if not already done this session
                 string grupoUuid = "";
@@ -638,7 +641,10 @@ namespace Pedeai.DB
                 bool usarFracionado  = _supabaseTemColFracionado  == true;
                 bool usarIsAdicional = _supabaseTemColIsAdicional  == true;
 
-                // Determina se produto está marcado como adicional no MySQL (tem vínculo tipo='A')
+                // Determina se produto é is_adicional = true no Supabase.
+                // REGRA: is_adicional só é true quando o produto é APENAS adicional (sem vínculo tipo='C').
+                // Se tem ambos (adicional + complemento), is_adicional = false para que o produto
+                // apareça como sabor fracionado E também como entrada na tabela `adicional`.
                 bool ehAdicional = false;
                 if (usarIsAdicional)
                 {
@@ -646,9 +652,21 @@ namespace Pedeai.DB
                     {
                         using var connA = AbrirMysql();
                         using var cmdA  = new MySqlCommand(
-                            "SELECT COUNT(*) FROM mercadoria_vinculo_grupo WHERE Codigo_Mercadoria=@c AND tipo='A' AND Situacao='A' LIMIT 1", connA);
+                            "SELECT " +
+                            "  SUM(CASE WHEN tipo='A' THEN 1 ELSE 0 END) AS qtdAd, " +
+                            "  SUM(CASE WHEN tipo='C' THEN 1 ELSE 0 END) AS qtdComp " +
+                            "FROM mercadoria_vinculo_grupo " +
+                            "WHERE Codigo_Mercadoria=@c AND Situacao='A'", connA);
                         cmdA.Parameters.AddWithValue("@c", codigoMercadoria);
-                        ehAdicional = Convert.ToInt32(cmdA.ExecuteScalar()) > 0;
+                        using var rA = cmdA.ExecuteReader();
+                        if (rA.Read())
+                        {
+                            int qtdAd   = rA["qtdAd"]   == DBNull.Value ? 0 : Convert.ToInt32(rA["qtdAd"]);
+                            int qtdComp = rA["qtdComp"] == DBNull.Value ? 0 : Convert.ToInt32(rA["qtdComp"]);
+                            // Adicional puro = nenhum vínculo de complemento → fica fora da lista de sabores
+                            // Ambos = is_adicional false → aparece como sabor E na tabela adicional
+                            ehAdicional = qtdAd > 0 && qtdComp == 0;
+                        }
                     }
                     catch { }
                 }
@@ -741,11 +759,10 @@ namespace Pedeai.DB
                     object patchPayload = string.IsNullOrWhiteSpace(imagemUrl)
                         ? BuildPayload(false)
                         : postPayload;
-                    // PATCH apenas no registro desta empresa (evita sobrescrever produto de outra empresa)
-                    string mercPatchFilter = UsarEmpresaCodigo
-                        ? $"id=eq.{uuid}&empresa_codigo=eq.{Uri.EscapeDataString(_empresaCodigo)}"
-                        : $"id=eq.{uuid}";
-                    await PatchAsync(TBL_MERCADORIAS, mercPatchFilter, patchPayload);
+                    // PATCH pelo id apenas — empresa_codigo vem no payload e é atualizado.
+                    // Filtrar por empresa_codigo causava falha silenciosa quando o registro
+                    // ainda tinha empresa_codigo=NULL ("Corrigir Dados" não executado).
+                    await PatchAsync(TBL_MERCADORIAS, $"id=eq.{uuid}", patchPayload);
                 }
                 else
                 {
@@ -1921,7 +1938,7 @@ namespace Pedeai.DB
                     {
                         // Ensure Supabase status is "recebido" so it stops appearing in polls
                         try { await AtualizarStatusPedidoWebAsync(supaPedido.Id, "recebido"); } catch { }
-                        return ""; // already imported
+                        return "JA_IMPORTADO"; // already imported — caller must not count as new
                     }
                 }
 
@@ -2813,11 +2830,14 @@ namespace Pedeai.DB
                         try { await DeleteAsync(TBL_COMP_GRUPO, $"id=eq.{adGrupoId}"); } catch { }
                     }
 
-                    // Busca adicionais existentes desta marmita no Supabase
+                    // Busca adicionais existentes desta marmita no Supabase (filtrado por empresa)
                     var adExistentes = new Dictionary<string, (string id, decimal preco, int maxQtde)>(StringComparer.OrdinalIgnoreCase);
                     try
                     {
-                        var adArr = await GetAsync($"adicional?mercadoria_id=eq.{marmitaUuid}&select=id,nome,preco,max_qtde");
+                        string adFilter = UsarEmpresaCodigo
+                            ? $"adicional?mercadoria_id=eq.{marmitaUuid}&empresa_codigo=eq.{Uri.EscapeDataString(_empresaCodigo)}&select=id,nome,preco,max_qtde"
+                            : $"adicional?mercadoria_id=eq.{marmitaUuid}&select=id,nome,preco,max_qtde";
+                        var adArr = await GetAsync(adFilter);
                         foreach (JObject a in adArr)
                         {
                             string n = a["nome"]?.ToString(); string id = a["id"]?.ToString();
@@ -2834,12 +2854,20 @@ namespace Pedeai.DB
                     foreach (var (nome, preco, _, maxG, maxAd) in adicionaisItens)
                     {
                         int qtdeMax = maxAd > 0 ? maxAd : 1;
+                        // Sempre inclui empresa_codigo quando configurado, independente do flag global
+                        bool temEmp = !string.IsNullOrWhiteSpace(_empresaCodigo);
                         try
                         {
                             if (adExistentes.TryGetValue(nome, out var existing))
-                                await PatchAsync("adicional", $"id=eq.{existing.id}", new { nome, preco, max_qtde = qtdeMax, ativo = true });
+                                await PatchAsync("adicional", $"id=eq.{existing.id}",
+                                    temEmp
+                                        ? (object)new { nome, preco, max_qtde = qtdeMax, ativo = true, empresa_codigo = _empresaCodigo }
+                                        : (object)new { nome, preco, max_qtde = qtdeMax, ativo = true });
                             else
-                                await PostAsync("adicional", new { mercadoria_id = marmitaUuid, nome, preco, max_qtde = qtdeMax, ativo = true });
+                                await PostAsync("adicional",
+                                    temEmp
+                                        ? (object)new { mercadoria_id = marmitaUuid, nome, preco, max_qtde = qtdeMax, ativo = true, empresa_codigo = _empresaCodigo }
+                                        : (object)new { mercadoria_id = marmitaUuid, nome, preco, max_qtde = qtdeMax, ativo = true });
                         }
                         catch { }
                     }
@@ -2869,31 +2897,38 @@ namespace Pedeai.DB
             try
             {
                 // Busca todos os vínculos agrupados por produto
-                var vinculos = new Dictionary<int, (List<(int, string)> ads, List<(int, string)> comps)>();
+                var vinculos = new Dictionary<int, (List<(int, string)> ads, List<(int, string)> comps, List<(int, string)> sabs, int qtdSaboresMan)>();
                 using (var conn = AbrirMysql())
                 using (var cmd = new MySqlCommand(@"
                     SELECT mvg.Codigo_Mercadoria, mvg.Codigo_Grupo, mvg.tipo,
-                           COALESCE(gm.grmeDescricao_,'') AS Nome
+                           COALESCE(gm.grmeDescricao_,'') AS Nome,
+                           COALESCE(m2.mercMercadoria,'') AS NomeProd,
+                           COALESCE(m.mercQtd_Sabores_Manual,1) AS QtdSabMan
                     FROM mercadoria_vinculo_grupo mvg
-                    LEFT JOIN grupo_mercadoria gm ON gm.Codigo = mvg.Codigo_Grupo
+                    LEFT JOIN grupo_mercadoria gm ON gm.Codigo = mvg.Codigo_Grupo AND mvg.tipo<>'S'
+                    LEFT JOIN mercadoria m2 ON m2.Codigo = mvg.Codigo_Grupo AND mvg.tipo='S'
+                    LEFT JOIN mercadoria m ON m.Codigo = mvg.Codigo_Mercadoria
                     WHERE mvg.Situacao = 'A'
                     ORDER BY mvg.Codigo_Mercadoria", conn))
                 {
                     using var r = cmd.ExecuteReader();
                     while (r.Read())
                     {
-                        int  codMerc  = r.GetInt32(0);
-                        int  codGrupo = r.GetInt32(1);
-                        string tipo   = r.GetString(2);
-                        string nome   = r.GetString(3);
+                        int    codMerc  = r.GetInt32(0);
+                        int    codGrupo = r.GetInt32(1);
+                        string tipo     = r.GetString(2);
+                        string nome     = r.GetString(3);
+                        string nomeProd = r.GetString(4);
+                        int    qtdSMan  = r["QtdSabMan"] == DBNull.Value ? 1 : Convert.ToInt32(r["QtdSabMan"]);
                         if (!vinculos.ContainsKey(codMerc))
-                            vinculos[codMerc] = (new List<(int, string)>(), new List<(int, string)>());
-                        if (tipo == "A") vinculos[codMerc].ads.Add((codGrupo, nome));
-                        else            vinculos[codMerc].comps.Add((codGrupo, nome));
+                            vinculos[codMerc] = (new List<(int, string)>(), new List<(int, string)>(), new List<(int, string)>(), qtdSMan);
+                        if (tipo == "A")      vinculos[codMerc].ads.Add((codGrupo, nome));
+                        else if (tipo == "C") vinculos[codMerc].comps.Add((codGrupo, nome));
+                        else if (tipo == "S") vinculos[codMerc].sabs.Add((codGrupo, nomeProd));
                     }
                 }
                 foreach (var kv in vinculos)
-                    await SincronizarVinculosGrupoAsync(kv.Key, kv.Value.ads, kv.Value.comps);
+                    await SincronizarVinculosGrupoAsync(kv.Key, kv.Value.ads, kv.Value.comps, kv.Value.sabs, kv.Value.qtdSaboresMan);
 
                 // Produtos fracionados sem vínculos também precisam ser sincronizados
                 var codsFrac = new List<int>();
@@ -2934,29 +2969,47 @@ namespace Pedeai.DB
         public static async Task SincronizarVinculosGrupoAsync(
             int codigoMercadoria,
             IEnumerable<(int CodigoGrupo, string NomeGrupo)> adicionais,
-            IEnumerable<(int CodigoGrupo, string NomeGrupo)> complementos)
+            IEnumerable<(int CodigoGrupo, string NomeGrupo)> complementos,
+            IEnumerable<(int CodigoProduto, string NomeProduto)> sabores = null,
+            int qtdMaxSabores = 1)
         {
             try
             {
                 var compList = complementos?.ToList() ?? new List<(int, string)>();
                 var adList   = adicionais?.ToList()   ?? new List<(int, string)>();
 
-                bool isPuroComplementoMarmitas = compList.Any(c =>
-                    c.NomeGrupo.Equals("Marmitas", StringComparison.OrdinalIgnoreCase))
-                    && !adList.Any();
+                // Produto que é APENAS complemento (sem adicionais) não deve aparecer como produto
+                // standalone no site — seja Marmitas ou qualquer outra categoria.
+                // O flag forcarAtivoFalse sobrepõe habSite e isGrupoComFracionado.
+                bool isPuroComplemento = compList.Any() && !adList.Any();
 
                 // 1. Sincroniza o produto principal
-                //    Para complemento puro de Marmitas: força ativo=false (não aparece como produto)
-                if (isPuroComplementoMarmitas)
+                if (isPuroComplemento)
                     await SincronizarProdutoAsync(codigoMercadoria, forcarAtivoFalse: true);
                 else
                     await SincronizarProdutoAsync(codigoMercadoria);
 
                 string produtoUuid = GetSupabaseUuid("mercadoria", "Codigo", codigoMercadoria);
 
-                // 2. Adicionais: sincroniza normalmente como mercadoria
-                foreach (var (codGrupo, _) in adicionais)
-                    if (codGrupo > 0) await SincronizarProdutoAsync(codGrupo);
+                // 2. Pré-sincroniza todos os produtos de CADA grupo de adicional para garantir
+                //    que os UUIDs no cache sejam da empresa corrente (não registros orphan).
+                foreach (var (codGrupo, _) in adList)
+                {
+                    if (codGrupo <= 0) continue;
+                    var codsDoGrupo = new List<int>();
+                    try
+                    {
+                        using var connG = AbrirMysql();
+                        using var cmdG  = new MySqlCommand(
+                            "SELECT Codigo FROM mercadoria WHERE Codigo_Grupo=@g AND Situacao='A'", connG);
+                        cmdG.Parameters.AddWithValue("@g", codGrupo);
+                        using var rG = cmdG.ExecuteReader();
+                        while (rG.Read()) codsDoGrupo.Add(rG.GetInt32(0));
+                    }
+                    catch { }
+                    foreach (var cod in codsDoGrupo)
+                        await SincronizarProdutoAsync(cod);
+                }
 
                 if (string.IsNullOrWhiteSpace(produtoUuid)) return;
 
@@ -3080,75 +3133,45 @@ namespace Pedeai.DB
                     }
                     else
                     {
-                        // Complemento de outro grupo: cria/usa complemento_grupo vinculado ao produto
-                        // O preço do complemento é SEMPRE 0 (não soma ao total)
-                        string grupoCompId = "";
+                        // Complemento de categoria não-Marmitas: NÃO cria grupo separado.
+                        // O produto aparecerá como sabor no grupo "Sabores" do produto fracionado
+                        // via SincronizarFracionadoAsync. Grupos órfãos de sincronizações antigas
+                        // são desativados para não aparecerem no site.
+                        var codsAlvo = new List<int>();
                         try
                         {
-                            // Busca grupos do produto via link table, filtra por nome
-                            var lnks = await GetAsync(
-                                $"{TBL_MERC_COMP_GRP}?mercadoria_id=eq.{produtoUuid}&select=grupo_id");
-                            foreach (JObject lnk in lnks)
-                            {
-                                var gid = lnk["grupo_id"]?.ToString() ?? "";
-                                if (string.IsNullOrEmpty(gid)) continue;
-                                var grpCheck = await GetAsync(
-                                    $"{TBL_COMP_GRUPO}?id=eq.{gid}&nome=eq.{Uri.EscapeDataString(nomeGrupo)}&limit=1");
-                                if (grpCheck.Count > 0) { grupoCompId = gid; break; }
-                            }
+                            using var connAlvo = AbrirMysql();
+                            using var cmdAlvo = new MySqlCommand(
+                                "SELECT Codigo FROM mercadoria WHERE Codigo_Grupo=@g AND Situacao='A' AND Codigo<>@c", connAlvo);
+                            cmdAlvo.Parameters.AddWithValue("@g", codGrupo);
+                            cmdAlvo.Parameters.AddWithValue("@c", codigoMercadoria);
+                            using var rAlvo = cmdAlvo.ExecuteReader();
+                            while (rAlvo.Read()) codsAlvo.Add(rAlvo.GetInt32(0));
                         }
                         catch { }
 
-                        if (string.IsNullOrWhiteSpace(grupoCompId))
+                        foreach (var codAlvo in codsAlvo)
                         {
+                            string alvoUuid = GetSupabaseUuid("mercadoria", "Codigo", codAlvo);
+                            if (string.IsNullOrWhiteSpace(alvoUuid)) continue;
                             try
                             {
-                                var res = await PostAsync(TBL_COMP_GRUPO, new
+                                // Desativa qualquer grupo órfão com este nome que ainda esteja ativo
+                                var grpArr = await GetAsync(
+                                    $"{TBL_COMP_GRUPO}?mercadoria_id=eq.{alvoUuid}&nome=eq.{Uri.EscapeDataString(nomeGrupo)}&ativo=eq.true");
+                                foreach (JObject grp in grpArr)
                                 {
-                                    nome        = nomeGrupo,
-                                    obrigatorio = false,
-                                    minimo      = 0,
-                                    maximo      = 10,
-                                });
-                                grupoCompId = res?["id"]?.ToString() ?? "";
+                                    var gId = grp["id"]?.ToString() ?? "";
+                                    if (!string.IsNullOrWhiteSpace(gId))
+                                        await PatchAsync(TBL_COMP_GRUPO, $"id=eq.{gId}", new { ativo = false });
+                                }
                             }
-                            catch { }
+                            catch (Exception ex)
+                            {
+                                Logger.Log("SupabaseService", "SincronizarVinculosGrupoAsync",
+                                    $"Erro ao desativar grupo complemento órfão '{nomeGrupo}' em produto {codAlvo}", ex);
+                            }
                         }
-
-                        if (string.IsNullOrWhiteSpace(grupoCompId)) continue;
-
-                        // Vincula grupo ao produto
-                        try
-                        {
-                            var lnk = await GetAsync(
-                                $"{TBL_MERC_COMP_GRP}?mercadoria_id=eq.{produtoUuid}&grupo_id=eq.{grupoCompId}&limit=1");
-                            if (lnk.Count == 0)
-                                await PostAsync(TBL_MERC_COMP_GRP, new
-                                {
-                                    mercadoria_id = produtoUuid,
-                                    grupo_id      = grupoCompId,
-                                });
-                        }
-                        catch { }
-
-                        // Complemento: preço = 0 (incluído, não soma ao total do pedido)
-                        try
-                        {
-                            var existentes = await GetAsync(
-                                $"{TBL_COMPLEMENTO}?grupo_id=eq.{grupoCompId}&nome=eq.{Uri.EscapeDataString(nomeProduto)}&limit=1");
-                            if (existentes.Count > 0)
-                                await PatchAsync(TBL_COMPLEMENTO, $"id=eq.{existentes[0]["id"]}",
-                                    new { nome = nomeProduto, preco = 0m, ativo = true });
-                            else
-                                await PostAsync(TBL_COMPLEMENTO, new
-                                {
-                                    grupo_id = grupoCompId,
-                                    nome     = nomeProduto,
-                                    preco    = 0m,
-                                    ativo    = true,
-                                });
-                        }
-                        catch { }
                     }
                 }
 
@@ -3181,7 +3204,7 @@ namespace Pedeai.DB
                         while (r.Read()) codsFracionados.Add(r.GetInt32(0));
                     }
 
-                    // Upsert um registro na tabela `adicional` por produto fracionado do grupo
+                    // Upsert um registro na tabela `adicional` por produto do grupo
                     foreach (var codFrac in codsFracionados)
                     {
                         string fracUuid = GetSupabaseUuid("mercadoria", "Codigo", codFrac);
@@ -3194,20 +3217,20 @@ namespace Pedeai.DB
 
                         try
                         {
+                            bool temEmpAd = !string.IsNullOrWhiteSpace(_empresaCodigo);
+                            // Lookup SEM empresa_codigo para capturar registros legados com NULL
                             var existAd = await GetAsync(
                                 $"adicional?mercadoria_id=eq.{fracUuid}&nome=eq.{Uri.EscapeDataString(nomeAd)}&limit=1");
                             if (existAd.Count > 0)
                                 await PatchAsync("adicional", $"id=eq.{existAd[0]["id"]}",
-                                    new { nome = nomeAd, preco = precoAd, max_qtde = qtdMaxAd, ativo = true });
+                                    temEmpAd
+                                        ? (object)new { nome = nomeAd, preco = precoAd, max_qtde = qtdMaxAd, ativo = true, empresa_codigo = _empresaCodigo }
+                                        : (object)new { nome = nomeAd, preco = precoAd, max_qtde = qtdMaxAd, ativo = true });
                             else
-                                await PostAsync("adicional", new
-                                {
-                                    mercadoria_id = fracUuid,
-                                    nome          = nomeAd,
-                                    preco         = precoAd,
-                                    max_qtde      = qtdMaxAd,
-                                    ativo         = true,
-                                });
+                                await PostAsync("adicional",
+                                    temEmpAd
+                                        ? (object)new { mercadoria_id = fracUuid, nome = nomeAd, preco = precoAd, max_qtde = qtdMaxAd, ativo = true, empresa_codigo = _empresaCodigo }
+                                        : (object)new { mercadoria_id = fracUuid, nome = nomeAd, preco = precoAd, max_qtde = qtdMaxAd, ativo = true });
                         }
                         catch (Exception ex)
                         {
@@ -3218,6 +3241,104 @@ namespace Pedeai.DB
 
                 // 5. Produto fracionado: cria/atualiza complemento_grupo com todos os produtos da mesma categoria
                 await SincronizarFracionadoAsync(codigoMercadoria, produtoUuid);
+
+                // 6. Sabores manuais: cria complemento_grupo "Sabores" com produtos explicitamente escolhidos
+                var sabList = sabores?.ToList() ?? new List<(int, string)>();
+                if (sabList.Any() && !string.IsNullOrWhiteSpace(produtoUuid))
+                {
+                    try
+                    {
+                        int qtd = Math.Max(1, qtdMaxSabores);
+                        string nomeGrpSab = qtd == 1 ? "Sabores (escolha 1)" : $"Sabores (escolha até {qtd})";
+
+                        // Garante que cada produto-sabor existe no Supabase
+                        foreach (var (codSab, _) in sabList)
+                            await SincronizarProdutoAsync(codSab);
+
+                        // Busca ou cria o complemento_grupo "Sabores" vinculado a este produto
+                        string grpSabId = "";
+                        var grpArr = await GetAsync(
+                            $"{TBL_COMP_GRUPO}?mercadoria_id=eq.{produtoUuid}&nome=ilike.Sabores*&limit=1");
+                        if (grpArr.Count > 0)
+                        {
+                            grpSabId = grpArr[0]["id"]?.ToString() ?? "";
+                            await PatchAsync(TBL_COMP_GRUPO, $"id=eq.{grpSabId}",
+                                new { nome = nomeGrpSab, obrigatorio = true, minimo = 1, maximo = qtd, ativo = true });
+                        }
+                        else
+                        {
+                            var res = await PostAsync(TBL_COMP_GRUPO, new
+                            {
+                                mercadoria_id = produtoUuid,
+                                nome          = nomeGrpSab,
+                                obrigatorio   = true,
+                                minimo        = 1,
+                                maximo        = qtd,
+                                ativo         = true,
+                            });
+                            grpSabId = res?["id"]?.ToString() ?? "";
+                        }
+                        if (string.IsNullOrWhiteSpace(grpSabId)) goto skipSabores;
+
+                        // Busca complementos existentes no grupo
+                        var compExist = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+                        var compArr2 = await GetAsync($"{TBL_COMPLEMENTO}?grupo_id=eq.{grpSabId}&select=id,nome");
+                        foreach (JObject e in compArr2) { var n = e["nome"]?.ToString(); var id = e["id"]?.ToString(); if (n != null && id != null) compExist[n] = id; }
+
+                        var nomesAtivos = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                        foreach (var (codSab, nomeSab) in sabList)
+                        {
+                            nomesAtivos.Add(nomeSab);
+                            // Busca preço e imagem do produto
+                            decimal precoSab = 0m; string imgSab = "";
+                            try
+                            {
+                                using var connS = AbrirMysql();
+                                using var cmdS  = new MySqlCommand(
+                                    "SELECT COALESCE(mercPreco_Venda,0) AS preco, COALESCE(mercImagem_Url,'') AS img " +
+                                    "FROM mercadoria WHERE Codigo=@c LIMIT 1", connS);
+                                cmdS.Parameters.AddWithValue("@c", codSab);
+                                using var rS = cmdS.ExecuteReader();
+                                if (rS.Read())
+                                {
+                                    precoSab = Convert.ToDecimal(rS["preco"]);
+                                    imgSab   = rS["img"]?.ToString() ?? "";
+                                    if (!string.IsNullOrWhiteSpace(imgSab) && !imgSab.StartsWith("http", StringComparison.OrdinalIgnoreCase))
+                                        imgSab = "";
+                                }
+                            }
+                            catch { }
+
+                            try
+                            {
+                                if (compExist.TryGetValue(nomeSab, out string eid))
+                                    await PatchAsync(TBL_COMPLEMENTO, $"id=eq.{eid}",
+                                        string.IsNullOrEmpty(imgSab)
+                                            ? (object)new { nome = nomeSab, preco = precoSab, ativo = true }
+                                            : (object)new { nome = nomeSab, preco = precoSab, imagem_url = imgSab, ativo = true });
+                                else
+                                    await PostAsync(TBL_COMPLEMENTO,
+                                        string.IsNullOrEmpty(imgSab)
+                                            ? (object)new { grupo_id = grpSabId, nome = nomeSab, preco = precoSab, ativo = true }
+                                            : (object)new { grupo_id = grpSabId, nome = nomeSab, preco = precoSab, imagem_url = imgSab, ativo = true });
+                            }
+                            catch (Exception exS) { Logger.Log("SupabaseService", "SincronizarVinculosGrupoAsync", $"Erro sabor '{nomeSab}'", exS); }
+                        }
+
+                        // Desativa sabores removidos
+                        foreach (var kv in compExist)
+                            if (!nomesAtivos.Contains(kv.Key))
+                                try { await PatchAsync(TBL_COMPLEMENTO, $"id=eq.{kv.Value}", new { ativo = false }); } catch { }
+
+                        Logger.Log("SupabaseService", "SincronizarVinculosGrupoAsync",
+                            $"Produto {codigoMercadoria}: {sabList.Count} sabores manuais sincronizados");
+                    }
+                    catch (Exception exSab)
+                    {
+                        Logger.Log("SupabaseService", "SincronizarVinculosGrupoAsync", $"Erro sabores produto {codigoMercadoria}", exSab);
+                    }
+                }
+                skipSabores:;
             }
             catch (Exception ex)
             {
@@ -3250,6 +3371,20 @@ namespace Pedeai.DB
                 }
                 if (codigoGrupo <= 0) return;
 
+                // Se o produto tem sabores manuais configurados (tipo='S'), o grupo "Sabores"
+                // é gerenciado por SincronizarVinculosGrupoAsync — não criamos o automático aqui.
+                bool temSaboresManuais = false;
+                try
+                {
+                    using var connSM = AbrirMysql();
+                    using var cmdSM  = new MySqlCommand(
+                        "SELECT COUNT(*) FROM mercadoria_vinculo_grupo WHERE Codigo_Mercadoria=@c AND tipo='S' AND Situacao='A'",
+                        connSM);
+                    cmdSM.Parameters.AddWithValue("@c", codigoMercadoria);
+                    temSaboresManuais = Convert.ToInt32(cmdSM.ExecuteScalar()) > 0;
+                }
+                catch { }
+
                 // Sincroniza adicionais do grupo para QUALQUER produto da categoria (fracionado ou não)
                 try
                 {
@@ -3271,20 +3406,20 @@ namespace Pedeai.DB
                     {
                         try
                         {
+                            bool temEmpAd2 = !string.IsNullOrWhiteSpace(_empresaCodigo);
+                            // Lookup SEM empresa_codigo para capturar registros legados com NULL
                             var existAd = await GetAsync(
                                 $"adicional?mercadoria_id=eq.{produtoUuid}&nome=eq.{Uri.EscapeDataString(nomeAd)}&limit=1");
                             if (existAd.Count > 0)
                                 await PatchAsync("adicional", $"id=eq.{existAd[0]["id"]}",
-                                    new { nome = nomeAd, preco = precoAd, max_qtde = maxAd, ativo = true });
+                                    temEmpAd2
+                                        ? (object)new { nome = nomeAd, preco = precoAd, max_qtde = maxAd, ativo = true, empresa_codigo = _empresaCodigo }
+                                        : (object)new { nome = nomeAd, preco = precoAd, max_qtde = maxAd, ativo = true });
                             else
-                                await PostAsync("adicional", new
-                                {
-                                    mercadoria_id = produtoUuid,
-                                    nome          = nomeAd,
-                                    preco         = precoAd,
-                                    max_qtde      = maxAd,
-                                    ativo         = true,
-                                });
+                                await PostAsync("adicional",
+                                    temEmpAd2
+                                        ? (object)new { mercadoria_id = produtoUuid, nome = nomeAd, preco = precoAd, max_qtde = maxAd, ativo = true, empresa_codigo = _empresaCodigo }
+                                        : (object)new { mercadoria_id = produtoUuid, nome = nomeAd, preco = precoAd, max_qtde = maxAd, ativo = true });
                         }
                         catch (Exception exAd) { Logger.Log("SupabaseService", "SincronizarFracionadoAsync", $"Erro adicional '{nomeAd}'", exAd); }
                     }
@@ -3298,17 +3433,26 @@ namespace Pedeai.DB
 
                 if (!fracionado) return;
 
+                // Se tem sabores manuais, não criar grupo automático — evita duplicata
+                if (temSaboresManuais) return;
+
                 // Busca todos os produtos ATIVOS da mesma categoria que NÃO são fracionados
-                // (fracionados são "tamanhos" como Pizza Grande — não entram como sabor)
+                // e NÃO são EXCLUSIVAMENTE adicionais (se tiver também Sabor ou Complemento, entra como sabor).
                 var sabores = new List<(string nome, decimal preco, string descricao, string imagemUrl)>();
                 using (var conn = AbrirMysql())
                 using (var cmd = new MySqlCommand(
-                    "SELECT mercMercadoria, COALESCE(mercPreco_Venda,0) AS preco, " +
-                    "COALESCE(mercApresentacao,'') AS descricao, COALESCE(mercImagem_Url,'') AS imagem " +
-                    "FROM mercadoria " +
-                    "WHERE Codigo_Grupo=@g AND Situacao='A' AND Codigo<>@c " +
-                    "  AND COALESCE(mercFracionado,0)=0 " +
-                    "ORDER BY mercMercadoria", conn))
+                    "SELECT m.mercMercadoria, COALESCE(m.mercPreco_Venda,0) AS preco, " +
+                    "COALESCE(m.mercApresentacao,'') AS descricao, COALESCE(m.mercImagem_Url,'') AS imagem " +
+                    "FROM mercadoria m " +
+                    "WHERE m.Codigo_Grupo=@g AND m.Situacao='A' AND m.Codigo<>@c " +
+                    "  AND COALESCE(m.mercFracionado,0)=0 " +
+                    "  AND NOT (" +
+                    "      EXISTS (SELECT 1 FROM mercadoria_vinculo_grupo va" +
+                    "             WHERE va.Codigo_Mercadoria=m.Codigo AND va.tipo='A' AND va.Situacao='A' AND va.Codigo_Grupo=@g)" +
+                    "      AND NOT EXISTS (SELECT 1 FROM mercadoria_vinculo_grupo vsc" +
+                    "             WHERE vsc.Codigo_Mercadoria=m.Codigo AND vsc.Situacao='A' AND vsc.tipo IN ('S','C'))" +
+                    "  ) " +
+                    "ORDER BY m.mercMercadoria", conn))
                 {
                     cmd.Parameters.AddWithValue("@g", codigoGrupo);
                     cmd.Parameters.AddWithValue("@c", codigoMercadoria);
@@ -3330,20 +3474,29 @@ namespace Pedeai.DB
                 if (!sabores.Any()) return;
 
                 // Garante complemento_grupo "Sabores" vinculado a este produto
-                // Busca via link table mercadoria_complemento_grupo → complemento_grupo com nome Sabores*
+                // Busca por mercadoria_id direto OU via link table (legado)
                 string grpSaboresId = "";
                 string nomeGrupoSabores = qtdSabores == 1
                     ? "Sabores (escolha 1)"
                     : $"Sabores (escolha até {qtdSabores})";
                 try
                 {
-                    var lnks = await GetAsync($"{TBL_MERC_COMP_GRP}?mercadoria_id=eq.{produtoUuid}&select=grupo_id");
-                    foreach (JObject lnk in lnks)
+                    // 1. Tenta por mercadoria_id direto (modo atual)
+                    var direto = await GetAsync($"{TBL_COMP_GRUPO}?mercadoria_id=eq.{produtoUuid}&nome=ilike.Sabores*&limit=1");
+                    if (direto.Count > 0)
+                        grpSaboresId = direto[0]["id"]?.ToString() ?? "";
+
+                    // 2. Fallback: link table (registros antigos)
+                    if (string.IsNullOrEmpty(grpSaboresId))
                     {
-                        var gid = lnk["grupo_id"]?.ToString() ?? "";
-                        if (string.IsNullOrEmpty(gid)) continue;
-                        var chk = await GetAsync($"{TBL_COMP_GRUPO}?id=eq.{gid}&nome=ilike.Sabores*&limit=1");
-                        if (chk.Count > 0) { grpSaboresId = gid; break; }
+                        var lnks = await GetAsync($"{TBL_MERC_COMP_GRP}?mercadoria_id=eq.{produtoUuid}&select=grupo_id");
+                        foreach (JObject lnk in lnks)
+                        {
+                            var gid = lnk["grupo_id"]?.ToString() ?? "";
+                            if (string.IsNullOrEmpty(gid)) continue;
+                            var chk = await GetAsync($"{TBL_COMP_GRUPO}?id=eq.{gid}&nome=ilike.Sabores*&limit=1");
+                            if (chk.Count > 0) { grpSaboresId = gid; break; }
+                        }
                     }
                 }
                 catch { }
@@ -3351,17 +3504,17 @@ namespace Pedeai.DB
                 if (!string.IsNullOrEmpty(grpSaboresId))
                 {
                     await PatchAsync(TBL_COMP_GRUPO, $"id=eq.{grpSaboresId}",
-                        new { nome = nomeGrupoSabores, obrigatorio = true, minimo = 1, maximo = qtdSabores, calculo_preco = "media" });
+                        new { mercadoria_id = produtoUuid, nome = nomeGrupoSabores, obrigatorio = true, minimo = 1, maximo = qtdSabores });
                 }
                 else
                 {
                     var grpResult = await PostAsync(TBL_COMP_GRUPO, new
                     {
+                        mercadoria_id = produtoUuid,
                         nome          = nomeGrupoSabores,
                         obrigatorio   = true,
                         minimo        = 1,
                         maximo        = qtdSabores,
-                        calculo_preco = "media",
                     });
                     grpSaboresId = grpResult?["id"]?.ToString() ?? "";
                     if (!string.IsNullOrEmpty(grpSaboresId))
@@ -3394,6 +3547,83 @@ namespace Pedeai.DB
                     catch (Exception ex) { Logger.Log("SupabaseService", "SincronizarFracionadoAsync", $"Erro sabor '{nome}'", ex); }
                 }
                 Logger.Log("SupabaseService", "SincronizarFracionadoAsync", $"Produto {codigoMercadoria}: {sabores.Count} sabores sincronizados (max={qtdSabores})");
+
+                // Desativa itens no grupo Sabores que não fazem mais parte da lista válida
+                // (ex: Borda de Cheddar adicionada numa sincronização antiga como sabor)
+                try
+                {
+                    var nomesValidos2 = new HashSet<string>(sabores.Select(s => s.nome), StringComparer.OrdinalIgnoreCase);
+                    foreach (var kv in existentes)
+                    {
+                        if (!nomesValidos2.Contains(kv.Key))
+                            await PatchAsync(TBL_COMPLEMENTO, $"id=eq.{kv.Value}", new { ativo = false });
+                    }
+                }
+                catch (Exception exClean2)
+                {
+                    Logger.Log("SupabaseService", "SincronizarFracionadoAsync", $"Erro ao desativar sabores obsoletos produto {codigoMercadoria}", exClean2);
+                }
+
+                // Limpa complemento_grupos órfãos: desativa grupos que existem no Supabase
+                // mas não possuem mais vínculo ativo no MySQL (ex: quando o usuário desmarcou
+                // "Complementos" em um produto e fez nova sincronização).
+                try
+                {
+                    // 1. Nomes de grupos válidos no MySQL para este produto (tipo='C' e tipo='S')
+                    var nomesValidos = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                    nomesValidos.Add(nomeGrupoSabores); // o grupo "Sabores (escolha X)" sempre é válido
+                    using (var connV = AbrirMysql())
+                    using (var cmdV = new MySqlCommand(@"
+                        SELECT COALESCE(gm.grmeDescricao_,'') AS nome
+                        FROM mercadoria_vinculo_grupo mvg
+                        LEFT JOIN grupo_mercadoria gm ON gm.Codigo = mvg.Codigo_Grupo
+                        WHERE mvg.Codigo_Mercadoria=@c AND mvg.Situacao='A'", connV))
+                    {
+                        cmdV.Parameters.AddWithValue("@c", codigoMercadoria);
+                        using var rv = cmdV.ExecuteReader();
+                        while (rv.Read()) { var n = rv.GetString(0); if (!string.IsNullOrWhiteSpace(n)) nomesValidos.Add(n); }
+                    }
+
+                    // 2. Busca todos os complemento_grupo ativos deste produto no Supabase
+                    var grpsSupabase = await GetAsync($"{TBL_COMP_GRUPO}?mercadoria_id=eq.{produtoUuid}&ativo=eq.true&select=id,nome");
+                    foreach (JObject g in grpsSupabase)
+                    {
+                        var gNome = g["nome"]?.ToString() ?? "";
+                        var gId   = g["id"]?.ToString()   ?? "";
+                        if (string.IsNullOrWhiteSpace(gId)) continue;
+                        // Mantém grupos "Sabores*" e qualquer grupo configurado via vinculos
+                        bool ehSabores = gNome.StartsWith("Sabores", StringComparison.OrdinalIgnoreCase);
+                        if (!ehSabores && !nomesValidos.Contains(gNome))
+                        {
+                            await PatchAsync(TBL_COMP_GRUPO, $"id=eq.{gId}", new { ativo = false });
+                            Logger.Log("SupabaseService", "SincronizarFracionadoAsync",
+                                $"Produto {codigoMercadoria}: complemento_grupo '{gNome}' desativado (órfão)");
+                        }
+                    }
+
+                    // 3. Faz o mesmo via link table (mercadoria_complemento_grupo) para grupos
+                    //    que podem não ter mercadoria_id direto mas estão vinculados via link table
+                    var lnkArr = await GetAsync($"{TBL_MERC_COMP_GRP}?mercadoria_id=eq.{produtoUuid}&select=grupo_id");
+                    foreach (JObject lnk in lnkArr)
+                    {
+                        var gid = lnk["grupo_id"]?.ToString() ?? "";
+                        if (string.IsNullOrWhiteSpace(gid)) continue;
+                        var grpChk = await GetAsync($"{TBL_COMP_GRUPO}?id=eq.{gid}&ativo=eq.true&limit=1");
+                        if (grpChk.Count == 0) continue;
+                        var gNome2 = grpChk[0]["nome"]?.ToString() ?? "";
+                        bool ehSabores2 = gNome2.StartsWith("Sabores", StringComparison.OrdinalIgnoreCase);
+                        if (!ehSabores2 && !nomesValidos.Contains(gNome2))
+                        {
+                            await PatchAsync(TBL_COMP_GRUPO, $"id=eq.{gid}", new { ativo = false });
+                            Logger.Log("SupabaseService", "SincronizarFracionadoAsync",
+                                $"Produto {codigoMercadoria}: complemento_grupo '{gNome2}' (via link) desativado (órfão)");
+                        }
+                    }
+                }
+                catch (Exception exClean)
+                {
+                    Logger.Log("SupabaseService", "SincronizarFracionadoAsync", $"Erro limpeza complementos órfãos produto {codigoMercadoria}", exClean);
+                }
             }
             catch (Exception ex)
             {
@@ -3501,6 +3731,10 @@ namespace Pedeai.DB
         {
             try
             {
+                // Limpa apenas o cache de grupos já sincronizados nesta sessão para forçar
+                // re-verificação dos registros. NÃO reinicia as flags de detecção de colunas
+                // (_supabaseTemColEmpresaCodigo etc.) pois isso causa falsos "not found" e duplicatas.
+                _gruposSincronizados.Clear();
                 await SincronizarTodosGruposAsync();
                 await SincronizarTodosProdutosAsync();
                 await SincronizarTodasMarmitasAsync();

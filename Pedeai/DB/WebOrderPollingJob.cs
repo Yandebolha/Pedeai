@@ -27,8 +27,9 @@ namespace Pedeai.DB
                         // Mark as received in Supabase so we don't re-import
                         await SupabaseService.AtualizarStatusPedidoWebAsync(pedido.Id, "recebido");
                     }
-                    else
+                    else if (erro != "JA_IMPORTADO")
                     {
+                        // JA_IMPORTADO é silencioso; erros reais são logados
                         Logger.Log("WebOrderPollingJob", "Execute",
                             $"Erro ao importar pedido {pedido.Id}: {erro}", null);
                     }

@@ -163,7 +163,20 @@ namespace Pedeai.BLL
             {
                 linhas.Add("(Entregar no endereco)");
                 if (!string.IsNullOrWhiteSpace(pedido.pediEndereco_Entrega))
-                    linhas.Add(pedido.pediEndereco_Entrega);
+                {
+                    // Quebra endereços longos em múltiplas linhas respeitando a largura do cupom
+                    string end = pedido.pediEndereco_Entrega;
+                    while (end.Length > larg)
+                    {
+                        // Tenta quebrar no último espaço ou hífen antes do limite
+                        int corte = larg;
+                        int ultimoEspaco = end.LastIndexOfAny(new[]{ ' ', '-' }, corte - 1);
+                        if (ultimoEspaco > larg / 2) corte = ultimoEspaco + 1;
+                        linhas.Add(end.Substring(0, corte).TrimEnd());
+                        end = end.Substring(corte).TrimStart();
+                    }
+                    if (end.Length > 0) linhas.Add(end);
+                }
             }
             else
             {

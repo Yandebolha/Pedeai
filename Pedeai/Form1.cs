@@ -47,11 +47,13 @@ namespace Pedeai
 
         private void OnNovoPedidoWebRecebido(int count)
         {
-            // Silent background refresh — no popup, preserve selection
+            // Refresh grid, then play alert sound on a background thread (non-blocking)
             BeginInvoke(new Action(() =>
             {
                 try { CarregarPedidosSemPerderSelecao(); } catch { }
             }));
+            // Toca o som uma única vez para notificar novo pedido web
+            try { System.Media.SystemSounds.Exclamation.Play(); } catch { }
         }
 
         protected override void OnFormClosed(FormClosedEventArgs e)
@@ -75,8 +77,8 @@ namespace Pedeai
             _syncCatalogoTimer = new System.Threading.Timer(
                 async _ => { try { await DB.SupabaseService.SincronizarCatalogoAsync(); } catch { } },
                 null,
-                System.TimeSpan.FromMinutes(5),
-                System.TimeSpan.FromMinutes(5));
+                System.TimeSpan.FromMinutes(3),
+                System.TimeSpan.FromMinutes(3));
 
             // Start web order polling + initial sync
             System.Threading.Tasks.Task.Run(async () =>

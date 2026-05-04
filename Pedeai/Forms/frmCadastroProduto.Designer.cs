@@ -38,6 +38,13 @@ namespace Pedeai.Forms
             this.chkControlaEstoque = new System.Windows.Forms.CheckBox();
             this.chkAdicionais      = new System.Windows.Forms.CheckBox();
             this.chkComplementos    = new System.Windows.Forms.CheckBox();
+            this.btnAddGrupoVincC   = new System.Windows.Forms.Button();
+            this.chkSabores         = new System.Windows.Forms.CheckBox();
+            this.lblQtdSaboresM     = new System.Windows.Forms.Label();
+            this.numQtdSaboresM     = new System.Windows.Forms.NumericUpDown();
+            this.lblProdVinc        = new System.Windows.Forms.Label();
+            this.cmbProdVinc        = new System.Windows.Forms.ComboBox();
+            this.btnAddSabor        = new System.Windows.Forms.Button();
             this.lblPrecoAdicional  = new System.Windows.Forms.Label();
             this.numPrecoAdicional  = new System.Windows.Forms.NumericUpDown();
             this.lblQtdAdicional    = new System.Windows.Forms.Label();
@@ -109,8 +116,8 @@ namespace Pedeai.Forms
             this.btnPesq.BackColor=System.Drawing.Color.FromArgb(224,113,42); this.btnPesq.ForeColor=System.Drawing.Color.White;
             this.btnPesq.FlatStyle=System.Windows.Forms.FlatStyle.Flat; this.btnPesq.Cursor=System.Windows.Forms.Cursors.Hand;
             this.btnPesq.FlatAppearance.BorderSize=0; this.btnPesq.Click+=new System.EventHandler(this.BtnPesqProd_Click);
-            // pnlForm
-            this.pnlForm.Dock=System.Windows.Forms.DockStyle.Bottom; this.pnlForm.Height=340;
+            // pnlForm grows 75px for the new chkSabores row + space for pnlBtns below pnlVinculos
+            this.pnlForm.Dock=System.Windows.Forms.DockStyle.Bottom; this.pnlForm.Height=415;
             this.pnlForm.BackColor=System.Drawing.Color.FromArgb(245,237,216);
             this.pnlForm.BorderStyle=System.Windows.Forms.BorderStyle.FixedSingle; this.pnlForm.Visible=false;
             this.pnlForm.Controls.Add(this.lblCat);  this.pnlForm.Controls.Add(this.cmbCategoria);
@@ -128,6 +135,8 @@ namespace Pedeai.Forms
             this.pnlForm.Controls.Add(this.lblQtdAdicional); this.pnlForm.Controls.Add(this.numQtdAdicional);
             this.pnlForm.Controls.Add(this.chkFracionado);
             this.pnlForm.Controls.Add(this.lblQtdSabores); this.pnlForm.Controls.Add(this.numQtdSabores);
+            this.pnlForm.Controls.Add(this.chkSabores);
+            this.pnlForm.Controls.Add(this.lblQtdSaboresM); this.pnlForm.Controls.Add(this.numQtdSaboresM);
             this.pnlForm.Controls.Add(this.pnlVinculos);
             this.pnlForm.Controls.Add(this.pnlBtns);
             // row 1
@@ -180,32 +189,59 @@ namespace Pedeai.Forms
             this.lblQtdAdicional.Text="Qtd. Máx:"; this.lblQtdAdicional.AutoSize=true; this.lblQtdAdicional.Left=462; this.lblQtdAdicional.Top=151; this.lblQtdAdicional.Visible=false;
             this.numQtdAdicional.Left=530; this.numQtdAdicional.Top=148; this.numQtdAdicional.Width=55; this.numQtdAdicional.Visible=false;
             this.numQtdAdicional.Minimum=1; this.numQtdAdicional.Maximum=99; this.numQtdAdicional.Value=1;
-            // row 5c — Fracionado (pizza com múltiplos sabores)
+            // row 5c — Fracionado (pizza com múltiplos sabores auto da mesma categoria)
             this.chkFracionado.Text="Fracionado (múltiplos sabores)"; this.chkFracionado.Left=10; this.chkFracionado.Top=178; this.chkFracionado.AutoSize=true;
             this.chkFracionado.CheckedChanged+=new System.EventHandler(this.ChkFracionado_CheckedChanged);
             this.lblQtdSabores.Text="Qtd. sabores:"; this.lblQtdSabores.AutoSize=true; this.lblQtdSabores.Left=255; this.lblQtdSabores.Top=180; this.lblQtdSabores.Visible=false;
             this.numQtdSabores.Left=355; this.numQtdSabores.Top=177; this.numQtdSabores.Width=55; this.numQtdSabores.Visible=false;
             this.numQtdSabores.Minimum=1; this.numQtdSabores.Maximum=10; this.numQtdSabores.Value=1;
-            // row 6 — group link panel
-            this.pnlVinculos.Left=10; this.pnlVinculos.Top=205; this.pnlVinculos.Width=790; this.pnlVinculos.Height=100;
+            // row 5d — Sabores manuais (produtos específicos como sabor)
+            this.chkSabores.Text="Sabores"; this.chkSabores.Left=10; this.chkSabores.Top=207; this.chkSabores.AutoSize=true;
+            this.chkSabores.CheckedChanged+=new System.EventHandler(this.ChkSabores_CheckedChanged);
+            this.lblQtdSaboresM.Text="Qtd. máx sabores:"; this.lblQtdSaboresM.AutoSize=true; this.lblQtdSaboresM.Left=120; this.lblQtdSaboresM.Top=209; this.lblQtdSaboresM.Visible=false;
+            this.numQtdSaboresM.Left=255; this.numQtdSaboresM.Top=206; this.numQtdSaboresM.Width=55; this.numQtdSaboresM.Visible=false;
+            this.numQtdSaboresM.Minimum=1; this.numQtdSaboresM.Maximum=20; this.numQtdSaboresM.Value=1;
+            // row 6 — group link panel (moved down 32px)
+            this.pnlVinculos.Left=10; this.pnlVinculos.Top=237; this.pnlVinculos.Width=790; this.pnlVinculos.Height=130;
             this.pnlVinculos.BackColor=System.Drawing.Color.FromArgb(235,227,206);
             this.pnlVinculos.BorderStyle=System.Windows.Forms.BorderStyle.FixedSingle;
             this.pnlVinculos.Visible=false;
             this.pnlVinculos.Controls.Add(this.lblGrupoVinc);
             this.pnlVinculos.Controls.Add(this.cmbGrupoVinc);
             this.pnlVinculos.Controls.Add(this.btnAddGrupoVinc);
+            this.pnlVinculos.Controls.Add(this.btnAddGrupoVincC);
+            this.pnlVinculos.Controls.Add(this.lblProdVinc);
+            this.pnlVinculos.Controls.Add(this.cmbProdVinc);
+            this.pnlVinculos.Controls.Add(this.btnAddSabor);
             this.pnlVinculos.Controls.Add(this.lstGruposVinc);
             this.pnlVinculos.Controls.Add(this.btnRemGrupoVinc);
+            // Row 1 (Top=7): categorias — Adicional / Complemento
             this.lblGrupoVinc.Text="Categoria:"; this.lblGrupoVinc.AutoSize=true; this.lblGrupoVinc.Left=6; this.lblGrupoVinc.Top=10;
             this.cmbGrupoVinc.Left=75; this.cmbGrupoVinc.Top=7; this.cmbGrupoVinc.Width=200;
             this.cmbGrupoVinc.DropDownStyle=System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.btnAddGrupoVinc.Text="+ Adicionar"; this.btnAddGrupoVinc.Left=282; this.btnAddGrupoVinc.Top=7; this.btnAddGrupoVinc.Width=90; this.btnAddGrupoVinc.Height=24;
+            // + Adicional button
+            this.btnAddGrupoVinc.Text="+ Adicional"; this.btnAddGrupoVinc.Left=282; this.btnAddGrupoVinc.Top=7; this.btnAddGrupoVinc.Width=100; this.btnAddGrupoVinc.Height=24;
             this.btnAddGrupoVinc.BackColor=System.Drawing.Color.FromArgb(42,120,80); this.btnAddGrupoVinc.ForeColor=System.Drawing.Color.White;
             this.btnAddGrupoVinc.FlatStyle=System.Windows.Forms.FlatStyle.Flat; this.btnAddGrupoVinc.FlatAppearance.BorderSize=0;
             this.btnAddGrupoVinc.Click+=new System.EventHandler(this.BtnAddGrupoVinc_Click);
-            this.lstGruposVinc.Left=6; this.lstGruposVinc.Top=36; this.lstGruposVinc.Width=350; this.lstGruposVinc.Height=56;
+            // + Complemento button
+            this.btnAddGrupoVincC.Text="+ Complemento"; this.btnAddGrupoVincC.Left=388; this.btnAddGrupoVincC.Top=7; this.btnAddGrupoVincC.Width=112; this.btnAddGrupoVincC.Height=24;
+            this.btnAddGrupoVincC.BackColor=System.Drawing.Color.FromArgb(70,110,170); this.btnAddGrupoVincC.ForeColor=System.Drawing.Color.White;
+            this.btnAddGrupoVincC.FlatStyle=System.Windows.Forms.FlatStyle.Flat; this.btnAddGrupoVincC.FlatAppearance.BorderSize=0;
+            this.btnAddGrupoVincC.Visible=false;
+            this.btnAddGrupoVincC.Click+=new System.EventHandler(this.BtnAddGrupoVincC_Click);
+            // Row 2 (Top=37): produtos individuais — Sabores
+            this.lblProdVinc.Text="Produto:"; this.lblProdVinc.AutoSize=true; this.lblProdVinc.Left=6; this.lblProdVinc.Top=40; this.lblProdVinc.Visible=false;
+            this.cmbProdVinc.Left=65; this.cmbProdVinc.Top=37; this.cmbProdVinc.Width=210; this.cmbProdVinc.Visible=false;
+            this.cmbProdVinc.DropDownStyle=System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.btnAddSabor.Text="+ Sabor"; this.btnAddSabor.Left=282; this.btnAddSabor.Top=37; this.btnAddSabor.Width=90; this.btnAddSabor.Height=24; this.btnAddSabor.Visible=false;
+            this.btnAddSabor.BackColor=System.Drawing.Color.FromArgb(160,90,20); this.btnAddSabor.ForeColor=System.Drawing.Color.White;
+            this.btnAddSabor.FlatStyle=System.Windows.Forms.FlatStyle.Flat; this.btnAddSabor.FlatAppearance.BorderSize=0;
+            this.btnAddSabor.Click+=new System.EventHandler(this.BtnAddSabor_Click);
+            // Row 3 (Top=68): lista e remover
+            this.lstGruposVinc.Left=6; this.lstGruposVinc.Top=68; this.lstGruposVinc.Width=350; this.lstGruposVinc.Height=56;
             this.lstGruposVinc.HorizontalScrollbar=true;
-            this.btnRemGrupoVinc.Text="Remover"; this.btnRemGrupoVinc.Left=363; this.btnRemGrupoVinc.Top=36; this.btnRemGrupoVinc.Width=80; this.btnRemGrupoVinc.Height=24;
+            this.btnRemGrupoVinc.Text="Remover"; this.btnRemGrupoVinc.Left=363; this.btnRemGrupoVinc.Top=68; this.btnRemGrupoVinc.Width=80; this.btnRemGrupoVinc.Height=24;
             this.btnRemGrupoVinc.BackColor=System.Drawing.Color.FromArgb(192,57,43); this.btnRemGrupoVinc.ForeColor=System.Drawing.Color.White;
             this.btnRemGrupoVinc.FlatStyle=System.Windows.Forms.FlatStyle.Flat; this.btnRemGrupoVinc.FlatAppearance.BorderSize=0;
             this.btnRemGrupoVinc.Click+=new System.EventHandler(this.BtnRemGrupoVinc_Click);
@@ -229,8 +265,8 @@ namespace Pedeai.Forms
             // Form
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(904, 581);
-            this.MinimumSize = new System.Drawing.Size(820, 540);
+            this.ClientSize = new System.Drawing.Size(904, 624);
+            this.MinimumSize = new System.Drawing.Size(820, 583);
             this.BackColor = System.Drawing.Color.FromArgb(245, 237, 216);
             this.ForeColor = System.Drawing.Color.FromArgb(60, 60, 60);
             this.Font = new System.Drawing.Font("Segoe UI", 9F);
@@ -266,6 +302,13 @@ namespace Pedeai.Forms
         private  System.Windows.Forms.Label         lblQtdSabores;
         internal System.Windows.Forms.NumericUpDown numQtdSabores;
         internal System.Windows.Forms.Panel         pnlVinculos;
+        internal System.Windows.Forms.Button        btnAddGrupoVincC;
+        internal System.Windows.Forms.CheckBox      chkSabores;
+        internal System.Windows.Forms.Label         lblQtdSaboresM;
+        internal System.Windows.Forms.NumericUpDown numQtdSaboresM;
+        internal System.Windows.Forms.Label         lblProdVinc;
+        internal System.Windows.Forms.ComboBox      cmbProdVinc;
+        internal System.Windows.Forms.Button        btnAddSabor;
         private  System.Windows.Forms.Label         lblGrupoVinc;
         internal System.Windows.Forms.ComboBox      cmbGrupoVinc;
         private  System.Windows.Forms.Button        btnAddGrupoVinc;

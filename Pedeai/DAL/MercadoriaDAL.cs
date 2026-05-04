@@ -61,10 +61,10 @@ namespace Pedeai.DAL
                             (auxCodigo, Codigo, Codigo_Grupo, mercMercadoria, mercApresentacao,
                              mercPreco_Venda, mercPreco_Custo, mercPreco_Promocional, mercEstoque_Atual,
                              mercControla_Estoque, mercImagem_Url, mercDestaque, mercOrdem,
-                             mercHabilitar_Ifood, mercHabilitar_Site, mercPreco_Adicional, mercAdicional_Qtd_Max, mercFracionado, mercQtd_Sabores,
+                             mercHabilitar_Ifood, mercHabilitar_Site, mercPreco_Adicional, mercAdicional_Qtd_Max, mercFracionado, mercQtd_Sabores, mercQtd_Sabores_Manual,
                              Situacao, Status_Transmissao, Info, mercData_Cadastro)
                             VALUES(@aux, @cod, @grp, @nome, @desc, @preco, @custo, @promo, @est,
-                                   @ctrl, @img, @dest, @ordem, @ifood, @site, @precoad, @qtdmaxad, @frac, @qtdsab, @sit, @trans, @info, @dt)";
+                                   @ctrl, @img, @dest, @ordem, @ifood, @site, @precoad, @qtdmaxad, @frac, @qtdsab, @qtdSabMan, @sit, @trans, @info, @dt)";
                 using var cmd = new MySqlCommand(sql, conn);
                 BindParams(cmd, obj);
                 cmd.ExecuteNonQuery();
@@ -93,7 +93,7 @@ namespace Pedeai.DAL
                             mercPreco_Venda=@preco, mercPreco_Custo=@custo, mercPreco_Promocional=@promo, mercEstoque_Atual=@est,
                             mercControla_Estoque=@ctrl, mercImagem_Url=@img, mercDestaque=@dest,
                             mercOrdem=@ordem, mercHabilitar_Ifood=@ifood, mercHabilitar_Site=@site,
-                            mercPreco_Adicional=@precoad, mercAdicional_Qtd_Max=@qtdmaxad, mercFracionado=@frac, mercQtd_Sabores=@qtdsab,
+                            mercPreco_Adicional=@precoad, mercAdicional_Qtd_Max=@qtdmaxad, mercFracionado=@frac, mercQtd_Sabores=@qtdsab, mercQtd_Sabores_Manual=@qtdSabMan,
                             Situacao=@sit
                             WHERE Codigo=@cod";
                 using var cmd = new MySqlCommand(sql, conn);
@@ -175,6 +175,7 @@ namespace Pedeai.DAL
             cmd.Parameters.AddWithValue("@qtdmaxad", obj.mercAdicional_Qtd_Max > 0 ? obj.mercAdicional_Qtd_Max : 1);
             cmd.Parameters.AddWithValue("@frac",     obj.mercFracionado    ? 1 : 0);
             cmd.Parameters.AddWithValue("@qtdsab",   obj.mercQtd_Sabores);
+            cmd.Parameters.AddWithValue("@qtdSabMan", obj.mercQtd_Sabores_Manual);
             cmd.Parameters.AddWithValue("@sit",      obj.Situacao ?? "A");
             cmd.Parameters.AddWithValue("@trans", obj.Status_Transmissao ?? "N");
             cmd.Parameters.AddWithValue("@info",  obj.Info ?? "");
@@ -217,6 +218,8 @@ namespace Pedeai.DAL
                                        (r["mercFracionado"]?.ToString() == "1" || r["mercFracionado"]?.ToString() == "True"),
                 mercQtd_Sabores      = ColExists(r, "mercQtd_Sabores") && r["mercQtd_Sabores"] != DBNull.Value
                                        ? Convert.ToInt32(r["mercQtd_Sabores"]) : 1,
+                mercQtd_Sabores_Manual = ColExists(r, "mercQtd_Sabores_Manual") && r["mercQtd_Sabores_Manual"] != DBNull.Value
+                                       ? Convert.ToInt32(r["mercQtd_Sabores_Manual"]) : 0,
                 mercData_Cadastro    = r["mercData_Cadastro"] == DBNull.Value ? DateTime.Now : Convert.ToDateTime(r["mercData_Cadastro"]),
                 Situacao             = r["Situacao"]?.ToString() ?? "A",
                 Status_Transmissao   = r["Status_Transmissao"]?.ToString() ?? "N",
