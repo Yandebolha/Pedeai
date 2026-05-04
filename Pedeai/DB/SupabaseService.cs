@@ -788,6 +788,29 @@ namespace Pedeai.DB
                 }
                 else
                 {
+                    // Antes de POST: garante que o grupo existe no Supabase.
+                    // O verify check em SincronizarGrupoAsync pode ter mantido UUID inválido
+                    // se houve exceção durante o GET (ex: timeout, RLS). Isso causaria
+                    // FK constraint 23503 no POST do produto.
+                    if (!string.IsNullOrWhiteSpace(grupoUuid) && codigoGrupo > 0)
+                    {
+                        try
+                        {
+                            var grpCheck = await GetAsync($"grupo_mercadoria?id=eq.{grupoUuid}&limit=1");
+                            if (grpCheck.Count == 0)
+                            {
+                                // UUID do grupo é inválido — limpa e re-sincroniza o grupo
+                                SaveSupabaseUuid("grupo_mercadoria", "Codigo", codigoGrupo, "");
+                                _gruposSincronizados.Remove(codigoGrupo);
+                                await SincronizarGrupoAsync(codigoGrupo);
+                                grupoUuid = GetSupabaseUuid("grupo_mercadoria", "Codigo", codigoGrupo);
+                                // Reconstrói payload com novo grupoUuid
+                                postPayload = BuildPayload(true);
+                            }
+                        }
+                        catch { /* mantém grupoUuid atual em caso de erro de rede */ }
+                    }
+
                     var result = await PostAsync(TBL_MERCADORIAS, postPayload);
                     uuid = result?["id"]?.ToString() ?? "";
                     if (!string.IsNullOrWhiteSpace(uuid))
