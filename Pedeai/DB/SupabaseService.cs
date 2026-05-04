@@ -190,14 +190,17 @@ namespace Pedeai.DB
         /// </summary>
         private static async Task<string> UploadImgBBAsync(string localPath, string apiKey)
         {
+            // ImgBB API: chave na query string, imagem como base64 em campo multipart.
+            // Não usar FormUrlEncodedContent (corrompe base64) nem ByteArrayContent (API rejeita).
             var base64 = Convert.ToBase64String(System.IO.File.ReadAllBytes(localPath));
-            using var content = new FormUrlEncodedContent(new[]
-            {
-                new KeyValuePair<string,string>("key",   apiKey),
-                new KeyValuePair<string,string>("image", base64),
-                new KeyValuePair<string,string>("name",  System.IO.Path.GetFileNameWithoutExtension(localPath)),
-            });
-            var resp = await _http.PostAsync("https://api.imgbb.com/1/upload", content);
+            var name   = System.IO.Path.GetFileNameWithoutExtension(localPath);
+
+            using var form = new MultipartFormDataContent();
+            form.Add(new StringContent(base64), "image");
+            form.Add(new StringContent(name),   "name");
+
+            var url  = $"https://api.imgbb.com/1/upload?key={Uri.EscapeDataString(apiKey)}";
+            var resp = await _http.PostAsync(url, form);
             var body = await resp.Content.ReadAsStringAsync();
             if (!resp.IsSuccessStatusCode)
                 throw new Exception($"ImgBB upload {resp.StatusCode}: {body}");
@@ -501,7 +504,15 @@ namespace Pedeai.DB
                 {
                     // Filtra somente por id — empresa_codigo vem no payload e é atualizado.
                     // Filtrar por empresa_codigo causava falha silenciosa em registros com empresa_codigo=NULL.
-                    await PatchAsync("grupo_mercadoria", $"id=eq.{uuid}", payload);
+                    object groupPatchPayload = payload;
+                    if (string.IsNullOrWhiteSpace(imagemUrl))
+                    {
+                        // Omit imagem_url from PATCH — never clear an existing Supabase category image.
+                        var jo = JObject.FromObject(payload);
+                        jo.Remove("imagem_url");
+                        groupPatchPayload = jo;
+                    }
+                    await PatchAsync("grupo_mercadoria", $"id=eq.{uuid}", groupPatchPayload);
                 }
                 else
                 {
@@ -757,9 +768,19 @@ namespace Pedeai.DB
 
                 if (!string.IsNullOrWhiteSpace(uuid))
                 {
-                    object patchPayload = string.IsNullOrWhiteSpace(imagemUrl)
-                        ? BuildPayload(false)
-                        : postPayload;
+                    object patchPayload;
+                    if (string.IsNullOrWhiteSpace(imagemUrl))
+                    {
+                        // Omit imagem_url from PATCH — never clear an existing Supabase image
+                        // just because MySQL still has a local path or no URL yet.
+                        var jo = JObject.FromObject(BuildPayload(false));
+                        jo.Remove("imagem_url");
+                        patchPayload = jo;
+                    }
+                    else
+                    {
+                        patchPayload = postPayload;
+                    }
                     // PATCH pelo id apenas — empresa_codigo vem no payload e é atualizado.
                     // Filtrar por empresa_codigo causava falha silenciosa quando o registro
                     // ainda tinha empresa_codigo=NULL ("Corrigir Dados" não executado).
@@ -4349,12 +4370,13 @@ namespace Pedeai.DB
         /// <summary>
         /// Uploads a product image to Supabase Storage (bucket: produtos)
         /// and saves the public URL back to mercadoria.mercImagem_Url.
+        /// Returns empty string on success, or the error message on failure.
         /// </summary>
-        public static async Task UploadProdutoImagemAsync(int codigoProduto, string localPath)
+        public static async Task<string> UploadProdutoImagemAsync(int codigoProduto, string localPath)
         {
             try
             {
-                if (!System.IO.File.Exists(localPath)) return;
+                if (!System.IO.File.Exists(localPath)) return "Arquivo n\u00e3o encontrado: " + localPath;
 
                 var ext      = System.IO.Path.GetExtension(localPath).ToLower();
                 var fileName = $"produto_{codigoProduto}{ext}";
@@ -4409,10 +4431,12 @@ namespace Pedeai.DB
                 // Push URL to Supabase — bypasses habSite gate, finds UUID by name if not in MySQL
                 await ForcarUrlImagemAsync(TBL_MERCADORIAS, "mercadoria",
                     "Codigo", codigoProduto, prodNome, publicUrl);
+                return "";
             }
             catch (Exception ex)
             {
                 Logger.Log("SupabaseService", "UploadProdutoImagemAsync", $"Erro produto {codigoProduto}", ex);
+                return ex.Message;
             }
         }
 

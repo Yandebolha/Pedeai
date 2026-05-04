@@ -268,9 +268,7 @@ namespace Pedeai.Forms
                 mercControla_Estoque  = chkControlaEstoque.Checked,
                 mercImagem_Url        = _caminhoImagem?.StartsWith("http", StringComparison.OrdinalIgnoreCase) == true
                                          ? _caminhoImagem  // URL já publicada — usa diretamente
-                                         : !string.IsNullOrWhiteSpace(_caminhoImagem)
-                                             ? _caminhoImagem  // caminho local — salva temporariamente até upload concluir
-                                             : (_codigoEditando > 0 ? (_bll.PesquisaCodigo(_codigoEditando)?.mercImagem_Url ?? "") : ""),
+                                         : (_codigoEditando > 0 ? (_bll.PesquisaCodigo(_codigoEditando)?.mercImagem_Url ?? "") : ""),
                 mercDestaque          = chkDestaque.Checked,
                 mercOrdem             = 0,
                 mercHabilitar_Site    = chkSite.Checked,
@@ -318,7 +316,16 @@ namespace Pedeai.Forms
                         && !imagemLocal.StartsWith("http", StringComparison.OrdinalIgnoreCase)
                         && System.IO.File.Exists(imagemLocal))
                     {
-                        await DB.SupabaseService.UploadProdutoImagemAsync(codSalvo, imagemLocal);
+                        string uploadErro = await DB.SupabaseService.UploadProdutoImagemAsync(codSalvo, imagemLocal);
+                        if (!string.IsNullOrWhiteSpace(uploadErro) && !this.IsDisposed)
+                        {
+                            this.Invoke(new Action(() =>
+                                MessageBox.Show(
+                                    "Falha ao enviar imagem:\n\n" + uploadErro,
+                                    "Erro no upload da imagem",
+                                    MessageBoxButtons.OK,
+                                    MessageBoxIcon.Error)));
+                        }
                     }
                     var adTuples   = snapAdicionais.ConvertAll(v => (v.CodigoGrupo, v.NomeGrupo));
                     var compTuples = snapComplementos.ConvertAll(v => (v.CodigoGrupo, v.NomeGrupo));
