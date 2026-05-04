@@ -267,16 +267,18 @@ namespace Pedeai.Forms
                 mercEstoque_Atual     = numEstoque.Value,
                 mercControla_Estoque  = chkControlaEstoque.Checked,
                 mercImagem_Url        = _caminhoImagem?.StartsWith("http", StringComparison.OrdinalIgnoreCase) == true
-                                         ? _caminhoImagem
-                                         // Mantém a URL existente no banco quando não há nova imagem local
-                                         : (_codigoEditando > 0 ? (_bll.PesquisaCodigo(_codigoEditando)?.mercImagem_Url ?? "") : ""),
+                                         ? _caminhoImagem  // URL já publicada — usa diretamente
+                                         : !string.IsNullOrWhiteSpace(_caminhoImagem)
+                                             ? _caminhoImagem  // caminho local — salva temporariamente até upload concluir
+                                             : (_codigoEditando > 0 ? (_bll.PesquisaCodigo(_codigoEditando)?.mercImagem_Url ?? "") : ""),
                 mercDestaque          = chkDestaque.Checked,
                 mercOrdem             = 0,
                 mercHabilitar_Site    = chkSite.Checked,
                 mercPreco_Adicional      = chkAdicionais.Checked ? numPrecoAdicional.Value : 0m,
                 mercAdicional_Qtd_Max    = chkAdicionais.Checked ? (int)numQtdAdicional.Value : 1,
                 mercFracionado           = chkFracionado.Checked,
-                mercQtd_Sabores       = chkFracionado.Checked ? (int)numQtdSabores.Value : 1,
+                mercQtd_Sabores          = chkFracionado.Checked ? (int)numQtdSabores.Value : 1,
+                mercQtd_Sabores_Manual   = chkSabores.Checked ? (int)numQtdSaboresM.Value : 0,
                 Situacao              = cmbSituacao.SelectedItem?.ToString() == "Inativo" ? "I" : "A",
             };
             var erro = _bll.Salvar(obj);

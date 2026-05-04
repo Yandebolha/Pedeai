@@ -435,7 +435,7 @@ namespace Pedeai.DB
                 using (var conn = AbrirMysql())
                 using (var cmd  = new MySqlCommand(
                     "SELECT grmeDescricao_, grmeOrdem, Situacao, " +
-                    "COALESCE(grmeHabilitar_Site,0) AS grmeHabilitar_Site, " +
+                    "COALESCE(grmeHabilitar_Site,1) AS grmeHabilitar_Site, " +
                     "COALESCE(grmeImagem_Url,'')   AS grmeImagem_Url " +
                     "FROM grupo_mercadoria WHERE Codigo=@c LIMIT 1", conn))
                 {
@@ -466,12 +466,13 @@ namespace Pedeai.DB
 
                 // Verify cached UUID still exists in Supabase (may have been deleted)
                 // Only clear if we get a confirmed 200-OK with 0 results (not on network error)
+                // Verifica apenas por id — sem filtrar empresa_codigo, pois registros criados
+                // antes da migração podem ter empresa_codigo=NULL e seriam incorretamente descartados.
                 if (!string.IsNullOrWhiteSpace(uuid) && !_gruposSincronizados.Contains(codigoGrupo))
                 {
                     try
                     {
-                        // Verifica que o UUID ainda existe E pertence a esta empresa
-                        var check = await GetAsync($"grupo_mercadoria?id=eq.{uuid}{EmpresaFilter()}&limit=1");
+                        var check = await GetAsync($"grupo_mercadoria?id=eq.{uuid}&limit=1");
                         if (check.Count == 0) { SaveSupabaseUuid("grupo_mercadoria", "Codigo", codigoGrupo, ""); uuid = ""; }
                     }
                     catch { /* network error — keep existing UUID, don't clear */ }
@@ -480,7 +481,8 @@ namespace Pedeai.DB
                 // Check Supabase by nome to avoid duplicates if UUID not stored
                 if (string.IsNullOrWhiteSpace(uuid))
                 {
-                    var existing = await GetAsync($"grupo_mercadoria?nome=eq.{Uri.EscapeDataString(nome)}{EmpresaFilter()}&limit=1");
+                    // Busca sem filtro de empresa_codigo para encontrar registros legados com NULL
+                    var existing = await GetAsync($"grupo_mercadoria?nome=eq.{Uri.EscapeDataString(nome)}&limit=1");
                     if (existing.Count > 0)
                     {
                         uuid = existing[0]["id"]?.ToString() ?? "";
@@ -497,11 +499,9 @@ namespace Pedeai.DB
 
                 if (!string.IsNullOrWhiteSpace(uuid))
                 {
-                    // Quando empresa_codigo existe, filtra para só atualizar nossos registros
-                    string patchFilter = UsarEmpresaCodigo
-                        ? $"id=eq.{uuid}&empresa_codigo=eq.{Uri.EscapeDataString(_empresaCodigo)}"
-                        : $"id=eq.{uuid}";
-                    await PatchAsync("grupo_mercadoria", patchFilter, payload);
+                    // Filtra somente por id — empresa_codigo vem no payload e é atualizado.
+                    // Filtrar por empresa_codigo causava falha silenciosa em registros com empresa_codigo=NULL.
+                    await PatchAsync("grupo_mercadoria", $"id=eq.{uuid}", payload);
                 }
                 else
                 {
@@ -539,7 +539,7 @@ namespace Pedeai.DB
                 using (var conn = AbrirMysql())
                 using (var cmd  = new MySqlCommand(
                     "SELECT mercMercadoria, mercApresentacao, mercPreco_Venda, mercPreco_Promocional, " +
-                    "mercImagem_Url, mercDestaque, mercHabilitar_Site, Codigo_Grupo, Situacao, " +
+                    "mercImagem_Url, mercDestaque, COALESCE(mercHabilitar_Site,1) AS mercHabilitar_Site, Codigo_Grupo, Situacao, " +
                     "COALESCE(mercFracionado,0) AS mercFracionado, COALESCE(mercQtd_Sabores,1) AS mercQtd_Sabores, " +
                     "COALESCE(mercPreco_Adicional,0) AS mercPreco_Adicional " +
                     "FROM mercadoria WHERE Codigo=@c LIMIT 1", conn))
@@ -578,12 +578,13 @@ namespace Pedeai.DB
 
                 // Verify cached UUID still exists in Supabase
                 // Only clear on confirmed 200-OK with 0 results (not on network error)
+                // Verifica apenas por id — sem empresa_codigo, pois registros legados podem ter empresa_codigo=NULL
+                // e seriam incorretamente descartados, gerando duplicatas a cada sync.
                 if (!string.IsNullOrWhiteSpace(uuid))
                 {
                     try
                     {
-                        // Verifica que o UUID pertence a esta empresa (evita usar UUID de outra empresa cacheado)
-                        var check = await GetAsync($"{TBL_MERCADORIAS}?id=eq.{uuid}{EmpresaFilter()}&limit=1");
+                        var check = await GetAsync($"{TBL_MERCADORIAS}?id=eq.{uuid}&limit=1");
                         if (check.Count == 0) { SaveSupabaseUuid("mercadoria", "Codigo", codigoMercadoria, ""); uuid = ""; }
                     }
                     catch { /* network error — keep existing UUID */ }
@@ -887,12 +888,12 @@ namespace Pedeai.DB
 
                 // Verify cached UUID still exists in Supabase
                 // Only clear on confirmed 200-OK with 0 results
+                // Verifica apenas por id — sem empresa_codigo para não perder registros com empresa_codigo=NULL.
                 if (!string.IsNullOrWhiteSpace(uuid))
                 {
                     try
                     {
-                        // Verifica que o UUID pertence a esta empresa
-                        var check = await GetAsync($"{TBL_MERCADORIAS}?id=eq.{uuid}{EmpresaFilter()}&limit=1");
+                        var check = await GetAsync($"{TBL_MERCADORIAS}?id=eq.{uuid}&limit=1");
                         if (check.Count == 0) { SaveSupabaseUuid("marmita", "Codigo", codigoMarmita, ""); uuid = ""; }
                     }
                     catch { /* keep UUID on network error */ }
@@ -938,11 +939,8 @@ namespace Pedeai.DB
                             : (object)new { grupo_id = grupoUuid, nome = descricao, descricao = "Marmita",
                                             preco_venda = valor, ativo = ativoSite, destaque }
                         : postPayload;
-                    // PATCH apenas no registro desta empresa
-                    string marPatchFilter = UsarEmpresaCodigo
-                        ? $"id=eq.{uuid}&empresa_codigo=eq.{Uri.EscapeDataString(_empresaCodigo)}"
-                        : $"id=eq.{uuid}";
-                    await PatchAsync(TBL_MERCADORIAS, marPatchFilter, patchPayload);
+                    // PATCH apenas pelo id — empresa_codigo vem no payload, não no filtro.
+                    await PatchAsync(TBL_MERCADORIAS, $"id=eq.{uuid}", patchPayload);
                 }
                 else
                 {
@@ -2834,10 +2832,9 @@ namespace Pedeai.DB
                     var adExistentes = new Dictionary<string, (string id, decimal preco, int maxQtde)>(StringComparer.OrdinalIgnoreCase);
                     try
                     {
-                        string adFilter = UsarEmpresaCodigo
-                            ? $"adicional?mercadoria_id=eq.{marmitaUuid}&empresa_codigo=eq.{Uri.EscapeDataString(_empresaCodigo)}&select=id,nome,preco,max_qtde"
-                            : $"adicional?mercadoria_id=eq.{marmitaUuid}&select=id,nome,preco,max_qtde";
-                        var adArr = await GetAsync(adFilter);
+                        // Busca SEM empresa_codigo para encontrar registros legados com empresa_codigo=NULL
+                        var adArr = await GetAsync(
+                            $"adicional?mercadoria_id=eq.{marmitaUuid}&select=id,nome,preco,max_qtde");
                         foreach (JObject a in adArr)
                         {
                             string n = a["nome"]?.ToString(); string id = a["id"]?.ToString();
@@ -2977,14 +2974,18 @@ namespace Pedeai.DB
             {
                 var compList = complementos?.ToList() ?? new List<(int, string)>();
                 var adList   = adicionais?.ToList()   ?? new List<(int, string)>();
+                var sabList0 = sabores?.ToList()      ?? new List<(int, string)>();
 
-                // Produto que é APENAS complemento (sem adicionais) não deve aparecer como produto
-                // standalone no site — seja Marmitas ou qualquer outra categoria.
-                // O flag forcarAtivoFalse sobrepõe habSite e isGrupoComFracionado.
-                bool isPuroComplemento = compList.Any() && !adList.Any();
+                // Somente ingredientes de Marmitas ficam ocultos como produto independente.
+                // Produtos com vínculos complemento de outras categorias (ou vínculos obsoletos)
+                // respeitam o flag habSite para decidir visibilidade standalone.
+                bool isPuroIngredienteMarmita =
+                    compList.Any(c => c.NomeGrupo.Equals("Marmitas", StringComparison.OrdinalIgnoreCase))
+                    && !adList.Any()
+                    && !sabList0.Any();
 
                 // 1. Sincroniza o produto principal
-                if (isPuroComplemento)
+                if (isPuroIngredienteMarmita)
                     await SincronizarProdutoAsync(codigoMercadoria, forcarAtivoFalse: true);
                 else
                     await SincronizarProdutoAsync(codigoMercadoria);
@@ -3385,7 +3386,16 @@ namespace Pedeai.DB
                 }
                 catch { }
 
-                // Sincroniza adicionais do grupo para QUALQUER produto da categoria (fracionado ou não)
+                // Adicionais e sabores só fazem sentido para produtos fracionados
+                // (ex: Pizza Grande com adicionais e sabores).
+                // Produtos não-fracionados (ex: próprios adicionais como "Batata Frita") não devem
+                // ter registros na tabela adicional do Supabase vinculados a eles mesmos.
+                if (!fracionado) return;
+
+                // Se tem sabores manuais, não criar grupo automático — evita duplicata
+                if (temSaboresManuais) return;
+
+                // Sincroniza adicionais do grupo para este produto fracionado
                 try
                 {
                     var adicionaisMysql = new List<(string nome, decimal preco, int maxad)>();
@@ -3430,11 +3440,6 @@ namespace Pedeai.DB
                 {
                     Logger.Log("SupabaseService", "SincronizarFracionadoAsync", $"Erro ao sincronizar adicionais do produto {codigoMercadoria}", ex);
                 }
-
-                if (!fracionado) return;
-
-                // Se tem sabores manuais, não criar grupo automático — evita duplicata
-                if (temSaboresManuais) return;
 
                 // Busca todos os produtos ATIVOS da mesma categoria que NÃO são fracionados
                 // e NÃO são EXCLUSIVAMENTE adicionais (se tiver também Sabor ou Complemento, entra como sabor).
@@ -3738,6 +3743,7 @@ namespace Pedeai.DB
                 await SincronizarTodosGruposAsync();
                 await SincronizarTodosProdutosAsync();
                 await SincronizarTodasMarmitasAsync();
+                await SincronizarTodosVinculosAsync();
                 await SincronizarTodasImagensAsync();
             }
             catch (Exception ex)
