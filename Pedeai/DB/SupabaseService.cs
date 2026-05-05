@@ -3076,12 +3076,14 @@ namespace Pedeai.DB
                     // Verifica se é o grupo Marmitas
                     bool ehMarmitas = nomeGrupo.Equals("Marmitas", StringComparison.OrdinalIgnoreCase);
 
-                    // Nome/preço do produto que será inserido como complemento
+                    // Nome/preço/imagem do produto que será inserido como complemento
                     string nomeProduto = "";
                     decimal precoProduto = 0m;
+                    string imagemProduto = "";
                     using (var conn = AbrirMysql())
                     using (var cmd = new MySqlCommand(
-                        "SELECT mercMercadoria, COALESCE(mercPreco_Venda,0) AS preco " +
+                        "SELECT mercMercadoria, COALESCE(mercPreco_Venda,0) AS preco, " +
+                        "COALESCE(mercImagem_Url,'') AS mercImagem_Url " +
                         "FROM mercadoria WHERE Codigo=@c LIMIT 1", conn))
                     {
                         cmd.Parameters.AddWithValue("@c", codigoMercadoria);
@@ -3090,9 +3092,13 @@ namespace Pedeai.DB
                         {
                             nomeProduto   = r["mercMercadoria"]?.ToString() ?? "";
                             precoProduto  = Convert.ToDecimal(r["preco"]);
+                            imagemProduto = r["mercImagem_Url"]?.ToString() ?? "";
                         }
                     }
                     if (string.IsNullOrWhiteSpace(nomeProduto)) continue;
+                    // Só envia URLs válidas para o Supabase
+                    string imgUrlMarmita = imagemProduto.StartsWith("http", StringComparison.OrdinalIgnoreCase)
+                                          ? imagemProduto : null;
 
                     // Se for Marmitas: este produto serve de complemento para CADA marmita existente
                     if (ehMarmitas)
@@ -3168,15 +3174,27 @@ namespace Pedeai.DB
                                 var existentes = await GetAsync(
                                     $"{TBL_COMPLEMENTO}?grupo_id=eq.{grupoId}&nome=eq.{Uri.EscapeDataString(nomeProduto)}&limit=1");
                                 if (existentes.Count > 0)
-                                    await PatchAsync(TBL_COMPLEMENTO, $"id=eq.{existentes[0]["id"]}",
-                                        new { nome = nomeProduto, preco = precoProduto, ativo = true });
+                                {
+                                    // PATCH — inclui imagem_url apenas se disponível (evita limpar imagem existente)
+                                    object patchPayload;
+                                    if (imgUrlMarmita != null)
+                                        patchPayload = new { nome = nomeProduto, preco = precoProduto, ativo = true, imagem_url = imgUrlMarmita };
+                                    else
+                                    {
+                                        var jo = JObject.FromObject(new { nome = nomeProduto, preco = precoProduto, ativo = true, imagem_url = (string)null });
+                                        jo.Remove("imagem_url");
+                                        patchPayload = jo;
+                                    }
+                                    await PatchAsync(TBL_COMPLEMENTO, $"id=eq.{existentes[0]["id"]}", patchPayload);
+                                }
                                 else
                                     await PostAsync(TBL_COMPLEMENTO, new
                                     {
-                                        grupo_id = grupoId,
-                                        nome     = nomeProduto,
-                                        preco    = precoProduto,
-                                        ativo    = true,
+                                        grupo_id   = grupoId,
+                                        nome       = nomeProduto,
+                                        preco      = precoProduto,
+                                        ativo      = true,
+                                        imagem_url = imgUrlMarmita,
                                     });
                                 Logger.Log("SupabaseService", "SincronizarVinculosGrupoAsync", $"Complemento '{nomeProduto}' inserido no grupo {grupoId}");
                             }

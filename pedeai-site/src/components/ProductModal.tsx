@@ -174,14 +174,16 @@ export function ProductModal({
   };
 
   const precoCalculado = useMemo(() => {
-    if (!isFracionado || saboresListFinal.length === 0 || selectedSabores.length !== qtdSabores) return null;
+    if (!isFracionado) return null;
+    // Preço fixo: o preço é sempre o preço base — sabores não somam nem mudam o valor
+    if (saboresModoSoma) return itemBasePrice;
+    // Pizza: média dos sabores (half/half) — só calcula quando todos os sabores estão selecionados
+    if (saboresListFinal.length === 0 || selectedSabores.length !== qtdSabores) return null;
     const somaPrecos = selectedSabores.reduce((acc, id) => {
       const item = saboresListFinal.find((p) => p.id === id);
       return acc + (item ? item.preco : 0);
     }, 0);
-    // Açaí: preço base + soma dos sabores
-    if (saboresModoSoma) return itemBasePrice + somaPrecos;
-    // Pizza: média dos sabores (half/half)
+    // Pizza: média dos sabores
     return somaPrecos / qtdSabores;
   }, [isFracionado, selectedSabores, qtdSabores, saboresListFinal, saboresModoSoma, itemBasePrice]);
 
@@ -329,9 +331,12 @@ export function ProductModal({
                             <div className="flex-1 min-w-0">
                               <p className="text-sm font-semibold text-gray-800 uppercase leading-tight tracking-wide">{sabor.nome}</p>
                             </div>
-                            <span className="text-xs font-bold text-green-700 flex-shrink-0">
-                              R$ {sabor.preco.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                            </span>
+                            {/* Preço do sabor: só exibe quando preco_fixo=false (modo pizza/média) */}
+                            {!saboresModoSoma && (
+                              <span className="text-xs font-bold text-green-700 flex-shrink-0">
+                                R$ {sabor.preco.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                              </span>
+                            )}
                           </button>
                         );
                       })}
@@ -509,7 +514,7 @@ export function ProductModal({
                     <>
                       <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">
                         {saboresModoSoma
-                          ? 'Preço base + sabores'
+                          ? 'Preço fixo'
                           : selectedSabores.length === qtdSabores
                             ? 'Preço calculado'
                             : `A partir de · selecione ${qtdSabores} sabores`}
