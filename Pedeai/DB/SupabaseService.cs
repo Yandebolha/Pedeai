@@ -623,10 +623,10 @@ namespace Pedeai.DB
                     }
                     catch { /* ignora — fallback para habSite */ }
                 }
-                // isGrupoComFracionado não controla mais visibilidade standalone:
-                // sabores/adicionais/complementos só aparecem como produto independente
-                // se o usuário marcou explicitamente "No site" (habSite=true).
-                bool ativoSite = forcarAtivoFalse ? false : (habSite || fracionado);
+                // Visibilidade controlada EXCLUSIVAMENTE pelo checkbox "No site" (habSite).
+                // Produtos fracionados, sabores e adicionais só aparecem no site se o
+                // usuário marcou explicitamente "No site" — sem sobreposição automática.
+                bool ativoSite = forcarAtivoFalse ? false : habSite;
 
                 // Ensure group UUID is available — only do full sync if not already done this session
                 string grupoUuid = "";
@@ -2714,8 +2714,8 @@ namespace Pedeai.DB
                 string marmitaUuid = GetSupabaseUuid("marmita", "Codigo", codigoMarmita);
                 if (string.IsNullOrWhiteSpace(marmitaUuid)) return;
 
-                // 2. Busca itens agrupados: nome, preco, grupo, maxGrupo, maxAd
-                var itensRaw = new List<(string nome, decimal preco, string grupo, int maxGrupo, int maxAd)>();
+                // 2. Busca itens agrupados: nome, preco, grupo, maxGrupo, maxAd, imagemUrl
+                var itensRaw = new List<(string nome, decimal preco, string grupo, int maxGrupo, int maxAd, string imagemUrl)>();
                 using (var conn = AbrirMysql())
                 using (var cmd = new MySqlCommand(@"
                     SELECT mi.maritmNome,
@@ -2726,7 +2726,8 @@ namespace Pedeai.DB
                            END AS preco,
                            COALESCE(mi.maritmGrupo, 'Geral')    AS grupo,
                            COALESCE(mi.maritmGrupoMax, 1)        AS maxGrupo,
-                           COALESCE(m.mercAdicional_Qtd_Max, 1)  AS maxAd
+                           COALESCE(m.mercAdicional_Qtd_Max, 1)  AS maxAd,
+                           COALESCE(m.mercImagem_Url, '')         AS imagemUrl
                     FROM marmita_item mi
                     LEFT JOIN mercadoria m ON m.Codigo = mi.maritmCodigo_Merc
                     WHERE mi.Codigo_Marmita = @c
@@ -2735,13 +2736,21 @@ namespace Pedeai.DB
                     cmd.Parameters.AddWithValue("@c", codigoMarmita);
                     using var r = cmd.ExecuteReader();
                     while (r.Read())
+                    {
+                        string rawImg = r["imagemUrl"]?.ToString() ?? "";
+                        // Nunca enviar caminhos locais para o Supabase
+                        if (!string.IsNullOrWhiteSpace(rawImg) &&
+                            !rawImg.StartsWith("http", StringComparison.OrdinalIgnoreCase))
+                            rawImg = "";
                         itensRaw.Add((
                             r["maritmNome"]?.ToString() ?? "",
                             Convert.ToDecimal(r["preco"]),
                             r["grupo"]?.ToString()?.Trim() is string g && g.Length > 0 ? g : "Geral",
                             r["maxGrupo"] == DBNull.Value ? 1 : Convert.ToInt32(r["maxGrupo"]),
-                            r["maxAd"]    == DBNull.Value ? 1 : Convert.ToInt32(r["maxAd"])
+                            r["maxAd"]    == DBNull.Value ? 1 : Convert.ToInt32(r["maxAd"]),
+                            rawImg
                         ));
+                    }
                 }
 
                 if (!itensRaw.Any()) return;
@@ -2839,15 +2848,25 @@ namespace Pedeai.DB
 
                     var nomesNoGrupo = new HashSet<string>(grupoItens.Select(i => i.nome), StringComparer.OrdinalIgnoreCase);
 
-                    // Upsert itens do grupo
-                    foreach (var (nome, preco, _, __, ___) in grupoItens)
+                    // Upsert itens do grupo (inclui imagem_url do produto no Supabase)
+                    foreach (var (nome, preco, _, __, ___, itemImagemUrl) in grupoItens)
                     {
                         try
                         {
                             if (compExistentes.TryGetValue(nome, out string cId))
-                                await PatchAsync(TBL_COMPLEMENTO, $"id=eq.{cId}", new { nome, preco, ativo = true });
+                            {
+                                object patchComp = string.IsNullOrWhiteSpace(itemImagemUrl)
+                                    ? (object)new { nome, preco, ativo = true }
+                                    : (object)new { nome, preco, ativo = true, imagem_url = itemImagemUrl };
+                                await PatchAsync(TBL_COMPLEMENTO, $"id=eq.{cId}", patchComp);
+                            }
                             else
-                                await PostAsync(TBL_COMPLEMENTO, new { grupo_id = grupoCompId, nome, preco, ativo = true });
+                            {
+                                object postComp = string.IsNullOrWhiteSpace(itemImagemUrl)
+                                    ? (object)new { grupo_id = grupoCompId, nome, preco, ativo = true }
+                                    : (object)new { grupo_id = grupoCompId, nome, preco, ativo = true, imagem_url = itemImagemUrl };
+                                await PostAsync(TBL_COMPLEMENTO, postComp);
+                            }
                         }
                         catch { }
                     }
@@ -2902,7 +2921,7 @@ namespace Pedeai.DB
                     int maxGrupoAd = adicionaisItens.FirstOrDefault().maxGrupo < 1 ? 1 : adicionaisItens.First().maxGrupo;
                     var nomesAd = new HashSet<string>(adicionaisItens.Select(i => i.nome), StringComparer.OrdinalIgnoreCase);
 
-                    foreach (var (nome, preco, _, maxG, maxAd) in adicionaisItens)
+                    foreach (var (nome, preco, _, maxG, maxAd, __) in adicionaisItens)
                     {
                         int qtdeMax = maxAd > 0 ? maxAd : 1;
                         // Sempre inclui empresa_codigo quando configurado, independente do flag global

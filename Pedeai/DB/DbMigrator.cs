@@ -757,12 +757,10 @@ namespace Pedeai.DB
                 AddColumnIfNotExists(conn, db, "empresa", "empHabilitar_Site",
                     "TINYINT(1) NOT NULL DEFAULT 1");
 
-                // ── Corrige registros legados: categorias e produtos criados antes do
-                //    checkbox "No site" existir tinham DEFAULT 0, ficavam ocultos no sync.
-                //    Atualiza para 1 (visível) somente os registros que ainda têm 0,
-                //    preservando escolhas explícitas feitas após a feature existir.
-                Exec(conn, "UPDATE grupo_mercadoria SET grmeHabilitar_Site=1 WHERE grmeHabilitar_Site=0");
-                Exec(conn, "UPDATE mercadoria SET mercHabilitar_Site=1 WHERE COALESCE(mercHabilitar_Site,0)=0 AND Situacao='A'");
+                // Nota: remoção intencional das UPDATEs que forçavam grmeHabilitar_Site=1 e
+                // mercHabilitar_Site=1. Essas instruções resetavam as escolhas explícitas do
+                // usuário toda vez que o sistema abria. O usuário agora controla visibilidade
+                // individualmente pelo checkbox "Habilitar no Site" / "No site" em cada registro.
 
                 return true;
             }
