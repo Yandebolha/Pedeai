@@ -2722,7 +2722,7 @@ namespace Pedeai.DB
                            CASE WHEN COALESCE(mi.maritmGrupo,'') = 'Adicionais'
                                      AND COALESCE(m.mercPreco_Adicional,0) > 0
                                 THEN m.mercPreco_Adicional
-                                ELSE COALESCE(m.mercPreco_Venda, 0)
+                                ELSE 0  -- complementos da marmita não têm cobrança extra (incluídos no preço da marmita)
                            END AS preco,
                            COALESCE(mi.maritmGrupo, 'Geral')    AS grupo,
                            COALESCE(mi.maritmGrupoMax, 1)        AS maxGrupo,
@@ -2921,23 +2921,31 @@ namespace Pedeai.DB
                     int maxGrupoAd = adicionaisItens.FirstOrDefault().maxGrupo < 1 ? 1 : adicionaisItens.First().maxGrupo;
                     var nomesAd = new HashSet<string>(adicionaisItens.Select(i => i.nome), StringComparer.OrdinalIgnoreCase);
 
-                    foreach (var (nome, preco, _, maxG, maxAd, __) in adicionaisItens)
+                    foreach (var (nome, preco, _, maxG, maxAd, adImagemUrl) in adicionaisItens)
                     {
                         int qtdeMax = maxAd > 0 ? maxAd : 1;
-                        // Sempre inclui empresa_codigo quando configurado, independente do flag global
                         bool temEmp = !string.IsNullOrWhiteSpace(_empresaCodigo);
+                        bool temImg = !string.IsNullOrWhiteSpace(adImagemUrl);
                         try
                         {
                             if (adExistentes.TryGetValue(nome, out var existing))
-                                await PatchAsync("adicional", $"id=eq.{existing.id}",
-                                    temEmp
-                                        ? (object)new { nome, preco, max_qtde = qtdeMax, ativo = true, empresa_codigo = _empresaCodigo }
-                                        : (object)new { nome, preco, max_qtde = qtdeMax, ativo = true });
+                            {
+                                object patchAd;
+                                if (temImg && temEmp)       patchAd = new { nome, preco, max_qtde = qtdeMax, ativo = true, imagem_url = adImagemUrl, empresa_codigo = _empresaCodigo };
+                                else if (temImg)            patchAd = new { nome, preco, max_qtde = qtdeMax, ativo = true, imagem_url = adImagemUrl };
+                                else if (temEmp)            patchAd = new { nome, preco, max_qtde = qtdeMax, ativo = true, empresa_codigo = _empresaCodigo };
+                                else                        patchAd = new { nome, preco, max_qtde = qtdeMax, ativo = true };
+                                await PatchAsync("adicional", $"id=eq.{existing.id}", patchAd);
+                            }
                             else
-                                await PostAsync("adicional",
-                                    temEmp
-                                        ? (object)new { mercadoria_id = marmitaUuid, nome, preco, max_qtde = qtdeMax, ativo = true, empresa_codigo = _empresaCodigo }
-                                        : (object)new { mercadoria_id = marmitaUuid, nome, preco, max_qtde = qtdeMax, ativo = true });
+                            {
+                                object postAd;
+                                if (temImg && temEmp)       postAd = new { mercadoria_id = marmitaUuid, nome, preco, max_qtde = qtdeMax, ativo = true, imagem_url = adImagemUrl, empresa_codigo = _empresaCodigo };
+                                else if (temImg)            postAd = new { mercadoria_id = marmitaUuid, nome, preco, max_qtde = qtdeMax, ativo = true, imagem_url = adImagemUrl };
+                                else if (temEmp)            postAd = new { mercadoria_id = marmitaUuid, nome, preco, max_qtde = qtdeMax, ativo = true, empresa_codigo = _empresaCodigo };
+                                else                        postAd = new { mercadoria_id = marmitaUuid, nome, preco, max_qtde = qtdeMax, ativo = true };
+                                await PostAsync("adicional", postAd);
+                            }
                         }
                         catch { }
                     }
