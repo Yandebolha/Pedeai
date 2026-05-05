@@ -740,6 +740,8 @@ namespace Pedeai.DB
                     "TINYINT(1) NOT NULL DEFAULT 0 COMMENT '1=produto com múltiplos sabores (ex: pizza)'");
                 AddColumnIfNotExists(conn, db, "mercadoria", "mercQtd_Sabores",
                     "INT NOT NULL DEFAULT 1 COMMENT 'Quantidade máxima de sabores para produto fracionado'");
+                AddColumnIfNotExists(conn, db, "mercadoria", "mercPreco_Fixo",
+                    "TINYINT(1) NOT NULL DEFAULT 0 COMMENT '1=preço base fixo, sabores somam ao total (Açaí); 0=preço = média dos sabores (Pizza)'");
 
                 // ── empresa: ImgBB API key for image hosting ──────────────
                 AddColumnIfNotExists(conn, db, "empresa", "empImgBBKey",

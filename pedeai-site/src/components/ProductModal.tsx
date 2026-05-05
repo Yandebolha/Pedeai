@@ -157,6 +157,13 @@ export function ProductModal({
 
   const isFracionado = product?.fracionado === true;
   const qtdSabores = product?.qtd_sabores || 2;
+  // Preço base do produto (antes de adicionar adicionais)
+  const itemBasePrice = product ? (product.preco_promocional || product.preco_venda) : 0;
+
+  // Modo de precificação dos sabores:
+  // - preco_fixo=true (Açaí): preço final = preço base + soma dos sabores selecionados
+  // - preco_fixo=false/null (Pizza): preço final = média dos sabores selecionados (half/half)
+  const saboresModoSoma = isFracionado && product?.preco_fixo === true;
 
   const toggleSabor = (id: string) => {
     setSelectedSabores((prev) => {
@@ -168,12 +175,15 @@ export function ProductModal({
 
   const precoCalculado = useMemo(() => {
     if (!isFracionado || saboresListFinal.length === 0 || selectedSabores.length !== qtdSabores) return null;
-    const soma = selectedSabores.reduce((acc, id) => {
+    const somaPrecos = selectedSabores.reduce((acc, id) => {
       const item = saboresListFinal.find((p) => p.id === id);
       return acc + (item ? item.preco : 0);
     }, 0);
-    return soma / qtdSabores;
-  }, [isFracionado, selectedSabores, qtdSabores, saboresListFinal]);
+    // Açaí: preço base + soma dos sabores
+    if (saboresModoSoma) return itemBasePrice + somaPrecos;
+    // Pizza: média dos sabores (half/half)
+    return somaPrecos / qtdSabores;
+  }, [isFracionado, selectedSabores, qtdSabores, saboresListFinal, saboresModoSoma, itemBasePrice]);
 
   const canAdd = isFracionado
     ? selectedSabores.length === qtdSabores
@@ -183,7 +193,6 @@ export function ProductModal({
           .every((g) => (selectedComplementos[g.id]?.length || 0) >= g.minimo));
 
   const adicionaisTotal = selectedAdicionais.reduce((acc, a) => acc + a.preco * a.quantity, 0);
-  const itemBasePrice = product ? (product.preco_promocional || product.preco_venda) : 0;
   const finalPrice = isFracionado
     ? (precoCalculado ?? itemBasePrice) + adicionaisTotal
     : itemBasePrice + adicionaisTotal;
@@ -499,15 +508,24 @@ export function ProductModal({
                   {isFracionado ? (
                     <>
                       <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">
-                        {selectedSabores.length === qtdSabores ? 'Preço calculado' : `A partir de · selecione ${qtdSabores} sabores`}
+                        {saboresModoSoma
+                          ? 'Preço base + sabores'
+                          : selectedSabores.length === qtdSabores
+                            ? 'Preço calculado'
+                            : `A partir de · selecione ${qtdSabores} sabores`}
                       </span>
                       <div className="flex items-baseline gap-2 mt-1">
                         <span className="text-2xl font-black text-green-700">
                           R$ {((precoCalculado ?? itemBasePrice) + adicionaisTotal).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                         </span>
-                        {precoCalculado !== null && (
+                        {precoCalculado !== null && !saboresModoSoma && (
                           <span className="text-xs text-gray-400">
                             ({selectedSabores.length}/{qtdSabores} sabores · média{adicionaisTotal > 0 ? ` + R$ ${adicionaisTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} adicionais` : ''})
+                          </span>
+                        )}
+                        {saboresModoSoma && adicionaisTotal > 0 && (
+                          <span className="text-xs text-gray-400">
+                            + R$ {adicionaisTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} adicionais
                           </span>
                         )}
                       </div>

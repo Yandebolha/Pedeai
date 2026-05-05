@@ -544,7 +544,7 @@ namespace Pedeai.DB
             {
                 string nome, descricao, imagemUrl, situacao;
                 decimal precoVenda, precoPromo, precoAdicional;
-                bool destaque, habSite, fracionado;
+                bool destaque, habSite, fracionado, precoFixo;
                 int codigoGrupo, qtdSabores;
 
                 using (var conn = AbrirMysql())
@@ -552,6 +552,7 @@ namespace Pedeai.DB
                     "SELECT mercMercadoria, mercApresentacao, mercPreco_Venda, mercPreco_Promocional, " +
                     "mercImagem_Url, mercDestaque, COALESCE(mercHabilitar_Site,1) AS mercHabilitar_Site, Codigo_Grupo, Situacao, " +
                     "COALESCE(mercFracionado,0) AS mercFracionado, COALESCE(mercQtd_Sabores,1) AS mercQtd_Sabores, " +
+                    "COALESCE(mercPreco_Fixo,0) AS mercPreco_Fixo, " +
                     "COALESCE(mercPreco_Adicional,0) AS mercPreco_Adicional " +
                     "FROM mercadoria WHERE Codigo=@c LIMIT 1", conn))
                 {
@@ -569,6 +570,7 @@ namespace Pedeai.DB
                     situacao       = r["Situacao"]?.ToString() ?? "A";
                     fracionado     = r["mercFracionado"]?.ToString() == "1";
                     qtdSabores     = r["mercQtd_Sabores"] == DBNull.Value ? 1 : Convert.ToInt32(r["mercQtd_Sabores"]);
+                    precoFixo      = r["mercPreco_Fixo"]?.ToString() == "1";
                     precoAdicional = r["mercPreco_Adicional"] == DBNull.Value ? 0m : Convert.ToDecimal(r["mercPreco_Adicional"]);
                 }
 
@@ -715,37 +717,45 @@ namespace Pedeai.DB
                             ? temEmp ? (object)new { nome, descricao, preco_venda = precoVenda,
                                             imagem_url = comImagem ? imagemUrl : null,
                                             ativo = ativoSite, destaque, fracionado, qtd_sabores = qtdSabores,
+                                            preco_fixo = precoFixo,
                                             is_adicional = ehAdicional, preco_adicional = precoAdicional, empresa_codigo = emp }
                                      : (object)new { nome, descricao, preco_venda = precoVenda,
                                             imagem_url = comImagem ? imagemUrl : null,
                                             ativo = ativoSite, destaque, fracionado, qtd_sabores = qtdSabores,
+                                            preco_fixo = precoFixo,
                                             is_adicional = ehAdicional, preco_adicional = precoAdicional }
                             : temEmp ? (object)new { grupo_id = grupoUuid, nome, descricao,
                                             preco_venda = precoVenda,
                                             imagem_url = comImagem ? imagemUrl : null,
                                             ativo = ativoSite, destaque, fracionado, qtd_sabores = qtdSabores,
+                                            preco_fixo = precoFixo,
                                             is_adicional = ehAdicional, preco_adicional = precoAdicional, empresa_codigo = emp }
                                      : (object)new { grupo_id = grupoUuid, nome, descricao,
                                             preco_venda = precoVenda,
                                             imagem_url = comImagem ? imagemUrl : null,
                                             ativo = ativoSite, destaque, fracionado, qtd_sabores = qtdSabores,
+                                            preco_fixo = precoFixo,
                                             is_adicional = ehAdicional, preco_adicional = precoAdicional };
                     else if (usarFracionado)
                         return string.IsNullOrWhiteSpace(grupoUuid)
                             ? temEmp ? (object)new { nome, descricao, preco_venda = precoVenda,
                                             imagem_url = comImagem ? imagemUrl : null,
-                                            ativo = ativoSite, destaque, fracionado, qtd_sabores = qtdSabores, empresa_codigo = emp }
+                                            ativo = ativoSite, destaque, fracionado, qtd_sabores = qtdSabores,
+                                            preco_fixo = precoFixo, empresa_codigo = emp }
                                      : (object)new { nome, descricao, preco_venda = precoVenda,
                                             imagem_url = comImagem ? imagemUrl : null,
-                                            ativo = ativoSite, destaque, fracionado, qtd_sabores = qtdSabores }
+                                            ativo = ativoSite, destaque, fracionado, qtd_sabores = qtdSabores,
+                                            preco_fixo = precoFixo }
                             : temEmp ? (object)new { grupo_id = grupoUuid, nome, descricao,
                                             preco_venda = precoVenda,
                                             imagem_url = comImagem ? imagemUrl : null,
-                                            ativo = ativoSite, destaque, fracionado, qtd_sabores = qtdSabores, empresa_codigo = emp }
+                                            ativo = ativoSite, destaque, fracionado, qtd_sabores = qtdSabores,
+                                            preco_fixo = precoFixo, empresa_codigo = emp }
                                      : (object)new { grupo_id = grupoUuid, nome, descricao,
                                             preco_venda = precoVenda,
                                             imagem_url = comImagem ? imagemUrl : null,
-                                            ativo = ativoSite, destaque, fracionado, qtd_sabores = qtdSabores };
+                                            ativo = ativoSite, destaque, fracionado, qtd_sabores = qtdSabores,
+                                            preco_fixo = precoFixo };
                     else
                         return string.IsNullOrWhiteSpace(grupoUuid)
                             ? temEmp ? (object)new { nome, descricao, preco_venda = precoVenda,

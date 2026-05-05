@@ -50,6 +50,7 @@ namespace Pedeai.Forms
             this.lblQtdAdicional    = new System.Windows.Forms.Label();
             this.numQtdAdicional    = new System.Windows.Forms.NumericUpDown();
             this.chkFracionado      = new System.Windows.Forms.CheckBox();
+            this.chkPrecoFixo       = new System.Windows.Forms.CheckBox();
             this.lblQtdSabores      = new System.Windows.Forms.Label();
             this.numQtdSabores      = new System.Windows.Forms.NumericUpDown();
             this.pnlVinculos        = new System.Windows.Forms.Panel();
@@ -134,6 +135,7 @@ namespace Pedeai.Forms
             this.pnlForm.Controls.Add(this.lblPrecoAdicional); this.pnlForm.Controls.Add(this.numPrecoAdicional);
             this.pnlForm.Controls.Add(this.lblQtdAdicional); this.pnlForm.Controls.Add(this.numQtdAdicional);
             this.pnlForm.Controls.Add(this.chkFracionado);
+            this.pnlForm.Controls.Add(this.chkPrecoFixo);
             this.pnlForm.Controls.Add(this.lblQtdSabores); this.pnlForm.Controls.Add(this.numQtdSabores);
             this.pnlForm.Controls.Add(this.chkSabores);
             this.pnlForm.Controls.Add(this.lblQtdSaboresM); this.pnlForm.Controls.Add(this.numQtdSaboresM);
@@ -192,6 +194,8 @@ namespace Pedeai.Forms
             // row 5c — Fracionado (pizza com múltiplos sabores auto da mesma categoria)
             this.chkFracionado.Text="Fracionado (múltiplos sabores)"; this.chkFracionado.Left=10; this.chkFracionado.Top=178; this.chkFracionado.AutoSize=true;
             this.chkFracionado.CheckedChanged+=new System.EventHandler(this.ChkFracionado_CheckedChanged);
+            // Preço fixo: o preço do produto é base fixo e sabores somam (modo Açaí)
+            this.chkPrecoFixo.Text="Preço fixo"; this.chkPrecoFixo.Left=450; this.chkPrecoFixo.Top=178; this.chkPrecoFixo.AutoSize=true; this.chkPrecoFixo.Visible=false;
             this.lblQtdSabores.Text="Qtd. sabores:"; this.lblQtdSabores.AutoSize=true; this.lblQtdSabores.Left=255; this.lblQtdSabores.Top=180; this.lblQtdSabores.Visible=false;
             this.numQtdSabores.Left=355; this.numQtdSabores.Top=177; this.numQtdSabores.Width=55; this.numQtdSabores.Visible=false;
             this.numQtdSabores.Minimum=1; this.numQtdSabores.Maximum=10; this.numQtdSabores.Value=1;
@@ -299,6 +303,7 @@ namespace Pedeai.Forms
         private  System.Windows.Forms.Label         lblQtdAdicional;
         internal System.Windows.Forms.NumericUpDown numQtdAdicional;
         internal System.Windows.Forms.CheckBox      chkFracionado;
+        internal System.Windows.Forms.CheckBox      chkPrecoFixo;
         private  System.Windows.Forms.Label         lblQtdSabores;
         internal System.Windows.Forms.NumericUpDown numQtdSabores;
         internal System.Windows.Forms.Panel         pnlVinculos;

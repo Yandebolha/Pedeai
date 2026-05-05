@@ -165,7 +165,7 @@ namespace Pedeai.Forms
             numQtdSaboresM.Value = 1; numQtdSaboresM.Visible = false; lblQtdSaboresM.Visible = false;
             chkControlaEstoque.Checked = false; chkDestaque.Checked = false; chkSite.Checked = true;
             _loadingForm = true;
-            try { chkAdicionais.Checked = false; chkComplementos.Checked = false; chkFracionado.Checked = false; chkSabores.Checked = false; }
+            try { chkAdicionais.Checked = false; chkComplementos.Checked = false; chkFracionado.Checked = false; chkPrecoFixo.Checked = false; chkPrecoFixo.Visible = false; chkSabores.Checked = false; }
             finally { _loadingForm = false; }
             _vinculosAdicionais.Clear(); _vinculosComplementos.Clear(); _vinculosSabores.Clear();
             pnlVinculos.Visible = false;
@@ -216,6 +216,7 @@ namespace Pedeai.Forms
                 chkAdicionais.Checked   = _vinculosAdicionais.Count > 0;
                 chkComplementos.Checked = _vinculosComplementos.Count > 0;
                 chkFracionado.Checked   = obj.mercFracionado;
+                chkPrecoFixo.Checked    = obj.mercPreco_Fixo;
                 chkSabores.Checked      = _vinculosSabores.Count > 0;
                 numQtdSabores.Value     = Math.Max(1, obj.mercQtd_Sabores);
                 numQtdSaboresM.Value    = Math.Max(1, obj.mercQtd_Sabores_Manual > 0 ? obj.mercQtd_Sabores_Manual : 1);
@@ -227,6 +228,7 @@ namespace Pedeai.Forms
             numQtdAdicional.Visible    = chkAdicionais.Checked;
             lblQtdSabores.Visible      = chkFracionado.Checked;
             numQtdSabores.Visible      = chkFracionado.Checked;
+            chkPrecoFixo.Visible       = chkFracionado.Checked;
             lblQtdSaboresM.Visible     = chkSabores.Checked;
             numQtdSaboresM.Visible     = chkSabores.Checked;
             // Ajusta visibilidade do painel sem evento
@@ -277,6 +279,7 @@ namespace Pedeai.Forms
                 mercFracionado           = chkFracionado.Checked,
                 mercQtd_Sabores          = chkFracionado.Checked ? (int)numQtdSabores.Value : 1,
                 mercQtd_Sabores_Manual   = chkSabores.Checked ? (int)numQtdSaboresM.Value : 0,
+                mercPreco_Fixo           = chkFracionado.Checked && chkPrecoFixo.Checked,
                 Situacao              = cmbSituacao.SelectedItem?.ToString() == "Inativo" ? "I" : "A",
             };
             var erro = _bll.Salvar(obj);
@@ -437,6 +440,8 @@ namespace Pedeai.Forms
             if (_loadingForm) return;
             lblQtdSabores.Visible = chkFracionado.Checked;
             numQtdSabores.Visible = chkFracionado.Checked;
+            chkPrecoFixo.Visible  = chkFracionado.Checked;
+            if (!chkFracionado.Checked) chkPrecoFixo.Checked = false;
             if (chkFracionado.Checked && numQtdSabores.Value < 1) numQtdSabores.Value = 2;
         }
 

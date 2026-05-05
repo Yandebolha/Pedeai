@@ -34,6 +34,10 @@ namespace Pedeai.Modelo
         // Sabores manuais: qtd máxima quando o produto tem seleção manual de sabores
         public int  mercQtd_Sabores_Manual { get; set; } = 0;
 
+        // Preço fixo: quando verdadeiro, o preço do produto é fixo e os sabores somam ao total
+        // (ex: Açaí = R$15 + sabores). Quando falso, o preço é a média dos sabores (ex: Pizza half/half).
+        public bool mercPreco_Fixo { get; set; } = false;
+
         public string Situacao { get; set; } = "A";
         public string Status_Transmissao { get; set; } = "N";
         public string Info { get; set; } = "";

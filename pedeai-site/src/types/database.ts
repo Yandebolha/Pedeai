@@ -48,6 +48,7 @@ export interface Database {
           destaque: boolean
           fracionado: boolean | null
           qtd_sabores: number | null
+          preco_fixo: boolean | null
           is_adicional: boolean | null
           preco_adicional: number | null
           created_at: string
