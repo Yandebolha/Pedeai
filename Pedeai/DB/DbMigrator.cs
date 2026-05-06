@@ -684,6 +684,18 @@ namespace Pedeai.DB
                     "TINYINT(1) NOT NULL DEFAULT 0");
                 AddColumnIfNotExists(conn, db, "marmita", "marImagem_Url",
                     "VARCHAR(500) NOT NULL DEFAULT ''");
+                AddColumnIfNotExists(conn, db, "marmita", "marMaxComplementos",
+                    "INT NOT NULL DEFAULT 1 COMMENT 'Máximo de complementos (itens) que o cliente pode escolher'");
+
+                // ── marmita_item: grupos e limites por grupo ──────────────────
+                AddColumnIfNotExists(conn, db, "marmita_item", "maritmGrupo",
+                    "VARCHAR(100) NOT NULL DEFAULT 'Geral' COMMENT 'Grupo/categoria deste item dentro da marmita'");
+                AddColumnIfNotExists(conn, db, "marmita_item", "maritmGrupoMax",
+                    "INT NOT NULL DEFAULT 1 COMMENT 'Quantidade máxima de itens que o cliente pode escolher neste grupo'");
+
+                // ── promocao: limite de cupons gerados ────────────────────────
+                AddColumnIfNotExists(conn, db, "promocao", "prom_Limite_Cupons",
+                    "INT NOT NULL DEFAULT 0 COMMENT '0=ilimitado'");
 
                 // Complement groups linked to a marmita (shown as selectable options on website)
                 Exec(conn, @"
@@ -740,6 +752,8 @@ namespace Pedeai.DB
                     "TINYINT(1) NOT NULL DEFAULT 0 COMMENT '1=produto com múltiplos sabores (ex: pizza)'");
                 AddColumnIfNotExists(conn, db, "mercadoria", "mercQtd_Sabores",
                     "INT NOT NULL DEFAULT 1 COMMENT 'Quantidade máxima de sabores para produto fracionado'");
+                AddColumnIfNotExists(conn, db, "mercadoria", "mercQtd_Sabores_Manual",
+                    "INT NOT NULL DEFAULT 0 COMMENT 'Quantidade manual de sabores exibida no pedido (0=usa mercQtd_Sabores)'");
                 AddColumnIfNotExists(conn, db, "mercadoria", "mercPreco_Fixo",
                     "TINYINT(1) NOT NULL DEFAULT 0 COMMENT '1=preço base fixo, sabores somam ao total (Açaí); 0=preço = média dos sabores (Pizza)'");
 
