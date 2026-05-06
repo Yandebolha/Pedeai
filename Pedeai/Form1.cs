@@ -1216,6 +1216,8 @@ namespace Pedeai
                 else
                 {
                     Logger.Log("Form1", "AtualizarSituacaoPedido", $"Pedido cancelado | #{cod} | Autorizado por: {canceladoPor}");
+                    if (!string.IsNullOrWhiteSpace(pedido.pediTelefone_Cliente))
+                        BLL.WhatsAppService.NotificarCancelado(pedido.pediTelefone_Cliente, pedido.pediNome_Cliente, pedido.pediNumero);
                     CarregarPedidos();
                     RestaurarSelecaoPedido(cod);
                 }
@@ -1288,6 +1290,9 @@ namespace Pedeai
                                 dlgTroco.AcceptButton = btnOkTroco;
                                 dlgTroco.ShowDialog(this);
                             }
+                        // Notificação WhatsApp: pedido entregue / pronto para retirada
+                            if (!string.IsNullOrWhiteSpace(pedido.pediTelefone_Cliente))
+                                BLL.WhatsAppService.NotificarEntregue(pedido.pediTelefone_Cliente, pedido.pediNome_Cliente, pedido.pediNumero);
                             // Reimprimir cupom quando há desconto autorizado no pagamento
                             if (!string.IsNullOrEmpty(autNome))
                                 ImprimirCupomPedido(cod);

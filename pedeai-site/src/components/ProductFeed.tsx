@@ -76,11 +76,7 @@ export function ProductFeed({ products, categoryName }: ProductFeedProps) {
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
-                    if (product.fracionado) {
-                      setSelectedProduct(product); // abre o modal para escolher sabores
-                    } else {
-                      addItem(product, 1);
-                    }
+                    setSelectedProduct(product); // sempre abre o modal para garantir seleção de complementos/sabores
                   }}
                   className="absolute bottom-1 right-1 bg-white rounded-full p-1 shadow-lg border border-gray-100 text-red-600 hover:bg-red-50 transition-colors"
                 >

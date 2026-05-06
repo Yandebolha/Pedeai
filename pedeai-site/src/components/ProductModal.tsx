@@ -37,7 +37,7 @@ export function ProductModal({
   const [selectedSabores, setSelectedSabores] = useState<string[]>(initialSabores ?? []);
   const [modalQuantity, setModalQuantity] = useState(initialQuantity ?? 1);
 
-  const { data: complementGrupos } = useQuery<ComplementoGrupoComItens[]>({
+  const { data: complementGrupos, isLoading: isLoadingGroups } = useQuery<ComplementoGrupoComItens[]>({
     queryKey: ['complemento_grupo', product?.id],
     queryFn: async () => {
       // 1. Busca grupos com mercadoria_id direto (modo atual)
@@ -191,10 +191,11 @@ export function ProductModal({
 
   const canAdd = isFracionado
     ? selectedSabores.length >= minSabores
-    : (!complementGrupos ||
-        complementGrupos
-          .filter((g) => g.obrigatorio && g.nome.toLowerCase() !== 'geral')
-          .every((g) => (selectedComplementos[g.id]?.length || 0) >= g.minimo));
+    : (!isLoadingGroups &&
+        (!complementGrupos?.filter((g) => g.obrigatorio && g.nome.toLowerCase() !== 'geral').length ||
+          complementGrupos!
+            .filter((g) => g.obrigatorio && g.nome.toLowerCase() !== 'geral')
+            .every((g) => (selectedComplementos[g.id]?.length || 0) >= Math.max(g.minimo, 1))));
 
   const adicionaisTotal = selectedAdicionais.reduce((acc, a) => acc + a.preco * a.quantity, 0);
   const finalPrice = isFracionado
@@ -207,7 +208,7 @@ export function ProductModal({
     if (isFracionado && precoCalculado !== null) {
       const saboresComp: SelectedComplemento[] = [{
         grupoId: 'sabores',
-        grupoNome: '🍕 Sabores',
+        grupoNome: 'Sabores',
         itemId: selectedSabores.join(','),
         itemNome: selectedSabores
           .map((id) => saboresListFinal.find((p) => p.id === id)?.nome || '')

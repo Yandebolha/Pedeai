@@ -218,7 +218,7 @@ namespace Pedeai.BLL
             if (!Ativo) return;
             string template = !string.IsNullOrWhiteSpace(MsgPreparo)
                 ? MsgPreparo
-                : "Olá {Nome}! 🍕 Seu pedido #{Numero} já está sendo preparado. Em breve ficará pronto!";
+                : "Olá {Nome}! Seu pedido #{Numero} já está sendo preparado. Em breve ficará pronto!";
             string msg = template
                 .Replace("{Nome}",   nomeCliente  ?? "")
                 .Replace("{Numero}", numeroPedido ?? "");
@@ -277,6 +277,20 @@ namespace Pedeai.BLL
                          $"Você atingiu sua meta de fidelidade!\n" +
                          $"Seu prêmio: *{qtdeStr}{produtoNome}* GRÁTIS no próximo pedido. 🥳\n" +
                          $"Informe ao atendente ao fazer seu pedido. Obrigado pela fidelidade!";
+            EnviarBackground(telefone, msg);
+        }
+
+        public static void NotificarEntregue(string telefone, string nomeCliente, string numeroPedido)
+        {
+            if (!Ativo) return;
+            string msg = $"Olá {nomeCliente}! ✅ Seu pedido #{numeroPedido} foi entregue. Obrigado pela preferência! Esperamos vê-lo novamente em breve.";
+            EnviarBackground(telefone, msg);
+        }
+
+        public static void NotificarCancelado(string telefone, string nomeCliente, string numeroPedido)
+        {
+            if (!Ativo) return;
+            string msg = $"Olá {nomeCliente}. Infelizmente seu pedido #{numeroPedido} foi cancelado. Em caso de dúvidas, entre em contato conosco.";
             EnviarBackground(telefone, msg);
         }
 
