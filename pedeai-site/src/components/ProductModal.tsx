@@ -173,22 +173,24 @@ export function ProductModal({
     });
   };
 
+  // Todos os produtos fracionados: mínimo 1 sabor, máximo qtdSabores
+  const minSabores = 1;
+
   const precoCalculado = useMemo(() => {
     if (!isFracionado) return null;
     // Preço fixo: o preço é sempre o preço base — sabores não somam nem mudam o valor
     if (saboresModoSoma) return itemBasePrice;
-    // Pizza: média dos sabores (half/half) — só calcula quando todos os sabores estão selecionados
-    if (saboresListFinal.length === 0 || selectedSabores.length !== qtdSabores) return null;
+    // Pizza: média dos sabores selecionados (half/half) — calcula com quantos estiverem escolhidos
+    if (saboresListFinal.length === 0 || selectedSabores.length === 0) return null;
     const somaPrecos = selectedSabores.reduce((acc, id) => {
       const item = saboresListFinal.find((p) => p.id === id);
       return acc + (item ? item.preco : 0);
     }, 0);
-    // Pizza: média dos sabores
-    return somaPrecos / qtdSabores;
-  }, [isFracionado, selectedSabores, qtdSabores, saboresListFinal, saboresModoSoma, itemBasePrice]);
+    return somaPrecos / selectedSabores.length;
+  }, [isFracionado, selectedSabores, saboresListFinal, saboresModoSoma, itemBasePrice]);
 
   const canAdd = isFracionado
-    ? selectedSabores.length === qtdSabores
+    ? selectedSabores.length >= minSabores
     : (!complementGrupos ||
         complementGrupos
           .filter((g) => g.obrigatorio && g.nome.toLowerCase() !== 'geral')
@@ -287,7 +289,7 @@ export function ProductModal({
                       <div>
                         <h3 className="font-bold text-gray-900 text-[15px] leading-tight">Sabores</h3>
                         <p className="text-xs text-gray-500 mt-0.5">
-                          Escolha {qtdSabores} {qtdSabores === 1 ? 'sabor' : 'sabores'}
+                          Escolha até {qtdSabores} {qtdSabores === 1 ? 'sabor' : 'sabores'}
                         </p>
                       </div>
                       <div className="flex items-center gap-2">
@@ -297,7 +299,7 @@ export function ProductModal({
                           </span>
                         )}
                         <span className="text-[10px] bg-red-600 text-white px-2.5 py-1 rounded-full font-bold uppercase tracking-wide">
-                          Obrigatório
+                          Mín. 1
                         </span>
                       </div>
                     </div>

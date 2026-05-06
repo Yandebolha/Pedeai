@@ -149,6 +149,9 @@ namespace Pedeai
                 if (login.ShowDialog() != DialogResult.OK) return;
             }
 
+            // ── Inicia contêiner Docker (WhatsApp) em segundo plano ───────────
+            _ = Task.Run(() => IniciarDockerComposeAsync());
+
             Application.Run(new Form1());
 
             // Ao fechar, libera a sessão desta máquina imediatamente
@@ -371,6 +374,51 @@ namespace Pedeai
             public bool   Bloqueado     { get; set; }
             public string VersaoAtual   { get; set; }
             public int    MaxMaquinas   { get; set; }
+        }
+
+        /// <summary>
+        /// Inicia o contêiner Docker do WhatsApp via docker compose em segundo plano.
+        /// Silencioso: não exibe janela nem bloqueia a UI.
+        /// </summary>
+        private static async Task IniciarDockerComposeAsync()
+        {
+            try
+            {
+                const string composeFile = @"C:\Users\dev-yan\source\repos\Pedeai\docker-compose.yml";
+
+                // Verifica se o Docker está disponível antes de tentar
+                var checkDocker = new System.Diagnostics.Process
+                {
+                    StartInfo = new System.Diagnostics.ProcessStartInfo
+                    {
+                        FileName               = "docker",
+                        Arguments              = "info",
+                        UseShellExecute        = false,
+                        CreateNoWindow         = true,
+                        RedirectStandardOutput = true,
+                        RedirectStandardError  = true,
+                    }
+                };
+                checkDocker.Start();
+                await Task.Run(() => checkDocker.WaitForExit(10_000));
+                if (checkDocker.ExitCode != 0) return; // Docker não disponível ou não iniciado
+
+                var proc = new System.Diagnostics.Process
+                {
+                    StartInfo = new System.Diagnostics.ProcessStartInfo
+                    {
+                        FileName               = "docker",
+                        Arguments              = $"compose -f \"{composeFile}\" up -d",
+                        UseShellExecute        = false,
+                        CreateNoWindow         = true,
+                        RedirectStandardOutput = true,
+                        RedirectStandardError  = true,
+                    }
+                };
+                proc.Start();
+                await Task.Run(() => proc.WaitForExit(60_000));
+            }
+            catch { /* Docker não instalado ou erro — ignora silenciosamente */ }
         }
 
         /// <summary>
