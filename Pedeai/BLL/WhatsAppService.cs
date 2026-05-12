@@ -15,7 +15,7 @@ namespace Pedeai.BLL
     /// </summary>
     public static class WhatsAppService
     {
-        private static readonly HttpClient _http = new HttpClient { Timeout = TimeSpan.FromSeconds(12) };
+        private static readonly HttpClient _http = new HttpClient { Timeout = TimeSpan.FromSeconds(60) };
 
         // Configuração centralizada no banco de dados (compartilhada entre máquinas em rede)
         private static WhatsAppConfig _cfg;
@@ -129,10 +129,10 @@ namespace Pedeai.BLL
                 string code = j["qrcode"]?["pairingCode"]?.ToString() ?? "";
                 if (!string.IsNullOrEmpty(code)) return code;
 
-                // Fallback: poll /instance/connect up to 3 times (5s each)
-                for (int i = 0; i < 3; i++)
+                // Fallback: poll /instance/connect up to 5 times (8s each)
+                for (int i = 0; i < 5; i++)
                 {
-                    await Task.Delay(5000).ConfigureAwait(false);
+                    await Task.Delay(8000).ConfigureAwait(false);
                     var pollResp = await _http.SendAsync(
                         Req(HttpMethod.Get, $"/instance/connect/{Instance}")).ConfigureAwait(false);
                     var pj = JObject.Parse(await pollResp.Content.ReadAsStringAsync().ConfigureAwait(false));
