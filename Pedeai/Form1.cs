@@ -73,12 +73,13 @@ namespace Pedeai
             Logger.Log("Form1", "Form1_Load", $"Login | Usu\u00e1rio: {UsuarioSessao.NomeAtual}");
             BeginInvoke(new Action(VerificarAvisosIniciais));
 
-            // Periodic catalog sync — runs every 5 minutes as catch-all for MySQL→Supabase
+            // Auto-sync a cada 30 segundos — sincroniza cat\u00e1logo (grupos, produtos, v\u00ednculos)
+            // O lock global em SincronizarCatalogoAsync garante que n\u00e3o rode junto com sync manual
             _syncCatalogoTimer = new System.Threading.Timer(
                 async _ => { try { await DB.SupabaseService.SincronizarCatalogoAsync(); } catch { } },
                 null,
-                System.TimeSpan.FromMinutes(3),
-                System.TimeSpan.FromMinutes(3));
+                System.TimeSpan.FromSeconds(60),
+                System.TimeSpan.FromSeconds(60));
 
             // Start web order polling + initial sync
             System.Threading.Tasks.Task.Run(async () =>

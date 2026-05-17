@@ -159,6 +159,10 @@ namespace Pedeai.DB
         private static readonly System.Collections.Concurrent.ConcurrentDictionary<int, System.Threading.SemaphoreSlim>
             _produtoSyncLocks = new();
 
+        // Lock global: garante que apenas UMA sincronização de catálogo rode por vez
+        // (evita duplicatas causadas por sync manual + auto-sync executando ao mesmo tempo)
+        private static readonly System.Threading.SemaphoreSlim _syncLock = new(1, 1);
+
         /// <summary>Clears the per-run group cache. Call at the start of a full sync.</summary>
         public static void ResetSyncCache() { _gruposSincronizados.Clear(); _supabaseTemColFracionado = null; _supabaseTemColIsAdicional = null; _supabaseTemColEmpresaCodigo = null; _supabaseTemColAdicionalMaxQtde = null; _supabaseTemColCupomProdutoNome = null; }
         static SupabaseService()
@@ -270,6 +274,53 @@ namespace Pedeai.DB
             var token = JToken.Parse(respBody);
             if (token is JArray arr && arr.Count > 0) return (JObject)arr[0];
             if (token is JObject obj) return obj;
+            return null;
+        }
+
+        /// <summary>
+        /// Upsert (INSERT ... ON CONFLICT DO UPDATE) via Supabase resolution=merge-duplicates.
+        /// Requires unique indexes to exist on the target table (see migration dedup_and_unique_constraints.sql).
+        /// Falls back to a regular POST if the server rejects the merge hint.
+        /// </summary>
+        private static async Task<JObject> UpsertAsync(string endpoint, object body, string onConflict = null)
+        {
+            // Apply same column-presence guards as PostAsync
+            if (_supabaseTemColAdicionalMaxQtde == false && endpoint.StartsWith("adicional"))
+                body = RemoveField(body, "max_qtde");
+            if (_supabaseTemColCupomProdutoNome == false && endpoint.StartsWith("cupom"))
+                body = RemoveField(body, "produto_nome");
+            object safeBody = _supabaseTemColEmpresaCodigo == false ? RemoveEmpresaCodigo(body) : body;
+            var json    = JsonConvert.SerializeObject(safeBody);
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
+            string url  = string.IsNullOrWhiteSpace(onConflict)
+                ? $"{BASE}/{endpoint}"
+                : $"{BASE}/{endpoint}?on_conflict={Uri.EscapeDataString(onConflict)}";
+            using var req = new HttpRequestMessage(HttpMethod.Post, url) { Content = content };
+            req.Headers.Add("Prefer", "resolution=merge-duplicates,return=representation");
+            var resp     = await _http.SendAsync(req);
+            var respBody = await resp.Content.ReadAsStringAsync();
+            if (!resp.IsSuccessStatusCode)
+            {
+                // Detecta coluna ausente — desabilita empresa_codigo e tenta novamente
+                if (respBody.Contains("PGRST204") && respBody.Contains("empresa_codigo"))
+                {
+                    _supabaseTemColEmpresaCodigo = false;
+                    return await UpsertAsync(endpoint, body, onConflict);
+                }
+                if (endpoint.StartsWith("adicional") && respBody.Contains("max_qtde"))
+                {
+                    _supabaseTemColAdicionalMaxQtde = false;
+                    return await UpsertAsync(endpoint, body, onConflict);
+                }
+                // Se o upsert falhou (ex: índice ainda não existe), cai no POST normal
+                return await PostAsync(endpoint, body);
+            }
+            if (_supabaseTemColEmpresaCodigo == null) _supabaseTemColEmpresaCodigo = true;
+            if (_supabaseTemColAdicionalMaxQtde == null && endpoint.StartsWith("adicional"))
+                _supabaseTemColAdicionalMaxQtde = true;
+            var token = JToken.Parse(respBody);
+            if (token is JArray arr && arr.Count > 0) return (JObject)arr[0];
+            if (token is JObject obj2) return obj2;
             return null;
         }
 
@@ -516,7 +567,7 @@ namespace Pedeai.DB
                 }
                 else
                 {
-                    var result = await PostAsync("grupo_mercadoria", payload);
+                    var result = await UpsertAsync("grupo_mercadoria", payload, "nome");
                     uuid = result?["id"]?.ToString() ?? "";
                     if (!string.IsNullOrWhiteSpace(uuid))
                         SaveSupabaseUuid("grupo_mercadoria", "Codigo", codigoGrupo, uuid);
@@ -545,7 +596,7 @@ namespace Pedeai.DB
                 string nome, descricao, imagemUrl, situacao;
                 decimal precoVenda, precoPromo, precoAdicional;
                 bool destaque, habSite, fracionado, precoFixo;
-                int codigoGrupo, qtdSabores;
+                int codigoGrupo, qtdSabores, qtdSaboresManual;
 
                 using (var conn = AbrirMysql())
                 using (var cmd  = new MySqlCommand(
@@ -553,7 +604,8 @@ namespace Pedeai.DB
                     "mercImagem_Url, mercDestaque, COALESCE(mercHabilitar_Site,1) AS mercHabilitar_Site, Codigo_Grupo, Situacao, " +
                     "COALESCE(mercFracionado,0) AS mercFracionado, COALESCE(mercQtd_Sabores,1) AS mercQtd_Sabores, " +
                     "COALESCE(mercPreco_Fixo,0) AS mercPreco_Fixo, " +
-                    "COALESCE(mercPreco_Adicional,0) AS mercPreco_Adicional " +
+                    "COALESCE(mercPreco_Adicional,0) AS mercPreco_Adicional, " +
+                    "COALESCE(mercQtd_Sabores_Manual,0) AS mercQtd_Sabores_Manual " +
                     "FROM mercadoria WHERE Codigo=@c LIMIT 1", conn))
                 {
                     cmd.Parameters.AddWithValue("@c", codigoMercadoria);
@@ -568,10 +620,11 @@ namespace Pedeai.DB
                     habSite        = r["mercHabilitar_Site"] != DBNull.Value && Convert.ToBoolean(r["mercHabilitar_Site"]);
                     codigoGrupo    = r["Codigo_Grupo"] == DBNull.Value ? 0 : Convert.ToInt32(r["Codigo_Grupo"]);
                     situacao       = r["Situacao"]?.ToString() ?? "A";
-                    fracionado     = r["mercFracionado"]?.ToString() == "1";
-                    qtdSabores     = r["mercQtd_Sabores"] == DBNull.Value ? 1 : Convert.ToInt32(r["mercQtd_Sabores"]);
-                    precoFixo      = r["mercPreco_Fixo"]?.ToString() == "1";
-                    precoAdicional = r["mercPreco_Adicional"] == DBNull.Value ? 0m : Convert.ToDecimal(r["mercPreco_Adicional"]);
+                    fracionado      = r["mercFracionado"]?.ToString() == "1";
+                    qtdSabores      = r["mercQtd_Sabores"] == DBNull.Value ? 1 : Convert.ToInt32(r["mercQtd_Sabores"]);
+                    precoFixo       = r["mercPreco_Fixo"]?.ToString() == "1";
+                    precoAdicional  = r["mercPreco_Adicional"] == DBNull.Value ? 0m : Convert.ToDecimal(r["mercPreco_Adicional"]);
+                    qtdSaboresManual = r["mercQtd_Sabores_Manual"] == DBNull.Value ? 0 : Convert.ToInt32(r["mercQtd_Sabores_Manual"]);
                 }
 
                 // Never send local file paths to Supabase
@@ -628,6 +681,12 @@ namespace Pedeai.DB
                 // usuário marcou explicitamente "No site" — sem sobreposição automática.
                 bool ativoSite = forcarAtivoFalse ? false : habSite;
 
+                // Produtos com sabores manuais configurados (Sabores checkbox) são tratados
+                // como fracionados no Supabase para que o seletor de sabores apareça no site.
+                bool fracionadoSite = fracionado || qtdSaboresManual > 0;
+                int  qtdSaboresSite = fracionado ? qtdSabores
+                                     : (qtdSaboresManual > 0 ? qtdSaboresManual : qtdSabores);
+
                 // Ensure group UUID is available — only do full sync if not already done this session
                 string grupoUuid = "";
                 if (codigoGrupo > 0)
@@ -668,7 +727,8 @@ namespace Pedeai.DB
                         using var cmdA  = new MySqlCommand(
                             "SELECT " +
                             "  SUM(CASE WHEN tipo='A' THEN 1 ELSE 0 END) AS qtdAd, " +
-                            "  SUM(CASE WHEN tipo='C' THEN 1 ELSE 0 END) AS qtdComp " +
+                            "  SUM(CASE WHEN tipo='C' THEN 1 ELSE 0 END) AS qtdComp, " +
+                            "  SUM(CASE WHEN tipo='S' THEN 1 ELSE 0 END) AS qtdSab " +
                             "FROM mercadoria_vinculo_grupo " +
                             "WHERE Codigo_Mercadoria=@c AND Situacao='A'", connA);
                         cmdA.Parameters.AddWithValue("@c", codigoMercadoria);
@@ -677,9 +737,11 @@ namespace Pedeai.DB
                         {
                             int qtdAd   = rA["qtdAd"]   == DBNull.Value ? 0 : Convert.ToInt32(rA["qtdAd"]);
                             int qtdComp = rA["qtdComp"] == DBNull.Value ? 0 : Convert.ToInt32(rA["qtdComp"]);
-                            // Adicional puro = nenhum vínculo de complemento → fica fora da lista de sabores
-                            // Ambos = is_adicional false → aparece como sabor E na tabela adicional
-                            ehAdicional = qtdAd > 0 && qtdComp == 0;
+                            int qtdSab  = rA["qtdSab"]  == DBNull.Value ? 0 : Convert.ToInt32(rA["qtdSab"]);
+                            // Adicional PURO = tem tipo='A', sem tipo='C' nem tipo='S'.
+                            // Se tem sabores (tipo='S') o produto é também um container com seletor
+                            // de sabores → não deve ser ocultado do feed principal do site.
+                            ehAdicional = qtdAd > 0 && qtdComp == 0 && qtdSab == 0;
                         }
                     }
                     catch { }
@@ -716,45 +778,45 @@ namespace Pedeai.DB
                         return string.IsNullOrWhiteSpace(grupoUuid)
                             ? temEmp ? (object)new { nome, descricao, preco_venda = precoVenda,
                                             imagem_url = comImagem ? imagemUrl : null,
-                                            ativo = ativoSite, destaque, fracionado, qtd_sabores = qtdSabores,
+                                            ativo = ativoSite, destaque, fracionado = fracionadoSite, qtd_sabores = qtdSaboresSite,
                                             preco_fixo = precoFixo,
                                             is_adicional = ehAdicional, preco_adicional = precoAdicional, empresa_codigo = emp }
                                      : (object)new { nome, descricao, preco_venda = precoVenda,
                                             imagem_url = comImagem ? imagemUrl : null,
-                                            ativo = ativoSite, destaque, fracionado, qtd_sabores = qtdSabores,
+                                            ativo = ativoSite, destaque, fracionado = fracionadoSite, qtd_sabores = qtdSaboresSite,
                                             preco_fixo = precoFixo,
                                             is_adicional = ehAdicional, preco_adicional = precoAdicional }
                             : temEmp ? (object)new { grupo_id = grupoUuid, nome, descricao,
                                             preco_venda = precoVenda,
                                             imagem_url = comImagem ? imagemUrl : null,
-                                            ativo = ativoSite, destaque, fracionado, qtd_sabores = qtdSabores,
+                                            ativo = ativoSite, destaque, fracionado = fracionadoSite, qtd_sabores = qtdSaboresSite,
                                             preco_fixo = precoFixo,
                                             is_adicional = ehAdicional, preco_adicional = precoAdicional, empresa_codigo = emp }
                                      : (object)new { grupo_id = grupoUuid, nome, descricao,
                                             preco_venda = precoVenda,
                                             imagem_url = comImagem ? imagemUrl : null,
-                                            ativo = ativoSite, destaque, fracionado, qtd_sabores = qtdSabores,
+                                            ativo = ativoSite, destaque, fracionado = fracionadoSite, qtd_sabores = qtdSaboresSite,
                                             preco_fixo = precoFixo,
                                             is_adicional = ehAdicional, preco_adicional = precoAdicional };
                     else if (usarFracionado)
                         return string.IsNullOrWhiteSpace(grupoUuid)
                             ? temEmp ? (object)new { nome, descricao, preco_venda = precoVenda,
                                             imagem_url = comImagem ? imagemUrl : null,
-                                            ativo = ativoSite, destaque, fracionado, qtd_sabores = qtdSabores,
+                                            ativo = ativoSite, destaque, fracionado = fracionadoSite, qtd_sabores = qtdSaboresSite,
                                             preco_fixo = precoFixo, empresa_codigo = emp }
                                      : (object)new { nome, descricao, preco_venda = precoVenda,
                                             imagem_url = comImagem ? imagemUrl : null,
-                                            ativo = ativoSite, destaque, fracionado, qtd_sabores = qtdSabores,
+                                            ativo = ativoSite, destaque, fracionado = fracionadoSite, qtd_sabores = qtdSaboresSite,
                                             preco_fixo = precoFixo }
                             : temEmp ? (object)new { grupo_id = grupoUuid, nome, descricao,
                                             preco_venda = precoVenda,
                                             imagem_url = comImagem ? imagemUrl : null,
-                                            ativo = ativoSite, destaque, fracionado, qtd_sabores = qtdSabores,
+                                            ativo = ativoSite, destaque, fracionado = fracionadoSite, qtd_sabores = qtdSaboresSite,
                                             preco_fixo = precoFixo, empresa_codigo = emp }
                                      : (object)new { grupo_id = grupoUuid, nome, descricao,
                                             preco_venda = precoVenda,
                                             imagem_url = comImagem ? imagemUrl : null,
-                                            ativo = ativoSite, destaque, fracionado, qtd_sabores = qtdSabores,
+                                            ativo = ativoSite, destaque, fracionado = fracionadoSite, qtd_sabores = qtdSaboresSite,
                                             preco_fixo = precoFixo };
                     else
                         return string.IsNullOrWhiteSpace(grupoUuid)
@@ -821,7 +883,7 @@ namespace Pedeai.DB
                         catch { /* mantém grupoUuid atual em caso de erro de rede */ }
                     }
 
-                    var result = await PostAsync(TBL_MERCADORIAS, postPayload);
+                    var result = await UpsertAsync(TBL_MERCADORIAS, postPayload, "nome,grupo_id");
                     uuid = result?["id"]?.ToString() ?? "";
                     if (!string.IsNullOrWhiteSpace(uuid))
                         SaveSupabaseUuid("mercadoria", "Codigo", codigoMercadoria, uuid);
@@ -889,10 +951,11 @@ namespace Pedeai.DB
                 _marmitaGrupoUuid = arr[0]["id"]?.ToString() ?? "";
                 return _marmitaGrupoUuid;
             }
-            var result = await PostAsync("grupo_mercadoria",
+            var result = await UpsertAsync("grupo_mercadoria",
                 UsarEmpresaCodigo
                     ? (object)new { nome = "Marmitas", ordem = 99, ativo = true, empresa_codigo = _empresaCodigo }
-                    : (object)new { nome = "Marmitas", ordem = 99, ativo = true });
+                    : (object)new { nome = "Marmitas", ordem = 99, ativo = true },
+                "nome");
             _marmitaGrupoUuid = result?["id"]?.ToString() ?? "";
             return _marmitaGrupoUuid;
         }
@@ -998,7 +1061,7 @@ namespace Pedeai.DB
                 }
                 else
                 {
-                    var result = await PostAsync(TBL_MERCADORIAS, postPayload);
+                    var result = await UpsertAsync(TBL_MERCADORIAS, postPayload, "nome,grupo_id");
                     uuid = result?["id"]?.ToString() ?? "";
                     if (!string.IsNullOrWhiteSpace(uuid))
                         SaveSupabaseUuid("marmita", "Codigo", codigoMarmita, uuid);
@@ -1074,7 +1137,7 @@ namespace Pedeai.DB
                     object payload = UsarEmpresaCodigo
                         ? (object)new { nome, tipo, ativo = true, empresa_codigo = _empresaCodigo }
                         : new { nome, tipo, ativo = true };
-                    try { await PostAsync("forma_pagamento", payload); } catch { }
+                    try { await UpsertAsync("forma_pagamento", payload, "nome"); } catch { }
                 }
             }
             catch (Exception ex)
@@ -2831,7 +2894,7 @@ namespace Pedeai.DB
                     {
                         try
                         {
-                            var grpResult = await PostAsync(TBL_COMP_GRUPO, new
+                            var grpResult = await UpsertAsync(TBL_COMP_GRUPO, new
                             {
                                 mercadoria_id = marmitaUuid,
                                 nome          = grupoNome,
@@ -2839,7 +2902,7 @@ namespace Pedeai.DB
                                 minimo        = 1,
                                 maximo        = grupoMax,
                                 ativo         = true,
-                            });
+                            }, "mercadoria_id,nome");
                             grupoCompId = grpResult?["id"]?.ToString() ?? "";
                             if (!string.IsNullOrEmpty(grupoCompId))
                                 gruposExistentes[grupoNome] = grupoCompId;
@@ -2883,7 +2946,7 @@ namespace Pedeai.DB
                                 object postComp = string.IsNullOrWhiteSpace(itemImagemUrl)
                                     ? (object)new { grupo_id = grupoCompId, nome, preco, ativo = true }
                                     : (object)new { grupo_id = grupoCompId, nome, preco, ativo = true, imagem_url = itemImagemUrl };
-                                await PostAsync(TBL_COMPLEMENTO, postComp);
+                                await UpsertAsync(TBL_COMPLEMENTO, postComp, "grupo_id,nome");
                             }
                         }
                         catch { }
@@ -2962,7 +3025,7 @@ namespace Pedeai.DB
                                 else if (temImg)            postAd = new { mercadoria_id = marmitaUuid, nome, preco, max_qtde = qtdeMax, ativo = true, imagem_url = adImagemUrl };
                                 else if (temEmp)            postAd = new { mercadoria_id = marmitaUuid, nome, preco, max_qtde = qtdeMax, ativo = true, empresa_codigo = _empresaCodigo };
                                 else                        postAd = new { mercadoria_id = marmitaUuid, nome, preco, max_qtde = qtdeMax, ativo = true };
-                                await PostAsync("adicional", postAd);
+                                await UpsertAsync("adicional", postAd, "mercadoria_id,nome");
                             }
                         }
                         catch { }
@@ -3198,7 +3261,7 @@ namespace Pedeai.DB
                                     object mGrpPost = UsarEmpresaCodigo
                                         ? (object)new { nome = mNome, obrigatorio = true, minimo = 1, maximo = 1, empresa_codigo = _empresaCodigo }
                                         : (object)new { nome = mNome, obrigatorio = true, minimo = 1, maximo = 1 };
-                                    var grpResult = await PostAsync(TBL_COMP_GRUPO, mGrpPost);
+                                    var grpResult = await UpsertAsync(TBL_COMP_GRUPO, mGrpPost, "mercadoria_id,nome");
                                     gid = grpResult?["id"]?.ToString() ?? "";
                                     if (!string.IsNullOrEmpty(gid))
                                         try { await PostAsync(TBL_MERC_COMP_GRP, new { mercadoria_id = muuid, grupo_id = gid }); } catch { }
@@ -3231,10 +3294,11 @@ namespace Pedeai.DB
                                     await PatchAsync(TBL_COMPLEMENTO, $"id=eq.{existentes[0]["id"]}", patchPayload);
                                 }
                                 else
-                                    await PostAsync(TBL_COMPLEMENTO,
+                                    await UpsertAsync(TBL_COMPLEMENTO,
                                         temEmpMar
                                             ? (object)new { grupo_id = grupoId, nome = nomeProduto, preco = precoProduto, ativo = true, imagem_url = imgUrlMarmita, empresa_codigo = empMarCod }
-                                            : (object)new { grupo_id = grupoId, nome = nomeProduto, preco = precoProduto, ativo = true, imagem_url = imgUrlMarmita });
+                                            : (object)new { grupo_id = grupoId, nome = nomeProduto, preco = precoProduto, ativo = true, imagem_url = imgUrlMarmita },
+                                        "grupo_id,nome");
                                 Logger.Log("SupabaseService", "SincronizarVinculosGrupoAsync", $"Complemento '{nomeProduto}' inserido no grupo {grupoId}");
                             }
                             catch (Exception ex) { Logger.Log("SupabaseService", "SincronizarVinculosGrupoAsync", $"Erro ao upsert complemento '{nomeProduto}' no grupo {grupoId}", ex); }
@@ -3357,7 +3421,7 @@ namespace Pedeai.DB
                                                : (object)new { mercadoria_id = fracUuid, nome = nomeAd, preco = precoAd, max_qtde = qtdMaxAd, ativo = true }
                                     : temEmpAd ? (object)new { mercadoria_id = fracUuid, nome = nomeAd, preco = precoAd, max_qtde = qtdMaxAd, ativo = true, imagem_url = imgAd, empresa_codigo = _empresaCodigo }
                                                : (object)new { mercadoria_id = fracUuid, nome = nomeAd, preco = precoAd, max_qtde = qtdMaxAd, ativo = true, imagem_url = imgAd };
-                                await PostAsync("adicional", postAd);
+                                await UpsertAsync("adicional", postAd, "mercadoria_id,nome");
                             }
                         }
                         catch (Exception ex)
@@ -3400,7 +3464,7 @@ namespace Pedeai.DB
                             object grpSabPost = UsarEmpresaCodigo
                                 ? (object)new { mercadoria_id = produtoUuid, nome = nomeGrpSab, obrigatorio = true, minimo = 1, maximo = qtd, ativo = true, empresa_codigo = _empresaCodigo }
                                 : (object)new { mercadoria_id = produtoUuid, nome = nomeGrpSab, obrigatorio = true, minimo = 1, maximo = qtd, ativo = true };
-                            var res = await PostAsync(TBL_COMP_GRUPO, grpSabPost);
+                            var res = await UpsertAsync(TBL_COMP_GRUPO, grpSabPost, "mercadoria_id,nome");
                             grpSabId = res?["id"]?.ToString() ?? "";
                         }
                         if (string.IsNullOrWhiteSpace(grpSabId)) goto skipSabores;
@@ -3443,10 +3507,11 @@ namespace Pedeai.DB
                                             ? temEmpSab ? (object)new { nome = nomeSab, preco = precoSab, ativo = true, empresa_codigo = empSabCod } : (object)new { nome = nomeSab, preco = precoSab, ativo = true }
                                             : temEmpSab ? (object)new { nome = nomeSab, preco = precoSab, imagem_url = imgSab, ativo = true, empresa_codigo = empSabCod } : (object)new { nome = nomeSab, preco = precoSab, imagem_url = imgSab, ativo = true });
                                 else
-                                    await PostAsync(TBL_COMPLEMENTO,
+                                    await UpsertAsync(TBL_COMPLEMENTO,
                                         string.IsNullOrEmpty(imgSab)
                                             ? temEmpSab ? (object)new { grupo_id = grpSabId, nome = nomeSab, preco = precoSab, ativo = true, empresa_codigo = empSabCod } : (object)new { grupo_id = grpSabId, nome = nomeSab, preco = precoSab, ativo = true }
-                                            : temEmpSab ? (object)new { grupo_id = grpSabId, nome = nomeSab, preco = precoSab, imagem_url = imgSab, ativo = true, empresa_codigo = empSabCod } : (object)new { grupo_id = grpSabId, nome = nomeSab, preco = precoSab, imagem_url = imgSab, ativo = true });
+                                            : temEmpSab ? (object)new { grupo_id = grpSabId, nome = nomeSab, preco = precoSab, imagem_url = imgSab, ativo = true, empresa_codigo = empSabCod } : (object)new { grupo_id = grpSabId, nome = nomeSab, preco = precoSab, imagem_url = imgSab, ativo = true },
+                                        "grupo_id,nome");
                             }
                             catch (Exception exS) { Logger.Log("SupabaseService", "SincronizarVinculosGrupoAsync", $"Erro sabor '{nomeSab}'", exS); }
                         }
@@ -3566,7 +3631,7 @@ namespace Pedeai.DB
                                                : (object)new { mercadoria_id = produtoUuid, nome = nomeAd, preco = precoAd, max_qtde = maxAd, ativo = true }
                                     : temEmpAd2 ? (object)new { mercadoria_id = produtoUuid, nome = nomeAd, preco = precoAd, max_qtde = maxAd, ativo = true, imagem_url = imgAd2, empresa_codigo = _empresaCodigo }
                                                : (object)new { mercadoria_id = produtoUuid, nome = nomeAd, preco = precoAd, max_qtde = maxAd, ativo = true, imagem_url = imgAd2 };
-                                await PostAsync("adicional", pAd);
+                                await UpsertAsync("adicional", pAd, "mercadoria_id,nome");
                             }
                         }
                         catch (Exception exAd) { Logger.Log("SupabaseService", "SincronizarFracionadoAsync", $"Erro adicional '{nomeAd}'", exAd); }
@@ -3746,6 +3811,9 @@ namespace Pedeai.DB
         /// </summary>
         public static async Task SincronizarCatalogoAsync()
         {
+            if (!SiteConectado) return;
+            // Se já há uma sincronização em curso, pula — evita duplicatas
+            if (!await _syncLock.WaitAsync(0)) return;
             try
             {
                 // Limpa apenas o cache de grupos já sincronizados nesta sessão para forçar
@@ -3761,6 +3829,10 @@ namespace Pedeai.DB
             catch (Exception ex)
             {
                 Logger.Log("SupabaseService", "SincronizarCatalogoAsync", "Erro", ex);
+            }
+            finally
+            {
+                _syncLock.Release();
             }
         }
 
@@ -4058,6 +4130,7 @@ namespace Pedeai.DB
         public static async Task SincronizarTudoAsync()
         {
             if (!SiteConectado) return;
+            if (!await _syncLock.WaitAsync(0)) return; // skip se já há sync em curso
             try
             {
                 await SincronizarLojaAsync();
@@ -4077,6 +4150,10 @@ namespace Pedeai.DB
             {
                 Logger.Log("SupabaseService", "SincronizarTudoAsync", "Erro", ex);
             }
+            finally
+            {
+                _syncLock.Release();
+            }
         }
 
         /// <summary>
@@ -4086,9 +4163,13 @@ namespace Pedeai.DB
         public static async Task<string> SincronizarTudoComProgressoAsync(IProgress<string> progress)
         {
             if (!SiteConectado) return "Conexão com o site está desabilitada.";
+            // Aguarda lock: sincronização manual sempre executa, mas espera a automática terminar
+            progress?.Report("Aguardando sincronização automática em curso...");
+            await _syncLock.WaitAsync();
             var todosErros = new List<string>();
-            ResetSyncCache(); // clear per-run group cache to avoid stale hits
-
+            _gruposSincronizados.Clear(); // limpa cache de grupos desta sessão (não reseta flags de colunas)
+            try
+            {
             progress?.Report("Sincronizando dados da loja...");
             await SincronizarLojaAsync();
 
@@ -4129,6 +4210,11 @@ namespace Pedeai.DB
 
             progress?.Report(todosErros.Count == 0 ? "Concluido!" : $"Concluido com {todosErros.Count} erro(s).");
             return todosErros.Count == 0 ? "" : string.Join("\n", todosErros);
+            }
+            finally
+            {
+                _syncLock.Release();
+            }
         }
 
         /// <summary>
