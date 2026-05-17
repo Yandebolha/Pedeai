@@ -1434,7 +1434,7 @@ namespace Pedeai
                     frm.BackColor       = Color.FromArgb(245, 237, 216);
                     frm.ForeColor       = Color.FromArgb(50, 50, 50);
                     frm.Font            = new Font("Segoe UI", 9F);
-                    frm.ClientSize      = new Size(420, 310);
+                    frm.ClientSize      = new Size(420, 350);
 
                     // Barra de título interna
                     var pnlTop = new Panel { Left = 0, Top = 0, Width = 420, Height = 36,
@@ -1470,14 +1470,14 @@ namespace Pedeai
                     else if (pedido.pediForma_Pagamento == 2) numPix.Value  = total;
                     else numDin.Value = total;  // 0=Dinheiro ou qualquer outro (ex: -1 de pedidos externos)
 
-                    Lbl("C\u00f3d. Transa\u00e7\u00e3o (cart\u00e3o/Pix):", 12, 224);
-                    var txtTrans = new TextBox { Left = 240, Top = 220, Width = 164,
+                    Lbl("C\u00f3d. Transa\u00e7\u00e3o (cart\u00e3o/Pix):", 12, 226);
+                    var txtTrans = new TextBox { Left = 240, Top = 222, Width = 164,
                         BackColor = Color.White, ForeColor = Color.FromArgb(50, 50, 50),
                         BorderStyle = BorderStyle.FixedSingle };
 
                     var lblSoma = new Label
                     {
-                        Left = 12, Top = 254, Width = 300, AutoSize = false,
+                        Left = 12, Top = 262, Width = 396, AutoSize = false, Height = 22,
                         ForeColor = Color.FromArgb(176, 110, 42),
                         Font = new Font("Segoe UI", 9F, FontStyle.Bold),
                         Text = ""
@@ -1501,9 +1501,9 @@ namespace Pedeai
 
                     frm.Controls.AddRange(new Control[] { numDin, numCred, numDeb, numPix, txtTrans });
 
-                    var btnOk  = new Button { Text = "\u2714 Confirmar", Left = 100, Top = 273, Width = 140, Height = 28, DialogResult = DialogResult.OK,
+                    var btnOk  = new Button { Text = "\u2714 Confirmar", Left = 12,  Top = 304, Width = 190, Height = 32, DialogResult = DialogResult.OK,
                         BackColor = Color.FromArgb(87, 120, 38), ForeColor = Color.White, FlatStyle = FlatStyle.Flat };
-                    var btnCan = new Button { Text = "Cancelar",     Left = 252, Top = 243, Width = 100, Height = 28, DialogResult = DialogResult.Cancel,
+                    var btnCan = new Button { Text = "Cancelar",     Left = 214, Top = 304, Width = 194, Height = 32, DialogResult = DialogResult.Cancel,
                         BackColor = Color.FromArgb(224, 113, 42), ForeColor = Color.White, FlatStyle = FlatStyle.Flat };
                     btnOk.FlatAppearance.BorderSize = btnCan.FlatAppearance.BorderSize = 0;
                     frm.Controls.AddRange(new Control[] { btnOk, btnCan });
