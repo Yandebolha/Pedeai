@@ -4181,6 +4181,7 @@ namespace Pedeai.DB
                 await SincronizarTodosCuponsFidelizacaoAsync();
                 await SincronizarTodosBairrosAsync();
                 await SincronizarTodosClientesAsync();
+                try { await CorrigirEmpresaCodigoNuloAsync(); } catch { }
             }
             catch (Exception ex)
             {
@@ -4230,6 +4231,11 @@ namespace Pedeai.DB
 
             progress?.Report("Sincronizando clientes...");
             await SincronizarTodosClientesAsync();
+
+            // Garante que todos os registros ainda sem empresa_codigo (legados) sejam corrigidos.
+            // Executar ao final para não afetar o _supabaseTemColEmpresaCodigo das etapas anteriores.
+            progress?.Report("Corrigindo empresa_codigo em registros legados...");
+            try { await CorrigirEmpresaCodigoNuloAsync(); } catch { }
 
             progress?.Report(todosErros.Count == 0 ? "Concluido!" : $"Concluido com {todosErros.Count} erro(s).");
             return todosErros.Count == 0 ? "" : string.Join("\n", todosErros);
