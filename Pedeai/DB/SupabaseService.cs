@@ -1651,8 +1651,20 @@ namespace Pedeai.DB
             try
             {
                 // Accept any order that hasn't been processed yet (website may use "pendente" or "banda")
-                string empFilter = EmpresaFilter(true);
-                var arr = await GetAsync($"pedido_web?status=in.(pendente,banda,novo,aguardando){empFilter}&order=created_at.asc&limit=50");
+                // Usa OR para capturar tanto pedidos com empresa_codigo correto quanto os com NULL (legados)
+                string empOr = UsarEmpresaCodigo
+                    ? $"&or=(empresa_codigo.eq.{Uri.EscapeDataString(_empresaCodigo)},empresa_codigo.is.null)"
+                    : "";
+                JArray arr;
+                try
+                {
+                    arr = await GetAsync($"pedido_web?status=in.(pendente,banda,novo,aguardando){empOr}&order=created_at.asc&limit=50");
+                }
+                catch
+                {
+                    // Coluna empresa_codigo ainda não existe no banco — busca sem filtro
+                    arr = await GetAsync("pedido_web?status=in.(pendente,banda,novo,aguardando)&order=created_at.asc&limit=50");
+                }
                 foreach (JObject item in arr)
                 {
                     result.Add(new PedidoWebSupabase
@@ -3577,9 +3589,9 @@ namespace Pedeai.DB
                     "FROM mercadoria m " +
                     "WHERE m.Codigo_Grupo=@g AND m.Situacao='A' AND m.Codigo<>@c " +
                     "  AND COALESCE(m.mercFracionado,0)=0 " +
-                    "  AND EXISTS (SELECT 1 FROM mercadoria_vinculo_grupo vsc" +
-                    "             WHERE vsc.Codigo_Mercadoria=m.Codigo AND vsc.Situacao='A'" +
-                    "             AND vsc.tipo IN ('S','C') AND vsc.Codigo_Grupo=@g) " +
+                    "  AND NOT EXISTS (SELECT 1 FROM mercadoria_vinculo_grupo vad" +
+                    "                 WHERE vad.Codigo_Mercadoria=m.Codigo AND vad.Situacao='A'" +
+                    "                 AND vad.tipo='A' AND vad.Codigo_Grupo=@g) " +
                     "ORDER BY m.mercMercadoria", conn))
                 {
                     cmd.Parameters.AddWithValue("@g", codigoGrupo);
@@ -3599,7 +3611,29 @@ namespace Pedeai.DB
                         ));
                     }
                 }
-                if (!sabores.Any()) return;
+                if (!sabores.Any())
+                {
+                    // Sem vínculos explícitos — desativa grupo Sabores e seus itens orphãos
+                    try
+                    {
+                        var grpOrfao = await GetAsync($"{TBL_COMP_GRUPO}?mercadoria_id=eq.{produtoUuid}&nome=ilike.Sabores*&limit=1");
+                        if (grpOrfao.Count > 0)
+                        {
+                            string gOrfaoId = grpOrfao[0]["id"]?.ToString() ?? "";
+                            if (!string.IsNullOrEmpty(gOrfaoId))
+                            {
+                                var itensOrfaos = await GetAsync($"{TBL_COMPLEMENTO}?grupo_id=eq.{gOrfaoId}&ativo=eq.true&select=id");
+                                foreach (JObject io in itensOrfaos)
+                                    try { await PatchAsync(TBL_COMPLEMENTO, $"id=eq.{io["id"]}", new { ativo = false }); } catch { }
+                                await PatchAsync(TBL_COMP_GRUPO, $"id=eq.{gOrfaoId}", new { ativo = false });
+                                Logger.Log("SupabaseService", "SincronizarFracionadoAsync",
+                                    $"Produto {codigoMercadoria}: grupo Sabores e seus itens desativados (sem vínculos explícitos)");
+                            }
+                        }
+                    }
+                    catch { }
+                    return;
+                }
 
                 // Garante complemento_grupo "Sabores" vinculado a este produto
                 // Busca por mercadoria_id direto OU via link table (legado)
