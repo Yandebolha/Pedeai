@@ -2,8 +2,8 @@
 import { createClient } from '@supabase/supabase-js';
 import { Database } from '@/types/database';
 
-const supabaseUrl = 'https://supabase.rangofood.com.br';
-const supabaseAnonKey = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJzdXBhYmFzZSIsImlhdCI6MTc3ODk0MDk2MCwiZXhwIjo0OTM0NjE0NTYwLCJyb2xlIjoiYW5vbiJ9.HC-Er7LJR5K_EH7sPmRioG4uPC07YtbVm-n3wzYyfEM';
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string;
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
 
 export const supabase = createClient<Database>(
   supabaseUrl,

@@ -18,8 +18,8 @@ namespace Pedeai.DB
     /// </summary>
     public static class SupabaseService
     {
-        private const string BASE = "https://uwgcmnmzjjinfmxlskks.supabase.co/rest/v1";
-        private const string KEY  = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3Z2Ntbm16amppbmZteGxza2tzIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NjEyOTQwNCwiZXhwIjoyMDkxNzA1NDA0fQ.ZKkr27mHvknWpOh1C9PQePJEAHQYQvnnUjvMEFvj5Gg";
+        private const string BASE = "https://supabase.rangofood.com.br/rest/v1";
+        private const string KEY  = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJzdXBhYmFzZSIsImlhdCI6MTc3ODk0MDk2MCwiZXhwIjo0OTM0NjE0NTYwLCJyb2xlIjoic2VydmljZV9yb2xlIn0.tjMNViPE7WqMoOB9UH_CBKSuMCwU7fE9voX5lrAUvjI";
 
         // Supabase table names (must match exactly what's in the Supabase project)
         private const string TBL_MERCADORIAS    = "mercadoria";
