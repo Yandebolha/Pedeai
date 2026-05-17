@@ -1433,7 +1433,7 @@ namespace Pedeai
                     frm.BackColor       = Color.FromArgb(245, 237, 216);
                     frm.ForeColor       = Color.FromArgb(50, 50, 50);
                     frm.Font            = new Font("Segoe UI", 9F);
-                    frm.ClientSize      = new Size(420, 325);
+                    frm.ClientSize      = new Size(420, 310);
 
                     // Barra de título interna
                     var pnlTop = new Panel { Left = 0, Top = 0, Width = 420, Height = 36,
@@ -1476,7 +1476,7 @@ namespace Pedeai
 
                     var lblSoma = new Label
                     {
-                        Left = 12, Top = 254, Width = 390, AutoSize = false,
+                        Left = 12, Top = 254, Width = 300, AutoSize = false,
                         ForeColor = Color.FromArgb(176, 110, 42),
                         Font = new Font("Segoe UI", 9F, FontStyle.Bold),
                         Text = ""
@@ -1500,9 +1500,9 @@ namespace Pedeai
 
                     frm.Controls.AddRange(new Control[] { numDin, numCred, numDeb, numPix, txtTrans });
 
-                    var btnOk  = new Button { Text = "\u2714 Confirmar", Left = 256, Top = 284, Width = 148, Height = 30, DialogResult = DialogResult.OK,
+                    var btnOk  = new Button { Text = "\u2714 Confirmar", Left = 100, Top = 273, Width = 140, Height = 28, DialogResult = DialogResult.OK,
                         BackColor = Color.FromArgb(87, 120, 38), ForeColor = Color.White, FlatStyle = FlatStyle.Flat };
-                    var btnCan = new Button { Text = "Cancelar",     Left = 16,  Top = 284, Width = 120, Height = 30, DialogResult = DialogResult.Cancel,
+                    var btnCan = new Button { Text = "Cancelar",     Left = 252, Top = 243, Width = 100, Height = 28, DialogResult = DialogResult.Cancel,
                         BackColor = Color.FromArgb(224, 113, 42), ForeColor = Color.White, FlatStyle = FlatStyle.Flat };
                     btnOk.FlatAppearance.BorderSize = btnCan.FlatAppearance.BorderSize = 0;
                     frm.Controls.AddRange(new Control[] { btnOk, btnCan });

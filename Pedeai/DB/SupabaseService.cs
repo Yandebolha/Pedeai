@@ -3183,13 +3183,10 @@ namespace Pedeai.DB
                                 }
                                 else
                                 {
-                                    var grpResult = await PostAsync(TBL_COMP_GRUPO, new
-                                    {
-                                        nome        = mNome,
-                                        obrigatorio = true,
-                                        minimo      = 1,
-                                        maximo      = 1,
-                                    });
+                                    object mGrpPost = UsarEmpresaCodigo
+                                        ? (object)new { nome = mNome, obrigatorio = true, minimo = 1, maximo = 1, empresa_codigo = _empresaCodigo }
+                                        : (object)new { nome = mNome, obrigatorio = true, minimo = 1, maximo = 1 };
+                                    var grpResult = await PostAsync(TBL_COMP_GRUPO, mGrpPost);
                                     gid = grpResult?["id"]?.ToString() ?? "";
                                     if (!string.IsNullOrEmpty(gid))
                                         try { await PostAsync(TBL_MERC_COMP_GRP, new { mercadoria_id = muuid, grupo_id = gid }); } catch { }
@@ -3206,29 +3203,26 @@ namespace Pedeai.DB
                             {
                                 var existentes = await GetAsync(
                                     $"{TBL_COMPLEMENTO}?grupo_id=eq.{grupoId}&nome=eq.{Uri.EscapeDataString(nomeProduto)}&limit=1");
+                                bool temEmpMar = UsarEmpresaCodigo; string empMarCod = _empresaCodigo;
                                 if (existentes.Count > 0)
                                 {
                                     // PATCH — inclui imagem_url apenas se disponível (evita limpar imagem existente)
                                     object patchPayload;
                                     if (imgUrlMarmita != null)
-                                        patchPayload = new { nome = nomeProduto, preco = precoProduto, ativo = true, imagem_url = imgUrlMarmita };
+                                        patchPayload = temEmpMar ? (object)new { nome = nomeProduto, preco = precoProduto, ativo = true, imagem_url = imgUrlMarmita, empresa_codigo = empMarCod } : (object)new { nome = nomeProduto, preco = precoProduto, ativo = true, imagem_url = imgUrlMarmita };
                                     else
                                     {
-                                        var jo = JObject.FromObject(new { nome = nomeProduto, preco = precoProduto, ativo = true, imagem_url = (string)null });
+                                        var jo = JObject.FromObject(temEmpMar ? (object)new { nome = nomeProduto, preco = precoProduto, ativo = true, imagem_url = (string)null, empresa_codigo = empMarCod } : (object)new { nome = nomeProduto, preco = precoProduto, ativo = true, imagem_url = (string)null });
                                         jo.Remove("imagem_url");
                                         patchPayload = jo;
                                     }
                                     await PatchAsync(TBL_COMPLEMENTO, $"id=eq.{existentes[0]["id"]}", patchPayload);
                                 }
                                 else
-                                    await PostAsync(TBL_COMPLEMENTO, new
-                                    {
-                                        grupo_id   = grupoId,
-                                        nome       = nomeProduto,
-                                        preco      = precoProduto,
-                                        ativo      = true,
-                                        imagem_url = imgUrlMarmita,
-                                    });
+                                    await PostAsync(TBL_COMPLEMENTO,
+                                        temEmpMar
+                                            ? (object)new { grupo_id = grupoId, nome = nomeProduto, preco = precoProduto, ativo = true, imagem_url = imgUrlMarmita, empresa_codigo = empMarCod }
+                                            : (object)new { grupo_id = grupoId, nome = nomeProduto, preco = precoProduto, ativo = true, imagem_url = imgUrlMarmita });
                                 Logger.Log("SupabaseService", "SincronizarVinculosGrupoAsync", $"Complemento '{nomeProduto}' inserido no grupo {grupoId}");
                             }
                             catch (Exception ex) { Logger.Log("SupabaseService", "SincronizarVinculosGrupoAsync", $"Erro ao upsert complemento '{nomeProduto}' no grupo {grupoId}", ex); }
@@ -3384,20 +3378,17 @@ namespace Pedeai.DB
                         if (grpArr.Count > 0)
                         {
                             grpSabId = grpArr[0]["id"]?.ToString() ?? "";
-                            await PatchAsync(TBL_COMP_GRUPO, $"id=eq.{grpSabId}",
-                                new { nome = nomeGrpSab, obrigatorio = true, minimo = 1, maximo = qtd, ativo = true });
+                            object grpSabPatch = UsarEmpresaCodigo
+                                ? (object)new { nome = nomeGrpSab, obrigatorio = true, minimo = 1, maximo = qtd, ativo = true, empresa_codigo = _empresaCodigo }
+                                : (object)new { nome = nomeGrpSab, obrigatorio = true, minimo = 1, maximo = qtd, ativo = true };
+                            await PatchAsync(TBL_COMP_GRUPO, $"id=eq.{grpSabId}", grpSabPatch);
                         }
                         else
                         {
-                            var res = await PostAsync(TBL_COMP_GRUPO, new
-                            {
-                                mercadoria_id = produtoUuid,
-                                nome          = nomeGrpSab,
-                                obrigatorio   = true,
-                                minimo        = 1,
-                                maximo        = qtd,
-                                ativo         = true,
-                            });
+                            object grpSabPost = UsarEmpresaCodigo
+                                ? (object)new { mercadoria_id = produtoUuid, nome = nomeGrpSab, obrigatorio = true, minimo = 1, maximo = qtd, ativo = true, empresa_codigo = _empresaCodigo }
+                                : (object)new { mercadoria_id = produtoUuid, nome = nomeGrpSab, obrigatorio = true, minimo = 1, maximo = qtd, ativo = true };
+                            var res = await PostAsync(TBL_COMP_GRUPO, grpSabPost);
                             grpSabId = res?["id"]?.ToString() ?? "";
                         }
                         if (string.IsNullOrWhiteSpace(grpSabId)) goto skipSabores;
@@ -3433,16 +3424,17 @@ namespace Pedeai.DB
 
                             try
                             {
+                                bool temEmpSab = UsarEmpresaCodigo; string empSabCod = _empresaCodigo;
                                 if (compExist.TryGetValue(nomeSab, out string eid))
                                     await PatchAsync(TBL_COMPLEMENTO, $"id=eq.{eid}",
                                         string.IsNullOrEmpty(imgSab)
-                                            ? (object)new { nome = nomeSab, preco = precoSab, ativo = true }
-                                            : (object)new { nome = nomeSab, preco = precoSab, imagem_url = imgSab, ativo = true });
+                                            ? temEmpSab ? (object)new { nome = nomeSab, preco = precoSab, ativo = true, empresa_codigo = empSabCod } : (object)new { nome = nomeSab, preco = precoSab, ativo = true }
+                                            : temEmpSab ? (object)new { nome = nomeSab, preco = precoSab, imagem_url = imgSab, ativo = true, empresa_codigo = empSabCod } : (object)new { nome = nomeSab, preco = precoSab, imagem_url = imgSab, ativo = true });
                                 else
                                     await PostAsync(TBL_COMPLEMENTO,
                                         string.IsNullOrEmpty(imgSab)
-                                            ? (object)new { grupo_id = grpSabId, nome = nomeSab, preco = precoSab, ativo = true }
-                                            : (object)new { grupo_id = grpSabId, nome = nomeSab, preco = precoSab, imagem_url = imgSab, ativo = true });
+                                            ? temEmpSab ? (object)new { grupo_id = grpSabId, nome = nomeSab, preco = precoSab, ativo = true, empresa_codigo = empSabCod } : (object)new { grupo_id = grpSabId, nome = nomeSab, preco = precoSab, ativo = true }
+                                            : temEmpSab ? (object)new { grupo_id = grpSabId, nome = nomeSab, preco = precoSab, imagem_url = imgSab, ativo = true, empresa_codigo = empSabCod } : (object)new { grupo_id = grpSabId, nome = nomeSab, preco = precoSab, imagem_url = imgSab, ativo = true });
                             }
                             catch (Exception exS) { Logger.Log("SupabaseService", "SincronizarVinculosGrupoAsync", $"Erro sabor '{nomeSab}'", exS); }
                         }
@@ -3585,12 +3577,9 @@ namespace Pedeai.DB
                     "FROM mercadoria m " +
                     "WHERE m.Codigo_Grupo=@g AND m.Situacao='A' AND m.Codigo<>@c " +
                     "  AND COALESCE(m.mercFracionado,0)=0 " +
-                    "  AND NOT (" +
-                    "      EXISTS (SELECT 1 FROM mercadoria_vinculo_grupo va" +
-                    "             WHERE va.Codigo_Mercadoria=m.Codigo AND va.tipo='A' AND va.Situacao='A' AND va.Codigo_Grupo=@g)" +
-                    "      AND NOT EXISTS (SELECT 1 FROM mercadoria_vinculo_grupo vsc" +
-                    "             WHERE vsc.Codigo_Mercadoria=m.Codigo AND vsc.Situacao='A' AND vsc.tipo IN ('S','C'))" +
-                    "  ) " +
+                    "  AND EXISTS (SELECT 1 FROM mercadoria_vinculo_grupo vsc" +
+                    "             WHERE vsc.Codigo_Mercadoria=m.Codigo AND vsc.Situacao='A'" +
+                    "             AND vsc.tipo IN ('S','C') AND vsc.Codigo_Grupo=@g) " +
                     "ORDER BY m.mercMercadoria", conn))
                 {
                     cmd.Parameters.AddWithValue("@g", codigoGrupo);
@@ -3642,19 +3631,17 @@ namespace Pedeai.DB
 
                 if (!string.IsNullOrEmpty(grpSaboresId))
                 {
-                    await PatchAsync(TBL_COMP_GRUPO, $"id=eq.{grpSaboresId}",
-                        new { mercadoria_id = produtoUuid, nome = nomeGrupoSabores, obrigatorio = true, minimo = 1, maximo = qtdSabores });
+                    object grpPatch = UsarEmpresaCodigo
+                        ? (object)new { mercadoria_id = produtoUuid, nome = nomeGrupoSabores, obrigatorio = true, minimo = 1, maximo = qtdSabores, empresa_codigo = _empresaCodigo }
+                        : (object)new { mercadoria_id = produtoUuid, nome = nomeGrupoSabores, obrigatorio = true, minimo = 1, maximo = qtdSabores };
+                    await PatchAsync(TBL_COMP_GRUPO, $"id=eq.{grpSaboresId}", grpPatch);
                 }
                 else
                 {
-                    var grpResult = await PostAsync(TBL_COMP_GRUPO, new
-                    {
-                        mercadoria_id = produtoUuid,
-                        nome          = nomeGrupoSabores,
-                        obrigatorio   = true,
-                        minimo        = 1,
-                        maximo        = qtdSabores,
-                    });
+                    object grpPost = UsarEmpresaCodigo
+                        ? (object)new { mercadoria_id = produtoUuid, nome = nomeGrupoSabores, obrigatorio = true, minimo = 1, maximo = qtdSabores, empresa_codigo = _empresaCodigo }
+                        : (object)new { mercadoria_id = produtoUuid, nome = nomeGrupoSabores, obrigatorio = true, minimo = 1, maximo = qtdSabores };
+                    var grpResult = await PostAsync(TBL_COMP_GRUPO, grpPost);
                     grpSaboresId = grpResult?["id"]?.ToString() ?? "";
                     if (!string.IsNullOrEmpty(grpSaboresId))
                         try { await PostAsync(TBL_MERC_COMP_GRP, new { mercadoria_id = produtoUuid, grupo_id = grpSaboresId }); } catch { }
@@ -3668,6 +3655,7 @@ namespace Pedeai.DB
 
                 // Upsert cada sabor no grupo "Sabores"
                 // Sabores continuam ativos como produtos independentes no site (pizza de sabor único)
+                bool temEmpComp = UsarEmpresaCodigo; string empCompCod = _empresaCodigo;
                 foreach (var (nome, preco, descricao, imagemUrl) in sabores)
                 {
                     try
@@ -3675,13 +3663,13 @@ namespace Pedeai.DB
                         if (existentes.TryGetValue(nome, out string eid))
                             await PatchAsync(TBL_COMPLEMENTO, $"id=eq.{eid}",
                                 string.IsNullOrEmpty(imagemUrl)
-                                    ? (object)new { nome, descricao, preco, ativo = true }
-                                    : (object)new { nome, descricao, preco, imagem_url = imagemUrl, ativo = true });
+                                    ? temEmpComp ? (object)new { nome, descricao, preco, ativo = true, empresa_codigo = empCompCod } : (object)new { nome, descricao, preco, ativo = true }
+                                    : temEmpComp ? (object)new { nome, descricao, preco, imagem_url = imagemUrl, ativo = true, empresa_codigo = empCompCod } : (object)new { nome, descricao, preco, imagem_url = imagemUrl, ativo = true });
                         else
                             await PostAsync(TBL_COMPLEMENTO,
                                 string.IsNullOrEmpty(imagemUrl)
-                                    ? (object)new { grupo_id = grpSaboresId, nome, descricao, preco, ativo = true }
-                                    : (object)new { grupo_id = grpSaboresId, nome, descricao, preco, imagem_url = imagemUrl, ativo = true });
+                                    ? temEmpComp ? (object)new { grupo_id = grpSaboresId, nome, descricao, preco, ativo = true, empresa_codigo = empCompCod } : (object)new { grupo_id = grpSaboresId, nome, descricao, preco, ativo = true }
+                                    : temEmpComp ? (object)new { grupo_id = grpSaboresId, nome, descricao, preco, imagem_url = imagemUrl, ativo = true, empresa_codigo = empCompCod } : (object)new { grupo_id = grpSaboresId, nome, descricao, preco, imagem_url = imagemUrl, ativo = true });
                     }
                     catch (Exception ex) { Logger.Log("SupabaseService", "SincronizarFracionadoAsync", $"Erro sabor '{nome}'", ex); }
                 }
