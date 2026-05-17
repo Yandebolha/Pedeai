@@ -253,94 +253,6 @@ namespace Pedeai.Forms
             }
 
             // ─ Conexão API ─
-            var lblSec1 = MkTitle("Conexão com Evolution API");
-            lblSec1.Top = y; pnl.Controls.Add(lblSec1); y += 26;
-
-            // Painel de ajuda — como obter as credenciais
-            var pnlAjuda = new Panel
-            {
-                Left      = 0, Top = y,
-                Width     = 620, Height = 116,
-                BackColor = Color.FromArgb(255, 248, 225),
-                BorderStyle = BorderStyle.FixedSingle,
-            };
-
-            var lblAjudaTitulo = new Label
-            {
-                Text      = "❓  O que preencher aqui?",
-                Left      = 8, Top = 6, AutoSize = true,
-                Font      = new Font("Segoe UI", 9F, FontStyle.Bold),
-                ForeColor = CorHeader,
-            };
-
-            var lblAjudaTexto = new Label
-            {
-                Text      = "Você precisa do serviço Evolution API rodando (gratuito e local).\r\n" +
-                            "1. Instale o Docker Desktop: https://docker.com/products/docker-desktop\r\n" +
-                            "2. Abra o PowerShell na pasta do projeto e execute: docker compose up -d\r\n" +
-                            "3. Preencha: URL = http://localhost:8081  |  API Key = pedeaikey  |  Instância = pedeai",
-                Left      = 8, Top = 24, Width = 590,
-                Font      = new Font("Segoe UI", 8F),
-                ForeColor = Color.FromArgb(60, 50, 20),
-                AutoSize  = false, Height = 56,
-            };
-
-            // Compose file fica na raiz do repositório (um nível acima do executável em Debug/Release)
-            string composeDir = System.IO.Path.GetFullPath(
-                System.IO.Path.Combine(
-                    System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location),
-                    "..", "..", "..", ".."));
-            string composeFile = System.IO.Path.Combine(composeDir, "docker-compose.yml");
-            // Fallback: pasta corrente do executável
-            if (!System.IO.File.Exists(composeFile))
-                composeFile = System.IO.Path.Combine(
-                    System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location),
-                    "docker-compose.yml");
-            string DockerCmd = $"docker compose -f \"{composeFile}\" up -d";
-
-            var btnCopiarDocker = new Button
-            {
-                Text      = "📋  Copiar comando Docker",
-                Left      = 8, Top = 84,
-                Width     = 190, Height = 26,
-                BackColor = Color.FromArgb(52, 100, 160),
-                ForeColor = Color.White,
-                FlatStyle = FlatStyle.Flat,
-                Cursor    = Cursors.Hand,
-                Font      = new Font("Segoe UI", 8F),
-            };
-            btnCopiarDocker.FlatAppearance.BorderSize = 0;
-            btnCopiarDocker.Click += (_, __) =>
-            {
-                Clipboard.SetText(DockerCmd);
-                btnCopiarDocker.Text = "✔  Copiado!";
-                var t = new System.Windows.Forms.Timer { Interval = 2000 };
-                t.Tick += (s, e) => { btnCopiarDocker.Text = "📋  Copiar comando Docker"; t.Stop(); t.Dispose(); };
-                t.Start();
-            };
-
-            var btnAbrirDocker = new Button
-            {
-                Text      = "🌐  Baixar Docker",
-                Left      = 206, Top = 84,
-                Width     = 130, Height = 26,
-                BackColor = Color.FromArgb(87, 120, 38),
-                ForeColor = Color.White,
-                FlatStyle = FlatStyle.Flat,
-                Cursor    = Cursors.Hand,
-                Font      = new Font("Segoe UI", 8F),
-            };
-            btnAbrirDocker.FlatAppearance.BorderSize = 0;
-            btnAbrirDocker.Click += (_, __) =>
-                System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
-                    { FileName = "https://docker.com/products/docker-desktop", UseShellExecute = true });
-
-            pnlAjuda.Controls.Add(lblAjudaTitulo);
-            pnlAjuda.Controls.Add(lblAjudaTexto);
-            pnlAjuda.Controls.Add(btnCopiarDocker);
-            pnlAjuda.Controls.Add(btnAbrirDocker);
-            pnl.Controls.Add(pnlAjuda);
-            y += 124;
 
             // Botão preencher padrão
             var btnPadrao = new Button
@@ -357,7 +269,7 @@ namespace Pedeai.Forms
             btnPadrao.FlatAppearance.BorderSize = 0;
             btnPadrao.Click += (_, __) =>
             {
-                _txtApiUrl.Text  = "http://localhost:8081";
+                _txtApiUrl.Text  = "https://evolutionapi.rangofood.com.br";
                 _txtApiKey.Text  = "pedeaikey";
                 _txtInstance.Text = "pedeai";
             };

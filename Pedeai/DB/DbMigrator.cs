@@ -213,6 +213,8 @@ namespace Pedeai.DB
                     "DECIMAL(10,2) NOT NULL DEFAULT 0");
                 AddColumnIfNotExists(conn, db, "pedido_web", "pediPago_Pix",
                     "DECIMAL(10,2) NOT NULL DEFAULT 0");
+                AddColumnIfNotExists(conn, db, "pedido_web", "pediPago_CartaoDebito",
+                    "DECIMAL(10,2) NOT NULL DEFAULT 0");
                 AddColumnIfNotExists(conn, db, "pedido_web", "pediAutorizador",
                     "VARCHAR(150) NULL DEFAULT NULL");
 

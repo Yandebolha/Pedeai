@@ -34,13 +34,15 @@ namespace Pedeai.DAL
                                COALESCE(
                                    NULLIF(CONCAT_WS(' + ',
                                        IF(COALESCE(p.pediPago_Dinheiro,0)>0,'Dinheiro',NULL),
-                                       IF(COALESCE(p.pediPago_Cartao  ,0)>0,'Cartão'  ,NULL),
+                                       IF(COALESCE(p.pediPago_Cartao  ,0)>0,'Crédito' ,NULL),
+                                       IF(COALESCE(p.pediPago_CartaoDebito,0)>0,'Débito',NULL),
                                        IF(COALESCE(p.pediPago_Pix     ,0)>0,'Pix'     ,NULL)
                                    ),''),
                                    CASE p.pediForma_Pagamento
                                        WHEN 0 THEN 'Dinheiro'
-                                       WHEN 1 THEN 'Cartão'
+                                       WHEN 1 THEN 'Cartão Crédito'
                                        WHEN 2 THEN 'Pix'
+                                       WHEN 3 THEN 'Cartão Débito'
                                        ELSE 'Outro'
                                    END
                                )                            AS Pagamento,
@@ -397,27 +399,29 @@ namespace Pedeai.DAL
 
         /// <summary>Finaliza pedido gravando valor pago e código de transação.</summary>
         public void FinalizarPedido(int codigo, int novaSituacao, decimal valorPago, string transacao,
-                                    decimal pagoDinheiro = 0, decimal pagoCartao = 0, decimal pagoPix = 0,
+                                    decimal pagoDinheiro = 0, decimal pagoCartao = 0, decimal pagoCartaoDebito = 0, decimal pagoPix = 0,
                                     string autorizador = "")
         {
             using var conn = AbrirConexao();
             var sql = @"UPDATE pedido_web
-                        SET pediSituacao          = @sit,
-                            pediValor_Pago        = @pago,
-                            pediDesconto          = CASE WHEN @pago < pediValor_Total THEN pediValor_Total - @pago ELSE pediDesconto END,
-                            pediCodigo_Transacao  = @trans,
-                            pediPago_Dinheiro     = @din,
-                            pediPago_Cartao       = @car,
-                            pediPago_Pix          = @pix,
-                            pediAutorizador       = @aut,
-                            pediData_Atualizacao  = NOW()
+                        SET pediSituacao             = @sit,
+                            pediValor_Pago           = @pago,
+                            pediDesconto             = CASE WHEN @pago < pediValor_Total THEN pediValor_Total - @pago ELSE pediDesconto END,
+                            pediCodigo_Transacao     = @trans,
+                            pediPago_Dinheiro        = @din,
+                            pediPago_Cartao          = @cred,
+                            pediPago_CartaoDebito    = @deb,
+                            pediPago_Pix             = @pix,
+                            pediAutorizador          = @aut,
+                            pediData_Atualizacao     = NOW()
                         WHERE Codigo = @cod";
             using var cmd = new MySqlCommand(sql, conn);
             cmd.Parameters.AddWithValue("@sit",   novaSituacao);
             cmd.Parameters.AddWithValue("@pago",  valorPago);
             cmd.Parameters.AddWithValue("@trans", transacao ?? "");
             cmd.Parameters.AddWithValue("@din",   pagoDinheiro);
-            cmd.Parameters.AddWithValue("@car",   pagoCartao);
+            cmd.Parameters.AddWithValue("@cred",  pagoCartao);
+            cmd.Parameters.AddWithValue("@deb",   pagoCartaoDebito);
             cmd.Parameters.AddWithValue("@pix",   pagoPix);
             cmd.Parameters.AddWithValue("@aut",   string.IsNullOrEmpty(autorizador) ? (object)DBNull.Value : autorizador);
             cmd.Parameters.AddWithValue("@cod",   codigo);
@@ -438,9 +442,10 @@ namespace Pedeai.DAL
                 SUM(COALESCE(p.pediValor_Pago, p.pediValor_Total)) AS TotalBruto,
                 SUM(CASE WHEN p.pediTipo_Entrega=1 THEN COALESCE(p.pediValor_Pago, p.pediValor_Total) ELSE 0 END) AS ValorEntrega,
                 SUM(CASE WHEN p.pediTipo_Entrega=0 THEN COALESCE(p.pediValor_Pago, p.pediValor_Total) ELSE 0 END) AS ValorRetirada,
-                SUM(COALESCE(p.pediPago_Dinheiro, 0)) AS Dinheiro,
-                SUM(COALESCE(p.pediPago_Cartao,   0)) AS Cartao,
-                SUM(COALESCE(p.pediPago_Pix,      0)) AS Pix,
+                SUM(COALESCE(p.pediPago_Dinheiro, 0))         AS Dinheiro,
+                SUM(COALESCE(p.pediPago_Cartao,   0))         AS CartaoCredito,
+                SUM(COALESCE(p.pediPago_CartaoDebito, 0))     AS CartaoDebito,
+                SUM(COALESCE(p.pediPago_Pix,      0))         AS Pix,
                 COALESCE(SUM(custo.CustoMerc), 0)   AS CustoMercadorias
               FROM pedido_web p
               LEFT JOIN (
@@ -518,7 +523,7 @@ namespace Pedeai.DAL
                          ELSE NULL END      AS Desconto,
                     p.pediAutorizador       AS Autorizador,
                     CASE p.pediForma_Pagamento
-                        WHEN 0 THEN 'Dinheiro' WHEN 1 THEN 'Cartão' WHEN 2 THEN 'Pix'
+                        WHEN 0 THEN 'Dinheiro' WHEN 1 THEN 'Cartão Crédito' WHEN 2 THEN 'Pix' WHEN 3 THEN 'Cartão Débito'
                         ELSE 'Outro' END     AS Pagamento,
                     CASE p.pediSituacao
                         WHEN 0 THEN 'Pendente'         WHEN 1 THEN 'Confirmado'
@@ -604,7 +609,7 @@ namespace Pedeai.DAL
                          ELSE NULL END      AS Desconto,
                     p.pediAutorizador       AS Autorizador,
                     CASE p.pediForma_Pagamento
-                        WHEN 0 THEN 'Dinheiro' WHEN 1 THEN 'Cartão' WHEN 2 THEN 'Pix'
+                        WHEN 0 THEN 'Dinheiro' WHEN 1 THEN 'Cart\u00e3o Cr\u00e9dito' WHEN 2 THEN 'Pix' WHEN 3 THEN 'Cart\u00e3o D\u00e9bito'
                         ELSE 'Outro' END     AS Pagamento,
                     CASE p.pediSituacao
                         WHEN 0 THEN 'Pendente'         WHEN 1 THEN 'Confirmado'
@@ -661,8 +666,9 @@ namespace Pedeai.DAL
                 pediOrigem            = r["pediOrigem"] == DBNull.Value ? 0 : Convert.ToInt32(r["pediOrigem"]),
                 pediValor_Pago        = r["pediValor_Pago"] == DBNull.Value ? (decimal?)null : Convert.ToDecimal(r["pediValor_Pago"]),
                 pediPago_Dinheiro     = r["pediPago_Dinheiro"] == DBNull.Value ? 0m : Convert.ToDecimal(r["pediPago_Dinheiro"]),
-                pediPago_Cartao       = r["pediPago_Cartao"]   == DBNull.Value ? 0m : Convert.ToDecimal(r["pediPago_Cartao"]),
-                pediPago_Pix          = r["pediPago_Pix"]      == DBNull.Value ? 0m : Convert.ToDecimal(r["pediPago_Pix"]),
+                pediPago_Cartao       = r["pediPago_Cartao"]        == DBNull.Value ? 0m : Convert.ToDecimal(r["pediPago_Cartao"]),
+                pediPago_CartaoDebito = r.SafeDecimal("pediPago_CartaoDebito"),
+                pediPago_Pix          = r["pediPago_Pix"]           == DBNull.Value ? 0m : Convert.ToDecimal(r["pediPago_Pix"]),
                 pediData_Lancamento   = Convert.ToDateTime(r["pediData_Lancamento"]),
                 pediCancelado_Por     = r["pediCancelado_Por"] == DBNull.Value ? null : r["pediCancelado_Por"]?.ToString(),
                 pediAutorizador       = r["pediAutorizador"] == DBNull.Value ? null : r["pediAutorizador"]?.ToString(),

@@ -65,28 +65,29 @@ namespace Pedeai.BLL
             catch (Exception ex) { Logger.Log("TurnoBLL", "AtualizarSituacaoPedido", "Erro ao obter total movimentado", ex); return 0; }
         }
 
-        public (decimal totalVendas, decimal totalDin, decimal totalCar, decimal totalPix, int qtdPedidos)
+        public (decimal totalVendas, decimal totalDin, decimal totalCarCred, decimal totalCarDeb, decimal totalPix, int qtdPedidos)
             GetResumoMovimentado(Turno t)
         {
             try
             {
                 var fim = t.turFechamento ?? DateTime.Now;
                 var dt = _dal.GetPedidosTurno(t.turAbertura, fim);
-                decimal totalVendas = 0, totalDin = 0, totalCar = 0, totalPix = 0;
+                decimal totalVendas = 0, totalDin = 0, totalCarCred = 0, totalCarDeb = 0, totalPix = 0;
 
                 decimal C(System.Data.DataRow r, string c) =>
-                    r[c] == System.DBNull.Value ? 0m : Convert.ToDecimal(r[c]);
+                    r.Table.Columns.Contains(c) && r[c] != System.DBNull.Value ? Convert.ToDecimal(r[c]) : 0m;
 
                 foreach (System.Data.DataRow r in dt.Rows)
                 {
-                    totalVendas += C(r, "pediValor_Total");
-                    totalDin    += C(r, "pediPago_Dinheiro");
-                    totalCar    += C(r, "pediPago_Cartao");
-                    totalPix    += C(r, "pediPago_Pix");
+                    totalVendas  += C(r, "pediValor_Total");
+                    totalDin     += C(r, "pediPago_Dinheiro");
+                    totalCarCred += C(r, "pediPago_Cartao");
+                    totalCarDeb  += C(r, "pediPago_CartaoDebito");
+                    totalPix     += C(r, "pediPago_Pix");
                 }
-                return (totalVendas, totalDin, totalCar, totalPix, dt.Rows.Count);
+                return (totalVendas, totalDin, totalCarCred, totalCarDeb, totalPix, dt.Rows.Count);
             }
-            catch (Exception ex) { Logger.Log("TurnoBLL", "GetResumoMovimentado", "Erro ao calcular resumo do turno", ex); return (0, 0, 0, 0, 0); }
+            catch (Exception ex) { Logger.Log("TurnoBLL", "GetResumoMovimentado", "Erro ao calcular resumo do turno", ex); return (0, 0, 0, 0, 0, 0); }
         }
 
         public DataTable Listar(DateTime de, DateTime ate) => _dal.Listar(de, ate);

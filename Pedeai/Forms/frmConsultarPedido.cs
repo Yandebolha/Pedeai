@@ -109,15 +109,17 @@ namespace Pedeai.Forms
                 // Condição de pagamento
                 var formasPgto = new System.Collections.Generic.List<string>();
                 if (pedido.pediPago_Dinheiro > 0) formasPgto.Add($"Dinheiro: {pedido.pediPago_Dinheiro:C}");
-                if (pedido.pediPago_Cartao   > 0) formasPgto.Add($"Cart\u00e3o: {pedido.pediPago_Cartao:C}");
+                if (pedido.pediPago_Cartao   > 0) formasPgto.Add($"Cr\u00e9dito: {pedido.pediPago_Cartao:C}");
+                if (pedido.pediPago_CartaoDebito > 0) formasPgto.Add($"D\u00e9bito: {pedido.pediPago_CartaoDebito:C}");
                 if (pedido.pediPago_Pix      > 0) formasPgto.Add($"Pix: {pedido.pediPago_Pix:C}");
                 string condPgto = formasPgto.Count > 0
                     ? string.Join(" + ", formasPgto)
                     : pedido.pediForma_Pagamento switch
                       {
                           0 => "Dinheiro",
-                          1 => "Cart\u00e3o",
+                          1 => "Cart\u00e3o Cr\u00e9dito",
                           2 => "Pix",
+                          3 => "Cart\u00e3o D\u00e9bito",
                           _ => "Outro"
                       };
                 condPgto += pedido.pediTipo_Entrega == 0 ? " \u00b7 Retirada" : " \u00b7 Entrega";

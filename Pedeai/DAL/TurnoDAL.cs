@@ -80,7 +80,7 @@ namespace Pedeai.DAL
             var sql = @"SELECT p.Codigo, p.pediNome_Cliente, p.pediSituacao,
                                p.pediForma_Pagamento, p.pediTipo_Entrega,
                                p.pediSubtotal, p.pediTaxa_Entrega, p.pediDesconto, p.pediValor_Total,
-                               p.pediPago_Dinheiro, p.pediPago_Cartao, p.pediPago_Pix,
+                               p.pediPago_Dinheiro, p.pediPago_Cartao, COALESCE(p.pediPago_CartaoDebito,0) AS pediPago_CartaoDebito, p.pediPago_Pix,
                                p.pediValor_Pago, p.pediData_Lancamento, p.pediData_Atualizacao
                         FROM pedido_web p
                         WHERE p.pediData_Lancamento >= @de

@@ -13,7 +13,7 @@ namespace Pedeai.Modelo
         public string pediTelefone_Cliente { get; set; }
         public int pediSituacao { get; set; }
         public int pediTipo_Entrega { get; set; }      // 0=Retirada 1=Entrega
-        public int pediForma_Pagamento { get; set; }   // 0=Dinheiro 1=Cartão 2=Pix
+        public int pediForma_Pagamento { get; set; }   // 0=Dinheiro 1=Crédito 2=Pix 3=Débito
         public int pediOrigem { get; set; }            // 0=Web 1=App 2=Manual
         public decimal pediSubtotal { get; set; }
         public decimal pediTaxa_Entrega { get; set; }
@@ -25,9 +25,10 @@ namespace Pedeai.Modelo
         public string pediObservacoes { get; set; } = "";
         public decimal? pediValor_Pago { get; set; }
         public string pediCodigo_Transacao { get; set; } = "";
-        public decimal pediPago_Dinheiro { get; set; }
-        public decimal pediPago_Cartao   { get; set; }
-        public decimal pediPago_Pix      { get; set; }
+        public decimal pediPago_Dinheiro      { get; set; }
+        public decimal pediPago_Cartao         { get; set; }  // Cartão Crédito (coluna DB: pediPago_Cartao)
+        public decimal pediPago_CartaoDebito   { get; set; }  // Cartão Débito
+        public decimal pediPago_Pix            { get; set; }
         public string pediCancelado_Por { get; set; }  // nome do usuario que autorizou o cancelamento
         public string pediAutorizador { get; set; }    // nome do usuario que autorizou desconto no pagamento
         public DateTime pediData_Lancamento { get; set; }

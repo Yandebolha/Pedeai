@@ -1239,14 +1239,14 @@ namespace Pedeai
                 if (finaliza)
                 {
                     if (MostrarDialogPagamento(pedido, out decimal vPago, out string trans,
-                                               out decimal din, out decimal car, out decimal pix,
+                                               out decimal din, out decimal car, out decimal deb, out decimal pix,
                                                out string autNome))
                     {
-                        var eF = _pedidoBLL.FinalizarPedido(cod, novaSit, vPago, trans, din, car, pix, autNome);
+                        var eF = _pedidoBLL.FinalizarPedido(cod, novaSit, vPago, trans, din, car, deb, pix, autNome);
                         if (!string.IsNullOrEmpty(eF)) MessageBox.Show("Erro: " + eF);
                         else
                         {
-                            string logExtra = $"#{cod} | Sit={novaSit} | Total={pedido.pediValor_Total:N2} | Pago={vPago:N2} | Din={din:N2} Car={car:N2} Pix={pix:N2}";
+                            string logExtra = $"#{cod} | Sit={novaSit} | Total={pedido.pediValor_Total:N2} | Pago={vPago:N2} | Din={din:N2} Cred={car:N2} Deb={deb:N2} Pix={pix:N2}";
                             if (!string.IsNullOrEmpty(autNome))
                                 logExtra += $" | DESCONTO R$ {(pedido.pediValor_Total - vPago):N2} autorizado por {autNome}";
                             Logger.Log("Form1", "AtualizarSituacaoPedido", $"Pedido finalizado | {logExtra}");
@@ -1406,20 +1406,21 @@ namespace Pedeai
 
         private bool MostrarDialogPagamento(PedidoWeb pedido,
                                              out decimal valorPago, out string transacao,
-                                             out decimal pagoDinheiro, out decimal pagoCartao, out decimal pagoPix,
+                                             out decimal pagoDinheiro, out decimal pagoCartao, out decimal pagoCartaoDebito, out decimal pagoPix,
                                              out string autorizadorNome)
         {
-            valorPago       = pedido.pediValor_Total;
-            transacao       = "";
-            pagoDinheiro    = 0m;
-            pagoCartao      = 0m;
-            pagoPix         = 0m;
-            autorizadorNome = "";
+            valorPago          = pedido.pediValor_Total;
+            transacao          = "";
+            pagoDinheiro       = 0m;
+            pagoCartao         = 0m;
+            pagoCartaoDebito   = 0m;
+            pagoPix            = 0m;
+            autorizadorNome    = "";
             decimal total = pedido.pediValor_Total;
 
             while (true)   // loop: "Voltar" reinicia o formulário de pagamento
             {
-                decimal tmpDin = 0, tmpCar = 0, tmpPix = 0;
+                decimal tmpDin = 0, tmpCar = 0, tmpDeb = 0, tmpPix = 0;
                 string  tmpTrans = "";
                 bool    confirmed = false;
 
@@ -1432,7 +1433,7 @@ namespace Pedeai
                     frm.BackColor       = Color.FromArgb(245, 237, 216);
                     frm.ForeColor       = Color.FromArgb(50, 50, 50);
                     frm.Font            = new Font("Segoe UI", 9F);
-                    frm.ClientSize      = new Size(420, 280);
+                    frm.ClientSize      = new Size(420, 325);
 
                     // Barra de título interna
                     var pnlTop = new Panel { Left = 0, Top = 0, Width = 420, Height = 36,
@@ -1453,25 +1454,29 @@ namespace Pedeai
                     Lbl("Dinheiro (R$):", 12, 80);
                     var numDin = new NumericUpDown { Left = 160, Top = 76, Width = 120, DecimalPlaces = 2, Maximum = 99999M, Value = 0M,
                         BackColor = Color.White, ForeColor = Color.FromArgb(50, 50, 50) };
-                    Lbl("Cart\u00e3o (R$):", 12, 116);
-                    var numCar = new NumericUpDown { Left = 160, Top = 112, Width = 120, DecimalPlaces = 2, Maximum = 99999M, Value = 0M,
+                    Lbl("Cr\u00e9dito (R$):", 12, 116);
+                    var numCred = new NumericUpDown { Left = 160, Top = 112, Width = 120, DecimalPlaces = 2, Maximum = 99999M, Value = 0M,
                         BackColor = Color.White, ForeColor = Color.FromArgb(50, 50, 50) };
-                    Lbl("Pix (R$):", 12, 152);
-                    var numPix = new NumericUpDown { Left = 160, Top = 148, Width = 120, DecimalPlaces = 2, Maximum = 99999M, Value = 0M,
+                    Lbl("D\u00e9bito (R$):", 12, 152);
+                    var numDeb = new NumericUpDown { Left = 160, Top = 148, Width = 120, DecimalPlaces = 2, Maximum = 99999M, Value = 0M,
+                        BackColor = Color.White, ForeColor = Color.FromArgb(50, 50, 50) };
+                    Lbl("Pix (R$):", 12, 188);
+                    var numPix = new NumericUpDown { Left = 160, Top = 184, Width = 120, DecimalPlaces = 2, Maximum = 99999M, Value = 0M,
                         BackColor = Color.White, ForeColor = Color.FromArgb(50, 50, 50) };
 
-                    if (pedido.pediForma_Pagamento == 1) numCar.Value = total;
-                    else if (pedido.pediForma_Pagamento == 2) numPix.Value = total;
+                    if (pedido.pediForma_Pagamento == 1)      numCred.Value = total;
+                    else if (pedido.pediForma_Pagamento == 3) numDeb.Value  = total;
+                    else if (pedido.pediForma_Pagamento == 2) numPix.Value  = total;
                     else numDin.Value = total;  // 0=Dinheiro ou qualquer outro (ex: -1 de pedidos externos)
 
-                    Lbl("C\u00f3d. Transa\u00e7\u00e3o (cart\u00e3o/Pix):", 12, 188);
-                    var txtTrans = new TextBox { Left = 240, Top = 184, Width = 164,
+                    Lbl("C\u00f3d. Transa\u00e7\u00e3o (cart\u00e3o/Pix):", 12, 224);
+                    var txtTrans = new TextBox { Left = 240, Top = 220, Width = 164,
                         BackColor = Color.White, ForeColor = Color.FromArgb(50, 50, 50),
                         BorderStyle = BorderStyle.FixedSingle };
 
                     var lblSoma = new Label
                     {
-                        Left = 12, Top = 218, Width = 300, AutoSize = false,
+                        Left = 12, Top = 254, Width = 390, AutoSize = false,
                         ForeColor = Color.FromArgb(176, 110, 42),
                         Font = new Font("Segoe UI", 9F, FontStyle.Bold),
                         Text = ""
@@ -1480,23 +1485,24 @@ namespace Pedeai
 
                     void AtualizarSoma()
                     {
-                        decimal soma = numDin.Value + numCar.Value + numPix.Value;
+                        decimal soma = numDin.Value + numCred.Value + numDeb.Value + numPix.Value;
                         decimal diff = soma - total;
                         string sinal = diff >= 0 ? "Troco: R$ " + diff.ToString("N2") : "Falta: R$ " + (-diff).ToString("N2");
                         lblSoma.Text = $"Soma: R$ {soma:N2}  |  {sinal}";
                         lblSoma.ForeColor = diff >= 0 ? Color.FromArgb(87, 120, 38) : Color.FromArgb(192, 57, 43);
                     }
 
-                    numDin.ValueChanged += (_, __) => AtualizarSoma();
-                    numCar.ValueChanged += (_, __) => AtualizarSoma();
-                    numPix.ValueChanged += (_, __) => AtualizarSoma();
+                    numDin.ValueChanged  += (_, __) => AtualizarSoma();
+                    numCred.ValueChanged += (_, __) => AtualizarSoma();
+                    numDeb.ValueChanged  += (_, __) => AtualizarSoma();
+                    numPix.ValueChanged  += (_, __) => AtualizarSoma();
                     AtualizarSoma();
 
-                    frm.Controls.AddRange(new Control[] { numDin, numCar, numPix, txtTrans });
+                    frm.Controls.AddRange(new Control[] { numDin, numCred, numDeb, numPix, txtTrans });
 
-                    var btnOk  = new Button { Text = "\u2714 Confirmar", Left = 100, Top = 243, Width = 140, Height = 28, DialogResult = DialogResult.OK,
+                    var btnOk  = new Button { Text = "\u2714 Confirmar", Left = 256, Top = 284, Width = 148, Height = 30, DialogResult = DialogResult.OK,
                         BackColor = Color.FromArgb(87, 120, 38), ForeColor = Color.White, FlatStyle = FlatStyle.Flat };
-                    var btnCan = new Button { Text = "Cancelar",     Left = 252, Top = 243, Width = 100, Height = 28, DialogResult = DialogResult.Cancel,
+                    var btnCan = new Button { Text = "Cancelar",     Left = 16,  Top = 284, Width = 120, Height = 30, DialogResult = DialogResult.Cancel,
                         BackColor = Color.FromArgb(224, 113, 42), ForeColor = Color.White, FlatStyle = FlatStyle.Flat };
                     btnOk.FlatAppearance.BorderSize = btnCan.FlatAppearance.BorderSize = 0;
                     frm.Controls.AddRange(new Control[] { btnOk, btnCan });
@@ -1507,7 +1513,8 @@ namespace Pedeai
                     if (confirmed)
                     {
                         tmpDin   = numDin.Value;
-                        tmpCar   = numCar.Value;
+                        tmpCar   = numCred.Value;
+                        tmpDeb   = numDeb.Value;
                         tmpPix   = numPix.Value;
                         tmpTrans = txtTrans.Text.Trim();
                     }
@@ -1515,10 +1522,11 @@ namespace Pedeai
 
                 if (!confirmed) return false;
 
-                pagoDinheiro = tmpDin;
-                pagoCartao   = tmpCar;
-                pagoPix      = tmpPix;
-                valorPago    = pagoDinheiro + pagoCartao + pagoPix;
+                pagoDinheiro     = tmpDin;
+                pagoCartao       = tmpCar;
+                pagoCartaoDebito = tmpDeb;
+                pagoPix          = tmpPix;
+                valorPago        = pagoDinheiro + pagoCartao + pagoCartaoDebito + pagoPix;
                 transacao    = tmpTrans;
 
                 if (valorPago >= total) return true;
@@ -1738,7 +1746,7 @@ namespace Pedeai
 
                 // ── Totais de vendas ──
                 decimal pedidos = 0, taxaEnt = 0, totalBruto = 0, custoMerc = 0;
-                decimal totalDinheiro = 0, totalCartao = 0, totalPix = 0;
+                decimal totalDinheiro = 0, totalCartaoCredito = 0, totalCartaoDebito = 0, totalPix = 0;
                 foreach (DataRow r in dt.Rows)
                 {
                     decimal V(string col) => r[col] == DBNull.Value ? 0 : Convert.ToDecimal(r[col]);
@@ -1747,7 +1755,8 @@ namespace Pedeai
                     totalBruto    += V("TotalBruto");
                     custoMerc     += V("CustoMercadorias");
                     totalDinheiro += V("Dinheiro");
-                    totalCartao   += V("Cartao");
+                    totalCartaoCredito += V("CartaoCredito");
+                    totalCartaoDebito  += V("CartaoDebito");
                     totalPix      += V("Pix");
                 }
 
@@ -1773,7 +1782,8 @@ namespace Pedeai
                     fatLiquido >= 0 ? Color.FromArgb(115, 140, 50) : Color.FromArgb(180, 70, 55));
                 // Movimentação por forma de pagamento
                 CriarCardFin("Dinheiro",            totalDinheiro.ToString("C"), Color.FromArgb(155, 130, 48));
-                CriarCardFin("Cart\u00e3o",         totalCartao.ToString("C"),   Color.FromArgb(73, 110, 160));
+                CriarCardFin("Cr\u00e9dito (Cart\u00e3o)", totalCartaoCredito.ToString("C"), Color.FromArgb(73, 110, 160));
+                CriarCardFin("D\u00e9bito (Cart\u00e3o)",  totalCartaoDebito.ToString("C"),  Color.FromArgb(60, 90, 140));
                 CriarCardFin("Pix",                 totalPix.ToString("C"),      Color.FromArgb(80, 130, 110));
 
                 // ── Gastos material grid ──
@@ -1804,7 +1814,8 @@ namespace Pedeai
                 ["TotalBruto"]   = "Total Bruto",
                 ["Dinheiro"]     = "Dinheiro",
                 ["Pix"]          = "Pix",
-                ["Cartao"]       = "Cart\u00e3o",
+                ["CartaoCredito"] = "Cr\u00e9dito",
+                ["CartaoDebito"]  = "D\u00e9bito",
                 ["CustoMercadorias"] = "Custo Merc.",
                 ["TotalLiquido"] = "Total L\u00edquido",
             };

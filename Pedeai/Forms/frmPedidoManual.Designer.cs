@@ -819,8 +819,9 @@ namespace Pedeai.Forms
             this.cmbPagamento.ForeColor = System.Drawing.Color.White;
             this.cmbPagamento.Items.AddRange(new object[] {
             "Dinheiro",
-            "Cartão",
-            "Pix"});
+            "Cart\u00e3o Cr\u00e9dito",
+            "Pix",
+            "Cart\u00e3o D\u00e9bito"});
             this.cmbPagamento.Location = new System.Drawing.Point(16, 382);
             this.cmbPagamento.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.cmbPagamento.Name = "cmbPagamento";

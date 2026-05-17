@@ -74,13 +74,14 @@ namespace Pedeai.Forms
 
             var show = new System.Collections.Generic.Dictionary<string, string>
             {
-                ["Codigo"]              = "N\u00ba",
-                ["pediNome_Cliente"]    = "Cliente",
-                ["pediValor_Total"]     = "Total R$",
-                ["pediPago_Dinheiro"]   = "Dinheiro",
-                ["pediPago_Cartao"]     = "Cart\u00e3o",
-                ["pediPago_Pix"]        = "Pix",
-                ["pediData_Lancamento"] = "Lan\u00e7amento",
+                ["Codigo"]                  = "Nº",
+                ["pediNome_Cliente"]        = "Cliente",
+                ["pediValor_Total"]         = "Total R$",
+                ["pediPago_Dinheiro"]       = "Dinheiro",
+                ["pediPago_Cartao"]         = "Crédito",
+                ["pediPago_CartaoDebito"]   = "Débito",
+                ["pediPago_Pix"]            = "Pix",
+                ["pediData_Lancamento"]     = "Lançamento",
             };
 
             foreach (DataGridViewColumn col in gridPedidos.Columns)
@@ -96,16 +97,17 @@ namespace Pedeai.Forms
 
         private void MontarResumo(DataTable dt)
         {
-            decimal totalVendas = 0, totalDin = 0, totalCar = 0, totalPix = 0;
+            decimal totalVendas = 0, totalDin = 0, totalCar = 0, totalDeb = 0, totalPix = 0;
             int qtdPedidos = dt.Rows.Count;
 
-            decimal C(DataRow r, string c) => r[c] == DBNull.Value ? 0m : Convert.ToDecimal(r[c]);
+            decimal C(DataRow r, string col) => dt.Columns.Contains(col) && r[col] != DBNull.Value ? Convert.ToDecimal(r[col]) : 0m;
 
             foreach (DataRow r in dt.Rows)
             {
                 totalVendas += C(r, "pediValor_Total");
                 totalDin    += C(r, "pediPago_Dinheiro");
                 totalCar    += C(r, "pediPago_Cartao");
+                totalDeb    += C(r, "pediPago_CartaoDebito");
                 totalPix    += C(r, "pediPago_Pix");
             }
 
@@ -113,10 +115,11 @@ namespace Pedeai.Forms
                 $"Pedidos: {qtdPedidos}   |   " +
                 $"Total Vendas: R$ {totalVendas:N2}   |   " +
                 $"Dinheiro: R$ {totalDin:N2}   |   " +
-                $"Cart\u00e3o: R$ {totalCar:N2}   |   " +
+                $"Cr\u00e9dito: R$ {totalCar:N2}   |   " +
+                $"D\u00e9bito: R$ {totalDeb:N2}   |   " +
                 $"Pix: R$ {totalPix:N2}";
 
-            decimal diferenca = totalVendas - (totalDin + totalCar + totalPix);
+            decimal diferenca = totalVendas - (totalDin + totalCar + totalDeb + totalPix);
             if (Math.Abs(diferenca) > 0.01m)
                 lblResumo.Text += $"   |   Dif. pagamento: R$ {diferenca:N2}";
         }
@@ -162,13 +165,14 @@ namespace Pedeai.Forms
                     // Larguras proporcionais por coluna para evitar sobreposição
                     var colWeightMap = new System.Collections.Generic.Dictionary<string, float>
                     {
-                        ["Codigo"]              = 0.5f,
-                        ["pediNome_Cliente"]    = 2.5f,
-                        ["pediValor_Total"]     = 1.0f,
-                        ["pediPago_Dinheiro"]   = 1.0f,
-                        ["pediPago_Cartao"]     = 1.0f,
-                        ["pediPago_Pix"]        = 0.8f,
-                        ["pediData_Lancamento"] = 1.5f,
+                        ["Codigo"]                  = 0.5f,
+                        ["pediNome_Cliente"]        = 2.5f,
+                        ["pediValor_Total"]         = 1.0f,
+                        ["pediPago_Dinheiro"]       = 1.0f,
+                        ["pediPago_Cartao"]         = 1.0f,
+                        ["pediPago_CartaoDebito"]   = 1.0f,
+                        ["pediPago_Pix"]            = 0.8f,
+                        ["pediData_Lancamento"]     = 1.5f,
                     };
                     float totalWeight = 0f;
                     foreach (var col in cols)

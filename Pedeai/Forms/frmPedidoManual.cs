@@ -502,13 +502,15 @@ namespace Pedeai.Forms
             decimal taxa      = ehEntrega ? numTaxa.Value : 0m;
             decimal total     = Math.Max(0, sub + taxa - _descontoCupom);
 
+            // Mapeamento: 0=Dinheiro, 1=Crédito, 2=Pix, 3=Débito (combo: Din, Cred, Pix, Deb)
+            int[] comboToFormaPag = { 0, 1, 2, 3 };
             var pedido = new PedidoWeb
             {
                 Codigo_Cliente       = _codigoCliente,
                 pediNome_Cliente     = txtNome.Text.Trim(),
                 pediTelefone_Cliente = txtTelefone.Text.Trim(),
                 pediTipo_Entrega     = cmbEntrega.SelectedIndex,
-                pediForma_Pagamento  = cmbPagamento.SelectedIndex,
+                pediForma_Pagamento  = comboToFormaPag[cmbPagamento.SelectedIndex],
                 pediSubtotal         = sub,
                 pediTaxa_Entrega     = taxa,
                 pediDesconto         = _descontoCupom,

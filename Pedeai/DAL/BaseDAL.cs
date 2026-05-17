@@ -66,4 +66,18 @@ namespace Pedeai.DAL
             }
         }
     }
+
+    /// <summary>Extensões de leitura segura para MySqlDataReader (colunas opcionais).</summary>
+    internal static class DataReaderExtensions
+    {
+        public static decimal SafeDecimal(this MySqlDataReader r, string coluna)
+        {
+            try
+            {
+                int ord = r.GetOrdinal(coluna);
+                return r.IsDBNull(ord) ? 0m : r.GetDecimal(ord);
+            }
+            catch { return 0m; }
+        }
+    }
 }

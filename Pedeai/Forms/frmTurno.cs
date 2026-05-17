@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Data;
 using System.Drawing;
 using System.Windows.Forms;
@@ -99,7 +99,7 @@ namespace Pedeai.Forms
         /// Retorna null se cancelado, ou o valor de caixa final confirmado.
         /// </summary>
         private decimal? MostrarDialogFechamento(decimal esperado, decimal informadoInicial,
-            (decimal totalVendas, decimal totalDin, decimal totalCar, decimal totalPix, int qtdPedidos) resumo)
+            (decimal totalVendas, decimal totalDin, decimal totalCarCred, decimal totalCarDeb, decimal totalPix, int qtdPedidos) resumo)
         {
             // ── Cores do sistema ─────────────────────────────────────────────
             Color clrBg     = Color.FromArgb(245, 237, 216);
@@ -160,7 +160,8 @@ namespace Pedeai.Forms
 
             InfoRow($"Pedidos ({resumo.qtdPedidos}):", $"Total Vendas: R$ {resumo.totalVendas:N2}");
             InfoRow("  Dinheiro:",  $"R$ {resumo.totalDin:N2}");
-            InfoRow("  Cart\u00e3o:", $"R$ {resumo.totalCar:N2}");
+            InfoRow("  Cr\u00e9dito:", $"R$ {resumo.totalCarCred:N2}");
+            InfoRow("  D\u00e9bito:", $"R$ {resumo.totalCarDeb:N2}");
             InfoRow("  Pix:",       $"R$ {resumo.totalPix:N2}");
             Sep();
             InfoRow("Caixa esperado (Ini + Vendas):", $"R$ {esperado:N2}");
@@ -187,10 +188,16 @@ namespace Pedeai.Forms
             dlg.Controls.Add(numDin);
             y += 30;
 
-            dlg.Controls.Add(new Label { Text = "Cart\u00e3o recebido:", Left = 24, Top = y + 3,
+            dlg.Controls.Add(new Label { Text = "Cr\u00e9dito recebido:", Left = 24, Top = y + 3,
                 AutoSize = true, ForeColor = clrCap, Font = new Font("Segoe UI", 9F, FontStyle.Bold) });
-            var numCar = MkNum(resumo.totalCar);
-            dlg.Controls.Add(numCar);
+            var numCred = MkNum(resumo.totalCarCred);
+            dlg.Controls.Add(numCred);
+            y += 30;
+
+            dlg.Controls.Add(new Label { Text = "D\u00e9bito recebido:", Left = 24, Top = y + 3,
+                AutoSize = true, ForeColor = clrCap, Font = new Font("Segoe UI", 9F, FontStyle.Bold) });
+            var numDeb = MkNum(resumo.totalCarDeb);
+            dlg.Controls.Add(numDeb);
             y += 30;
 
             dlg.Controls.Add(new Label { Text = "Pix recebido:", Left = 24, Top = y + 3,
@@ -254,7 +261,7 @@ namespace Pedeai.Forms
             // ── Atualização em tempo real da diferença ───────────────────────
             void AtualizarDif()
             {
-                decimal total = numDin.Value + numCar.Value + numPix.Value;
+                decimal total = numDin.Value + numCred.Value + numDeb.Value + numPix.Value;
                 lblTotalVal.Text = $"R$ {total:N2}";
                 decimal dif = esperado - total;
                 if (Math.Abs(dif) <= 0.01m)
@@ -273,14 +280,15 @@ namespace Pedeai.Forms
                 }
             }
             numDin.ValueChanged += (_, __) => AtualizarDif();
-            numCar.ValueChanged += (_, __) => AtualizarDif();
+            numCred.ValueChanged += (_, __) => AtualizarDif();
+            numDeb.ValueChanged  += (_, __) => AtualizarDif();
             numPix.ValueChanged += (_, __) => AtualizarDif();
             AtualizarDif();
 
             // ── Lógica do botão confirmar ─────────────────────────────────────
             btnConfirmar.Click += (_, __) =>
             {
-                decimal total = numDin.Value + numCar.Value + numPix.Value;
+                decimal total = numDin.Value + numCred.Value + numDeb.Value + numPix.Value;
                 decimal dif   = esperado - total;
                 if (Math.Abs(dif) > 0.01m)
                 {
@@ -290,7 +298,7 @@ namespace Pedeai.Forms
             };
 
             if (dlg.ShowDialog(this) != DialogResult.OK) return null;
-            return numDin.Value + numCar.Value + numPix.Value;
+            return numDin.Value + numCred.Value + numDeb.Value + numPix.Value;
         }
 
         private bool MostrarDialogAutorizacao()

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
@@ -1050,7 +1050,9 @@ namespace Pedeai.DB
         {
             try
             {
-                var existentes = await GetAsync("forma_pagamento?select=nome");
+                // Filtra por empresa_codigo para não detectar registros de outras empresas
+                string epFilter = UsarEmpresaCodigo ? "&empresa_codigo=eq." + Uri.EscapeDataString(_empresaCodigo) : "";
+                var existentes = await GetAsync("forma_pagamento?select=nome" + epFilter);
                 var nomesExistentes = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
                 foreach (JObject fp in existentes)
                 {
@@ -1058,17 +1060,21 @@ namespace Pedeai.DB
                     if (!string.IsNullOrWhiteSpace(n)) nomesExistentes.Add(n);
                 }
 
-                var defaults = new[]
+                var defaults = new (string nome, string tipo)[]
                 {
-                    new { nome = "Dinheiro", tipo = "dinheiro", ativo = true },
-                    new { nome = "Cartão",   tipo = "cartao",   ativo = true },
-                    new { nome = "Pix",      tipo = "pix",      ativo = true },
+                    ("Dinheiro",       "dinheiro"),
+                    ("Cartão Crédito", "cartao"),
+                    ("Cartão Débito",  "cartao"),
+                    ("Pix",            "pix"),
                 };
 
-                foreach (var fp in defaults)
+                foreach (var (nome, tipo) in defaults)
                 {
-                    if (!nomesExistentes.Contains(fp.nome))
-                        try { await PostAsync("forma_pagamento", fp); } catch { }
+                    if (nomesExistentes.Contains(nome)) continue;
+                    object payload = UsarEmpresaCodigo
+                        ? (object)new { nome, tipo, ativo = true, empresa_codigo = _empresaCodigo }
+                        : new { nome, tipo, ativo = true };
+                    try { await PostAsync("forma_pagamento", payload); } catch { }
                 }
             }
             catch (Exception ex)

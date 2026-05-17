@@ -56,17 +56,30 @@ export default function Sacola() {
     queryKey: ['payment-methods', empresaCodigo],
     queryFn: async () => {
       const base = supabase.from('forma_pagamento').select('*').eq('ativo', true);
-      const { data, error } = empresaCodigo
-        ? await base.eq('empresa_codigo', empresaCodigo)
-        : await base;
-      if (error) {
-        if (isEmpresaCodigoMissing(error)) {
-          const { data: d2, error: e2 } = await supabase.from('forma_pagamento').select('*').eq('ativo', true);
-          if (e2) throw e2;
-          return d2 as FormaPagamento[];
+
+      // Se empresa_codigo está configurado, tenta filtrar por ela;
+      // inclui também registros sem empresa_codigo (legado / schema sem coluna)
+      if (empresaCodigo) {
+        const { data, error } = await base.or(`empresa_codigo.eq.${empresaCodigo},empresa_codigo.is.null`);
+        if (error) {
+          if (isEmpresaCodigoMissing(error)) {
+            // Coluna não existe: busca tudo sem filtro
+            const { data: d2, error: e2 } = await supabase.from('forma_pagamento').select('*').eq('ativo', true);
+            if (e2) throw e2;
+            return d2 as FormaPagamento[];
+          }
+          throw error;
         }
-        throw error;
+        // Se o filtro retornou vazio, faz fallback buscando tudo (pode ser schema sem a coluna)
+        if (!data || data.length === 0) {
+          const { data: d2 } = await supabase.from('forma_pagamento').select('*').eq('ativo', true);
+          return (d2 ?? []) as FormaPagamento[];
+        }
+        return data as FormaPagamento[];
       }
+
+      const { data, error } = await base;
+      if (error) throw error;
       return data as FormaPagamento[];
     },
   });
