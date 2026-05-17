@@ -3580,150 +3580,10 @@ namespace Pedeai.DB
                 }
 
                 // Busca todos os produtos ATIVOS da mesma categoria que NÃO são fracionados
-                // e NÃO são EXCLUSIVAMENTE adicionais (se tiver também Sabor ou Complemento, entra como sabor).
-                var sabores = new List<(string nome, decimal preco, string descricao, string imagemUrl)>();
-                using (var conn = AbrirMysql())
-                using (var cmd = new MySqlCommand(
-                    "SELECT m.mercMercadoria, COALESCE(m.mercPreco_Venda,0) AS preco, " +
-                    "COALESCE(m.mercApresentacao,'') AS descricao, COALESCE(m.mercImagem_Url,'') AS imagem " +
-                    "FROM mercadoria m " +
-                    "WHERE m.Codigo_Grupo=@g AND m.Situacao='A' AND m.Codigo<>@c " +
-                    "  AND COALESCE(m.mercFracionado,0)=0 " +
-                    "  AND NOT EXISTS (SELECT 1 FROM mercadoria_vinculo_grupo vad" +
-                    "                 WHERE vad.Codigo_Mercadoria=m.Codigo AND vad.Situacao='A'" +
-                    "                 AND vad.tipo='A' AND vad.Codigo_Grupo=@g) " +
-                    "ORDER BY m.mercMercadoria", conn))
-                {
-                    cmd.Parameters.AddWithValue("@g", codigoGrupo);
-                    cmd.Parameters.AddWithValue("@c", codigoMercadoria);
-                    using var r = cmd.ExecuteReader();
-                    while (r.Read())
-                    {
-                        string img = r["imagem"]?.ToString() ?? "";
-                        // Não enviar caminhos locais ao Supabase
-                        if (!string.IsNullOrWhiteSpace(img) && !img.StartsWith("http", StringComparison.OrdinalIgnoreCase))
-                            img = "";
-                        sabores.Add((
-                            r.GetString(0),
-                            Convert.ToDecimal(r["preco"]),
-                            r["descricao"]?.ToString() ?? "",
-                            img
-                        ));
-                    }
-                }
-                if (!sabores.Any())
-                {
-                    // Sem vínculos explícitos — desativa grupo Sabores e seus itens orphãos
-                    try
-                    {
-                        var grpOrfao = await GetAsync($"{TBL_COMP_GRUPO}?mercadoria_id=eq.{produtoUuid}&nome=ilike.Sabores*&limit=1");
-                        if (grpOrfao.Count > 0)
-                        {
-                            string gOrfaoId = grpOrfao[0]["id"]?.ToString() ?? "";
-                            if (!string.IsNullOrEmpty(gOrfaoId))
-                            {
-                                var itensOrfaos = await GetAsync($"{TBL_COMPLEMENTO}?grupo_id=eq.{gOrfaoId}&ativo=eq.true&select=id");
-                                foreach (JObject io in itensOrfaos)
-                                    try { await PatchAsync(TBL_COMPLEMENTO, $"id=eq.{io["id"]}", new { ativo = false }); } catch { }
-                                await PatchAsync(TBL_COMP_GRUPO, $"id=eq.{gOrfaoId}", new { ativo = false });
-                                Logger.Log("SupabaseService", "SincronizarFracionadoAsync",
-                                    $"Produto {codigoMercadoria}: grupo Sabores e seus itens desativados (sem vínculos explícitos)");
-                            }
-                        }
-                    }
-                    catch { }
-                    return;
-                }
-
-                // Garante complemento_grupo "Sabores" vinculado a este produto
-                // Busca por mercadoria_id direto OU via link table (legado)
-                string grpSaboresId = "";
-                string nomeGrupoSabores = qtdSabores == 1
-                    ? "Sabores (escolha 1)"
-                    : $"Sabores (escolha até {qtdSabores})";
-                try
-                {
-                    // 1. Tenta por mercadoria_id direto (modo atual)
-                    var direto = await GetAsync($"{TBL_COMP_GRUPO}?mercadoria_id=eq.{produtoUuid}&nome=ilike.Sabores*&limit=1");
-                    if (direto.Count > 0)
-                        grpSaboresId = direto[0]["id"]?.ToString() ?? "";
-
-                    // 2. Fallback: link table (registros antigos)
-                    if (string.IsNullOrEmpty(grpSaboresId))
-                    {
-                        var lnks = await GetAsync($"{TBL_MERC_COMP_GRP}?mercadoria_id=eq.{produtoUuid}&select=grupo_id");
-                        foreach (JObject lnk in lnks)
-                        {
-                            var gid = lnk["grupo_id"]?.ToString() ?? "";
-                            if (string.IsNullOrEmpty(gid)) continue;
-                            var chk = await GetAsync($"{TBL_COMP_GRUPO}?id=eq.{gid}&nome=ilike.Sabores*&limit=1");
-                            if (chk.Count > 0) { grpSaboresId = gid; break; }
-                        }
-                    }
-                }
-                catch { }
-
-                if (!string.IsNullOrEmpty(grpSaboresId))
-                {
-                    object grpPatch = UsarEmpresaCodigo
-                        ? (object)new { mercadoria_id = produtoUuid, nome = nomeGrupoSabores, obrigatorio = true, minimo = 1, maximo = qtdSabores, empresa_codigo = _empresaCodigo }
-                        : (object)new { mercadoria_id = produtoUuid, nome = nomeGrupoSabores, obrigatorio = true, minimo = 1, maximo = qtdSabores };
-                    await PatchAsync(TBL_COMP_GRUPO, $"id=eq.{grpSaboresId}", grpPatch);
-                }
-                else
-                {
-                    object grpPost = UsarEmpresaCodigo
-                        ? (object)new { mercadoria_id = produtoUuid, nome = nomeGrupoSabores, obrigatorio = true, minimo = 1, maximo = qtdSabores, empresa_codigo = _empresaCodigo }
-                        : (object)new { mercadoria_id = produtoUuid, nome = nomeGrupoSabores, obrigatorio = true, minimo = 1, maximo = qtdSabores };
-                    var grpResult = await PostAsync(TBL_COMP_GRUPO, grpPost);
-                    grpSaboresId = grpResult?["id"]?.ToString() ?? "";
-                    if (!string.IsNullOrEmpty(grpSaboresId))
-                        try { await PostAsync(TBL_MERC_COMP_GRP, new { mercadoria_id = produtoUuid, grupo_id = grpSaboresId }); } catch { }
-                }
-                if (string.IsNullOrEmpty(grpSaboresId)) return;
-
-                // Busca sabores já existentes no grupo
-                var existentes = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-                var compArr = await GetAsync($"{TBL_COMPLEMENTO}?grupo_id=eq.{grpSaboresId}&select=id,nome");
-                foreach (JObject e in compArr) { var n = e["nome"]?.ToString(); var id = e["id"]?.ToString(); if (n != null && id != null) existentes[n] = id; }
-
-                // Upsert cada sabor no grupo "Sabores"
-                // Sabores continuam ativos como produtos independentes no site (pizza de sabor único)
-                bool temEmpComp = UsarEmpresaCodigo; string empCompCod = _empresaCodigo;
-                foreach (var (nome, preco, descricao, imagemUrl) in sabores)
-                {
-                    try
-                    {
-                        if (existentes.TryGetValue(nome, out string eid))
-                            await PatchAsync(TBL_COMPLEMENTO, $"id=eq.{eid}",
-                                string.IsNullOrEmpty(imagemUrl)
-                                    ? temEmpComp ? (object)new { nome, descricao, preco, ativo = true, empresa_codigo = empCompCod } : (object)new { nome, descricao, preco, ativo = true }
-                                    : temEmpComp ? (object)new { nome, descricao, preco, imagem_url = imagemUrl, ativo = true, empresa_codigo = empCompCod } : (object)new { nome, descricao, preco, imagem_url = imagemUrl, ativo = true });
-                        else
-                            await PostAsync(TBL_COMPLEMENTO,
-                                string.IsNullOrEmpty(imagemUrl)
-                                    ? temEmpComp ? (object)new { grupo_id = grpSaboresId, nome, descricao, preco, ativo = true, empresa_codigo = empCompCod } : (object)new { grupo_id = grpSaboresId, nome, descricao, preco, ativo = true }
-                                    : temEmpComp ? (object)new { grupo_id = grpSaboresId, nome, descricao, preco, imagem_url = imagemUrl, ativo = true, empresa_codigo = empCompCod } : (object)new { grupo_id = grpSaboresId, nome, descricao, preco, imagem_url = imagemUrl, ativo = true });
-                    }
-                    catch (Exception ex) { Logger.Log("SupabaseService", "SincronizarFracionadoAsync", $"Erro sabor '{nome}'", ex); }
-                }
-                Logger.Log("SupabaseService", "SincronizarFracionadoAsync", $"Produto {codigoMercadoria}: {sabores.Count} sabores sincronizados (max={qtdSabores})");
-
-                // Desativa itens no grupo Sabores que não fazem mais parte da lista válida
-                // (ex: Borda de Cheddar adicionada numa sincronização antiga como sabor)
-                try
-                {
-                    var nomesValidos2 = new HashSet<string>(sabores.Select(s => s.nome), StringComparer.OrdinalIgnoreCase);
-                    foreach (var kv in existentes)
-                    {
-                        if (!nomesValidos2.Contains(kv.Key))
-                            await PatchAsync(TBL_COMPLEMENTO, $"id=eq.{kv.Value}", new { ativo = false });
-                    }
-                }
-                catch (Exception exClean2)
-                {
-                    Logger.Log("SupabaseService", "SincronizarFracionadoAsync", $"Erro ao desativar sabores obsoletos produto {codigoMercadoria}", exClean2);
-                }
+                // Detecção automática de sabores removida.
+                // Somente vínculos explícitos (tipo='S') configurados pelo usuário criam o grupo
+                // Sabores — gerenciado por SincronizarVinculosGrupoAsync.
+                // Aqui apenas limpamos grupos órfãos que possam ter ficado de sincronizações antigas.
 
                 // Limpa complemento_grupos órfãos: desativa grupos que existem no Supabase
                 // mas não possuem mais vínculo ativo no MySQL (ex: quando o usuário desmarcou
@@ -3732,7 +3592,6 @@ namespace Pedeai.DB
                 {
                     // 1. Nomes de grupos válidos no MySQL para este produto (tipo='C' e tipo='S')
                     var nomesValidos = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-                    nomesValidos.Add(nomeGrupoSabores); // o grupo "Sabores (escolha X)" sempre é válido
                     using (var connV = AbrirMysql())
                     using (var cmdV = new MySqlCommand(@"
                         SELECT COALESCE(gm.grmeDescricao_,'') AS nome
@@ -3752,9 +3611,7 @@ namespace Pedeai.DB
                         var gNome = g["nome"]?.ToString() ?? "";
                         var gId   = g["id"]?.ToString()   ?? "";
                         if (string.IsNullOrWhiteSpace(gId)) continue;
-                        // Mantém grupos "Sabores*" e qualquer grupo configurado via vinculos
-                        bool ehSabores = gNome.StartsWith("Sabores", StringComparison.OrdinalIgnoreCase);
-                        if (!ehSabores && !nomesValidos.Contains(gNome))
+                        if (!nomesValidos.Contains(gNome))
                         {
                             await PatchAsync(TBL_COMP_GRUPO, $"id=eq.{gId}", new { ativo = false });
                             Logger.Log("SupabaseService", "SincronizarFracionadoAsync",
@@ -3772,8 +3629,7 @@ namespace Pedeai.DB
                         var grpChk = await GetAsync($"{TBL_COMP_GRUPO}?id=eq.{gid}&ativo=eq.true&limit=1");
                         if (grpChk.Count == 0) continue;
                         var gNome2 = grpChk[0]["nome"]?.ToString() ?? "";
-                        bool ehSabores2 = gNome2.StartsWith("Sabores", StringComparison.OrdinalIgnoreCase);
-                        if (!ehSabores2 && !nomesValidos.Contains(gNome2))
+                        if (!nomesValidos.Contains(gNome2))
                         {
                             await PatchAsync(TBL_COMP_GRUPO, $"id=eq.{gid}", new { ativo = false });
                             Logger.Log("SupabaseService", "SincronizarFracionadoAsync",
