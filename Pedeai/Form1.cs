@@ -45,6 +45,29 @@ namespace Pedeai
                 Load += Form1_Load;
         }
 
+        private static void PlayAlertSound()
+        {
+            string mp3 = System.IO.Path.Combine(Application.StartupPath, "AUDIO.mp3");
+            if (!System.IO.File.Exists(mp3))
+            {
+                try { System.Media.SystemSounds.Exclamation.Play(); } catch { }
+                return;
+            }
+            System.Threading.Tasks.Task.Run(() =>
+            {
+                try
+                {
+                    using var reader = new NAudio.Wave.Mp3FileReader(mp3);
+                    using var output = new NAudio.Wave.WaveOutEvent();
+                    output.Init(reader);
+                    output.Play();
+                    while (output.PlaybackState == NAudio.Wave.PlaybackState.Playing)
+                        System.Threading.Thread.Sleep(100);
+                }
+                catch { try { System.Media.SystemSounds.Exclamation.Play(); } catch { } }
+            });
+        }
+
         private void OnNovoPedidoWebRecebido(int count)
         {
             // Refresh grid, then play alert sound on a background thread (non-blocking)
@@ -52,8 +75,8 @@ namespace Pedeai
             {
                 try { CarregarPedidosSemPerderSelecao(); } catch { }
             }));
-            // Toca o som uma única vez para notificar novo pedido web
-            try { System.Media.SystemSounds.Exclamation.Play(); } catch { }
+            // Toca AUDIO.mp3 para notificar novo pedido web (fallback: beep do sistema)
+            try { PlayAlertSound(); } catch { }
         }
 
         protected override void OnFormClosed(FormClosedEventArgs e)
