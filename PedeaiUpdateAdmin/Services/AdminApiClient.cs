@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
+using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
@@ -120,15 +121,31 @@ namespace PedeaiUpdateAdmin.Services
 
             // 1. Upload do ZIP para o Supabase Storage (usa _httpStorage com service_role)
             // Armazena na pasta nomeada pela versão: {versao}/files.zip
-            string fileName = versao + "/files.zip";
+            // Codifica cada segmento individualmente para preservar o '/' como separador de caminho.
+            string fileName   = versao + "/files.zip";
+            string uploadPath = string.Join("/",
+                fileName.Split('/').Select(s => Uri.EscapeDataString(s)));
             using var fileContent = new StreamContent(File.OpenRead(arquivoZip));
             fileContent.Headers.ContentType = new MediaTypeHeaderValue("application/octet-stream");
             var uploadReq = new HttpRequestMessage(HttpMethod.Post,
-                _storageBase + $"object/{BUCKET}/{Uri.EscapeDataString(fileName)}");
+                _storageBase + $"object/{BUCKET}/{uploadPath}");
             uploadReq.Headers.Add("x-upsert", "true");
             uploadReq.Content = fileContent;
-            var uploadResp = await _httpStorage.SendAsync(uploadReq);
-            string uploadBody = await uploadResp.Content.ReadAsStringAsync();
+            HttpResponseMessage uploadResp;
+            string uploadBody;
+            try
+            {
+                uploadResp = await _httpStorage.SendAsync(uploadReq);
+                uploadBody = await uploadResp.Content.ReadAsStringAsync();
+            }
+            catch (Exception ex) when (ex.Message.Contains("copying content to a stream") ||
+                                        ex.InnerException?.Message.Contains("copying content to a stream") == true)
+            {
+                throw new Exception(
+                    "O servidor encerrou a conexão durante o upload.\n\n" +
+                    "Causa mais provável: a chave JWT está incorreta e o servidor rejeita a requisição.\n" +
+                    "Use o SUPABASE_SERVICE_KEY do container supabase-kong (execute: echo $SUPABASE_SERVICE_KEY).");
+            }
             if (!uploadResp.IsSuccessStatusCode)
                 throw new Exception($"Storage upload falhou [{(int)uploadResp.StatusCode}]: {uploadBody}");
 
@@ -244,7 +261,22 @@ namespace PedeaiUpdateAdmin.Services
             }
         }
 
-        private async Task GarantirBucketAsync() => await CriarBucketAsync();
+        /// <summary>
+        /// Versão leniente usada antes do upload: se a verificação falhar por auth (JWT),
+        /// ignora e tenta o upload mesmo assim — o upload revelará o erro real.
+        /// </summary>
+        private async Task GarantirBucketAsync()
+        {
+            try { await CriarBucketAsync(); }
+            catch (Exception ex) when (
+                ex.Message.Contains("signature verification failed") ||
+                ex.Message.Contains("Unauthorized"))
+            {
+                // JWT inválido para gerenciar buckets — tenta o upload assim mesmo.
+                // Se o bucket não existir ou o JWT for inválido para upload, o próximo
+                // passo (Storage upload) mostrará o erro correto.
+            }
+        }
 
         // ── Helpers REST ──────────────────────────────────────────────────────────
 

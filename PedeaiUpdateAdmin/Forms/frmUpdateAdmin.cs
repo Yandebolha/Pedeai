@@ -271,8 +271,11 @@ namespace PedeaiUpdateAdmin.Forms
         private void BtnSalvarConfig_Click(object sender, EventArgs e)
         {
             string url = txtVpsUrl.Text.Trim();
-            string key = txtAdminToken.Text.Trim();
-            string srk = txtServiceRoleKey.Text.Trim();
+            // Remove qualquer whitespace embutido (quebras de linha do copy-paste do terminal)
+            string key = System.Text.RegularExpressions.Regex.Replace(
+                txtAdminToken.Text, @"\s+", "");
+            string srk = System.Text.RegularExpressions.Regex.Replace(
+                txtServiceRoleKey.Text, @"\s+", "");
 
             // Valida formato JWT
             if (!string.IsNullOrWhiteSpace(key) && !key.StartsWith("eyJ"))
@@ -287,7 +290,28 @@ namespace PedeaiUpdateAdmin.Forms
 
             AdminApiClient.SalvarConfig(url, key, srk);
             _api = new AdminApiClient(url, key, srk);
-            SetStatus("Configuração salva.");
+
+            // Decodifica o payload do JWT e mostra o role para diagnóstico
+            string roleInfo = DecodificarRoleJwt(key);
+            SetStatus($"Configuração salva. JWT role detectado: {roleInfo}");
+        }
+
+        /// <summary>Decodifica o payload do JWT (sem verificar assinatura) e retorna o campo 'role'.</summary>
+        private static string DecodificarRoleJwt(string jwt)
+        {
+            try
+            {
+                var parts = jwt.Split('.');
+                if (parts.Length != 3) return "formato inválido (não tem 3 partes)";
+                string payload = parts[1];
+                // Adiciona padding se necessário
+                payload = payload.PadRight(payload.Length + (4 - payload.Length % 4) % 4, '=');
+                string json = System.Text.Encoding.UTF8.GetString(Convert.FromBase64String(
+                    payload.Replace('-', '+').Replace('_', '/')));
+                dynamic obj = Newtonsoft.Json.JsonConvert.DeserializeObject(json);
+                return $"\"{obj.role}\" (iss={obj.iss})";
+            }
+            catch (Exception ex) { return $"erro ao decodificar: {ex.Message}"; }
         }
 
         private async void BtnTestarConexao_Click(object sender, EventArgs e)
