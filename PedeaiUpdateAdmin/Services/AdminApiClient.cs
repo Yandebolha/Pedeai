@@ -209,7 +209,11 @@ namespace PedeaiUpdateAdmin.Services
                 Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
                 "PedeaiUpdateAdmin", "config.json");
 
-        private async Task GarantirBucketAsync()
+        /// <summary>
+        /// Verifica se o bucket existe e, se não existir, tenta criá-lo.
+        /// Lança exceção com mensagem detalhada (incluindo resposta HTTP do Supabase) em caso de falha.
+        /// </summary>
+        public async Task CriarBucketAsync()
         {
             // Testa se o bucket existe (com _httpStorage que tem service_role)
             var checkResp = await _httpStorage.GetAsync(_storageBase + $"bucket/{BUCKET}");
@@ -220,15 +224,27 @@ namespace PedeaiUpdateAdmin.Services
             var req  = new HttpRequestMessage(HttpMethod.Post, _storageBase + "bucket");
             req.Content = new StringContent(body, Encoding.UTF8, "application/json");
             var resp = await _httpStorage.SendAsync(req);
+            string rb = await resp.Content.ReadAsStringAsync();
             if (!resp.IsSuccessStatusCode)
             {
-                string rb = await resp.Content.ReadAsStringAsync();
                 if (!rb.Contains("already exists") && !rb.Contains("Duplicate"))
+                {
+                    string extra = "";
+                    if (rb.Contains("signature verification failed") || rb.Contains("Unauthorized"))
+                        extra = "\n\n\u26a0\ufe0f A chave JWT foi rejeitada pelo Supabase.\n" +
+                                "Verifique:\n" +
+                                "  \u2022 A chave deve ser a service_role (come\u00e7a com \"eyJ\")\n" +
+                                "  \u2022 N\u00e3o use sb_publishable_* \u2014 essa chave n\u00e3o \u00e9 um JWT\n" +
+                                "  \u2022 Copie a chave em: Supabase Dashboard \u2192 Settings \u2192 API \u2192 service_role";
                     throw new Exception(
-                        $"O bucket \"{BUCKET}\" não existe e não foi possível criar automaticamente.\n\n" +
-                        $"Crie manualmente: Supabase → Storage → New Bucket → nome: pacotes → Public.\n\nDetalhe: {rb}");
+                        $"O bucket \"{BUCKET}\" n\u00e3o existe e n\u00e3o foi poss\u00edvel criar automaticamente.\n\n" +
+                        $"Crie manualmente: Supabase \u2192 Storage \u2192 New Bucket \u2192 nome: pacotes \u2192 Public.\n\n" +
+                        $"Resposta HTTP {(int)resp.StatusCode}: {rb}{extra}");
+                }
             }
         }
+
+        private async Task GarantirBucketAsync() => await CriarBucketAsync();
 
         // ── Helpers REST ──────────────────────────────────────────────────────────
 

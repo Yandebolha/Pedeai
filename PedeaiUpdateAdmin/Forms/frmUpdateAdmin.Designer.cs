@@ -59,6 +59,7 @@ namespace PedeaiUpdateAdmin.Forms
             this.lblServiceRoleKey  = new System.Windows.Forms.Label();
             this.btnSalvarConfig     = new System.Windows.Forms.Button();
             this.btnTestarConexao    = new System.Windows.Forms.Button();
+            this.btnCriarBucket      = new System.Windows.Forms.Button();
             this.lblConfigInfo       = new System.Windows.Forms.Label();
 
             // Status bar
@@ -259,6 +260,7 @@ namespace PedeaiUpdateAdmin.Forms
             this.tabConfig.Controls.Add(this.txtServiceRoleKey);
             this.tabConfig.Controls.Add(this.btnSalvarConfig);
             this.tabConfig.Controls.Add(this.btnTestarConexao);
+            this.tabConfig.Controls.Add(this.btnCriarBucket);
             this.tabConfig.Controls.Add(this.lblConfigInfo);
 
             this.lblVpsUrl.Text    = "URL do Supabase:";       this.lblVpsUrl.SetBounds(8, 24, 130, 20);
@@ -277,6 +279,12 @@ namespace PedeaiUpdateAdmin.Forms
             this.btnTestarConexao.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnTestarConexao.FlatAppearance.BorderSize = 0;
             this.btnTestarConexao.Click += new System.EventHandler(this.BtnTestarConexao_Click);
+            this.btnCriarBucket.Text  = "🪣 Criar Bucket 'pacotes'"; this.btnCriarBucket.SetBounds(410, 90, 180, 28);
+            this.btnCriarBucket.BackColor = System.Drawing.Color.FromArgb(60, 100, 150);
+            this.btnCriarBucket.ForeColor = System.Drawing.Color.White;
+            this.btnCriarBucket.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnCriarBucket.FlatAppearance.BorderSize = 0;
+            this.btnCriarBucket.Click += new System.EventHandler(this.BtnCriarBucket_Click);
 
             this.lblConfigInfo.Text =
                 "ℹ️  Supabase Dashboard → Settings → API → \"Project API keys\"\r\n" +
@@ -345,6 +353,7 @@ namespace PedeaiUpdateAdmin.Forms
         private System.Windows.Forms.TextBox                txtAdminToken;
         private System.Windows.Forms.Label                  lblServiceRoleKey;
         private System.Windows.Forms.TextBox                txtServiceRoleKey;
+        private System.Windows.Forms.Button               btnCriarBucket;
         private System.Windows.Forms.Label                  lblConfigInfo;
         private System.Windows.Forms.Button                 btnSalvarConfig;
         private System.Windows.Forms.Button                 btnTestarConexao;

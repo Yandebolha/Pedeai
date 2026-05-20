@@ -99,8 +99,10 @@ namespace PedeaiUpdateAdmin.Forms
             catch (Exception ex)
             {
                 SetStatus($"Erro ao publicar: {ex.Message}");
-                lblStatusPublicacao.Text = $"❌ Erro: {ex.Message}";
+                lblStatusPublicacao.Text = "\u274c Erro ao publicar — veja detalhes";
                 lblStatusPublicacao.ForeColor = System.Drawing.Color.Red;
+                MessageBox.Show(ex.Message, "Erro ao publicar",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             finally
             {
@@ -268,8 +270,23 @@ namespace PedeaiUpdateAdmin.Forms
 
         private void BtnSalvarConfig_Click(object sender, EventArgs e)
         {
-            AdminApiClient.SalvarConfig(txtVpsUrl.Text.Trim(), txtAdminToken.Text.Trim(), txtServiceRoleKey.Text.Trim());
-            _api = new AdminApiClient(txtVpsUrl.Text.Trim(), txtAdminToken.Text.Trim(), txtServiceRoleKey.Text.Trim());
+            string url = txtVpsUrl.Text.Trim();
+            string key = txtAdminToken.Text.Trim();
+            string srk = txtServiceRoleKey.Text.Trim();
+
+            // Valida formato JWT
+            if (!string.IsNullOrWhiteSpace(key) && !key.StartsWith("eyJ"))
+            {
+                MessageBox.Show(
+                    "A chave informada n\u00e3o parece ser um JWT v\u00e1lido.\n\n" +
+                    "A service_role Key deve come\u00e7ar com \"eyJ\".\n" +
+                    "N\u00e3o use chaves no formato sb_publishable_* \u2014 elas n\u00e3o funcionam com a API REST/Storage.",
+                    "Chave inv\u00e1lida", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            AdminApiClient.SalvarConfig(url, key, srk);
+            _api = new AdminApiClient(url, key, srk);
             SetStatus("Configuração salva.");
         }
 
@@ -286,7 +303,26 @@ namespace PedeaiUpdateAdmin.Forms
             catch (Exception ex) { SetStatus($"Falha na conexão: {ex.Message}"); }
             finally { btnTestarConexao.Enabled = true; }
         }
-
+        private async void BtnCriarBucket_Click(object sender, EventArgs e)
+        {
+            btnCriarBucket.Enabled = false;
+            SetStatus("Verificando/criando bucket 'pacotes'...");
+            try
+            {
+                var client = new AdminApiClient(txtVpsUrl.Text.Trim(), txtAdminToken.Text.Trim(), txtServiceRoleKey.Text.Trim());
+                await client.CriarBucketAsync();
+                SetStatus("Bucket 'pacotes' OK!");
+                MessageBox.Show("Bucket 'pacotes' criado (ou j\u00e1 existia) com sucesso!",
+                    "Bucket OK", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (Exception ex)
+            {
+                SetStatus($"Erro ao criar bucket: {ex.Message}");
+                MessageBox.Show(ex.Message, "Erro ao criar bucket",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            finally { btnCriarBucket.Enabled = true; }
+        }
         // ── Utilitários ───────────────────────────────────────────────────────────
 
         private void SetStatus(string msg)
